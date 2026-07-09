@@ -1,0 +1,1 @@
+const{join:e,dirname:t}=require("path"),a=require("electron")["app"],r=require("fs");let i,o,s;exports.getUserData=()=>i,exports.getExeDir=()=>o,exports.getExeName=()=>s,exports.init=()=>{i=e(a.getPath("appData"),"NanoCord"),o=t(a.getPath("exe")),r.readdir(o,(e,t)=>{e||(s=t.find(e=>e.endsWith(".exe")))}),global.moduleDataPath=e(i,"modules"),a.setPath("userData",i)};

@@ -1,0 +1,1 @@
+const e=require("path")["join"],r=require("./paths"),o=(r.init(),e(r.getExeDir(),"resources","modules")),s=(require("module").globalPaths.push(o),require("module")._resolveLookupPaths);require("module")._resolveLookupPaths=(e,r)=>(0<r?.paths?.length&&(r.paths=r.paths.concat(require("module").globalPaths)),s(e,r)),require("./bootstrap")();
