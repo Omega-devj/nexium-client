@@ -56,3 +56,5 @@ installé ailleurs sur le système.
   du dossier, au même niveau que les autres fichiers, et pas dans un sous-dossier.
 - **Discord classique déjà ouvert** : fermez-le complètement (clic droit sur
   l'icône près de l'horloge → Quitter) avant de lancer celui-ci.
+
+Nexium Client Team
