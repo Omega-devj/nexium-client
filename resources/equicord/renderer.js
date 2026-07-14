@@ -84,9 +84,16 @@ _NXDB.keys=function(){var out=[];try{if(_NXDB.ls._m)return Object.keys(_NXDB.ls.
 var _NXM=window._NXM||(window._NXM={});
 if(!_NXM.boot){
 _NXM.boot=true;_NXM.KEY="nexium_music_v1";
-_NXM.def=[{title:"Nexium Mix — 01",url:"https://files.catbox.moe/b2mgkk.mp3"}];
+_NXM.def=[
+  {title:"cette fille emo t",url:"https://files.catbox.moe/ppdly5.mp3"},
+  {title:"Yamine - Hors Série #8",url:"https://files.catbox.moe/cb2lhp.mp3"},
+  {title:"Guy2Bezbar - Wagyu du jap",url:"https://files.catbox.moe/z86imf.mp3"},
+  {title:"Still Fresh Feat Titof - NO EX NO STRESS",url:"https://files.catbox.moe/xs4qjn.mp3"},
+  {title:"LA FÈVE - FINIS-LES",url:"https://files.catbox.moe/mjj2yr.mp3"},
+  {title:"NINJA feat. GIMS",url:"https://files.catbox.moe/r5w939.mp3"}
+];
 _NXM.OLD={"https://files.catbox.moe/o12z10.mp3":1,"https://files.catbox.moe/7bb063.mp3":1,"https://files.catbox.moe/pdbz2u.mp3":1};
-_NXM.cfg=(function(){var d;try{var raw=_NXDB.get(_NXM.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};if(!Array.isArray(d.tracks))d.tracks=[];d.tracks=d.tracks.filter(function(t){return t&&t.url&&!_NXM.OLD[t.url];});var has=false;for(var a=0;a<d.tracks.length;a++)if(d.tracks[a].url===_NXM.def[0].url)has=true;if(!has)d.tracks.unshift({title:_NXM.def[0].title,url:_NXM.def[0].url});if(typeof d.vol!=="number"||d.vol<0||d.vol>1)d.vol=0.7;if(typeof d.shuffle!=="boolean")d.shuffle=false;if(typeof d.repeat!=="boolean")d.repeat=false;if(typeof d.popup!=="boolean")d.popup=true;if(typeof d.idx!=="number"||d.idx<0)d.idx=0;if(typeof d.px!=="number")d.px=null;if(typeof d.py!=="number")d.py=null;return d;})();
+_NXM.cfg=(function(){var d;try{var raw=_NXDB.get(_NXM.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};if(!Array.isArray(d.tracks))d.tracks=[];d.tracks=d.tracks.filter(function(t){return t&&t.url&&!_NXM.OLD[t.url];});for(var i=_NXM.def.length-1;i>=0;i--){var defTrack=_NXM.def[i];var found=false;for(var a=0;a<d.tracks.length;a++)if(d.tracks[a].url===defTrack.url){found=true;break;}if(!found)d.tracks.unshift({title:defTrack.title,url:defTrack.url});}if(typeof d.vol!=="number"||d.vol<0||d.vol>1)d.vol=0.7;if(typeof d.shuffle!=="boolean")d.shuffle=false;if(typeof d.repeat!=="boolean")d.repeat=false;if(typeof d.popup!=="boolean")d.popup=true;if(typeof d.idx!=="number"||d.idx<0)d.idx=0;if(typeof d.px!=="number")d.px=null;if(typeof d.py!=="number")d.py=null;return d;})();
 _NXM.save=function(){_NXDB.set(_NXM.KEY,JSON.stringify(_NXM.cfg));};
 _NXM.save();
 _NXM.audio=null;_NXM.idx=Math.min(_NXM.cfg.idx,Math.max(0,_NXM.cfg.tracks.length-1));_NXM.playing=false;_NXM.progress=0;_NXM.dur=0;_NXM.listeners=[];_NXM.fails=0;_NXM.err={};_NXM.remain=false;
