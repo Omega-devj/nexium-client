@@ -31,3 +31,6 @@
 [2026-07-15T21:48:54.288Z] sync: déjà à jour (raw17a1d06f)
 [2026-07-15T21:49:00.339Z] sync: déjà à jour (raw17a1d06f)
 [2026-07-15T21:49:00.725Z] à jour (raw17a1d06f)
+[2026-07-15T21:51:30.012Z] SYNC appliqué au démarrage (raw17a1d06f, installé avant=__NEXIUM_APPLIED_SHA__)
+[2026-07-15T21:51:31.034Z] à jour (raw17a1d06f)
+[2026-07-15T22:10:52.273Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, tes modifications locales sont conservées.

@@ -7,6 +7,7 @@ const desktopAsar = path.join(equicordDir, "desktop.asar");
 const patcherJs = path.join(equicordDir, "patcher.js");
 const STATE = path.join(equicordDir, ".nexium-update.json");
 const LOG = path.join(equicordDir, ".nexium-update.log");
+const DEV = path.join(equicordDir, ".nexium-dev");
 const RAW = "https://raw.githubusercontent.com/Omega-devj/nexium-client/refs/heads/main/resources/equicord/";
 
 function loadState() { try { return JSON.parse(fs.readFileSync(STATE, "utf8")) || {}; } catch (_) { return {}; } }
@@ -25,126 +26,112 @@ function appliedOf(file) { try { var t = fs.readFileSync(file, "utf8"); var m = 
 
 let state = loadState();
 
-// 1) Apply any pending update downloaded in a previous session (sync, before patcher loads)
-(function applyPending() {
-    try {
-        var didRenderer = false;
-        ["renderer.js", "renderer.css"].forEach(function (name) {
-            var live = path.join(equicordDir, name);
-            var pend = live + ".pending";
-            if (!fs.existsSync(pend)) return;
-            try {
-                var size = fs.statSync(pend).size;
-                if (name === "renderer.js" && size < 500000) { fs.unlinkSync(pend); log("pending " + name + " rejeté (taille " + size + ")"); return; }
-                fs.renameSync(pend, live);
-                if (name === "renderer.js") didRenderer = true;
-                log("APPLIQUÉ " + name + " (" + size + " o)");
-            } catch (e) {
-                try { fs.copyFileSync(pend, live); fs.unlinkSync(pend); if (name === "renderer.js") didRenderer = true; log("APPLIQUÉ " + name + " (copie)"); }
-                catch (_) { log("ÉCHEC application " + name + " : " + (e && e.message)); }
-            }
-        });
-        if (didRenderer) { state.appliedHash = appliedOf(path.join(equicordDir, "renderer.js")); saveState(state); }
-    } catch (e) { log("applyPending exception: " + (e && e.message)); }
-})();
+function loadPatcher() {
+    if (fs.existsSync(patcherJs)) { require(patcherJs); }
+    else if (fs.existsSync(desktopAsar)) { require(desktopAsar); }
+    else { throw new Error("NanoCord mod missing. Re-run pnpm repair:portable."); }
+}
 
-// 1b) Synchronously fetch + apply the latest renderer BEFORE the patcher loads (one restart = applied)
-(function syncApplyLatest() {
+// DEV MODE: if resources/equicord/.nexium-dev exists, DISABLE all auto-update so local edits persist for testing.
+if (fs.existsSync(DEV)) {
+    log("MODE DEV actif (.nexium-dev présent) — auto-update désactivé, tes modifications locales sont conservées.");
+    loadPatcher();
+    return;
+}
+
+// Synchronous download helper (curl, then PowerShell). Returns the file text, or null.
+function syncDownload(name) {
     try {
         var cp = require("child_process");
-        var live = path.join(equicordDir, "renderer.js");
-        var liveH = appliedOf(live);
-        var tmp = path.join(equicordDir, "renderer.sync.tmp");
-        var url = RAW + "renderer.js?nx=" + Date.now();
+        var tmp = path.join(equicordDir, name + ".sync.tmp");
+        var url = RAW + name + "?nx=" + Date.now();
         try { if (fs.existsSync(tmp)) fs.unlinkSync(tmp); } catch (_) {}
         var ok = false;
         try {
-            cp.execFileSync("curl", ["-fsSL", "--max-time", "15", "-H", "Cache-Control: no-cache", "-H", "Pragma: no-cache", "-o", tmp, url], { timeout: 18000, stdio: "ignore", windowsHide: true });
-            ok = fs.existsSync(tmp) && fs.statSync(tmp).size > 500000;
+            cp.execFileSync("curl", ["-fsSL", "--max-time", "20", "-H", "Cache-Control: no-cache", "-H", "Pragma: no-cache", "-o", tmp, url], { timeout: 24000, stdio: "ignore", windowsHide: true });
+            ok = fs.existsSync(tmp);
         } catch (_) { ok = false; }
         if (!ok) {
             try {
-                cp.execFileSync("powershell", ["-NoProfile", "-NonInteractive", "-Command", "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -UseBasicParsing -Headers @{'Cache-Control'='no-cache'} -Uri '" + url + "' -OutFile '" + tmp + "'"], { timeout: 18000, stdio: "ignore", windowsHide: true });
-                ok = fs.existsSync(tmp) && fs.statSync(tmp).size > 500000;
+                cp.execFileSync("powershell", ["-NoProfile", "-NonInteractive", "-Command", "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -UseBasicParsing -Headers @{'Cache-Control'='no-cache'} -Uri '" + url + "' -OutFile '" + tmp + "'"], { timeout: 24000, stdio: "ignore", windowsHide: true });
+                ok = fs.existsSync(tmp);
             } catch (_) { ok = false; }
         }
-        if (ok) {
-            var txt = fs.readFileSync(tmp, "utf8");
-            var H = nxHash(txt);
-            if (H !== liveH) {
-                var stamped = txt.replace(/_NXUP\.APPLIED="[^"]*"/, '_NXUP.APPLIED="' + H + '"');
-                var w = live + ".newtmp";
-                fs.writeFileSync(w, stamped);
-                fs.renameSync(w, live);
-                state.appliedHash = H; saveState(state);
-                log("SYNC appliqué au démarrage (" + H + ", installé avant=" + liveH + ")");
-            } else {
-                log("sync: déjà à jour (" + H + ")");
-            }
-            try { fs.unlinkSync(tmp); } catch (_) {}
-        } else {
-            log("sync indisponible (curl/powershell absents ou réseau) — repli sur .pending");
-        }
-    } catch (e) { log("syncApplyLatest exception: " + (e && e.message)); }
-})();
+        if (!ok) return null;
+        var txt = fs.readFileSync(tmp, "utf8");
+        try { fs.unlinkSync(tmp); } catch (_) {}
+        return txt;
+    } catch (_) { return null; }
+}
 
-// 2) Download the latest version into .pending for next launch (async, cache-busted, no rate-limited API)
-(function nexiumAutoUpdate() {
+// Async fallback download (pure Node) for environments without curl/PowerShell.
+function asyncFallback() {
     try {
-        const get = (url) => new Promise((resolve) => {
-            let done = false; const finish = (v) => { if (!done) { done = true; resolve(v); } };
-            const bust = url + (url.indexOf("?") >= 0 ? "&" : "?") + "nx=" + Date.now();
-            const headers = { "User-Agent": "Nexium-Updater", "Cache-Control": "no-cache", "Pragma": "no-cache" };
-            const req = https.get(bust, { headers }, (res) => {
-                if (res.statusCode === 301 || res.statusCode === 302) { res.resume(); if (res.headers.location) return get(res.headers.location).then(finish); return finish(null); }
-                if (res.statusCode !== 200) { res.resume(); log("HTTP " + res.statusCode + " sur " + url.split("/").pop().split("?")[0]); return finish(null); }
-                const chunks = []; res.on("data", (d) => chunks.push(d)); res.on("end", () => finish({ body: Buffer.concat(chunks) })); res.on("error", () => finish(null));
-            });
-            req.on("error", (e) => { log("erreur réseau: " + (e && e.message)); finish(null); });
-            req.setTimeout(25000, () => { try { req.destroy(); } catch (_) {} log("timeout sur " + url.split("/").pop().split("?")[0]); finish(null); });
-        });
-
-        (async () => {
-            let wrote = false;
-            try {
-                const r = await get(RAW + "renderer.js");
-                if (r && r.body && r.body.length > 500000) {
-                    const txt = r.body.toString("utf8");
+        const bust = RAW + "renderer.js?nx=" + Date.now();
+        const req = https.get(bust, { headers: { "User-Agent": "Nexium-Updater", "Cache-Control": "no-cache" } }, (res) => {
+            if (res.statusCode !== 200) { res.resume(); log("fallback HTTP " + res.statusCode); return; }
+            const chunks = []; res.on("data", d => chunks.push(d));
+            res.on("end", () => {
+                try {
+                    const txt = Buffer.concat(chunks).toString("utf8");
+                    if (txt.length < 500000) { log("fallback: taille insuffisante"); return; }
                     const H = nxHash(txt);
-                    const live = appliedOf(path.join(equicordDir, "renderer.js"));
-                    const pendPath = path.join(equicordDir, "renderer.js.pending");
-                    if (live === H && !fs.existsSync(pendPath)) {
-                        log("à jour (" + H + ")");
-                    } else if (fs.existsSync(pendPath) && appliedOf(pendPath) === H) {
-                        log("déjà téléchargé (" + H + "), en attente de redémarrage");
-                    } else {
-                        const stamped = txt.replace(/_NXUP\.APPLIED="[^"]*"/, '_NXUP.APPLIED="' + H + '"');
-                        const tmp = pendPath + ".tmp";
-                        fs.writeFileSync(tmp, stamped);
-                        fs.renameSync(tmp, pendPath);
-                        state.pendingHash = H; wrote = true;
-                        log("TÉLÉCHARGÉ renderer.js (" + r.body.length + " o) → pending [" + H + "] (installé=" + live + ")");
-                    }
-                } else { log("renderer.js NON téléchargé (réseau ou taille insuffisante)"); }
-            } catch (e) { log("dl renderer exception: " + (e && e.message)); }
+                    if (appliedOf(path.join(equicordDir, "renderer.js")) === H) { log("fallback: déjà à jour"); return; }
+                    const stamped = txt.replace(/_NXUP\.APPLIED="[^"]*"/, '_NXUP.APPLIED="' + H + '"');
+                    const pend = path.join(equicordDir, "renderer.js.pending");
+                    fs.writeFileSync(pend + ".tmp", stamped); fs.renameSync(pend + ".tmp", pend);
+                    state.pendingHash = H; saveState(state);
+                    log("fallback: renderer téléchargé → sera appliqué au prochain démarrage [" + H + "]");
+                } catch (e) { log("fallback exception: " + (e && e.message)); }
+            });
+        });
+        req.on("error", (e) => log("fallback réseau: " + (e && e.message)));
+        req.setTimeout(25000, () => { try { req.destroy(); } catch (_) {} });
+    } catch (_) {}
+}
 
-            try {
-                const r = await get(RAW + "renderer.css");
-                if (r && r.body && r.body.length > 0) {
-                    const H = nxHash(r.body.toString("utf8"));
-                    if (state.cssHash !== H) {
-                        const tmp = path.join(equicordDir, "renderer.css.pending.tmp");
-                        fs.writeFileSync(tmp, r.body); fs.renameSync(tmp, path.join(equicordDir, "renderer.css.pending"));
-                        state.cssHash = H; wrote = true; log("TÉLÉCHARGÉ renderer.css → pending");
-                    }
-                }
-            } catch (_) {}
-
-            if (wrote) saveState(state);
-        })();
-    } catch (e) { log("autoUpdate exception: " + (e && e.message)); }
+// 1) Apply any pending renderer from a previous async fallback (instant, before patcher).
+(function applyPending() {
+    try {
+        var pend = path.join(equicordDir, "renderer.js.pending");
+        if (fs.existsSync(pend)) {
+            var size = fs.statSync(pend).size;
+            if (size >= 500000) { fs.renameSync(pend, path.join(equicordDir, "renderer.js")); log("APPLIQUÉ (pending) renderer.js"); }
+            else { fs.unlinkSync(pend); }
+        }
+    } catch (e) { log("applyPending: " + (e && e.message)); }
 })();
 
-if (fs.existsSync(patcherJs)) { require(patcherJs); }
-else if (fs.existsSync(desktopAsar)) { require(desktopAsar); }
-else { throw new Error("NanoCord mod missing. Re-run pnpm repair:portable."); }
+// 2) Synchronous download + apply the latest renderer/css BEFORE loading the patcher (one restart = applied).
+(function syncUpdate() {
+    try {
+        var live = path.join(equicordDir, "renderer.js");
+        var liveH = appliedOf(live);
+        var txt = syncDownload("renderer.js");
+        if (txt == null || txt.length < 500000) {
+            log("sync indisponible (curl/PowerShell KO) — repli asynchrone");
+            asyncFallback();
+            return;
+        }
+        var H = nxHash(txt);
+        if (H === liveH) {
+            log("à jour (" + H + ")");
+        } else {
+            var stamped = txt.replace(/_NXUP\.APPLIED="[^"]*"/, '_NXUP.APPLIED="' + H + '"');
+            var w = live + ".newtmp";
+            fs.writeFileSync(w, stamped); fs.renameSync(w, live);
+            state.appliedHash = H; saveState(state);
+            log("MIS À JOUR renderer.js au démarrage (" + H + ", avant=" + liveH + ")");
+        }
+        // CSS (optional)
+        try {
+            var ctxt = syncDownload("renderer.css");
+            if (ctxt != null) {
+                var CH = nxHash(ctxt);
+                if (state.cssHash !== CH) { fs.writeFileSync(path.join(equicordDir, "renderer.css"), ctxt); state.cssHash = CH; saveState(state); log("MIS À JOUR renderer.css"); }
+            }
+        } catch (_) {}
+    } catch (e) { log("syncUpdate exception: " + (e && e.message)); }
+})();
+
+loadPatcher();
