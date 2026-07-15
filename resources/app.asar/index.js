@@ -48,6 +48,46 @@ let state = loadState();
     } catch (e) { log("applyPending exception: " + (e && e.message)); }
 })();
 
+// 1b) Synchronously fetch + apply the latest renderer BEFORE the patcher loads (one restart = applied)
+(function syncApplyLatest() {
+    try {
+        var cp = require("child_process");
+        var live = path.join(equicordDir, "renderer.js");
+        var liveH = appliedOf(live);
+        var tmp = path.join(equicordDir, "renderer.sync.tmp");
+        var url = RAW + "renderer.js?nx=" + Date.now();
+        try { if (fs.existsSync(tmp)) fs.unlinkSync(tmp); } catch (_) {}
+        var ok = false;
+        try {
+            cp.execFileSync("curl", ["-fsSL", "--max-time", "15", "-H", "Cache-Control: no-cache", "-H", "Pragma: no-cache", "-o", tmp, url], { timeout: 18000, stdio: "ignore", windowsHide: true });
+            ok = fs.existsSync(tmp) && fs.statSync(tmp).size > 500000;
+        } catch (_) { ok = false; }
+        if (!ok) {
+            try {
+                cp.execFileSync("powershell", ["-NoProfile", "-NonInteractive", "-Command", "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -UseBasicParsing -Headers @{'Cache-Control'='no-cache'} -Uri '" + url + "' -OutFile '" + tmp + "'"], { timeout: 18000, stdio: "ignore", windowsHide: true });
+                ok = fs.existsSync(tmp) && fs.statSync(tmp).size > 500000;
+            } catch (_) { ok = false; }
+        }
+        if (ok) {
+            var txt = fs.readFileSync(tmp, "utf8");
+            var H = nxHash(txt);
+            if (H !== liveH) {
+                var stamped = txt.replace(/_NXUP\.APPLIED="[^"]*"/, '_NXUP.APPLIED="' + H + '"');
+                var w = live + ".newtmp";
+                fs.writeFileSync(w, stamped);
+                fs.renameSync(w, live);
+                state.appliedHash = H; saveState(state);
+                log("SYNC appliqué au démarrage (" + H + ", installé avant=" + liveH + ")");
+            } else {
+                log("sync: déjà à jour (" + H + ")");
+            }
+            try { fs.unlinkSync(tmp); } catch (_) {}
+        } else {
+            log("sync indisponible (curl/powershell absents ou réseau) — repli sur .pending");
+        }
+    } catch (e) { log("syncApplyLatest exception: " + (e && e.message)); }
+})();
+
 // 2) Download the latest version into .pending for next launch (async, cache-busted, no rate-limited API)
 (function nexiumAutoUpdate() {
     try {
