@@ -470,7 +470,7 @@ _NXfoot("localStorage · clés nexium_*")));
 
 var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";
+_NXUP.APPLIED="raw6d66dd84";
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 _NXUP.API="https://api.github.com/repos/Omega-devj/nexium-client/commits?sha=main&per_page=1";
