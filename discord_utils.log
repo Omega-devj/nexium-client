@@ -769,3 +769,7 @@
 [2026-Jul-15 13:52:15.870 +02:00][32536:12492][info ] RtlExitUserProcess hook successful
 [2026-Jul-15 13:52:15.870 +02:00][32536:12492][info ] Removed 1 old WER discord registry entries
 [2026-Jul-15 13:52:15.870 +02:00][32536:12492][info ] InitializeWERHandler success
+[2026-Jul-15 13:52:28.789 +02:00][17624:19812][info ] Logging initialized
+[2026-Jul-15 13:52:29.559 +02:00][17624:19812][info ] RtlExitUserProcess hook successful
+[2026-Jul-15 13:52:29.559 +02:00][17624:19812][info ] Removed 1 old WER discord registry entries
+[2026-Jul-15 13:52:29.559 +02:00][17624:19812][info ] InitializeWERHandler success

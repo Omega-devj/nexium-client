@@ -316,7 +316,7 @@ _NXcard(i("div",null,_NXch("Mots les plus utilisés","Taille proportionnelle à 
 _NXcard(i("div",null,_NXch("Émojis perso favoris"),emos.length?i("div",null,emos.map(function(em,k){return _NXrank(k+1,":"+em.w+":",em.v,emax,0,k);})):i("div",{style:{fontSize:"12px",color:P.dim}},"Aucun émoji personnalisé utilisé.")),{mb:0}));
 var content=tab==="overview"?overview:tab==="activity"?activity:tab==="servers"?servers:wordsTab;
 return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
-_NXhead("Analytique locale","Nexium Stats","Métriques écoutées en temps réel via les events Discord, calculées et stockées sur ton client. Aucune donnée ne quitte ta machine."),
+_NXhead("Analytique locale","Nexium Stats","Métriques écoutées en temps réel via les events Discord, calculées et stockées sur ton client. Aucune donnée ne quitte ta machine et tu controle tout."),
 _NXtabs([{id:"overview",label:"Vue d'ensemble"},{id:"activity",label:"Activité"},{id:"servers",label:"Serveurs"},{id:"words",label:"Mots"}],tab,setTab),
 content,
 i("div",{style:{display:"flex",gap:"10px",marginTop:"16px"}},_NXbtn("Rafraîchir",function(){force();}),_NXbtn("Exporter (.json)",function(){_NXS.download();}),_NXbtn("Réinitialiser",function(){if(window.confirm("Réinitialiser toutes les statistiques Nexium ?")){_NXS.reset();force();}},"danger")),
