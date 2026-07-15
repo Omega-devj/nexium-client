@@ -29232,3 +29232,41 @@
 [2026-Jul-15 12:43:38.448 +02:00][17180: 8072][warning] Application not signed by Discord, Krisp is not enabled
 [2026-Jul-15 12:43:38.448 +02:00][17180: 8072][warning] Failed to setup Krisp module, error code: -3
 [2026-Jul-15 12:43:38.448 +02:00][17180: 8072][info ] Krisp SDK initialized
+[2026-Jul-15 12:52:46.574 +02:00][23360:11520][info ] Logging initialized
+[2026-Jul-15 12:52:46.574 +02:00][23360:11520][info ] Initializing krisp SDK...
+[2026-Jul-15 12:52:46.574 +02:00][23360:11520][info ] DoKrispInitialize
+[2026-Jul-15 12:52:46.574 +02:00][23360:11520][warning] Application not signed by Discord, Krisp is not enabled
+[2026-Jul-15 12:52:46.574 +02:00][23360:11520][warning] Failed to setup Krisp module, error code: -3
+[2026-Jul-15 12:52:46.574 +02:00][23360:11520][info ] Krisp SDK initialized
+[2026-Jul-15 12:56:37.398 +02:00][23360:11520][info ] Logging initialized
+[2026-Jul-15 12:56:37.398 +02:00][23360:11520][info ] Initializing krisp SDK...
+[2026-Jul-15 12:56:37.398 +02:00][23360:11520][warning] Failed to setup Krisp module, error code: -3
+[2026-Jul-15 12:56:37.398 +02:00][23360:11520][info ] Krisp SDK initialized
+[2026-Jul-15 12:57:24.293 +02:00][23360:11520][info ] Logging initialized
+[2026-Jul-15 12:57:24.293 +02:00][23360:11520][info ] Initializing krisp SDK...
+[2026-Jul-15 12:57:24.293 +02:00][23360:11520][warning] Failed to setup Krisp module, error code: -3
+[2026-Jul-15 12:57:24.293 +02:00][23360:11520][info ] Krisp SDK initialized
+[2026-Jul-15 13:05:34.096 +02:00][ 4992: 7596][info ] Logging initialized
+[2026-Jul-15 13:05:34.096 +02:00][ 4992: 7596][info ] Initializing krisp SDK...
+[2026-Jul-15 13:05:34.096 +02:00][ 4992: 7596][info ] DoKrispInitialize
+[2026-Jul-15 13:05:34.097 +02:00][ 4992: 7596][warning] Application not signed by Discord, Krisp is not enabled
+[2026-Jul-15 13:05:34.097 +02:00][ 4992: 7596][warning] Failed to setup Krisp module, error code: -3
+[2026-Jul-15 13:05:34.097 +02:00][ 4992: 7596][info ] Krisp SDK initialized
+[2026-Jul-15 13:09:33.226 +02:00][ 4992: 7596][info ] Logging initialized
+[2026-Jul-15 13:09:33.227 +02:00][ 4992: 7596][info ] Initializing krisp SDK...
+[2026-Jul-15 13:09:33.227 +02:00][ 4992: 7596][warning] Failed to setup Krisp module, error code: -3
+[2026-Jul-15 13:09:33.227 +02:00][ 4992: 7596][info ] Krisp SDK initialized
+[2026-Jul-15 13:11:19.000 +02:00][ 4992: 7596][info ] Logging initialized
+[2026-Jul-15 13:11:19.000 +02:00][ 4992: 7596][info ] Initializing krisp SDK...
+[2026-Jul-15 13:11:19.000 +02:00][ 4992: 7596][warning] Failed to setup Krisp module, error code: -3
+[2026-Jul-15 13:11:19.000 +02:00][ 4992: 7596][info ] Krisp SDK initialized
+[2026-Jul-15 13:19:13.524 +02:00][26308:15048][info ] Logging initialized
+[2026-Jul-15 13:19:13.524 +02:00][26308:15048][info ] Initializing krisp SDK...
+[2026-Jul-15 13:19:13.524 +02:00][26308:15048][info ] DoKrispInitialize
+[2026-Jul-15 13:19:13.525 +02:00][26308:15048][warning] Application not signed by Discord, Krisp is not enabled
+[2026-Jul-15 13:19:13.525 +02:00][26308:15048][warning] Failed to setup Krisp module, error code: -3
+[2026-Jul-15 13:19:13.526 +02:00][26308:15048][info ] Krisp SDK initialized
+[2026-Jul-15 13:20:57.621 +02:00][26308:15048][info ] Logging initialized
+[2026-Jul-15 13:20:57.621 +02:00][26308:15048][info ] Initializing krisp SDK...
+[2026-Jul-15 13:20:57.621 +02:00][26308:15048][warning] Failed to setup Krisp module, error code: -3
+[2026-Jul-15 13:20:57.621 +02:00][26308:15048][info ] Krisp SDK initialized
