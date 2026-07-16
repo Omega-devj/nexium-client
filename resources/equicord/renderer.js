@@ -471,7 +471,7 @@ _NXfoot("localStorage · clés nexium_*")));
 
 var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="100";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 _NXUP.API="https://api.github.com/repos/Omega-devj/nexium-client/commits?sha=main&per_page=1";
@@ -483,12 +483,12 @@ _NXUP.latest=null;_NXUP.listeners=[];_NXUP.busy=false;_NXUP.err=false;_NXUP.nati
 _NXUP.notify=function(){for(var a=0;a<_NXUP.listeners.length;a++){try{_NXUP.listeners[a]();}catch(_){}}};
 _NXUP.short=function(s){return (s||"").slice(0,7);};
 _NXUP.hash=function(s){var h=5381,a=0,n=s.length;for(;a<n;a++)h=(((h<<5)+h)^s.charCodeAt(a))|0;return "raw"+(h>>>0).toString(16);};
-_NXUP.checkRaw=function(){try{fetch(_NXUP.RAW_URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.text();}).then(function(t){t=String(t||"");if(t.length<50000)throw new Error("short");var hsh=_NXUP.hash(t);_NXUP.latest={sha:hsh,raw:true,msg:"Nouvelle version disponible",date:""};_NXUP.busy=false;_NXUP.err=false;if(_NXUP.available()&&_NXUP.st.notified!==hsh){_NXUP.st.notified=hsh;_NXUP.save();_NXUP.toast("Nexium — nouvelle version disponible.");}_NXUP.maybePrompt();_NXUP.notify();}).catch(function(){_NXUP.busy=false;_NXUP.err=true;_NXUP.notify();});}catch(_){_NXUP.busy=false;_NXUP.err=true;_NXUP.notify();}};
-_NXUP.stamped=function(){return _NXUP.APPLIED&&_NXUP.APPLIED.indexOf("__NEXIUM")!==0;};_NXUP.available=function(){if(!_NXUP.latest||!_NXUP.latest.sha)return false;if(_NXUP.stamped())return _NXUP.latest.sha!==_NXUP.APPLIED;return false;};
+_NXUP.checkRaw=function(){try{fetch(_NXUP.RAW_URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.text();}).then(function(t){t=String(t||"");if(t.length<50000)throw new Error("short");var mv=t.match(/_NXUP\.VERSION="(\d+)"/);var rv=mv?parseInt(mv[1],10):null;_NXUP.repoVersion=rv;_NXUP.latest={version:rv,raw:true,msg:"Nouvelle version disponible",date:""};_NXUP.busy=false;_NXUP.err=false;if(_NXUP.available()&&_NXUP.st.notified!==rv){_NXUP.st.notified=rv;_NXUP.save();_NXUP.toast("Nexium — nouvelle version disponible.");}_NXUP.maybePrompt();_NXUP.notify();}).catch(function(){_NXUP.busy=false;_NXUP.err=true;_NXUP.notify();});}catch(_){_NXUP.busy=false;_NXUP.err=true;_NXUP.notify();}};
+_NXUP.stamped=function(){return _NXUP.APPLIED&&_NXUP.APPLIED.indexOf("__NEXIUM")!==0;};_NXUP.available=function(){var lv=parseInt(_NXUP.VERSION,10)||0;return _NXUP.repoVersion!=null&&_NXUP.repoVersion>lv;};
 _NXUP.toast=function(m){try{var T=window.Vencord&&Vencord.Webpack&&Vencord.Webpack.Common&&Vencord.Webpack.Common.Toasts;if(T&&T.show)T.show({message:m,id:T.genId(),type:T.Type.MESSAGE,options:{position:T.Position.BOTTOM}});}catch(_){}};
 _NXUP.probeNative=function(){try{var U=window.Vencord&&Vencord.Updater;if(!U||typeof U.getRepo!=="function"){_NXUP.native=false;return;}Promise.resolve(U.getRepo()).then(function(r){var url=(r&&(r.value||r))||"";_NXUP.native=String(url).toLowerCase().indexOf(_NXUP.SLUG.toLowerCase())>=0;_NXUP.notify();}).catch(function(){_NXUP.native=false;_NXUP.notify();});}catch(_){_NXUP.native=false;}};
 _NXUP.check=function(){if(_NXUP.busy)return;_NXUP.busy=true;_NXUP.err=false;_NXUP.notify();_NXUP.checkRaw();};
-_NXUP.markUpdated=function(){if(_NXUP.latest){_NXUP.st.seen=_NXUP.latest.sha;_NXUP.save();}_NXUP.notify();};
+_NXUP.markUpdated=function(){_NXUP.notify();};
 _NXUP.relaunch=function(){try{if(window.DiscordNative&&DiscordNative.processUtils&&typeof DiscordNative.processUtils.restart==="function"){DiscordNative.processUtils.restart();return true;}}catch(_){}try{if(window.DiscordNative&&DiscordNative.app&&DiscordNative.app.relaunch){DiscordNative.app.relaunch();return true;}}catch(_){}return false;};
 _NXUP.relaunchApply=function(){_NXUP.msg="Redémarrage pour appliquer la mise à jour…";_NXUP.notify();if(!_NXUP.relaunch())_NXUP.msg="Ferme complètement Discord puis rouvre-le pour appliquer la mise à jour.";_NXUP.notify();};
 _NXUP.applyNative=function(){if(_NXUP.nbusy)return;_NXUP.nbusy=true;_NXUP.msg="Récupération des commits…";_NXUP.notify();
@@ -547,7 +547,7 @@ document.body.appendChild(ov);_NXUP.vsEl=ov;
 try{if(window._NXCL){if(!_NXCL.st.text&&_NXCL.refresh)_NXCL.refresh();var _vl=function(){try{if(!_NXUP.vsEl)return;var bd=document.getElementById("nx-vs-body");if(bd&&_NXCL.st.text){bd.innerHTML=_NXUP._vsBody(_NXCL.st.text);}}catch(_){}};_NXCL.listeners.push(_vl);}}catch(_){}
 }catch(_){}};
 _NXUP.hideVersionScreen=function(){try{if(_NXUP.vsEl&&_NXUP.vsEl.parentNode)_NXUP.vsEl.parentNode.removeChild(_NXUP.vsEl);}catch(_){}_NXUP.vsEl=null;};
-_NXUP.maybeVersionScreen=function(){try{if(!_NXUP.stamped())return;var cur=_NXUP.APPLIED;if(!_NXUP.st.lastBooted){_NXUP.st.lastBooted=cur;_NXUP.save();return;}if(_NXUP.st.lastBooted!==cur){_NXUP.st.lastBooted=cur;_NXUP.save();setTimeout(function(){_NXUP.showVersionScreen();},2500);}}catch(_){}};
+_NXUP.maybeVersionScreen=function(){try{var cur=String(_NXUP.VERSION);if(!_NXUP.st.lastBooted){_NXUP.st.lastBooted=cur;_NXUP.save();return;}if(_NXUP.st.lastBooted!==cur){_NXUP.st.lastBooted=cur;_NXUP.save();setTimeout(function(){_NXUP.showVersionScreen();},2500);}}catch(_){}};
 _NXUP.probeNative();
 setTimeout(function(){_NXUP.maybeVersionScreen();},1500);
 setTimeout(function(){_NXUP.check();},6000);
