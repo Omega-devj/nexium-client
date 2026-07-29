@@ -195,7 +195,7 @@ Non, ce n'est pas une option pour l'instant : le fonctionnement du client
 dépend de la synchronisation avec ce dépôt à chaque démarrage.
 
 **Est-ce compatible avec Vencord, BetterDiscord ou d'autres mods ?**
-Nexium Client est basé sur Equicord mais reste un client autonome. Faire
+Nexium Client est basé sur Nexium Mods (une version beaucoup plus complète qu'equicord) mais reste un client autonome. Faire
 tourner plusieurs clients modifiés en parallèle n'est pas recommandé et
 peut provoquer des conflits.
 
