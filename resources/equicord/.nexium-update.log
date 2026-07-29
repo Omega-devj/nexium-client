@@ -1,8 +1,3 @@
-[2026-07-15T10:45:27.959Z] TÉLÉCHARGÉ renderer.js (3407672 octets) → pending
-[2026-07-15T10:58:31.712Z] APPLIQUÉ renderer.js (3407690 octets)
-[2026-07-15T10:58:32.529Z] renderer identique au disque, rien à faire
-[2026-07-15T11:15:59.080Z] à jour (sha a1ea389)
-[2026-07-15T11:18:00.345Z] à jour (sha a1ea389)
 [2026-07-15T11:25:19.144Z] à jour (sha a1ea389)
 [2026-07-15T11:38:58.730Z] TÉLÉCHARGÉ renderer.js (3414684 o) → pending
 [2026-07-15T11:51:31.621Z] APPLIQUÉ renderer.js (3414726 o)
@@ -75,3 +70,10 @@
 [2026-07-29T12:06:08.656Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
 [2026-07-29T12:06:27.443Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
 [2026-07-29T16:43:26.910Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-07-29T17:50:13.321Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-07-29T21:53:52.841Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-07-29T22:00:30.395Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-07-29T22:01:51.547Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-07-29T22:29:47.618Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-07-29T22:45:31.255Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-07-29T22:53:39.711Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
