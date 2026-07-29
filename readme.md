@@ -32,6 +32,7 @@
 - [Mises à jour](#mises-à-jour)
 - [Désinstallation](#désinstallation)
 - [Problèmes fréquents](#problèmes-fréquents)
+- [FAQ](#faq)
 
 ---
 
@@ -114,6 +115,120 @@ installé ailleurs sur le système.
 | **Windows SmartScreen bloque le `.exe`** | Cliquez « Informations complémentaires » → « Exécuter quand même » (l'exécutable n'est pas signé). |
 | **Discord ne se lance pas** | Vérifiez que le `.exe` est bien à la **racine** du dossier, au même niveau que les autres fichiers, et pas dans un sous-dossier. |
 | **Discord classique déjà ouvert** | Fermez-le complètement (clic droit sur l'icône près de l'horloge → Quitter) avant de lancer celui-ci. |
+
+---
+
+## FAQ
+
+### 🔒 Sécurité & confiance
+
+**Est-ce que c'est un virus ?**
+Non. C'est un client Discord modifié : le `.exe` relance simplement Discord
+avec du code supplémentaire injecté. Le fait qu'il ne soit pas signé
+numériquement (signer coûte de l'argent et n'est pas fait par la plupart
+des projets communautaires) déclenche des alertes automatiques de Windows,
+mais ça ne veut pas dire que le fichier est malveillant.
+
+**Pourquoi mon antivirus ou Windows SmartScreen le signale ?**
+Les modifications de Discord (patch de fichiers, exécutable non signé)
+correspondent à des comportements que les antivirus surveillent par
+défaut, même quand ils sont légitimes. C'est un faux positif classique
+pour ce type d'outil, pas une preuve de danger.
+
+**Comment être sûr que je télécharge la bonne version et pas une copie piégée ?**
+Le seul dépôt officiel est celui-ci, et le seul site de référence est
+**[nexium-client.netlify.app](https://nexium-client.netlify.app/)**. Si
+vous avez trouvé le client ailleurs (autre site, lien Discord, forum),
+revenez toujours vérifier ici avant d'installer quoi que ce soit.
+
+**Le code est-il vérifiable ?**
+Oui, entièrement. Rien n'est compilé en boîte noire à l'installation :
+chaque fichier posé sur votre machine est visible, et le code source
+complet est consultable dans ce dépôt. Vous pouvez l'inspecter avant de
+lancer quoi que ce soit.
+
+### 🛡️ Compte & risques
+
+**Est-ce que je risque un bannissement de mon compte Discord ?**
+En théorie oui, puisque modifier le client va à l'encontre des Conditions
+d'Utilisation de Discord — c'est écrit noir sur blanc plus haut, on ne
+vous le cache pas. En pratique, les bans pour l'usage d'un client modifié
+seul (sans autre comportement abusif) restent rares, mais le risque
+n'est jamais nul.
+
+**Est-ce que ça peut casser mon Discord ?**
+Non : le `.exe` ne modifie pas votre installation Discord existante. Il
+lance une version parallèle avec les mods actifs. Vous gardez votre
+compte, vos serveurs et vos réglages intacts.
+
+**Puis-je revenir au Discord normal facilement ?**
+Oui, à tout moment. Fermez simplement cette version et rouvrez votre
+Discord habituel (ou réinstallez-le depuis discord.com si besoin). Rien
+n'est remplacé de façon permanente.
+
+### 🕵️ Vie privée
+
+**Est-ce que le client envoie mes données quelque part ?**
+Non : zéro télémétrie. Aucune donnée de statistiques d'usage n'est
+renvoyée vers un serveur externe.
+
+**Est-ce que quelqu'un peut voir mon token ou mon mot de passe ?**
+Le client ne fait rien d'autre que ce que le code publié dans ce dépôt
+décrit — c'est justement pour ça que tout est laissé visible plutôt que
+caché dans un installateur. Si vous voulez une certitude totale, c'est
+consultable ligne par ligne avant de lancer quoi que ce soit.
+
+**Le module "moniteur réseau" m'espionne-t-il, moi ?**
+Non, c'est l'inverse : il vous montre les requêtes réseau émises par le
+client, pour que ce soit vous qui gardiez un œil dessus — pas pour
+collecter quoi que ce soit de votre côté.
+
+### ⚙️ Fonctionnement technique
+
+**Comment fonctionne la mise à jour automatique ?**
+À chaque lancement, le `.exe` va chercher la dernière version du code sur
+ce dépôt officiel et l'applique avant de démarrer Discord. Vous n'avez
+jamais besoin de retélécharger quoi que ce soit manuellement.
+
+**Puis-je désactiver les mises à jour automatiques ?**
+Non, ce n'est pas une option pour l'instant : le fonctionnement du client
+dépend de la synchronisation avec ce dépôt à chaque démarrage.
+
+**Est-ce compatible avec Vencord, BetterDiscord ou d'autres mods ?**
+Nexium Client est basé sur Equicord mais reste un client autonome. Faire
+tourner plusieurs clients modifiés en parallèle n'est pas recommandé et
+peut provoquer des conflits.
+
+**Ça fonctionne sur Mac ou Linux ?**
+Non, uniquement sur Windows pour le moment.
+
+### 🧩 Installation & utilisation
+
+**J'ai fait une erreur, comment tout supprimer proprement ?**
+Fermez Discord, supprimez le dossier `nexium-client-main` (qui contient
+le `.exe` et tous les fichiers du projet). C'est tout : rien n'est
+installé ailleurs sur le système.
+
+**Le `.exe` ne se lance pas, que faire ?**
+Vérifiez d'abord qu'il est bien à la racine du dossier `nexium-client-main`
+et pas dans un sous-dossier. Voir aussi la section
+[Problèmes fréquents](#problèmes-fréquents) ci-dessus.
+
+**Dois-je refaire les 4 étapes d'installation à chaque mise à jour ?**
+Non, une seule fois. Ensuite le client se met à jour tout seul au
+lancement.
+
+### 💬 Support & communauté
+
+**Le projet est-il toujours maintenu ?**
+Oui, activement, par la Nexium Collective — c'est justement pour ça que
+les mises à jour sont automatiques.
+
+**Où signaler un bug ou poser une question ?**
+Dans l'onglet **[Issues](../../issues)** de ce dépôt.
+
+**Est-ce gratuit ?**
+Oui, entièrement gratuit et open-source.
 
 ---
 
