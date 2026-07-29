@@ -162,12 +162,24 @@ setTimeout(function(){_NXM.loadRemote();},3000);
 var NexiumMusicIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20},i("path",{d:"M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"}));};
 var _NXBoundary=null;
 try{if(typeof F!=="undefined"&&F&&F.Component){
-_NXBoundary=function(p){F.Component.call(this,p);this.state={err:false};};
+_NXBoundary=function(p){F.Component.call(this,p);this.state={err:false,msg:""};};
 _NXBoundary.prototype=Object.create(F.Component.prototype);
 _NXBoundary.prototype.constructor=_NXBoundary;
-_NXBoundary.getDerivedStateFromError=function(){return {err:true};};
-_NXBoundary.prototype.componentDidCatch=function(){try{if(this.props&&this.props.nm)console.warn("[Nexium] section indisponible:",this.props.nm);}catch(_){}};
-_NXBoundary.prototype.render=function(){try{if(this.state&&this.state.err)return i("div",{style:{padding:"22px",maxWidth:"640px",margin:"0 auto",color:"var(--text-muted)",fontSize:"13px",lineHeight:"1.6"}},i("div",{style:{fontWeight:"700",color:"var(--header-primary)",marginBottom:"6px",fontSize:"15px"}},(this.props&&this.props.nm)||"Nexium"),i("div",null,"Cette section n'a pas pu s'afficher dans cet environnement. Le reste du client fonctionne normalement."));}catch(_){}return this.props?this.props.children:null;};
+_NXBoundary.getDerivedStateFromError=function(e){return {err:true,msg:(e&&(e.message||String(e)))||"erreur inconnue"};};
+_NXBoundary.prototype.componentDidCatch=function(e){try{var nm=(this.props&&this.props.nm)||"Nexium";var det=nm+" :: "+((e&&(e.message||String(e)))||"?")+" | "+(((e&&e.stack)||"").split("\n").slice(0,5).join(" | "));this._det=det;if(window._NXERR){_NXERR.push(det);if(_NXERR.length>20)_NXERR.shift();}console.warn("[Nexium] section indisponible:",nm,e);}catch(_){}};
+_NXBoundary.prototype.render=function(){try{
+if(this.state&&this.state.err){var self=this;var P=_NXpal;
+return i("div",{style:{padding:"26px",maxWidth:"640px",margin:"0 auto"}},
+i("div",{style:{background:"linear-gradient(168deg,#141013,#0a0a0b)",border:"1px solid #3a2626",borderRadius:"18px",padding:"22px"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"11px",marginBottom:"12px"}},
+i("div",{style:{width:"34px",height:"34px",borderRadius:"11px",background:"rgba(214,72,72,.15)",border:"1px solid rgba(214,72,72,.3)",display:"flex",alignItems:"center",justifyContent:"center",color:"#e79a9a",fontWeight:"800",flexShrink:0}},"!"),
+i("div",null,i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint}},"Section indisponible"),i("div",{style:{fontSize:"17px",fontWeight:"800",color:P.txt}},(this.props&&this.props.nm)||"Nexium"))),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6,marginBottom:"12px"}},"Cette page a rencontre une erreur. Le reste du client fonctionne normalement."),
+i("div",{style:{fontSize:"11px",color:P.dim,fontFamily:_NXf.mono,background:"#0c0c0e",border:"1px solid "+P.line,borderRadius:"9px",padding:"10px 12px",marginBottom:"14px",wordBreak:"break-word"}},String(this.state.msg||"").slice(0,300)),
+i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{self.setState({err:false,msg:""});}catch(_){}},style:{flex:1,minWidth:"120px",textAlign:"center",padding:"11px",borderRadius:"10px",background:P.acc,color:"#0a0a0a",fontSize:"13px",fontWeight:"800",cursor:"pointer"}},"Reessayer"),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{DiscordNative.clipboard.copy(self._det||self.state.msg||"");}catch(_){}},style:{flex:1,minWidth:"120px",textAlign:"center",padding:"11px",borderRadius:"10px",background:"transparent",border:"1px solid "+P.line,color:P.sub,fontSize:"13px",fontWeight:"700",cursor:"pointer"}},"Copier le detail"))));}
+return this.props?this.props.children:null;}catch(_){return null;}};
 }}catch(_){}
 var _NXsafe=function(Comp,nm){try{if(!_NXBoundary||typeof Comp!=="function")return Comp;return function(p){try{return i(_NXBoundary,{nm:nm},i(Comp,p));}catch(_){return null;}};}catch(_){return Comp;}};
 function NexiumMusicComp(){
@@ -201,17 +213,42 @@ cfg.tracks.length?i("div",null,cfg.tracks.map(function(t,k){var on=k===_NXM.idx;
 i("div",{style:{fontSize:"11px",color:P.faint,marginTop:"12px",paddingTop:"12px",borderTop:"1px solid "+P.hair,lineHeight:"1.6"}},"La playlist est gérée depuis le dépôt GitHub. Une ligne par piste : ",i("span",{style:{fontFamily:_NXf.mono,color:P.dim}},"Titre | https://…"),"  ou juste l'URL.")),{mb:0}),
 _NXfoot("nexium_music_v1 · lecture directe, aucune donnée envoyée")));
 }
-var _NXcommon=function(){var V=window.Vencord||{},WP=V.Webpack||{},C=WP.Common||{};return{WP:WP,C:C,store:function(n){try{return C[n]||(WP.findStore&&WP.findStore(n))||null;}catch(_){return null;}}};};
+var _NXcommon=function(){var V=window.Vencord||{},WP=V.Webpack||{},C=WP.Common||{};if(_NXcommon._c&&_NXcommon._wp===WP)return _NXcommon._c;var sc={};var o={WP:WP,C:C,store:function(n){try{if(sc[n]!==undefined)return sc[n];var s=C[n]||(WP.findStore&&WP.findStore(n))||null;if(s)sc[n]=s;return s;}catch(_){return null;}}};_NXcommon._wp=WP;_NXcommon._c=o;return o;};
 var _NXguildOf=function(cid){try{if(!cid)return null;var CS=_NXcommon().store("ChannelStore");var ch=CS&&CS.getChannel&&CS.getChannel(cid);return ch&&ch.guild_id?ch.guild_id:null;}catch(_){return null;}};
 var _NXguildName=function(gid){try{if(!gid)return"Inconnu";var GS=_NXcommon().store("GuildStore");var g=GS&&GS.getGuild&&GS.getGuild(gid);return g&&g.name?g.name:"Serveur "+String(gid).slice(0,6);}catch(_){return"Serveur";}};
 var _NXchanName=function(cid){try{if(!cid)return"Salon";var CS=_NXcommon().store("ChannelStore");var ch=CS&&CS.getChannel&&CS.getChannel(cid);if(!ch)return"Salon "+String(cid).slice(0,6);if(ch.guild_id)return"#"+(ch.name||String(cid).slice(0,6));return ch.name||"Message privé";}catch(_){return"Salon";}};
 
 var _NXf={disp:"var(--font-display),'Bricolage Grotesque','gg sans',sans-serif",mono:"var(--font-code),'JetBrains Mono','SF Mono',ui-monospace,monospace"};
-var _NXpal={txt:"#f4f4f5",sub:"#8a8a92",dim:"#5b5b63",faint:"#34343a",line:"#161618",hair:"#212125",panel:"#0b0b0c",inset:"#0e0e10",acc:"#e8e8ea"};
-var _NXfxStyle=function(){try{if(document.getElementById("nx-fx-style"))return;var s=document.createElement("style");s.id="nx-fx-style";s.textContent=".nx-fx:focus-visible{outline:2px solid #e8e8ea;outline-offset:2px;border-radius:10px;}.nx-fx:focus:not(:focus-visible){outline:none;}";if(document.head)document.head.appendChild(s);}catch(_){}};
+var _NXpal={txt:"#f4f4f5",sub:"#8a8a92",dim:"#5b5b63",faint:"#34343a",line:"#161618",hair:"#212125",panel:"#0b0b0c",inset:"#0e0e10",acc:"#e8e8ea",light:false};
+var _NXPALD={txt:"#f4f4f5",sub:"#8a8a92",dim:"#5b5b63",faint:"#34343a",line:"#161618",hair:"#212125",panel:"#0b0b0c",inset:"#0e0e10",acc:"#e8e8ea",light:false};
+var _NXPALL={txt:"#111214",sub:"#4e5058",dim:"#6d6f78",faint:"#b5bac1",line:"#e3e5e8",hair:"#dcdee1",panel:"#ffffff",inset:"#f6f6f7",acc:"#1a1a1e",light:true};
+var _NXisLight=function(){try{
+var el=document.documentElement,bd=document.body;
+var cn=((el&&el.className)||"")+" "+((bd&&bd.className)||"");
+if(/theme-light/.test(cn))return true;
+if(/theme-dark|theme-darker|theme-midnight/.test(cn))return false;
+try{var v=getComputedStyle(el).getPropertyValue("--background-primary")||"";v=v.trim();
+if(/^#/.test(v)){var n=parseInt(v.slice(1,7),16);if(!isNaN(n)){var r=(n>>16)&255,g=(n>>8)&255,b=n&255;return (r*299+g*587+b*114)/1000>140;}}}catch(_){}
+}catch(_){}return false;};
+var _NXsyncPal=function(){try{
+var want=_NXisLight()?_NXPALL:_NXPALD;
+if(_NXpal.light===want.light)return false;
+for(var k in want)_NXpal[k]=want[k];
+try{if(window._NXthemeCB)for(var a=0;a<_NXthemeCB.length;a++)_NXthemeCB[a]();}catch(_){}
+try{var MM=["_NXM","_NXS","_NXP","_NXNET","_NXCL","_NXUP","_NXLY","_NXPR","_NXSP"];for(var b=0;b<MM.length;b++){var mo=window[MM[b]];if(mo&&mo.notify)mo.notify();}}catch(_){}
+return true;}catch(_){return false;}};
+var _NXthemeCB=window._NXthemeCB||(window._NXthemeCB=[]);
+try{setTimeout(_NXsyncPal,600);
+if(typeof MutationObserver!=="undefined"&&document.documentElement){
+var _tmo=new MutationObserver(function(){_NXsyncPal();});
+_tmo.observe(document.documentElement,{attributes:true,attributeFilter:["class"]});
+if(document.body)_tmo.observe(document.body,{attributes:true,attributeFilter:["class"]});}
+}catch(_){}
+var _NXfxStyle=function(){try{if(document.getElementById("nx-fx-style"))return;var s=document.createElement("style");s.id="nx-fx-style";s.textContent=".nx-fx:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:10px;}.nx-fx:focus:not(:focus-visible){outline:none;}@media (prefers-reduced-motion: reduce){#nx-welcome,#nx-welcome *,#nx-update-modal *,#nx-version-screen *,#nx-blocked-modal *,#nx-link-tip{animation:none!important;transition:none!important;}}";if(document.head)document.head.appendChild(s);}catch(_){}};
 try{setTimeout(_NXfxStyle,300);}catch(_){}
 var _NXSCHEMA=1;
 var _NXmig=function(d,name){try{if(!d||typeof d!=="object")return d;if(d._sv===_NXSCHEMA)return d;d._sv=_NXSCHEMA;}catch(_){}return d;};
+var _NXERR=window._NXERR||(window._NXERR=[]);
 var _NXkey=function(e){try{if(e.key==="Enter"||e.key===" "||e.key==="Spacebar"){e.preventDefault();if(e.currentTarget&&e.currentTarget.click)e.currentTarget.click();}}catch(_){}};
 var _NXn=function(v){v=v||0;if(v>=1000000)return(v/1000000).toFixed(1).replace(/\.0$/,"")+"M";if(v>=1000)return(v/1000).toFixed(1).replace(/\.0$/,"")+"k";return""+v;};
 var _NXhead=function(k,t,d){return i("div",{style:{position:"relative",marginBottom:"26px",paddingTop:"4px"}},i("div",{style:{position:"absolute",left:"-40px",top:"-56px",width:"340px",height:"170px",background:"radial-gradient(55% 70% at 0% 40%, rgba(255,255,255,.045), transparent 72%)",pointerEvents:"none"}}),i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"8px",marginBottom:"14px"}},i("div",{style:{width:"6px",height:"6px",borderRadius:"50%",background:_NXpal.acc,boxShadow:"0 0 10px "+_NXpal.acc+"66"}}),i("div",{style:{fontSize:"10.5px",fontWeight:"800",letterSpacing:".26em",color:_NXpal.sub,textTransform:"uppercase"}},k)),i("div",{style:{position:"relative",fontFamily:_NXf.disp,fontSize:"34px",fontWeight:"800",color:_NXpal.txt,letterSpacing:"-.035em",lineHeight:1.02}},t),d?i("div",{style:{position:"relative",fontSize:"13.5px",color:_NXpal.sub,marginTop:"13px",lineHeight:1.65,maxWidth:"540px"}},d):null,i("div",{style:{position:"relative",height:"1px",marginTop:"22px",background:"linear-gradient(90deg,"+_NXpal.hair+", "+_NXpal.hair+" 30%, transparent)"}}));};
@@ -239,14 +276,14 @@ _NXS.STOP={"avec":1,"dans":1,"pour":1,"mais":1,"plus":1,"tout":1,"tous":1,"cette
 _NXS.mkHeat=function(){var h=[];for(var a=0;a<7;a++){var r=[];for(var b=0;b<24;b++)r.push(0);h.push(r);}return h;};
 _NXS.load=function(){var d;try{var raw=_NXDB.get(_NXS.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};if(!d.daily)d.daily={};if(!d.dailyChars)d.dailyChars={};if(!d.guilds)d.guilds={};if(!d.channels)d.channels={};if(!d.heat||d.heat.length!==7)d.heat=_NXS.mkHeat();if(typeof d.given!=="number")d.given=0;if(typeof d.received!=="number")d.received=0;if(typeof d.session!=="number")d.session=0;if(!d.words)d.words={};if(!d.emojis)d.emojis={};if(typeof d.attach!=="number")d.attach=0;if(typeof d.links!=="number")d.links=0;if(typeof d.mentions!=="number")d.mentions=0;if(typeof d.totalChars!=="number")d.totalChars=0;if(typeof d.msgCount!=="number"){var mc=0;for(var kk in d.daily)mc+=d.daily[kk];d.msgCount=mc;}if(typeof d.voice!=="number")d.voice=0;if(!d.voiceDaily)d.voiceDaily={};if(!d.voiceGuilds)d.voiceGuilds={};if(!d.givenDaily)d.givenDaily={};if(!d.recvDaily)d.recvDaily={};if(typeof d.first!=="number")d.first=Date.now();return d;};
 _NXS.data=_NXS.load();
-_NXS.merge=function(mine){try{var raw=_NXDB.get(_NXS.KEY);if(!raw)return mine;var other=JSON.parse(raw);if(!other||typeof other!=="object")return mine;
+_NXS.merge=function(mine){try{var raw=_NXDB.get(_NXS.KEY);if(!raw)return mine;var other=JSON.parse(raw);if(!other||typeof other!=="object")return mine;var wipedAt=parseInt(_NXDB.get(_NXS.KEY+"_wipe")||"0",10)||0;if(wipedAt&&(!other._at||other._at<wipedAt))return mine;
 var NUM=["given","received","session","attach","links","mentions","totalChars","msgCount","voice"];
 for(var a=0;a<NUM.length;a++){var k=NUM[a];if(typeof other[k]==="number"&&other[k]>(mine[k]||0))mine[k]=other[k];}
 var MAPS=["daily","dailyChars","givenDaily","recvDaily","voiceDaily","guilds","channels","words","emojis","voiceGuilds"];
 for(var b=0;b<MAPS.length;b++){var m=MAPS[b];if(other[m]&&typeof other[m]==="object"){if(!mine[m])mine[m]={};for(var kk in other[m]){var ov=other[m][kk];if(typeof ov==="number"&&ov>(mine[m][kk]||0))mine[m][kk]=ov;}}}
 if(other.heat&&other.heat.length===7&&mine.heat&&mine.heat.length===7){for(var d=0;d<7;d++)for(var h=0;h<24;h++){if(other.heat[d][h]>mine.heat[d][h])mine.heat[d][h]=other.heat[d][h];}}
 if(typeof other.first==="number"&&other.first<mine.first)mine.first=other.first;}catch(_){}return mine;};
-_NXS.save=function(){try{_NXS.data=_NXS.merge(_NXS.data);_NXDB.set(_NXS.KEY,JSON.stringify(_NXS.data));}catch(_){}};
+_NXS.save=function(){try{_NXS.data=_NXS.merge(_NXS.data);_NXS.data._at=Date.now();_NXDB.set(_NXS.KEY,JSON.stringify(_NXS.data));}catch(_){}};
 _NXS.scheduleSave=function(){_NXS.rev=(_NXS.rev||0)+1;if(_NXS.st)return;_NXS.st=setTimeout(function(){_NXS.st=null;_NXS.save();},4000);};
 _NXS.reset=function(){try{_NXDB.del(_NXS.KEY);}catch(_){}_NXS.data=_NXS.load();_NXS.save();};
 _NXS.getMe=function(){if(_NXS.me)return _NXS.me;try{var US=_NXcommon().store("UserStore");var u=US&&US.getCurrentUser&&US.getCurrentUser();if(u&&u.id)_NXS.me=u.id;}catch(_){}return _NXS.me;};
@@ -469,7 +506,7 @@ var _df=F.useState("");var dflt=_df[0];var setDflt=_df[1];
 var P=_NXpal;
 var LABELS={"nexium_stats_v1":"Statistiques","nexium_privacy_v1":"Confidentialité — réglages","nexium_privacy_stats_v1":"Confidentialité — compteurs","nexium_music_v1":"Musique — playlist","nexium_protect_v1":"Protect — réglages","nexium_protect_v1_stats":"Protect — menaces détectées","nexium_changelog_v1":"Changelog — cache","nexium_update_v1":"Mise à jour — état"};
 function wipeKey(k){try{
-if(k==="nexium_stats_v1"&&window._NXS&&_NXS.reset){_NXS.reset();return;}
+if(k==="nexium_stats_v1"&&window._NXS&&_NXS.reset){try{_NXDB.set(_NXS.KEY+"_wipe",String(Date.now()));}catch(_){}_NXS.reset();return;}
 if(k==="nexium_privacy_stats_v1"&&window._NXP&&_NXP.resetStats){_NXP.resetStats();return;}
 if(k==="nexium_privacy_v1"&&window._NXP){_NXP.cfg={blockTel:false,blockSentry:false,silentTyping:false,noAck:false,blockHarvest:false,stripTracking:false,blockAnalytics:false,blockErrors:false,blockPromotions:false,quiet:{}};if(_NXP.saveCfg)_NXP.saveCfg();return;}
 if(k==="nexium_protect_v1"&&window._NXPR){_NXPR.cfg={scanLinks:true,blockGrabbers:true,scamAlerts:true,warnAccounts:true,phishGuard:true,consoleGuard:true};if(_NXPR.saveCfg)_NXPR.saveCfg();if(_NXPR.notify)_NXPR.notify();return;}
@@ -477,7 +514,8 @@ if(k==="nexium_protect_v1_stats"&&window._NXPR){_NXPR.stats={scanned:0,blocked:0
 if(k==="nexium_music_v1"&&window._NXM){_NXM.cfg={tracks:[],vol:0.7,shuffle:false,repeat:false,popup:true,idx:0,px:null,py:null};_NXM.idx=0;if(_NXM.save)_NXM.save();if(_NXM.loadRemote)_NXM.loadRemote();if(_NXM.notify)_NXM.notify();return;}
 }catch(_){}try{_NXDB.del(k);}catch(_){}}
 function nxExportAll(){try{var obj={_nexium:1,at:Date.now(),data:{}};var ks=_NXDB.keys();for(var a=0;a<ks.length;a++){if(ks[a]&&ks[a].indexOf("nexium_")===0)obj.data[ks[a]]=_NXDB.get(ks[a]);}DiscordNative.clipboard.copy(JSON.stringify(obj));if(window._NXUP&&_NXUP.toast)_NXUP.toast("Réglages Nexium copiés dans le presse-papiers");}catch(_){}}
-function nxImportAll(){try{var raw=window.prompt("Colle ici la sauvegarde Nexium (JSON) :","");if(!raw)return;var obj=JSON.parse(raw);if(!obj||!obj.data||typeof obj.data!=="object"){window.alert("Sauvegarde invalide.");return;}var n=0;for(var k in obj.data){if(k.indexOf("nexium_")===0&&typeof obj.data[k]==="string"){_NXDB.set(k,obj.data[k]);n++;}}window.alert(n+" éléments restaurés. Redémarre Discord (Ctrl+R) pour appliquer.");}catch(e){window.alert("Import impossible : sauvegarde illisible.");}}
+function nxImportAll(){try{var raw=window.prompt("Colle ici la sauvegarde Nexium (JSON) :","");if(!raw)return;var obj=JSON.parse(raw);if(!obj||!obj.data||typeof obj.data!=="object"){window.alert("Sauvegarde invalide.");return;}var n=0;for(var k in obj.data){if(k.indexOf("nexium_")===0&&typeof obj.data[k]==="string"){_NXDB.set(k,obj.data[k]);n++;}}try{if(window._NXPR&&_NXPR.reload)_NXPR.reload();}catch(_){}
+window.alert(n+" éléments restaurés et appliqués immédiatement.");}catch(e){window.alert("Import impossible : sauvegarde illisible.");}}
 var keys=[];try{var _ak=_NXDB.keys();for(var a=0;a<_ak.length;a++){if(_ak[a]&&_ak[a].indexOf("nexium_")===0)keys.push(_ak[a]);}}catch(_){}
 var rows=keys.map(function(k){var sz=0;try{sz=(_NXDB.get(k)||"").length;}catch(_){}return{k:k,sz:sz,label:LABELS[k]||k};}).sort(function(x,y){return y.sz-x.sz;});
 var totalSz=rows.reduce(function(s,r){return s+r.sz;},0);
@@ -503,7 +541,7 @@ _NXfoot("localStorage · clés nexium_*")));
 
 var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="103";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="105";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -532,7 +570,7 @@ Promise.resolve(U.checkForUpdates?U.checkForUpdates():null).then(function(){if(U
 _NXUP.download=function(){try{_NXP.open(_NXUP.RAW_URL);}catch(_){}_NXUP.markUpdated();};
 _NXUP.openRepo=function(){try{_NXP.open(_NXUP.REPO);}catch(_){}};
 _NXUP.ignore=function(){_NXUP.markUpdated();};
-_NXUP.snoozeUntil=0;_NXUP.modalEl=null;
+_NXUP.snoozeUntil=0;try{_NXUP.snoozeUntil=parseInt((_NXUP.st&&_NXUP.st.snooze)||0,10)||0;}catch(_){}_NXUP.modalEl=null;
 _NXUP.hideModal=function(){try{if(_NXUP.modalEl&&_NXUP.modalEl.parentNode)_NXUP.modalEl.parentNode.removeChild(_NXUP.modalEl);}catch(_){}_NXUP.modalEl=null;};
 _NXUP.showModal=function(){try{
 if(_NXUP.modalEl)return;if(typeof document==="undefined"||!document.body)return;
@@ -547,12 +585,12 @@ card.innerHTML='<div style="position:absolute;top:-40px;right:-40px;width:180px;
 +(note?'<div style="position:relative;font-size:12px;color:#8a8a92;background:#0e0e10;border:1px solid #1b1b1f;border-radius:10px;padding:11px 13px;margin-bottom:20px;line-height:1.5;"><span style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#5b5b63;margin-bottom:3px;">Nouveauté</span>'+note.replace(/</g,"&lt;")+'</div>':'<div style="height:4px;"></div>');
 var row=document.createElement("div");row.style.cssText="position:relative;display:flex;gap:9px;";
 var later=document.createElement("div");later.style.cssText="flex:1;text-align:center;padding:12px;border-radius:12px;background:transparent;border:1px solid #26262b;color:#9a9aa0;font-size:13px;font-weight:600;cursor:pointer;";later.textContent="Plus tard";
-later.onclick=function(){_NXUP.snoozeUntil=Date.now()+1500000;_NXUP.hideModal();};
+later.onclick=function(){_NXUP.snoozeUntil=Date.now()+1500000;try{_NXUP.st.snooze=_NXUP.snoozeUntil;_NXUP.save();}catch(_){}_NXUP.hideModal();};
 var apply=document.createElement("div");apply.style.cssText="flex:1.6;text-align:center;padding:12px;border-radius:12px;background:#e8e8ea;color:#0a0a0a;font-size:13px;font-weight:800;cursor:pointer;";apply.textContent="Redémarrer pour appliquer";
 apply.onclick=function(){_NXUP.hideModal();_NXUP.relaunchApply();};
 row.appendChild(later);row.appendChild(apply);card.appendChild(row);
 ov.appendChild(card);
-ov.onclick=function(e){if(e.target===ov){_NXUP.snoozeUntil=Date.now()+1500000;_NXUP.hideModal();}};
+ov.onclick=function(e){if(e.target===ov){_NXUP.snoozeUntil=Date.now()+1500000;try{_NXUP.st.snooze=_NXUP.snoozeUntil;_NXUP.save();}catch(_){}_NXUP.hideModal();}};
 document.body.appendChild(ov);_NXUP.modalEl=ov;
 }catch(_){}};
 _NXUP.maybePrompt=function(){try{if(!_NXUP.available())return;if(_NXUP.modalEl)return;if(Date.now()<_NXUP.snoozeUntil)return;_NXUP.showModal();}catch(_){}};
@@ -730,8 +768,9 @@ var _NXPR=window._NXPR||(window._NXPR={});
 if(!_NXPR.boot){_NXPR.boot=true;_NXPR.KEY="nexium_protect_v1";
 _NXPR.cfg=(function(){var d;try{var raw=_NXDB.get(_NXPR.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};
 if(typeof d.scanLinks!=="boolean")d.scanLinks=true;if(typeof d.blockGrabbers!=="boolean")d.blockGrabbers=true;if(typeof d.scamAlerts!=="boolean")d.scamAlerts=true;if(typeof d.warnAccounts!=="boolean")d.warnAccounts=true;if(typeof d.phishGuard!=="boolean")d.phishGuard=true;if(typeof d.consoleGuard!=="boolean")d.consoleGuard=true;if(!Array.isArray(d.allow))d.allow=[];return d;})();
+_NXPR.reload=function(){try{var r=_NXDB.get(_NXPR.KEY);if(r)_NXPR.cfg=JSON.parse(r);var s=_NXDB.get(_NXPR.KEY+"_stats");if(s)_NXPR.stats=JSON.parse(s);_NXPR.notify();}catch(_){}};
 _NXPR.saveCfg=function(){try{_NXDB.set(_NXPR.KEY,JSON.stringify(_NXPR.cfg));}catch(_){}};_NXPR.saveCfg();
-_NXPR.stats=(function(){var d;try{var raw=_NXDB.get(_NXPR.KEY+"_stats");d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d)d={};if(typeof d.scanned!=="number")d.scanned=0;if(typeof d.blocked!=="number")d.blocked=0;if(typeof d.scams!=="number")d.scams=0;if(typeof d.accounts!=="number")d.accounts=0;if(!Array.isArray(d.recent))d.recent=[];return d;})();
+_NXPR.stats=(function(){var d;try{var raw=_NXDB.get(_NXPR.KEY+"_stats");d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d)d={};if(typeof d.scanned!=="number")d.scanned=0;if(typeof d.blocked!=="number")d.blocked=0;if(typeof d.scams!=="number")d.scams=0;if(typeof d.accounts!=="number")d.accounts=0;if(typeof d.safe!=="number")d.safe=0;if(!Array.isArray(d.recent))d.recent=[];return d;})();
 _NXPR.saveStats=function(){try{_NXDB.set(_NXPR.KEY+"_stats",JSON.stringify(_NXPR.stats));}catch(_){}};
 _NXPR.listeners=[];_NXPR.notify=function(){for(var a=0;a<_NXPR.listeners.length;a++){try{_NXPR.listeners[a]();}catch(_){}}};
 _NXPR.blockedPrompt=function(url,cl){try{
@@ -761,16 +800,52 @@ _NXPR.SHORTENERS=["bit.ly","tinyurl.com","cutt.ly","rebrand.ly","is.gd","t.co","
 _NXPR.SCAM=[/free\s*nitro/i,/nitro\s*(gift|free|giveaway)/i,/discord\s*nitro.*(claim|free|gift)/i,/steam\s*(gift|community).*(nitro|free)/i,/claim\s*your\s*(free|prize|nitro|gift)/i,/(you|u)\s*(won|win)\s/i,/airdrop/i,/double\s*your\s*(crypto|btc|eth|money)/i,/(free|1000)\s*(robux|vbucks|v-bucks)/i,/@everyone.*(free|nitro|gift|claim)/i,/gift.*discord.*\/nitro/i,/verify.*(wallet|seed|phrase)/i,/(login|connect).*(qr|scan).*(discord|token)/i];
 _NXPR.host=function(u){try{return new URL(u).host.toLowerCase().replace(/^www\./,"");}catch(_){return "";}};
 _NXPR.isAllowed=function(h){try{if(!h)return false;var L=_NXPR.cfg.allow||[];for(var a=0;a<L.length;a++){if(h===L[a]||h.indexOf("."+L[a])>=0)return true;}}catch(_){}return false;};
-_NXPR.allowHost=function(h){try{if(!h)return;if(!Array.isArray(_NXPR.cfg.allow))_NXPR.cfg.allow=[];if(_NXPR.cfg.allow.indexOf(h)<0)_NXPR.cfg.allow.push(h);_NXPR.saveCfg();_NXPR.notify();}catch(_){}};
-_NXPR.unallowHost=function(h){try{_NXPR.cfg.allow=(_NXPR.cfg.allow||[]).filter(function(x){return x!==h;});_NXPR.saveCfg();_NXPR.notify();}catch(_){}};
+_NXPR.allowHost=function(h){try{if(!h)return;if(!Array.isArray(_NXPR.cfg.allow))_NXPR.cfg.allow=[];if(_NXPR.cfg.allow.indexOf(h)<0)_NXPR.cfg.allow.push(h);_NXPR.cache=Object.create(null);_NXPR.cacheN=0;_NXPR.saveCfg();_NXPR.notify();}catch(_){}};
+_NXPR.unallowHost=function(h){try{_NXPR.cfg.allow=(_NXPR.cfg.allow||[]).filter(function(x){return x!==h;});_NXPR.cache=Object.create(null);_NXPR.cacheN=0;_NXPR.saveCfg();_NXPR.notify();}catch(_){}};
 _NXPR.removeThreat=function(idx){try{_NXPR.stats.recent.splice(idx,1);_NXPR.saveStats();_NXPR.notify();}catch(_){}};
 _NXPR.clearThreats=function(){try{_NXPR.stats.recent=[];_NXPR.saveStats();_NXPR.notify();}catch(_){}};
-_NXPR.classify=function(u){try{var h=_NXPR.host(u);if(!h)return null;if(_NXPR.isAllowed(h))return {kind:"ok",host:h,allowed:true};for(var a=0;a<_NXPR.GRABBERS.length;a++){if(h===_NXPR.GRABBERS[a]||h.indexOf("."+_NXPR.GRABBERS[a])>=0||h.indexOf(_NXPR.GRABBERS[a])>=0)return {kind:"grabber",host:h};}
-if(/discord/i.test(h)&&!/^(discord\.com|discord\.gg|discordapp\.com|discord\.media|discordstatus\.com|discord\.new|dis\.gd|support\.discord\.com|cdn\.discordapp\.com|media\.discordapp\.net)$/.test(h))return {kind:"phish",host:h};
-if(/(dlscord|discrod|discvrd|dlscordapp|discordgift|discordnitro|discord-nitro|steamcommunlty|steamcomunity|steamcommnity)/i.test(h))return {kind:"phish",host:h};
-if(/xn--/.test(h))return {kind:"punycode",host:h};
-for(var b=0;b<_NXPR.SHORTENERS.length;b++){if(h===_NXPR.SHORTENERS[b])return {kind:"short",host:h};}
-return {kind:"ok",host:h};}catch(_){return null;}};
+_NXPR.BLOCKLIST_URL="https://raw.githubusercontent.com/Omega-devj/blacklist-url-nexium-client/refs/heads/main/blocklist.txt";
+_NXPR.idxG=null;_NXPR.idxS=null;_NXPR.remote={n:0,at:0};
+_NXPR.buildIndex=function(){try{
+var g=Object.create(null),s=Object.create(null),a;
+for(a=0;a<_NXPR.GRABBERS.length;a++){var gd=String(_NXPR.GRABBERS[a]||"").toLowerCase();if(gd&&gd.indexOf(".")>0)g[gd]=1;else if(gd)g[gd]=2;}
+for(a=0;a<_NXPR.SHORTENERS.length;a++){var sd=String(_NXPR.SHORTENERS[a]||"").toLowerCase();if(sd)s[sd]=1;}
+var R=_NXPR.remoteList||[];for(a=0;a<R.length;a++){var rd=R[a];if(rd)g[rd]=1;}
+_NXPR.idxG=g;_NXPR.idxS=s;_NXPR.cache=Object.create(null);_NXPR.cacheN=0;
+}catch(_){_NXPR.idxG=Object.create(null);_NXPR.idxS=Object.create(null);}};
+_NXPR.hit=function(h,idx){try{var p=h;var guard=0;while(p&&guard<8){if(idx[p])return true;var k=p.indexOf(".");if(k<0)break;p=p.slice(k+1);guard++;}}catch(_){}return false;};
+_NXPR.loadRemote=function(force){try{
+if(!_NXPR.idxG)_NXPR.buildIndex();
+var cachedRaw=_NXDB.get("nexium_blocklist");
+if(cachedRaw&&!force){try{var cj=JSON.parse(cachedRaw);if(cj&&cj.list&&(Date.now()-cj.at)<21600000){_NXPR.remoteList=cj.list;_NXPR.remote={n:cj.list.length,at:cj.at};_NXPR.buildIndex();return;}}catch(_){}}
+fetch(_NXPR.BLOCKLIST_URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw 0;return r.text();}).then(function(t){
+var out=[],lines=String(t||"").split(/\r?\n/);
+for(var a=0;a<lines.length&&out.length<20000;a++){var L=lines[a].trim().toLowerCase();
+if(!L||L.charAt(0)==="#"||L.charAt(0)===";")continue;
+L=L.replace(/^https?:\/\//,"").replace(/^www\./,"").split("/")[0].split(":")[0].trim();
+if(L&&L.indexOf(".")>0&&L.length<120)out.push(L);}
+_NXPR.remoteList=out;_NXPR.remote={n:out.length,at:Date.now()};
+try{_NXDB.set("nexium_blocklist",JSON.stringify({at:Date.now(),list:out}));}catch(_){}
+_NXPR.buildIndex();_NXPR.notify();
+}).catch(function(){try{if(cachedRaw){var cj2=JSON.parse(cachedRaw);if(cj2&&cj2.list){_NXPR.remoteList=cj2.list;_NXPR.remote={n:cj2.list.length,at:cj2.at,stale:true};_NXPR.buildIndex();}}}catch(_){}});
+}catch(_){}};
+_NXPR.classify=function(u){try{
+if(!_NXPR.idxG)_NXPR.buildIndex();
+var h=_NXPR.host(u);if(!h)return null;
+var cc=_NXPR.cache[h];if(cc!==undefined)return cc;
+var res;
+if(_NXPR.isAllowed(h))res={kind:"ok",host:h,allowed:true};
+else if(_NXPR.hit(h,_NXPR.idxG))res={kind:"grabber",host:h};
+else if(h.indexOf("xn--")>=0)res={kind:"punycode",host:h};
+else if(_NXPR.RXFAKE.test(h))res={kind:"phish",host:h};
+else if(h.indexOf("discord")>=0&&!_NXPR.RXREAL.test(h))res={kind:"phish",host:h};
+else if(_NXPR.idxS[h])res={kind:"short",host:h};
+else res={kind:"ok",host:h};
+if(_NXPR.cacheN>800){_NXPR.cache=Object.create(null);_NXPR.cacheN=0;}
+_NXPR.cache[h]=res;_NXPR.cacheN++;
+return res;}catch(_){return null;}};
+_NXPR.RXREAL=/^(discord\.com|discord\.gg|discordapp\.com|discordapp\.net|discord\.media|discordstatus\.com|discord\.new|dis\.gd|support\.discord\.com|cdn\.discordapp\.com|media\.discordapp\.net|images-ext-\d+\.discordapp\.net)$/;
+_NXPR.RXFAKE=/(dlscord|discrod|discvrd|dlscordapp|discordgift|discordnitro|discord-nitro|discordapp-|steamcommunlty|steamcomunity|steamcommnity|steampowered-)/;
 _NXPR.threat=function(cl){return cl&&(cl.kind==="grabber"||cl.kind==="phish"||cl.kind==="punycode");};_NXPR.suspicious=function(cl){return cl&&(cl.kind==="short");};
 _NXPR.logThreat=function(kind,detail){try{_NXPR.stats.recent.unshift({k:kind,d:detail,t:Date.now()});if(_NXPR.stats.recent.length>25)_NXPR.stats.recent=_NXPR.stats.recent.slice(0,25);_NXPR.saveStats();_NXPR.notify();}catch(_){}};
 _NXPR.scanUrl=function(u,announce){if(!_NXPR.cfg.scanLinks)return {kind:"ok"};var cl=_NXPR.classify(u);if(!cl)return {kind:"ok"};_NXPR.stats.scanned++;if(_NXPR.threat(cl)){if((cl.kind==="grabber"&&_NXPR.cfg.blockGrabbers)||((cl.kind==="phish"||cl.kind==="punycode")&&_NXPR.cfg.phishGuard)){_NXPR.stats.blocked++;_NXPR.logThreat(cl.kind,cl.host);if(announce)_NXPR.toast("⚠️ Lien dangereux bloqué ("+(cl.kind==="grabber"?"logger d'IP":"hameçonnage")+") : "+cl.host,0);}}else if(_NXPR.suspicious(cl)&&_NXPR.cfg.scanLinks){_NXPR.logThreat("short",cl.host);if(announce)_NXPR.toast("⚠️ Lien raccourci (destination masquée) : "+cl.host,0);}_NXPR.saveStats();return cl;};
@@ -780,7 +855,132 @@ _NXPR.deepScan=function(u,cb){if(!_NXPR.cfg.scanLinks){cb&&cb({verdict:"off"});r
 try{fetch(u,{method:"GET",redirect:"follow",mode:"cors",cache:"no-store"}).then(function(r){var fin=(r&&r.url)||u;var fc=_NXPR.classify(fin);var host=_NXPR.host(fin);if(_NXPR.threat(fc)){_NXPR.finish(cb,{verdict:"danger",kind:fc.kind,host:host,resolved:(host!==(base&&base.host)?fin:null)});}else if(_NXPR.suspicious(base)&&host&&base&&host!==base.host){_NXPR.finish(cb,{verdict:"ok",kind:"ok",host:host,resolved:fin,wasShort:true});}else if(_NXPR.suspicious(base)||_NXPR.suspicious(fc)){_NXPR.finish(cb,{verdict:"warn",kind:"short",host:(base&&base.host)||host,resolved:(host!==(base&&base.host)?fin:null)});}else{_NXPR.finish(cb,{verdict:"ok",kind:"ok",host:host,resolved:(host!==(base&&base.host)?fin:null)});}}).catch(function(){if(_NXPR.suspicious(base))_NXPR.finish(cb,{verdict:"warn",kind:"short",host:base.host,resolved:null});else _NXPR.finish(cb,{verdict:(base&&base.kind==="ok")?"ok":"warn",kind:(base&&base.kind)||"unknown",host:base&&base.host,resolved:null});});}
 catch(_){if(_NXPR.suspicious(base))_NXPR.finish(cb,{verdict:"warn",kind:"short",host:base.host,resolved:null});else _NXPR.finish(cb,{verdict:"ok",kind:"ok",host:base&&base.host,resolved:null});}};
 _NXPR.scanText=function(txt){try{if(!txt)return;var s=String(txt);if(s.length>4000)s=s.slice(0,4000);var low=s.toLowerCase();var hasLink=low.indexOf("http")>=0;var hasBait=/nitro|gift|free|gratuit|claim|airdrop|crypto|robux|vbucks|steam|verify|qr|cadeau|gagn/.test(low);if(!hasLink&&!hasBait)return;var urls=hasLink?(s.match(/https?:\/\/[^\s<>"')]+/gi)||[]):[];for(var a=0;a<urls.length;a++)_NXPR.scanUrl(urls[a],true);if(_NXPR.cfg.scamAlerts&&hasBait){for(var b=0;b<_NXPR.SCAM.length;b++){if(_NXPR.SCAM[b].test(s)){_NXPR.stats.scams++;_NXPR.logThreat("scam",s.slice(0,60));_NXPR.toast("⚠️ Message d'arnaque potentiel détecté.",0);break;}}}}catch(_){}};
-_NXPR.onMsg=function(e){try{if(!e||!e.message)return;var m=e.message;var me=null;try{me=_NXcommon().store("UserStore").getCurrentUser();}catch(_){}if(me&&m.author&&m.author.id===me.id)return;_NXPR.scanText(m.content||"");if(_NXPR.cfg.warnAccounts&&m.author&&m.author.id){try{var CS=_NXcommon().store("ChannelStore");var ch=CS&&CS.getChannel&&CS.getChannel(m.channel_id);if(ch&&(ch.type===1||ch.type===3)){var created=(BigInt(m.author.id)>>22n)+1420070400000n;var ageD=(Date.now()-Number(created))/86400000;if(ageD<7){_NXPR.stats.accounts++;_NXPR.saveStats();_NXPR.notify();}}}catch(_){}}}catch(_){}};
+_NXPR.onMsg=function(e){try{
+if(!e||!e.message)return;var m=e.message;
+var me=null;try{me=_NXcommon().store("UserStore").getCurrentUser();}catch(_){}
+var mine=!!(me&&m.author&&m.author.id===me.id);
+var isDM=false;try{var CS=_NXcommon().store("ChannelStore");var ch=CS&&CS.getChannel&&CS.getChannel(m.channel_id);isDM=!!(ch&&(ch.type===1||ch.type===3));}catch(_){}
+var content=m.content||"";
+_NXPR.scanSecrets(content,mine);
+if(mine)return;
+_NXPR.scanText(content);
+_NXPR.scanAttachments(m,isDM);
+if(_NXPR.cfg.warnAccounts&&isDM&&m.author&&m.author.id){try{
+var created=(BigInt(m.author.id)>>22n)+1420070400000n;
+var ageD=Math.floor((Date.now()-Number(created))/86400000);
+if(ageD<7&&ageD>=0)_NXPR.warnAccount(m.author.id,ageD);
+}catch(_){}}
+}catch(_){}};
+_NXPR.anchorOf=function(t){try{var d=0;while(t&&d<8){if(t.tagName==="A"&&(t.href||(t.getAttribute&&t.getAttribute("href"))))return t;t=t.parentElement;d++;}}catch(_){}return null;};
+_NXPR.hrefOf=function(a){try{var h=(a&&(a.href||a.getAttribute("href")))||"";h=String(h);return /^https?:/i.test(h)?h:"";}catch(_){return "";}};
+_NXPR.blocksKind=function(cl){if(!cl)return false;if(cl.kind==="grabber")return !!_NXPR.cfg.blockGrabbers;if(cl.kind==="phish"||cl.kind==="punycode")return !!_NXPR.cfg.phishGuard;return false;};
+_NXPR.bumpSafe=function(){try{_NXPR.stats.safe=(_NXPR.stats.safe||0)+1;if(_NXPR._st)return;_NXPR._st=setTimeout(function(){_NXPR._st=null;_NXPR.saveStats();_NXPR.notify();},5000);}catch(_){}};
+_NXPR.onClickCapture=function(e){try{
+if(!_NXPR.cfg.scanLinks)return;
+var a=_NXPR.anchorOf(e&&e.target);if(!a)return;
+var href=_NXPR.hrefOf(a);if(!href)return;
+var cl=_NXPR.classify(href);if(!cl)return;
+if(_NXPR.threat(cl)&&_NXPR.blocksKind(cl)){
+try{e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();}catch(_){}
+_NXPR.stats.scanned=(_NXPR.stats.scanned||0)+1;_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat(cl.kind,cl.host);_NXPR.saveStats();
+_NXPR.blockedPrompt(href,cl);return;}
+_NXPR.stats.scanned=(_NXPR.stats.scanned||0)+1;
+if(cl.kind==="short"){_NXPR.bumpSafe();_NXPR.toast("Lien raccourci : destination masquee ("+cl.host+")",1);return;}
+_NXPR.bumpSafe();
+}catch(_){}};
+_NXPR.tipEl=null;_NXPR.tipFor=null;
+_NXPR.hideTip=function(){try{if(_NXPR.tipEl&&_NXPR.tipEl.parentNode)_NXPR.tipEl.parentNode.removeChild(_NXPR.tipEl);}catch(_){}_NXPR.tipEl=null;_NXPR.tipFor=null;};
+_NXPR.showTip=function(a,href,cl,dest){try{
+if(_NXPR.tipFor===href)return;_NXPR.hideTip();_NXPR.tipFor=href;
+var danger=_NXPR.threat(cl),warn=(cl&&cl.kind==="short");
+var col=danger?"#d6484a":(warn?"#faa61a":"#3ba55d");
+var label=danger?(cl.kind==="grabber"?"Logger d IP - dangereux":(cl.kind==="punycode"?"Domaine trompeur":"Hameconnage")):(warn?"Lien raccourci - destination masquee":"Domaine sur");
+var d=document.createElement("div");d.id="nx-link-tip";
+d.style.cssText="position:fixed;z-index:99998;pointer-events:none;max-width:340px;background:rgba(12,12,14,.97);border:1px solid "+col+"55;border-left:3px solid "+col+";border-radius:10px;padding:9px 12px;box-shadow:0 10px 30px rgba(0,0,0,.5);font-size:11.5px;line-height:1.45;";
+var esc=function(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+d.innerHTML='<div style="color:'+col+';font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">'+esc(label)+'</div><div style="color:#c8c8ce;font-family:monospace;word-break:break-all;">'+esc((cl&&cl.host)||"")+'</div>'+(dest?'<div style="color:#8a8a92;font-size:10px;margin-top:4px;word-break:break-all;">→ '+esc(String(dest).slice(0,120))+'</div>':'');
+var r=null;try{r=a.getBoundingClientRect();}catch(_){}
+var top=(r?r.top:60),left=(r?r.left:60);
+d.style.top=Math.max(8,top-52)+"px";d.style.left=Math.max(8,left)+"px";
+if(document.body)document.body.appendChild(d);_NXPR.tipEl=d;
+}catch(_){}};
+_NXPR.onOver=function(e){try{
+if(!_NXPR.cfg.scanLinks)return;
+var a=_NXPR.anchorOf(e&&e.target);
+if(!a){if(_NXPR.tipEl)_NXPR.hideTip();return;}
+var href=_NXPR.hrefOf(a);if(!href){_NXPR.hideTip();return;}
+var cl=_NXPR.classify(href);if(!cl||!cl.host)return;
+_NXPR.showTip(a,href,cl);
+if(cl.kind==="short")_NXPR.resolveTip(a,href,cl);
+}catch(_){}};
+_NXPR.RXTOKEN=/(mfa\.[\w-]{20,})|([\w-]{23,28}\.[\w-]{6}\.[\w-]{27,38})/;
+_NXPR.RXHOOK=/discord(?:app)?\.com\/api\/(?:v\d+\/)?webhooks\//i;
+_NXPR.RXSELFXSS=/(localStorage(?:\.getItem)?\(?["']?token)|(document\.body\.appendChild\(document\.createElement\(["']iframe)|(webpackChunkdiscord_app)|(\.push\(\[\[.*\],\{.*:\(?function)/i;
+_NXPR.BADEXT=["exe","scr","bat","cmd","com","pif","vbs","vbe","js","jse","jar","msi","ps1","hta","cpl","reg","lnk","apk","dll","sh"];
+_NXPR.ARCHEXT=["zip","rar","7z"];
+_NXPR.extOf=function(n){try{var m=String(n||"").toLowerCase().match(/\.([a-z0-9]{1,5})$/);return m?m[1]:"";}catch(_){return "";}};
+_NXPR.scanAttachments=function(m,isDM){try{
+if(!_NXPR.cfg.scanLinks)return;var A=m&&m.attachments;if(!A||!A.length)return;
+for(var a=0;a<A.length;a++){var nm=A[a]&&(A[a].filename||A[a].name)||"";var ex=_NXPR.extOf(nm);
+if(_NXPR.BADEXT.indexOf(ex)>=0){_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat("file",nm);_NXPR.saveStats();
+_NXPR.toast("⚠️ Fichier potentiellement dangereux reçu : "+nm+" — n'ouvre pas ce fichier.",0);}
+else if(isDM&&_NXPR.ARCHEXT.indexOf(ex)>=0){_NXPR.logThreat("file",nm);_NXPR.toast("Archive reçue en message privé ("+nm+") — prudence avant d'ouvrir.",1);}}
+}catch(_){}};
+_NXPR.scanSecrets=function(txt,mine){try{
+if(!_NXPR.cfg.scamAlerts)return;var s=String(txt||"");if(s.length<20)return;
+if(_NXPR.RXHOOK.test(s)){_NXPR.logThreat("secret",mine?"webhook publié par toi":"webhook dans un message");
+_NXPR.toast(mine?"⚠️ Tu viens de publier une URL de webhook Discord — supprime le message et régénère-le.":"⚠️ Ce message contient une URL de webhook Discord.",0);return;}
+if(_NXPR.RXTOKEN.test(s)){_NXPR.logThreat("secret",mine?"jeton publié par toi":"jeton dans un message");
+_NXPR.toast(mine?"⚠️ Ce message ressemble à un jeton Discord. Supprime-le et change ton mot de passe.":"⚠️ Ce message contient ce qui ressemble à un jeton de compte.",0);return;}
+if(_NXPR.cfg.consoleGuard&&_NXPR.RXSELFXSS.test(s)){_NXPR.logThreat("selfxss","code à coller dans la console");
+_NXPR.toast("⚠️ Ce message contient du code à coller dans la console : arnaque classique de vol de compte. Ne le colle jamais.",0);}
+}catch(_){}};
+_NXPR.warnedUsers=Object.create(null);
+_NXPR.warnAccount=function(uid,days){try{
+if(_NXPR.warnedUsers[uid])return;_NXPR.warnedUsers[uid]=1;
+_NXPR.stats.accounts=(_NXPR.stats.accounts||0)+1;_NXPR.logThreat("account","compte créé il y a "+days+" j");_NXPR.saveStats();
+_NXPR.toast("⚠️ Message privé d'un compte très récent ("+days+" jour"+(days>1?"s":"")+"). Méfie-toi des demandes inhabituelles.",0);
+}catch(_){}};
+_NXPR.consoleWarn=function(){try{
+if(!_NXPR.cfg.consoleGuard||_NXPR._cw)return;_NXPR._cw=true;
+var big="font-size:38px;font-weight:800;color:#d6484a;-webkit-text-stroke:1px #000;";
+var small="font-size:15px;color:#f4f4f5;";
+console.log("%cSTOP !",big);
+console.log("%cSi quelqu'un t'a demandé de coller quelque chose ici, c'est une arnaque : tu lui donnerais l'accès à ton compte Discord.",small);
+console.log("%cNexium Protect surveille cette console. Ne colle jamais de code que tu ne comprends pas.",small);
+}catch(_){}};
+_NXPR.onPaste=function(e){try{
+if(!_NXPR.cfg.consoleGuard)return;
+var t="";try{t=(e.clipboardData||window.clipboardData).getData("text")||"";}catch(_){}
+if(!t||t.length<40)return;
+if(_NXPR.RXSELFXSS.test(t)||_NXPR.RXTOKEN.test(t)||_NXPR.RXHOOK.test(t)){
+_NXPR.logThreat("selfxss","collage suspect intercepté");
+_NXPR.toast("⚠️ Le contenu que tu viens de coller contient du code ou un secret sensible. Vérifie avant d'envoyer.",0);}
+}catch(_){}};
+_NXPR.resolveTip=function(a,href,cl){try{
+if(!cl||cl.kind!=="short")return;
+_NXPR.rcache=_NXPR.rcache||Object.create(null);
+var known=_NXPR.rcache[href];
+if(known){_NXPR.showTip(a,href,known.cl,known.dest);return;}
+if(_NXPR._resolving===href)return;_NXPR._resolving=href;
+_NXPR.deepScan(href,function(r){try{_NXPR._resolving=null;
+if(!r||r.verdict==="off")return;
+var kind=r.verdict==="danger"?(r.kind||"grabber"):(r.verdict==="warn"?"short":"ok");
+var ncl={kind:kind,host:(r.host||cl.host)};
+_NXPR.rcache[href]={cl:ncl,dest:r.resolved||null};
+if(_NXPR.tipFor===href){_NXPR.tipFor=null;_NXPR.showTip(a,href,ncl,r.resolved||null);}
+}catch(_){}});
+}catch(_){}};
+_NXPR.wireDom=function(){try{
+if(_NXPR._dom)return;_NXPR._dom=true;
+document.addEventListener("click",_NXPR.onClickCapture,true);
+document.addEventListener("auxclick",_NXPR.onClickCapture,true);
+document.addEventListener("paste",_NXPR.onPaste,true);
+document.addEventListener("mouseover",_NXPR.onOver,{capture:true,passive:true});
+document.addEventListener("mouseout",function(e){try{if(!_NXPR.anchorOf(e&&e.relatedTarget))_NXPR.hideTip();}catch(_){}},{capture:true,passive:true});
+}catch(_){}};
+try{_NXPR.wireDom();}catch(_){}
+try{setTimeout(function(){_NXPR.consoleWarn();},2500);setTimeout(function(){_NXPR.loadRemote();},4000);setInterval(function(){_NXPR.loadRemote(true);},21600000);}catch(_){}
 _NXPR.wire=function(){try{var C=_NXcommon();var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));if(!FX||!FX.subscribe){_NXPR.tries=(_NXPR.tries||0)+1;if(_NXPR.tries<25)setTimeout(_NXPR.wire,1500);return;}FX.subscribe("MESSAGE_CREATE",_NXPR.onMsg);}catch(_){}};
 _NXPR.wire();
 }
@@ -808,7 +1008,7 @@ i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"20px
 i("div",{style:{flexShrink:0,width:"88px",height:"88px",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",background:"conic-gradient("+scol+" "+(score*3.6)+"deg, #1a1a1e 0deg)"}},i("div",{style:{width:"70px",height:"70px",borderRadius:"50%",background:"#0b0b0c",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}},i("svg",{viewBox:"0 0 24 24",width:26,height:26,fill:scol},i("path",{d:"M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"})))),
 i("div",{style:{flex:1,minWidth:0}},i("div",{style:{fontSize:"10px",textTransform:"uppercase",letterSpacing:".14em",color:P.faint,fontWeight:"700"}},"Niveau de protection"),i("div",{style:{fontFamily:_NXf.disp,fontSize:"22px",fontWeight:"800",color:scol,letterSpacing:"-.02em",marginTop:"3px"}},sclabel),i("div",{style:{fontSize:"12px",color:P.sub,marginTop:"6px",lineHeight:"1.5"}},active+" protections actives sur 6"))))
 ,
-_NXcard(_NXstrip([{v:_NXn(st.blocked||0),label:"Menaces bloquées",color:"#d6aeae"},{v:_NXn(st.scams||0),label:"Arnaques détectées",color:"#faa61a"},{v:_NXn(st.scanned||0),label:"Liens analysés"},{v:_NXn(st.accounts||0),label:"Comptes suspects"}]),{pad:"20px 18px",mb:12}),
+_NXcard(_NXstrip([{v:_NXn(st.blocked||0),label:"Menaces bloquées",color:"#d6aeae"},{v:_NXn(st.safe||0),label:"Liens sûrs vérifiés",color:"#8fd19e"},{v:_NXn(st.scanned||0),label:"Liens analysés"},{v:_NXn(st.scams||0),label:"Arnaques",color:"#faa61a"}]),{pad:"20px 18px",mb:12}),
 i("div",{style:{position:"relative",overflow:"hidden",borderRadius:"18px",border:"1px solid "+P.line,background:"linear-gradient(160deg,#101012,#0a0a0b)",padding:"20px",marginBottom:"12px"}},
 i("div",{style:{fontSize:"11px",fontWeight:"800",textTransform:"uppercase",letterSpacing:".1em",color:P.dim,marginBottom:"4px"}},"Vérificateur de lien"),
 i("div",{style:{fontSize:"12px",color:P.dim,marginBottom:"13px",lineHeight:"1.5"}},"Colle un lien suspect : Nexium l'analyse et tente de démasquer sa vraie destination."),
@@ -832,7 +1032,7 @@ ctrl("M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-
 ctrl("M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z","Vigilance comptes suspects","Signale les MP venant de comptes très récents (usurpateurs, faux profils).",cfg.warnAccounts,tog("warnAccounts")),
 ctrl("M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z","Protection console (anti-self-XSS)","Avertit contre les arnaques « colle ce code dans la console » qui volent ton compte.",cfg.consoleGuard,tog("consoleGuard"))),{mb:12}),
 st.recent&&st.recent.length?_NXcard(i("div",null,
-_NXch("Menaces récentes",null,i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){if(window.confirm("Vider le journal des menaces ?")){_NXPR.clearThreats();force();}},style:{fontSize:"11px",color:P.dim,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"8px"}},"Tout vider")),
+_NXch("Menaces récentes",null,i("div",{style:{display:"flex",gap:"7px"}},i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{var L=(st.recent||[]).map(function(r){return new Date(r.t).toISOString()+" | "+kindLabel(r.k)+" | "+(r.d||"");}).join("\n");DiscordNative.clipboard.copy(L||"(journal vide)");_NXPR.toast("Journal copié dans le presse-papiers",1);}catch(_){}},style:{fontSize:"11px",color:P.dim,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"8px"}},"Exporter"),i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){if(window.confirm("Vider le journal des menaces ?")){_NXPR.clearThreats();force();}},style:{fontSize:"11px",color:P.dim,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"8px"}},"Tout vider"))),
 i("input",{value:flt,onChange:function(e){setFlt(e.target.value);},placeholder:"Filtrer (domaine, type…)",spellCheck:false,style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,borderRadius:"10px",padding:"9px 12px",color:P.txt,fontSize:"12px",fontFamily:_NXf.mono,outline:"none",marginBottom:"10px"}}),
 (function(){var q=(flt||"").toLowerCase();var list=st.recent.map(function(r,idx){return {r:r,idx:idx};}).filter(function(o){if(!q)return true;return (kindLabel(o.r.k)+" "+(o.r.d||"")).toLowerCase().indexOf(q)>=0;});
 if(!list.length)return i("div",{style:{fontSize:"12px",color:P.dim,padding:"8px 2px"}},"Aucune menace ne correspond au filtre.");
@@ -843,6 +1043,12 @@ i("div",{style:{flex:1,minWidth:0}},i("div",{style:{fontSize:"12px",fontWeight:"
 (r.k!=="scam"&&host)?i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.allowHost(host);force();},title:"Autoriser ce domaine",style:{flexShrink:0,fontSize:"10px",fontWeight:"700",color:P.sub,cursor:"pointer",padding:"4px 9px",border:"1px solid "+P.line,borderRadius:"7px"}},"Autoriser"):null,
 i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.removeThreat(o.idx);force();},title:"Supprimer",style:{flexShrink:0,color:P.faint,cursor:"pointer",padding:"3px",lineHeight:1}},i("svg",{viewBox:"0 0 24 24",width:14,height:14,fill:"currentColor"},i("path",{d:"M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"}))));}));})()),{mb:12}):null,
 (cfg.allow&&cfg.allow.length)?_NXcard(i("div",null,_NXch("Domaines autorisés","Ces domaines ne seront plus signalés."),i("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px"}},cfg.allow.map(function(h,k){return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"7px",padding:"6px 10px",background:P.inset,border:"1px solid "+P.line,borderRadius:"99px"}},i("span",{style:{fontSize:"11px",color:P.sub,fontFamily:_NXf.mono}},h),i("span",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.unallowHost(h);force();},title:"Retirer",style:{cursor:"pointer",color:P.faint,fontSize:"13px",lineHeight:1}},"\u00d7"));}))),{mb:12}):null,
+_NXcard(i("div",null,_NXch("Base de menaces","Liste de domaines dangereux mise à jour depuis le dépôt Nexium."),
+i("div",{style:{display:"flex",alignItems:"center",gap:"12px",flexWrap:"wrap"}},
+i("div",{style:{flex:1,minWidth:"160px"}},
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"22px",fontWeight:"800",color:P.txt,letterSpacing:"-.03em"}},_NXn((_NXPR.remote&&_NXPR.remote.n)||0)),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"2px"}},"domaines chargés"+((_NXPR.remote&&_NXPR.remote.at)?(" · "+new Date(_NXPR.remote.at).toLocaleDateString()):" · liste locale uniquement")+((_NXPR.remote&&_NXPR.remote.stale)?" (hors ligne)":""))),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.loadRemote(true);_NXPR.toast("Mise à jour de la liste…",1);},style:{flexShrink:0,padding:"9px 16px",borderRadius:"10px",border:"1px solid "+P.line,color:P.sub,fontSize:"12px",fontWeight:"700",cursor:"pointer"}},"Actualiser"))),{mb:12}),
 _NXcard(i("div",null,i("div",{style:{fontSize:"11px",fontWeight:"700",textTransform:"uppercase",letterSpacing:".1em",color:P.dim,marginBottom:"10px"}},"Conseils de sécurité"),
 ["Ne colle jamais de code dans la console Discord (F12) — c'est le piège n°1 pour voler un compte.","Ne scanne jamais un QR code de connexion envoyé par un inconnu.","Un « Nitro gratuit » par MP est toujours une arnaque.","Vérifie toujours le domaine exact d'un lien avant de te connecter."].map(function(t,k){return i("div",{key:k,style:{display:"flex",gap:"10px",alignItems:"flex-start",marginBottom:"8px"}},i("div",{style:{color:"#3ba55d",flexShrink:0,marginTop:"1px"}},i("svg",{viewBox:"0 0 24 24",width:15,height:15,fill:"currentColor"},i("path",{d:"M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"}))),i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:"1.55"}},t));})),{mb:0}),
 _NXfoot("Nexium Protect · analyse 100% locale, aucune donnée envoyée")));
@@ -855,6 +1061,107 @@ _NXlogin.mount=function(){try{if(!_NXlogin.isLogin()){_NXlogin.unmount();return;
 _NXlogin.unmount=function(){try{["nx-welcome","nx-login-glow"].forEach(function(id){var e=document.getElementById(id);if(e&&e.parentNode)e.parentNode.removeChild(e);});}catch(_){}};
 _NXlogin.tick=function(){try{_NXlogin.mount();}catch(_){}};
 try{setTimeout(_NXlogin.tick,400);setTimeout(_NXlogin.tick,1200);_NXlogin.iv=setInterval(_NXlogin.tick,2000);}catch(_){}
+}
+var _NXWelcome=window._NXWelcome||(window._NXWelcome={});
+if(!_NXWelcome.boot){_NXWelcome.boot=true;
+_NXWelcome.KEY="nexium_onboarded";
+_NXWelcome.close=function(){try{var e=document.getElementById("nx-onboard");if(e&&e.parentNode)e.parentNode.removeChild(e);}catch(_){}};
+_NXWelcome.show=function(){try{
+if(document.getElementById("nx-onboard"))return;var P=_NXpal;
+var ov=document.createElement("div");ov.id="nx-onboard";
+ov.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,"+(P.light?".3":".65")+");backdrop-filter:blur(7px);";
+var card=document.createElement("div");
+card.style.cssText="width:520px;max-width:calc(100vw - 40px);max-height:calc(100vh - 80px);overflow-y:auto;background:"+(P.light?"#ffffff":"linear-gradient(168deg,#141416,#0b0b0c)")+";border:1px solid "+P.line+";border-radius:22px;padding:28px;box-shadow:0 40px 100px rgba(0,0,0,.5);";
+var rows=[["Protect","Bloque les liens piégés, les loggers d IP et les arnaques, en temps réel."],["Privacy","Coupe la télémétrie et mesure ton niveau d anonymat."],["Stats","Tes statistiques d usage, en local et pour toi seul."],["Music","Un lecteur intégré avec la playlist du projet."],["Réseau & Données","Latence, stabilité, et contrôle total de ce qui est stocké."]];
+var html='<div style="font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:'+P.faint+';margin-bottom:9px;">Bienvenue</div>'
++'<div style="font-size:26px;font-weight:800;letter-spacing:-.03em;color:'+P.txt+';margin-bottom:10px;">Nexium est installé</div>'
++'<div style="font-size:13px;color:'+P.sub+';line-height:1.6;margin-bottom:20px;">Voici ce que tu trouveras dans les réglages Discord, section Nexium.</div>';
+for(var a=0;a<rows.length;a++){
+html+='<div style="display:flex;gap:12px;margin-bottom:13px;"><div style="width:6px;height:6px;border-radius:50%;background:'+P.acc+';margin-top:7px;flex-shrink:0;"></div>'
++'<div><div style="font-size:14px;font-weight:700;color:'+P.txt+';">'+rows[a][0]+'</div>'
++'<div style="font-size:12.5px;color:'+P.sub+';line-height:1.55;margin-top:2px;">'+rows[a][1]+'</div></div></div>';}
+html+='<div style="margin-top:18px;padding:12px 14px;border-radius:12px;background:'+(P.light?"#f6f6f7":"#0e0e10")+';border:1px solid '+P.line+';font-size:12.5px;color:'+P.sub+';line-height:1.55;">Astuce : appuie sur <b style="color:'+P.txt+';">Ctrl + Maj + N</b> à tout moment pour ouvrir la recherche rapide Nexium.</div>';
+card.innerHTML=html;
+var btn=document.createElement("div");btn.className="nx-fx";btn.setAttribute("role","button");btn.setAttribute("tabindex","0");
+btn.style.cssText="margin-top:20px;text-align:center;padding:13px;border-radius:12px;background:"+P.acc+";color:"+(P.light?"#ffffff":"#0a0a0a")+";font-size:14px;font-weight:800;cursor:pointer;";
+btn.textContent="Commencer";
+btn.onclick=function(){try{_NXDB.set(_NXWelcome.KEY,"1");}catch(_){}_NXWelcome.close();};
+btn.onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();btn.onclick();}};
+card.appendChild(btn);ov.appendChild(card);
+ov.onclick=function(e){if(e.target===ov){try{_NXDB.set(_NXWelcome.KEY,"1");}catch(_){}_NXWelcome.close();}};
+if(document.body)document.body.appendChild(ov);
+}catch(_){}};
+_NXWelcome.maybe=function(){try{if(_NXDB.get(_NXWelcome.KEY))return;setTimeout(function(){_NXWelcome.show();},3500);}catch(_){}};
+try{_NXWelcome.maybe();}catch(_){}
+}
+var _NXCP=window._NXCP||(window._NXCP={});
+if(!_NXCP.boot){_NXCP.boot=true;
+_NXCP.el=null;_NXCP.q="";_NXCP.sel=0;
+_NXCP.goto=function(key){try{
+var W=window.Vencord&&Vencord.Webpack;
+var cands=["open","setSection","openUserSettings"];
+for(var a=0;a<cands.length;a++){try{var m=W&&W.findByProps&&W.findByProps(cands[a]);
+if(m&&typeof m[cands[a]]==="function"){m[cands[a]](key);return true;}}catch(_){}}
+}catch(_){}return false;};
+_NXCP.items=function(){
+var L=[];
+var pages=[["equicord_protect","Nexium Protect","Sécurité, liens, menaces"],["equicord_privacy","Nexium Privacy","Télémétrie et anonymat"],["equicord_stats","Nexium Stats","Statistiques d'usage"],["equicord_music","Nexium Music","Lecteur et playlist"],["equicord_network","Nexium Réseau","Latence et stabilité"],["equicord_data","Nexium Données","Stockage, export, import"],["equicord_updater","Nexium Mise à jour","Version et journal"],["equicord_team","Nexium Team","L'équipe"],["equicord_sponsor","Nexium Sponsor","Partenariat"],["equicord_changelog","Changelog","Notes de version"]];
+for(var a=0;a<pages.length;a++){(function(p){L.push({t:p[1],d:p[2],g:"Pages",run:function(){if(!_NXCP.goto(p[0]))_NXPR.toast("Ouvre les réglages Discord puis « "+p[1]+" »",1);}});})(pages[a]);}
+try{var T=[["scanLinks","Scanner de liens"],["blockGrabbers","Anti-doxxing / IP"],["phishGuard","Anti-hameçonnage"],["scamAlerts","Alertes anti-arnaque"],["warnAccounts","Vigilance comptes récents"],["consoleGuard","Protection console"]];
+for(var b=0;b<T.length;b++){(function(k,lab){L.push({t:(_NXPR.cfg[k]?"Désactiver ":"Activer ")+lab,d:"Nexium Protect",g:"Protections",run:function(){_NXPR.cfg[k]=!_NXPR.cfg[k];_NXPR.saveCfg();_NXPR.notify();_NXPR.toast(lab+(_NXPR.cfg[k]?" activé":" désactivé"),1);}});})(T[b][0],T[b][1]);}}catch(_){}
+L.push({t:"Vérifier les mises à jour",d:"Interroge le dépôt maintenant",g:"Actions",run:function(){try{_NXUP.check();_NXPR.toast("Vérification en cours…",1);}catch(_){}}});
+L.push({t:"Exporter mes réglages Nexium",d:"Copie dans le presse-papiers",g:"Actions",run:function(){try{var o={_nexium:1,at:Date.now(),data:{}};var ks=_NXDB.keys();for(var a=0;a<ks.length;a++){if(ks[a].indexOf("nexium_")===0)o.data[ks[a]]=_NXDB.get(ks[a]);}DiscordNative.clipboard.copy(JSON.stringify(o));_NXPR.toast("Réglages copiés",1);}catch(_){}}});
+L.push({t:"Recharger la liste de menaces",d:"Met à jour la protection des liens",g:"Actions",run:function(){try{_NXPR.loadRemote(true);_NXPR.toast("Liste de menaces en cours de mise à jour…",1);}catch(_){}}});
+L.push({t:"Redémarrer Discord",d:"Redémarrage complet",g:"Actions",run:function(){try{DiscordNative.processUtils.restart();}catch(_){}}});
+return L;};
+_NXCP.close=function(){try{if(_NXCP.el&&_NXCP.el.parentNode)_NXCP.el.parentNode.removeChild(_NXCP.el);}catch(_){}_NXCP.el=null;_NXCP.q="";_NXCP.sel=0;};
+_NXCP.filtered=function(){var q=(_NXCP.q||"").toLowerCase().trim();var all=_NXCP.items();if(!q)return all.slice(0,9);var out=[];for(var a=0;a<all.length&&out.length<9;a++){var it=all[a];if((it.t+" "+it.d+" "+it.g).toLowerCase().indexOf(q)>=0)out.push(it);}return out;};
+_NXCP.render=function(){try{
+if(!_NXCP.el)return;var P=_NXpal;var list=_NXCP.filtered();
+if(_NXCP.sel>=list.length)_NXCP.sel=Math.max(0,list.length-1);
+var box=_NXCP.el.querySelector?_NXCP.el.querySelector("#nx-cp-list"):null;
+if(!box)return;var esc=function(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+var html="";
+if(!list.length)html='<div style="padding:18px;text-align:center;color:'+P.dim+';font-size:13px;">Aucun résultat</div>';
+for(var a=0;a<list.length;a++){var it=list[a];var on=a===_NXCP.sel;
+html+='<div data-i="'+a+'" style="display:flex;align-items:center;gap:11px;padding:10px 14px;cursor:pointer;background:'+(on?(P.light?"#eceef1":"#17171a"):"transparent")+';border-left:2px solid '+(on?P.acc:"transparent")+';">'
++'<div style="flex:1;min-width:0;"><div style="font-size:13.5px;font-weight:600;color:'+P.txt+';">'+esc(it.t)+'</div>'
++'<div style="font-size:11px;color:'+P.dim+';margin-top:1px;">'+esc(it.d)+'</div></div>'
++'<div style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:'+P.faint+';flex-shrink:0;">'+esc(it.g)+'</div></div>';}
+box.innerHTML=html;
+}catch(_){}};
+_NXCP.open=function(){try{
+if(_NXCP.el){_NXCP.close();return;}
+var P=_NXpal;
+var ov=document.createElement("div");ov.id="nx-command-palette";
+ov.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding-top:14vh;background:rgba(0,0,0,"+(P.light?".28":".55")+");backdrop-filter:blur(5px);";
+var card=document.createElement("div");
+card.style.cssText="width:560px;max-width:calc(100vw - 40px);background:"+(P.light?"#ffffff":"linear-gradient(168deg,#141416,#0b0b0c)")+";border:1px solid "+P.line+";border-radius:16px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,"+(P.light?".22":".6")+");";
+var top=document.createElement("div");top.style.cssText="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid "+P.line+";";
+top.innerHTML='<span style="font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:'+P.faint+';">Nexium</span>';
+var inp=document.createElement("input");
+inp.placeholder="Rechercher une page ou une action…";
+inp.style.cssText="flex:1;background:transparent;border:none;outline:none;color:"+P.txt+";font-size:15px;";
+top.appendChild(inp);
+var list=document.createElement("div");list.id="nx-cp-list";list.style.cssText="max-height:46vh;overflow-y:auto;";
+var foot=document.createElement("div");foot.style.cssText="padding:9px 16px;border-top:1px solid "+P.line+";font-size:10.5px;color:"+P.faint+";display:flex;gap:14px;";
+foot.innerHTML="<span>↑↓ naviguer</span><span>⏎ ouvrir</span><span>Échap fermer</span>";
+card.appendChild(top);card.appendChild(list);card.appendChild(foot);ov.appendChild(card);
+ov.onclick=function(e){if(e.target===ov)_NXCP.close();};
+list.onclick=function(e){try{var t=e.target;var d=0;while(t&&d<5){if(t.getAttribute&&t.getAttribute("data-i")!=null){var idx=parseInt(t.getAttribute("data-i"),10);var L=_NXCP.filtered();if(L[idx]){_NXCP.close();L[idx].run();}return;}t=t.parentElement;d++;}}catch(_){}};
+inp.oninput=function(){_NXCP.q=inp.value;_NXCP.sel=0;_NXCP.render();};
+inp.onkeydown=function(e){try{
+if(e.key==="Escape"){e.preventDefault();_NXCP.close();return;}
+if(e.key==="ArrowDown"){e.preventDefault();_NXCP.sel++;_NXCP.render();return;}
+if(e.key==="ArrowUp"){e.preventDefault();_NXCP.sel=Math.max(0,_NXCP.sel-1);_NXCP.render();return;}
+if(e.key==="Enter"){e.preventDefault();var L=_NXCP.filtered();var it=L[_NXCP.sel];if(it){_NXCP.close();it.run();}return;}
+}catch(_){}};
+if(document.body)document.body.appendChild(ov);_NXCP.el=ov;_NXCP.render();
+try{inp.focus();}catch(_){}
+}catch(_){}};
+try{document.addEventListener("keydown",function(e){try{
+if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==="N"||e.key==="n")){e.preventDefault();e.stopPropagation();_NXCP.open();}
+}catch(_){}},true);}catch(_){}
 }
 var NexiumSponsorIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20},i("path",{d:"M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"}));};
 function fmtN(n){if(n==null)return "—";if(n>=1000)return (n/1000).toFixed(n>=10000?0:1).replace(".0","")+"k";return ""+n;}

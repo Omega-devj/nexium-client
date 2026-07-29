@@ -189,22 +189,28 @@ function asyncFallback() {
                 log("TÉLÉCHARGEMENT REFUSÉ : " + why + " — fichier actuel conservé");
             } else {
                 var repoV = versionOfText(txt);
-                // Optional checksum published next to the file (renderer.js.nxsum). Verified when present.
+                if (liveV != null && repoV <= liveV) {
+                    log("à jour (v" + liveV + ")");
+                    repoV = null; // rien à appliquer
+                }
                 var sumOk = true, sumInfo = "";
-                try {
-                    var pub = syncDownload("renderer.js.nxsum");
-                    if (pub != null && /^nx[0-9a-f]+-\d+$/.test(pub.trim())) {
-                        sumOk = (nxSum(txt) === pub.trim());
-                        sumInfo = sumOk ? " (somme vérifiée)" : "";
-                        if (!sumOk) log("SOMME DE CONTRÔLE INVALIDE : attendu " + pub.trim() + ", obtenu " + nxSum(txt));
-                    }
-                } catch (_) {}
-                if (!sumOk) {
+                if (repoV != null) {
+                    // Checksum fetched only when an update is about to be applied.
+                    try {
+                        var pub = syncDownload("renderer.js.nxsum");
+                        if (pub != null && /^nx[0-9a-f]+-\d+$/.test(pub.trim())) {
+                            sumOk = (nxSum(txt) === pub.trim());
+                            sumInfo = sumOk ? " (somme vérifiée)" : "";
+                            if (!sumOk) log("SOMME DE CONTRÔLE INVALIDE : attendu " + pub.trim() + ", obtenu " + nxSum(txt));
+                        }
+                    } catch (_) {}
+                }
+                if (repoV == null) {
+                    // déjà à jour, rien à faire
+                } else if (!sumOk) {
                     log("TÉLÉCHARGEMENT REFUSÉ : somme de contrôle incorrecte — fichier actuel conservé");
                 } else if (state.blockedVersion != null && repoV === state.blockedVersion) {
                     log("v" + repoV + " ignorée (bloquée après restauration) — publie une version supérieure pour débloquer");
-                } else if (liveV != null && repoV <= liveV) {
-                    log("à jour (v" + liveV + ")");
                 } else {
                     try { if (liveV != null) fs.copyFileSync(live, bak); } catch (_) {}
                     var w = live + ".newtmp";
