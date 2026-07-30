@@ -1,6 +1,3 @@
-[2026-07-15T11:51:31.621Z] APPLIQUÉ renderer.js (3414726 o)
-[2026-07-15T11:51:32.493Z] TÉLÉCHARGÉ renderer.js (3414033 o) → pending
-[2026-07-15T11:52:00.148Z] APPLIQUÉ renderer.js (3414075 o)
 [2026-07-15T11:52:00.721Z] à jour (b9429bff1c)
 [2026-07-15T11:52:14.331Z] TÉLÉCHARGÉ renderer.js (3414033 o) → pending
 [2026-07-15T11:52:27.423Z] APPLIQUÉ renderer.js (3414075 o)
@@ -77,3 +74,6 @@
 [2026-07-29T22:53:39.711Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
 [2026-07-30T12:01:25.134Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
 [2026-07-30T12:15:26.527Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-07-30T14:35:07.091Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-07-30T14:41:15.775Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-07-30T19:55:57.488Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
