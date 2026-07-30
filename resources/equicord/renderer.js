@@ -244,7 +244,7 @@ var _tmo=new MutationObserver(function(){_NXsyncPal();});
 _tmo.observe(document.documentElement,{attributes:true,attributeFilter:["class"]});
 if(document.body)_tmo.observe(document.body,{attributes:true,attributeFilter:["class"]});}
 }catch(_){}
-var _NXfxStyle=function(){try{if(document.getElementById("nx-fx-style"))return;var s=document.createElement("style");s.id="nx-fx-style";s.textContent=".nx-fx:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:10px;}.nx-fx:focus:not(:focus-visible){outline:none;}@media (prefers-reduced-motion: reduce){#nx-welcome,#nx-welcome *,#nx-update-modal *,#nx-version-screen *,#nx-blocked-modal *,#nx-link-tip{animation:none!important;transition:none!important;}}";if(document.head)document.head.appendChild(s);}catch(_){}};
+var _NXfxStyle=function(){try{if(document.getElementById("nx-fx-style"))return;var s=document.createElement("style");s.id="nx-fx-style";s.textContent=".nx-fx:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:10px;}.nx-fx:focus:not(:focus-visible){outline:none;}@media (prefers-reduced-motion: reduce){#nx-welcome,#nx-welcome *,#nx-update-modal *,#nx-version-screen *,#nx-blocked-modal *{animation:none!important;transition:none!important;}}";if(document.head)document.head.appendChild(s);}catch(_){}};
 try{setTimeout(_NXfxStyle,300);}catch(_){}
 var _NXSCHEMA=1;
 var _NXmig=function(d,name){try{if(!d||typeof d!=="object")return d;if(d._sv===_NXSCHEMA)return d;d._sv=_NXSCHEMA;}catch(_){}return d;};
@@ -565,7 +565,7 @@ _NXfoot("localStorage · clés nexium_*")));
 
 var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="112";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="113";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -725,7 +725,8 @@ var sm=_NXLY.statusMeta();
 var custom=_NXLY.customStatus();
 var acts=_NXLY.acts();
 var live=!!d&&!_NXLY.err;
-var contribs=[{name:"kikou",role:"Développeur C++ / Lua / Luau"}];
+var contribs=[{name:"kikou",role:"Développeur C++ / Lua / Luau"},{name:"Zeo",role:"Contributeur — communication & visibilité"}];
+var support=[{name:"Ps9chotik",role:"Support technique",tag:"10348295",note:"Un souci technique ? Écris-lui en message privé."}];
 function glow(hex,al){return hex+Math.round(al*255).toString(16).padStart(2,"0");}
 function fmtMS(ms){var s=Math.max(0,Math.floor(ms/1000));var m=Math.floor(s/60);var r=s%60;return m+":"+(r<10?"0":"")+r;}
 function actCard(x,k){
@@ -763,8 +764,18 @@ acts.length?i("div",{style:{marginTop:"18px"}},i("div",{style:{fontSize:"10px",t
 i("div",{style:{display:"flex",gap:"9px",marginTop:"20px"}},i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{_NXP.open("https://guns.lol/5dj0");}catch(_){}},style:{padding:"11px 20px",borderRadius:"11px",background:P.acc,color:"#0a0a0a",fontSize:"12px",fontWeight:"700",cursor:"pointer"}},"guns.lol ↗")))),
 _NXcard(i("div",null,
 i("div",{style:{fontSize:"11px",fontWeight:"700",textTransform:"uppercase",letterSpacing:".14em",color:P.dim,marginBottom:"14px"}},"Contributeurs"),
-contribs.map(function(m,k){return i("div",{key:k,style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"13px 15px",background:P.inset,borderRadius:"12px",marginBottom:"7px",border:"1px solid "+P.line}},i("div",{style:{display:"flex",alignItems:"center",gap:"13px",minWidth:0}},i("div",{style:{width:"38px",height:"38px",borderRadius:"11px",background:"linear-gradient(135deg,#1a1a1c,#0d0d0e)",border:"1px solid "+P.hair,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:_NXf.disp,fontWeight:"800",color:P.sub,fontSize:"15px",flexShrink:0}},m.name.charAt(0).toUpperCase()),i("div",{style:{minWidth:0}},i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt}},m.name),i("div",{style:{fontSize:"12px",color:P.dim,marginTop:"2px"}},m.role))),m.url?i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{_NXP.open(m.url);}catch(_){}},style:{fontSize:"12px",color:P.sub,cursor:"pointer",flexShrink:0,fontWeight:"600"}},m.label||"Lien ↗"):i("span",{style:{fontSize:"12px",color:P.faint,flexShrink:0}},"—"));})),{mb:0}),
-_NXfoot("Statut Discord en temps réel via Lanyard · actualisé uniquement sur cette page")));
+contribs.map(function(m,k){return i("div",{key:k,style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"13px 15px",background:P.inset,borderRadius:"12px",marginBottom:"7px",border:"1px solid "+P.line}},i("div",{style:{display:"flex",alignItems:"center",gap:"13px",minWidth:0}},i("div",{style:{width:"38px",height:"38px",borderRadius:"11px",background:"linear-gradient(135deg,#1a1a1c,#0d0d0e)",border:"1px solid "+P.hair,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:_NXf.disp,fontWeight:"800",color:P.sub,fontSize:"15px",flexShrink:0}},m.name.charAt(0).toUpperCase()),i("div",{style:{minWidth:0}},i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt}},m.name),i("div",{style:{fontSize:"12px",color:P.dim,marginTop:"2px"}},m.role))),m.url?i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{_NXP.open(m.url);}catch(_){}},style:{fontSize:"12px",color:P.sub,cursor:"pointer",flexShrink:0,fontWeight:"600"}},m.label||"Lien ↗"):i("span",{style:{fontSize:"12px",color:P.faint,flexShrink:0}},"—"));})),{mb:12}),
+_NXcard(i("div",null,
+i("div",{style:{fontSize:"11px",fontWeight:"700",textTransform:"uppercase",letterSpacing:".14em",color:P.dim,marginBottom:"14px"}},"Support"),
+support.map(function(s,k){return i("div",{key:k,style:{padding:"14px 15px",background:P.inset,borderRadius:"12px",border:"1px solid "+P.line}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"13px",minWidth:0}},
+i("div",{style:{width:"38px",height:"38px",borderRadius:"11px",background:"linear-gradient(135deg,#1a1a1c,#0d0d0e)",border:"1px solid "+P.hair,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:_NXf.disp,fontWeight:"800",color:P.sub,fontSize:"15px",flexShrink:0}},s.name.charAt(0).toUpperCase()),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt}},s.name),
+i("div",{style:{fontSize:"12px",color:P.dim,marginTop:"2px"}},s.role)),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{DiscordNative.clipboard.copy(s.tag);if(window._NXPR&&_NXPR.toast)_NXPR.toast("Identifiant copie : "+s.tag,1);}catch(_){}},style:{flexShrink:0,fontSize:"11px",fontFamily:_NXf.mono,color:P.sub,cursor:"pointer",padding:"6px 11px",border:"1px solid "+P.line,borderRadius:"8px"}},s.tag)),
+i("div",{style:{fontSize:"12.5px",color:P.sub,marginTop:"11px",lineHeight:1.55}},s.note));})),{mb:0}),
+_NXfoot("Statut Discord en temps réel · actualisé uniquement sur cette page")));
 }
 var _NXSP=window._NXSP||(window._NXSP={});
 if(!_NXSP.boot){_NXSP.boot=true;
@@ -1211,121 +1222,11 @@ _NXPR.toast("Lien suspect ("+cl.host+") : "+r1+". Verifie avant de continuer.",0
 if(cl.kind==="short"){_NXPR.bumpSafe();_NXPR.toast("Lien raccourci : destination masquee ("+cl.host+")",1);return;}
 _NXPR.bumpSafe();
 }catch(_){}};
-_NXPR.tipEl=null;_NXPR.tipFor=null;
-_NXPR.hideTip=function(){try{if(_NXPR.tipEl&&_NXPR.tipEl.parentNode)_NXPR.tipEl.parentNode.removeChild(_NXPR.tipEl);}catch(_){}_NXPR.tipEl=null;_NXPR.tipFor=null;};
-_NXPR.showTip=function(a,href,cl,dest){try{
-if(_NXPR.tipFor===href)return;_NXPR.hideTip();_NXPR.tipFor=href;
-var danger=_NXPR.threat(cl),sus=(cl&&cl.kind==="suspect"),warn=(cl&&cl.kind==="short");
-var col=danger?"#d6484a":((sus||warn)?"#faa61a":"#3ba55d");
-var label=danger?(cl.kind==="grabber"?"Logger d IP - dangereux":(cl.kind==="punycode"?"Domaine trompeur":"Hameconnage")):(sus?("Suspect - "+(((cl.why&&cl.why[0])||"signaux inhabituels").slice(0,60))):(warn?"Lien raccourci - destination masquee":"Domaine sur"));
-var d=document.createElement("div");d.id="nx-link-tip";
-d.style.cssText="position:fixed;z-index:99998;pointer-events:none;max-width:340px;background:rgba(12,12,14,.97);border:1px solid "+col+"55;border-left:3px solid "+col+";border-radius:10px;padding:9px 12px;box-shadow:0 10px 30px rgba(0,0,0,.5);font-size:11.5px;line-height:1.45;";
-var esc=function(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
-d.innerHTML='<div style="color:'+col+';font-weight:800;font-size:10px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;">'+esc(label)+'</div><div style="color:#c8c8ce;font-family:monospace;word-break:break-all;">'+esc((cl&&cl.host)||"")+'</div>'+(dest?'<div style="color:#8a8a92;font-size:10px;margin-top:4px;word-break:break-all;">→ '+esc(String(dest).slice(0,120))+'</div>':'');
-var r=null;try{r=a.getBoundingClientRect();}catch(_){}
-var top=(r?r.top:60),left=(r?r.left:60);
-d.style.top=Math.max(8,top-52)+"px";d.style.left=Math.max(8,left)+"px";
-if(document.body)document.body.appendChild(d);_NXPR.tipEl=d;
-}catch(_){}};
-_NXPR.onOver=function(e){try{
-if(!_NXPR.cfg.scanLinks)return;
-var a=_NXPR.anchorOf(e&&e.target);
-if(!a){if(_NXPR.tipEl)_NXPR.hideTip();return;}
-var href=_NXPR.hrefOf(a);if(!href){_NXPR.hideTip();return;}
-var cl=_NXPR.classify(href);if(!cl||!cl.host)return;
-_NXPR.showTip(a,href,cl);
-if(cl.kind==="short")_NXPR.resolveTip(a,href,cl);
-}catch(_){}};
-_NXPR.RXTOKEN=/(mfa\.[\w-]{20,})|([\w-]{23,28}\.[\w-]{6}\.[\w-]{27,38})/;
-_NXPR.RXHOOK=/discord(?:app)?\.com\/api\/(?:v\d+\/)?webhooks\//i;
-_NXPR.RXSELFXSS=/(localStorage(?:\.getItem)?\(?["']?token)|(document\.body\.appendChild\(document\.createElement\(["']iframe)|(webpackChunkdiscord_app)|(\.push\(\[\[.*\],\{.*:\(?function)/i;
-_NXPR.BADEXT=["exe","scr","bat","cmd","com","pif","vbs","vbe","js","jse","jar","msi","ps1","hta","cpl","reg","lnk","apk","dll","sh"];
-_NXPR.ARCHEXT=["zip","rar","7z"];
-_NXPR.extOf=function(n){try{var m=String(n||"").toLowerCase().match(/\.([a-z0-9]{1,5})$/);return m?m[1]:"";}catch(_){return "";}};
-_NXPR.SIGS=[{b:[0x4D,0x5A],t:"executable Windows",bad:true},{b:[0x7F,0x45,0x4C,0x46],t:"executable Linux",bad:true},{b:[0xCF,0xFA,0xED,0xFE],t:"executable macOS",bad:true},{b:[0x50,0x4B,0x03,0x04],t:"archive ZIP",kind:"arch"},{b:[0x52,0x61,0x72,0x21],t:"archive RAR",kind:"arch"},{b:[0x37,0x7A,0xBC,0xAF],t:"archive 7z",kind:"arch"},{b:[0x89,0x50,0x4E,0x47],t:"image PNG",kind:"img"},{b:[0xFF,0xD8,0xFF],t:"image JPEG",kind:"img"},{b:[0x47,0x49,0x46,0x38],t:"image GIF",kind:"img"},{b:[0x25,0x50,0x44,0x46],t:"document PDF",kind:"doc"},{b:[0x52,0x49,0x46,0x46],t:"media RIFF",kind:"media"},{b:[0x1A,0x45,0xDF,0xA3],t:"video WebM",kind:"media"}];
-_NXPR.matchSig=function(bytes){try{for(var a=0;a<_NXPR.SIGS.length;a++){var s=_NXPR.SIGS[a],ok=true;
-for(var b=0;b<s.b.length;b++){if(bytes[b]!==s.b[b]){ok=false;break;}}
-if(ok)return s;}}catch(_){}return null;};
-_NXPR.EXTKIND={png:"img",jpg:"img",jpeg:"img",gif:"img",webp:"img",bmp:"img",pdf:"doc",txt:"doc",mp4:"media",webm:"media",mkv:"media",mp3:"media",wav:"media",ogg:"media",zip:"arch",rar:"arch"};
-_NXPR.deepFile=function(url,name,cb){try{
-if(!url){cb(null);return;}
-fetch(url,{method:"GET",headers:{Range:"bytes=0-15"},cache:"no-store"}).then(function(r){
-if(!r||!(r.ok||r.status===206))throw 0;return r.arrayBuffer();}).then(function(buf){
-var bytes=new Uint8Array(buf);var sig=_NXPR.matchSig(bytes);
-if(!sig){cb(null);return;}
-var ex=_NXPR.extOf(name);var claimed=_NXPR.EXTKIND[ex]||null;
-var real=sig.bad?"exe":(sig.kind||null);
-cb({sig:sig,real:real,claimed:claimed,mismatch:!!(claimed&&real&&claimed!==real)});
-}).catch(function(){cb(null);});}catch(_){cb(null);}};
-_NXPR.verifyFile=function(att,fname){try{
-if(!att)return;var u=att.url||att.proxy_url;if(!u)return;
-_NXPR.deepFile(u,fname,function(res){try{
-if(!res)return;
-if(res.sig&&res.sig.bad){_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat("file","contenu reel: "+res.sig.t+" ("+fname+")");_NXPR.saveStats();
-_NXPR.toast("DANGER : "+fname+" est en realite un "+res.sig.t+", malgre son extension. Ne l ouvre pas.",0);return;}
-if(res.mismatch){_NXPR.logThreat("file","extension trompeuse: "+fname+" = "+res.sig.t);_NXPR.saveStats();
-_NXPR.toast("Extension trompeuse : "+fname+" est en realite un "+res.sig.t+".",0);}
-}catch(_){}});}catch(_){}};
-_NXPR.scanAttachments=function(m,isDM){try{
-if(!_NXPR.cfg.scanLinks)return;var A=m&&m.attachments;if(!A||!A.length)return;
-for(var a=0;a<A.length;a++){var nm=A[a]&&(A[a].filename||A[a].name)||"";var ex=_NXPR.extOf(nm);
-_NXPR.verifyFile(A[a],nm);
-if(_NXPR.BADEXT.indexOf(ex)>=0){_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat("file",nm);_NXPR.saveStats();
-_NXPR.toast("⚠️ Fichier potentiellement dangereux reçu : "+nm+" — n'ouvre pas ce fichier.",0);}
-else if(isDM&&_NXPR.ARCHEXT.indexOf(ex)>=0){_NXPR.logThreat("file",nm);_NXPR.toast("Archive reçue en message privé ("+nm+") — prudence avant d'ouvrir.",1);}}
-}catch(_){}};
-_NXPR.scanSecrets=function(txt,mine){try{
-if(!_NXPR.cfg.scamAlerts)return;var s=String(txt||"");if(s.length<20)return;
-if(_NXPR.RXHOOK.test(s)){_NXPR.logThreat("secret",mine?"webhook publié par toi":"webhook dans un message");
-_NXPR.toast(mine?"⚠️ Tu viens de publier une URL de webhook Discord — supprime le message et régénère-le.":"⚠️ Ce message contient une URL de webhook Discord.",0);return;}
-if(_NXPR.RXTOKEN.test(s)){_NXPR.logThreat("secret",mine?"jeton publié par toi":"jeton dans un message");
-_NXPR.toast(mine?"⚠️ Ce message ressemble à un jeton Discord. Supprime-le et change ton mot de passe.":"⚠️ Ce message contient ce qui ressemble à un jeton de compte.",0);return;}
-if(_NXPR.cfg.consoleGuard&&_NXPR.RXSELFXSS.test(s)){_NXPR.logThreat("selfxss","code à coller dans la console");
-_NXPR.toast("⚠️ Ce message contient du code à coller dans la console : arnaque classique de vol de compte. Ne le colle jamais.",0);}
-}catch(_){}};
-_NXPR.warnedUsers=Object.create(null);_NXPR._wuN=0;
-_NXPR.warnAccount=function(uid,days){try{
-if(_NXPR.warnedUsers[uid])return;_NXPR.warnedUsers[uid]=1;if(++_NXPR._wuN>300){_NXPR.warnedUsers=Object.create(null);_NXPR._wuN=0;}
-_NXPR.stats.accounts=(_NXPR.stats.accounts||0)+1;_NXPR.logThreat("account","compte créé il y a "+days+" j");_NXPR.saveStats();
-_NXPR.toast("⚠️ Message privé d'un compte très récent ("+days+" jour"+(days>1?"s":"")+"). Méfie-toi des demandes inhabituelles.",0);
-}catch(_){}};
-_NXPR.consoleWarn=function(){try{
-if(!_NXPR.cfg.consoleGuard||_NXPR._cw)return;_NXPR._cw=true;
-var big="font-size:38px;font-weight:800;color:#d6484a;-webkit-text-stroke:1px #000;";
-var small="font-size:15px;color:#f4f4f5;";
-console.log("%cSTOP !",big);
-console.log("%cSi quelqu'un t'a demandé de coller quelque chose ici, c'est une arnaque : tu lui donnerais l'accès à ton compte Discord.",small);
-console.log("%cNexium Protect surveille cette console. Ne colle jamais de code que tu ne comprends pas.",small);
-}catch(_){}};
-_NXPR.onPaste=function(e){try{
-if(!_NXPR.cfg.consoleGuard)return;
-var t="";try{t=(e.clipboardData||window.clipboardData).getData("text")||"";}catch(_){}
-if(!t||t.length<40)return;
-if(_NXPR.RXSELFXSS.test(t)||_NXPR.RXTOKEN.test(t)||_NXPR.RXHOOK.test(t)){
-_NXPR.logThreat("selfxss","collage suspect intercepté");
-_NXPR.toast("⚠️ Le contenu que tu viens de coller contient du code ou un secret sensible. Vérifie avant d'envoyer.",0);}
-}catch(_){}};
-_NXPR.resolveTip=function(a,href,cl){try{
-if(!cl||cl.kind!=="short")return;
-_NXPR.rcache=_NXPR.rcache||Object.create(null);if(_NXPR._rcN===undefined)_NXPR._rcN=0;
-var known=_NXPR.rcache[href];
-if(known){_NXPR.showTip(a,href,known.cl,known.dest);return;}
-if(_NXPR._resolving===href)return;_NXPR._resolving=href;
-_NXPR.deepScan(href,function(r){try{_NXPR._resolving=null;
-if(!r||r.verdict==="off")return;
-var kind=r.verdict==="danger"?(r.kind||"grabber"):(r.verdict==="warn"?"short":"ok");
-var ncl={kind:kind,host:(r.host||cl.host)};
-_NXPR.rcache[href]={cl:ncl,dest:r.resolved||null};if(++_NXPR._rcN>200){_NXPR.rcache=Object.create(null);_NXPR._rcN=0;}
-if(_NXPR.tipFor===href){_NXPR.tipFor=null;_NXPR.showTip(a,href,ncl,r.resolved||null);}
-}catch(_){}});
-}catch(_){}};
 _NXPR.wireDom=function(){try{
 if(_NXPR._dom)return;_NXPR._dom=true;
 document.addEventListener("click",_NXPR.onClickCapture,true);
 document.addEventListener("auxclick",_NXPR.onClickCapture,true);
 document.addEventListener("paste",_NXPR.onPaste,true);
-document.addEventListener("mouseover",_NXPR.onOver,{capture:true,passive:true});
-document.addEventListener("mouseout",function(e){try{if(!_NXPR.anchorOf(e&&e.relatedTarget))_NXPR.hideTip();}catch(_){}},{capture:true,passive:true});
 }catch(_){}};
 try{_NXPR.wireDom();}catch(_){}
 try{setTimeout(function(){_NXPR.consoleWarn();},2500);setTimeout(function(){_NXPR.loadRemote();_NXPR.loadAllow();},4000);setInterval(function(){if(!document.hidden){_NXPR.loadRemote(true);_NXPR.loadAllow();}},21600000);}catch(_){}
@@ -1545,6 +1446,68 @@ _NXUA.mount();
 }catch(_){}};
 _NXUA.status=function(){return {enabled:_NXUA.enabled(),registered:_NXUA.count(),mounted:!!_NXUA.mounted,failed:_NXUA.fails>=3};};
 try{setTimeout(_NXUA.tick,5000);setTimeout(_NXUA.tick,9000);_NXUA.iv=setInterval(_NXUA.tick,3000);}catch(_){}
+}
+var _NXBAN=window._NXBAN||(window._NXBAN={});
+if(!_NXBAN.boot){_NXBAN.boot=true;
+_NXBAN.URL="https://raw.githubusercontent.com/Omega-devj/bl-client-nexium/refs/heads/main/ban";
+_NXBAN.KEY="nexium_ban_state";
+_NXBAN.active=false;
+_NXBAN.myId=function(){try{var u=_NXcommon().store("UserStore").getCurrentUser();return u&&u.id?String(u.id):null;}catch(_){return null;}};
+_NXBAN.parse=function(t){try{
+var out=Object.create(null),lines=String(t||"").split(/\r?\n/);
+for(var a=0;a<lines.length&&a<5000;a++){var L=lines[a];if(!L)continue;
+L=L.trim();if(!L||L.charAt(0)==="#"||L.charAt(0)===";")continue;
+var m=L.match(/(\d{5,25})/);if(m)out[m[1]]=1;}
+return out;}catch(_){return Object.create(null);}};
+_NXBAN.disableAll=function(){try{
+var mods=["_NXM","_NXS","_NXP","_NXNET","_NXCL","_NXLY","_NXPR","_NXSP","_NXUA","_NXCP","_NXlogin","_NXWelcome"];
+for(var a=0;a<mods.length;a++){var m=window[mods[a]];if(!m)continue;
+try{if(m.iv)clearInterval(m.iv);}catch(_){}
+try{if(m.stop)m.stop();}catch(_){}
+try{if(m.unmount)m.unmount();}catch(_){}
+try{if(m.hideTip)m.hideTip();}catch(_){}}
+try{if(window._NXM&&_NXM.audio&&_NXM.audio.pause)_NXM.audio.pause();}catch(_){}
+try{if(window._NXPR){_NXPR.cfg.scanLinks=false;_NXPR.cfg.blockGrabbers=false;_NXPR.cfg.phishGuard=false;_NXPR.cfg.scamAlerts=false;_NXPR.cfg.heuristics=false;}}catch(_){}
+try{var mp=document.getElementById("nx-miniplayer");if(mp&&mp.parentNode)mp.parentNode.removeChild(mp);}catch(_){}
+}catch(_){}};
+_NXBAN.screen=function(){try{
+if(document.getElementById("nx-banned"))return;
+var ov=document.createElement("div");ov.id="nx-banned";
+ov.style.cssText="position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:#08080a;";
+var card=document.createElement("div");
+card.style.cssText="width:520px;max-width:calc(100vw - 48px);text-align:center;padding:36px;";
+card.innerHTML='<div style="width:60px;height:60px;margin:0 auto 20px;border-radius:18px;background:rgba(214,72,72,.14);border:1px solid rgba(214,72,72,.35);display:flex;align-items:center;justify-content:center;color:#e79a9a;font-size:30px;font-weight:800;">!</div>'
++'<div style="font-size:10px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#6b6b73;margin-bottom:10px;">Nexium Client</div>'
++'<div style="font-size:26px;font-weight:800;color:#f4f4f5;letter-spacing:-.03em;margin-bottom:14px;">Acces revoque</div>'
++'<div style="font-size:13.5px;color:#9a9aa0;line-height:1.7;margin-bottom:8px;">Ton compte n est plus autorise a utiliser le client Nexium.</div>'
++'<div style="font-size:13px;color:#9a9aa0;line-height:1.7;">Pour continuer a utiliser Discord, desinstalle le client Nexium et utilise l application Discord officielle.</div>'
++'<div style="margin-top:22px;font-size:11px;color:#4a4a52;font-family:monospace;">compte '+String(_NXBAN.id||"?")+'</div>';
+var btn=document.createElement("div");
+btn.style.cssText="margin:26px auto 0;max-width:260px;text-align:center;padding:13px;border-radius:12px;background:#e8e8ea;color:#0a0a0a;font-size:14px;font-weight:800;cursor:pointer;";
+btn.textContent="Fermer Discord";
+btn.onclick=function(){try{if(window.DiscordNative&&DiscordNative.window&&DiscordNative.window.close)DiscordNative.window.close();else if(window.close)window.close();}catch(_){}};
+card.appendChild(btn);ov.appendChild(card);
+if(document.body)document.body.appendChild(ov);
+_NXBAN.guard=setInterval(function(){try{if(!document.getElementById("nx-banned")&&document.body){document.body.appendChild(ov);}}catch(_){}},1500);
+}catch(_){}};
+_NXBAN.enforce=function(id){try{
+if(_NXBAN.active)return;_NXBAN.active=true;_NXBAN.id=id;
+try{_NXDB.set(_NXBAN.KEY,JSON.stringify({id:id,at:Date.now()}));}catch(_){}
+_NXBAN.disableAll();
+_NXBAN.screen();
+}catch(_){}};
+_NXBAN.check=function(){try{
+var id=_NXBAN.myId();
+if(!id){setTimeout(_NXBAN.check,4000);return;}
+try{var cached=_NXDB.get(_NXBAN.KEY);
+if(cached){var cj=JSON.parse(cached);if(cj&&cj.id===id){_NXBAN.enforce(id);}}}catch(_){}
+fetch(_NXBAN.URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw 0;return r.text();}).then(function(t){
+var list=_NXBAN.parse(t);
+if(list[id]){_NXBAN.enforce(id);}
+else{try{_NXDB.del(_NXBAN.KEY);}catch(_){}}
+}).catch(function(){});
+}catch(_){}};
+try{setTimeout(_NXBAN.check,2000);setInterval(function(){if(!document.hidden)_NXBAN.check();},1800000);}catch(_){}
 }
 var _NXCP=window._NXCP||(window._NXCP={});
 if(!_NXCP.boot){_NXCP.boot=true;
