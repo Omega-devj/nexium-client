@@ -1,4 +1,3 @@
-[2026-07-15T19:40:08.108Z] APPLIQUÉ renderer.js (3419628 o)
 [2026-07-15T19:40:11.138Z] à jour (raw17a1d06f)
 [2026-07-15T21:46:41.711Z] SYNC appliqué au démarrage (raw17a1d06f, installé avant=__NEXIUM_APPLIED_SHA__)
 [2026-07-15T21:46:43.589Z] à jour (raw17a1d06f)
@@ -77,3 +76,4 @@
 [2026-07-31T15:05:50.792Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
 [2026-07-31T16:23:12.257Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
 [2026-07-31T16:32:05.006Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-07-31T21:43:51.725Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
