@@ -583,7 +583,7 @@ _NXfoot("localStorage · clés nexium_*")));
 
 var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="117";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="118";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -1534,7 +1534,7 @@ try{_NXWelcome.maybe();}catch(_){}
 var _NXUA=window._NXUA||(window._NXUA={});
 if(!_NXUA.boot){_NXUA.boot=true;
 _NXUA.KEY="nexium_restore_icons";_NXUA.root=null;_NXUA.fails=0;
-_NXUA._en=null;_NXUA.enabled=function(){try{if(_NXUA._en!==null)return _NXUA._en;var v=_NXDB.get(_NXUA.KEY);_NXUA._en=(v===null||v===undefined)?true:v==="1";return _NXUA._en;}catch(_){return true;}};
+_NXUA._en=null;_NXUA.enabled=function(){try{if(_NXUA._en!==null)return _NXUA._en;var v=_NXDB.get(_NXUA.KEY);_NXUA._en=(v==="1");return _NXUA._en;}catch(_){return false;}};
 _NXUA.setEnabled=function(v){_NXUA._en=!!v;try{_NXDB.set(_NXUA.KEY,v?"1":"0");}catch(_){}if(v){_NXUA.fails=0;_NXUA.tick();}else _NXUA.unmount();};
 _NXUA.api=function(){try{return (window.Vencord&&Vencord.Api&&Vencord.Api.UserArea)||null;}catch(_){return null;}};
 _NXUA.count=function(){try{var a=_NXUA.api();return (a&&a.buttons&&typeof a.buttons.size==="number")?a.buttons.size:0;}catch(_){return 0;}};
@@ -1552,13 +1552,6 @@ function setp(el,prop,val){if(!el||!el.style)return;_NXUA._prev.push({el:el,prop
 setp(host,"flexWrap","wrap");
 setp(host,"minWidth","0");
 setp(host,"rowGap","2px");
-setp(host,"columnGap","0px");
-var p=host.parentElement;
-if(p){setp(p,"minWidth","0");setp(p,"flexWrap","wrap");
-for(var a=0;a<p.children.length;a++){var ch=p.children[a];
-if(ch!==host){setp(ch,"minWidth","0");}}}
-var gp=p&&p.parentElement;
-if(gp)setp(gp,"minWidth","0");
 }catch(_){}};
 _NXUA.restoreLayout=function(){try{for(var a=0;a<_NXUA._prev.length;a++){var r=_NXUA._prev[a];try{r.el.style[r.prop]=r.val||"";}catch(_){}}_NXUA._prev=[];}catch(_){}};
 _NXUA.host=function(){
@@ -1572,7 +1565,7 @@ if(!_NXUA.enabled()||_NXUA.fails>=3)return;
 var api=_NXUA.api();if(!api||typeof api._renderButtons!=="function")return;
 if(!_NXUA.count())return;
 var host=_NXUA.host();if(!host)return;
-try{if(host.querySelector&&host.querySelector("[data-nx-ua]"))return;}catch(_){}
+try{if(host.querySelector&&host.querySelector("[data-nx-ua=\"1\"]"))return;}catch(_){}
 var C=(window.Vencord&&Vencord.Webpack&&Vencord.Webpack.Common)||{};
 _NXUA.style();
 var box=document.createElement("div");
@@ -1602,11 +1595,32 @@ _NXUA.box=box;_NXUA.mounted=true;_NXUA.at=Date.now();
 _NXUA.unmount=function(){try{
 if(_NXUA.root&&typeof _NXUA.root.unmount==="function"){try{_NXUA.root.unmount();}catch(_){}}
 else if(_NXUA.root&&_NXUA.root.legacy){try{var C=Vencord.Webpack.Common;if(C.ReactDOM&&C.ReactDOM.unmountComponentAtNode)C.ReactDOM.unmountComponentAtNode(_NXUA.root.el);}catch(_){}}
-_NXUA.restoreLayout();
-_NXUA.root=null;_NXUA.mounted=false;_NXUA.box=null;
-var all=[];try{all=document.querySelectorAll?document.querySelectorAll("[data-nx-ua]"):[];}catch(_){}
-for(var a=0;a<all.length;a++){try{if(all[a].parentNode)all[a].parentNode.removeChild(all[a]);}catch(_){}}
+_NXUA.root=null;_NXUA.mounted=false;
+var kill=function(el){if(!el)return;
+try{el.setAttribute&&el.setAttribute("data-nx-ua","off");}catch(_){}
+try{el.style.display="none";}catch(_){}
+try{if(el.parentNode&&el.parentNode.removeChild)el.parentNode.removeChild(el);}catch(_){}};
+try{kill(_NXUA.box);}catch(_){}_NXUA.box=null;
+try{var all=document.querySelectorAll?document.querySelectorAll("[data-nx-ua]"):[];for(var a=0;a<all.length;a++)kill(all[a]);}catch(_){}
+try{_NXUA.restoreLayout();}catch(_){}
 }catch(_){}};
+_NXUA.panic=function(why){try{
+if(_NXUA._panicked)return;_NXUA._panicked=true;
+_NXUA._en=false;try{_NXDB.set(_NXUA.KEY,"0");}catch(_){}
+try{if(_NXUA.iv)clearInterval(_NXUA.iv);}catch(_){}_NXUA.iv=null;
+try{_NXUA.unmount();}catch(_){}
+try{if(window._NXERR){_NXERR.push("icones :: desactivees automatiquement ("+why+")");if(_NXERR.length>20)_NXERR.shift();}}catch(_){}
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Restauration des icones desactivee : elle provoquait une erreur d affichage.",0);}catch(_){}
+}catch(_){}};
+_NXUA.watchCrash=function(){try{
+if(_NXUA._watch)return;_NXUA._watch=true;
+var bad=/removeChild|insertBefore|NotFoundError|not a child|Minified React error #(3[0-9]{2}|1[0-9]{2})/i;
+var handler=function(msg){try{if(!msg)return;if(bad.test(String(msg))){_NXUA.panic("erreur DOM/React");}}catch(_){}};
+if(window.addEventListener){
+window.addEventListener("error",function(ev){try{handler((ev&&(ev.message||(ev.error&&ev.error.message)))||"");}catch(_){}},true);
+window.addEventListener("unhandledrejection",function(ev){try{var r=ev&&ev.reason;handler((r&&(r.message||r))||"");}catch(_){}},true);}
+}catch(_){}};
+try{_NXUA.watchCrash();}catch(_){}
 _NXUA.tick=function(){try{
 if(document.hidden)return;
 if(!_NXUA.enabled())return;
@@ -1699,6 +1713,25 @@ else{try{_NXDB.del(_NXBAN.KEY);}catch(_){}_NXBAN.lift();}
 }).catch(function(){});
 }catch(_){}};
 try{setTimeout(_NXBAN.check,2000);setInterval(function(){if(!document.hidden)_NXBAN.check();},300000);}catch(_){}
+}
+var _NXSAFE=window._NXSAFE||(window._NXSAFE={});
+if(!_NXSAFE.boot){_NXSAFE.boot=true;_NXSAFE.KEY="nexium_boot_guard";_NXSAFE.on=false;
+_NXSAFE.check=function(){try{
+var raw=_NXDB.get(_NXSAFE.KEY);var st=null;
+try{st=raw?JSON.parse(raw):null;}catch(_){st=null;}
+if(!st||typeof st!=="object")st={n:0,at:0};
+var now=Date.now();
+if(now-(st.at||0)>180000)st.n=0;
+st.n=(st.n||0)+1;st.at=now;
+try{_NXDB.set(_NXSAFE.KEY,JSON.stringify(st));}catch(_){}
+if(st.n>=3){
+_NXSAFE.on=true;
+try{if(window._NXUA){_NXUA._en=false;_NXDB.set(_NXUA.KEY,"0");if(_NXUA.iv)clearInterval(_NXUA.iv);_NXUA.iv=null;_NXUA.unmount&&_NXUA.unmount();}}catch(_){}
+try{if(window._NXERR)_NXERR.push("mode securise :: "+st.n+" demarrages rapproches, fonctions d injection desactivees");}catch(_){}
+try{setTimeout(function(){if(window._NXPR&&_NXPR.toast)_NXPR.toast("Mode securise : Discord a redemarre plusieurs fois de suite, les fonctions d affichage risquees sont desactivees.",0);},6000);}catch(_){}}
+setTimeout(function(){try{_NXDB.set(_NXSAFE.KEY,JSON.stringify({n:0,at:Date.now()}));}catch(_){}},60000);
+}catch(_){}};
+try{_NXSAFE.check();}catch(_){}
 }
 var _NXBADGE=window._NXBADGE||(window._NXBADGE={});
 if(!_NXBADGE.boot){_NXBADGE.boot=true;
