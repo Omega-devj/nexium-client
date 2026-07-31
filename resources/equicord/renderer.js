@@ -267,6 +267,10 @@ try{setTimeout(_NXfxStyle,300);}catch(_){}
 var _NXSCHEMA=1;
 var _NXmig=function(d,name){try{if(!d||typeof d!=="object")return d;if(d._sv===_NXSCHEMA)return d;d._sv=_NXSCHEMA;}catch(_){}return d;};
 var _NXERR=window._NXERR||(window._NXERR=[]);
+var _NXsaveErr=window._NXsaveErr||(window._NXsaveErr=function(){try{_NXDB.set("nexium_errors",JSON.stringify(_NXERR.slice(-20)));}catch(_){}});
+try{var _pe=_NXDB.get("nexium_errors");if(_pe){var _pj=JSON.parse(_pe);if(_pj&&_pj.length){for(var _a=0;_a<_pj.length;_a++)_NXERR.push("[session precedente] "+_pj[_a]);}}}catch(_){}
+try{if(window.addEventListener){window.addEventListener("error",function(ev){try{var m=(ev&&(ev.message||(ev.error&&ev.error.message)))||"";if(!m)return;_NXERR.push("global :: "+String(m).slice(0,200));if(_NXERR.length>20)_NXERR.shift();_NXsaveErr();}catch(_){}},true);
+window.addEventListener("unhandledrejection",function(ev){try{var r=ev&&ev.reason;var m=(r&&(r.message||r))||"";if(!m)return;_NXERR.push("promesse :: "+String(m).slice(0,200));if(_NXERR.length>20)_NXERR.shift();_NXsaveErr();}catch(_){}},true);}}catch(_){}
 var _NXkey=function(e){try{if(e.key==="Enter"||e.key===" "||e.key==="Spacebar"){e.preventDefault();if(e.currentTarget&&e.currentTarget.click)e.currentTarget.click();}}catch(_){}};
 var _NXn=function(v){v=v||0;if(v>=1000000)return(v/1000000).toFixed(1).replace(/\.0$/,"")+"M";if(v>=1000)return(v/1000).toFixed(1).replace(/\.0$/,"")+"k";return""+v;};
 var _NXhead=function(k,t,d){return i("div",{style:{position:"relative",marginBottom:"26px",paddingTop:"4px"}},i("div",{style:{position:"absolute",left:"-40px",top:"-56px",width:"340px",height:"170px",background:"radial-gradient(55% 70% at 0% 40%, rgba(255,255,255,.045), transparent 72%)",pointerEvents:"none"}}),i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"8px",marginBottom:"14px"}},i("div",{style:{width:"6px",height:"6px",borderRadius:"50%",background:_NXpal.acc,boxShadow:"0 0 10px "+_NXpal.acc+"66"}}),i("div",{style:{fontSize:"10.5px",fontWeight:"800",letterSpacing:".26em",color:_NXpal.sub,textTransform:"uppercase"}},k)),i("div",{style:{position:"relative",fontFamily:_NXf.disp,fontSize:"34px",fontWeight:"800",color:_NXpal.txt,letterSpacing:"-.035em",lineHeight:1.02}},t),d?i("div",{style:{position:"relative",fontSize:"13.5px",color:_NXpal.sub,marginTop:"13px",lineHeight:1.65,maxWidth:"540px"}},d):null,i("div",{style:{position:"relative",height:"1px",marginTop:"22px",background:"linear-gradient(90deg,"+_NXpal.hair+", "+_NXpal.hair+" 30%, transparent)"}}));};
@@ -583,7 +587,7 @@ _NXfoot("localStorage · clés nexium_*")));
 
 var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="118";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="119";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -1615,7 +1619,7 @@ try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Restauration des icones desactivee
 _NXUA.watchCrash=function(){try{
 if(_NXUA._watch)return;_NXUA._watch=true;
 var bad=/removeChild|insertBefore|NotFoundError|not a child|Minified React error #(3[0-9]{2}|1[0-9]{2})/i;
-var handler=function(msg){try{if(!msg)return;if(bad.test(String(msg))){_NXUA.panic("erreur DOM/React");}}catch(_){}};
+var handler=function(msg){try{if(!msg)return;if(bad.test(String(msg))){_NXUA.panic("erreur DOM/React");try{if(window._NXBADGE)_NXBADGE.kill("erreur DOM/React");}catch(_){}}}catch(_){}};
 if(window.addEventListener){
 window.addEventListener("error",function(ev){try{handler((ev&&(ev.message||(ev.error&&ev.error.message)))||"");}catch(_){}},true);
 window.addEventListener("unhandledrejection",function(ev){try{var r=ev&&ev.reason;handler((r&&(r.message||r))||"");}catch(_){}},true);}
@@ -1777,15 +1781,25 @@ title:"Nexium Client",
 "aria-label":"Nexium Client",
 style:{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"22px",height:"22px",fontSize:"16px",lineHeight:"22px",cursor:"pointer",userSelect:"none"}
 },"\uD83D\uDD25");}catch(_){return null;}};
+_NXBADGE.kill=function(why){try{
+if(_NXBADGE.killed)return;_NXBADGE.killed=true;
+var API=null;try{API=(window.Vencord&&Vencord.Api&&Vencord.Api.Badges)||null;}catch(_){}
+try{if(API&&_NXBADGE.entry&&typeof API.removeProfileBadge==="function")API.removeProfileBadge(_NXBADGE.entry);}catch(_){}
+_NXBADGE.done=true;
+try{if(window._NXERR){_NXERR.push("badge :: retire automatiquement ("+why+")");if(window._NXsaveErr)_NXsaveErr();}}catch(_){}
+}catch(_){}};
 _NXBADGE.install=function(){try{
-if(_NXBADGE.done)return;
+if(_NXBADGE.done||_NXBADGE.killed)return;
+var me=_NXBADGE.me();
+if(!me){_NXBADGE.itries=(_NXBADGE.itries||0)+1;if(_NXBADGE.itries<20)setTimeout(_NXBADGE.install,3000);return;}
+if(!_NXBADGE.viewerIsDev()){_NXBADGE.done=true;return;}
 var API=null;try{API=(window.Vencord&&Vencord.Api&&Vencord.Api.Badges)||null;}catch(_){}
 if(!API||typeof API.addProfileBadge!=="function"){
 _NXBADGE.itries=(_NXBADGE.itries||0)+1;
 if(_NXBADGE.itries<30)setTimeout(_NXBADGE.install,2000);
 else{try{if(window._NXERR)_NXERR.push("badge :: API Badges indisponible");}catch(_){}}
 return;}
-API.addProfileBadge({
+_NXBADGE.entry={
 description:"Nexium Client",
 component:_NXBADGE.Flame,
 link:"https://discord.gg/"+((window._NXSP&&_NXSP.CODE)||"itsuki"),
@@ -1794,7 +1808,8 @@ if(!_NXBADGE.viewerIsDev())return false;
 if(!info)return false;
 var id=info.userId||(info.user&&info.user.id)||info.id;
 return _NXBADGE.has(id);}catch(_){return false;}}
-});
+};
+API.addProfileBadge(_NXBADGE.entry);
 _NXBADGE.done=true;
 }catch(e){try{if(window._NXERR)_NXERR.push("badge :: "+((e&&e.message)||"erreur"));}catch(_){}}};
 try{_NXBADGE.loadCache();
