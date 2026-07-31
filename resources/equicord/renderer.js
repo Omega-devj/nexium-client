@@ -269,6 +269,21 @@ var _NXmig=function(d,name){try{if(!d||typeof d!=="object")return d;if(d._sv===_
 var _NXERR=window._NXERR||(window._NXERR=[]);
 var _NXsaveErr=window._NXsaveErr||(window._NXsaveErr=function(){try{_NXDB.set("nexium_errors",JSON.stringify(_NXERR.slice(-20)));}catch(_){}});
 try{var _pe=_NXDB.get("nexium_errors");if(_pe){var _pj=JSON.parse(_pe);if(_pj&&_pj.length){for(var _a=0;_a<_pj.length;_a++)_NXERR.push("[session precedente] "+_pj[_a]);}}}catch(_){}
+try{if(typeof console!=="undefined"&&console.error&&!console.error.__nx){
+var _ce=console.error.bind(console);
+var _pce=function(){try{
+var parts=[];for(var a=0;a<arguments.length&&a<4;a++){var v=arguments[a];
+if(v==null)continue;
+if(typeof v==="string")parts.push(v);
+else if(v&&v.message)parts.push(String(v.message)+(v.stack?(" | "+String(v.stack).split("\n").slice(1,3).join(" | ")):""));
+else{try{parts.push(String(v).slice(0,120));}catch(__){}}}
+var msg=parts.join(" ").slice(0,300);
+if(msg&&/error|erreur|exception|failed|cannot|undefined is not|null is not|removeChild|insertBefore|React/i.test(msg)){
+if(!_NXERR.length||_NXERR[_NXERR.length-1]!=="console :: "+msg){
+_NXERR.push("console :: "+msg);if(_NXERR.length>20)_NXERR.shift();_NXsaveErr();}}
+}catch(__){}
+return _ce.apply(null,arguments);};
+_pce.__nx=true;console.error=_pce;}}catch(_){}
 try{if(window.addEventListener){window.addEventListener("error",function(ev){try{var m=(ev&&(ev.message||(ev.error&&ev.error.message)))||"";if(!m)return;_NXERR.push("global :: "+String(m).slice(0,200));if(_NXERR.length>20)_NXERR.shift();_NXsaveErr();}catch(_){}},true);
 window.addEventListener("unhandledrejection",function(ev){try{var r=ev&&ev.reason;var m=(r&&(r.message||r))||"";if(!m)return;_NXERR.push("promesse :: "+String(m).slice(0,200));if(_NXERR.length>20)_NXERR.shift();_NXsaveErr();}catch(_){}},true);}}catch(_){}
 var _NXkey=function(e){try{if(e.key==="Enter"||e.key===" "||e.key==="Spacebar"){e.preventDefault();if(e.currentTarget&&e.currentTarget.click)e.currentTarget.click();}}catch(_){}};
@@ -587,7 +602,7 @@ _NXfoot("localStorage · clés nexium_*")));
 
 var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="119";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="120";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
