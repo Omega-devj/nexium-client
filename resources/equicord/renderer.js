@@ -68,7 +68,7 @@ ${a}`}function xW(e,t){return async()=>{e(!0);try{await t()}catch(n){Ec.error(n)
 `),axe()}function ixe(e,t){if(!e?.document)return;let n=e.document;n.querySelector("vencord-root")?.remove();let o=Tv.cloneNode(!1);o.append(hp.cloneNode(!0),Gm.cloneNode(!0)),t!=="DISCORD_OutOfProcessOverlay"&&o.append(Ev.cloneNode(!0)),n.documentElement.appendChild(o)}function axe(){if(jg)for(let e of jg.getWindowKeys())ixe(jg.getWindow(e),e)}function jat(e){_x();let t=e.theme;e.addChangeListener(()=>{t!==e.theme&&(t=e.theme,_x())})}var $v,txe,sxe=h(()=>{"use strict";d();q();Ie();T();Xa();document.addEventListener("DOMContentLoaded",()=>{_x(),rxe(Me.useQuickCss),nn.addChangeListener("useQuickCss",rxe),nn.addChangeListener("enabledThemeLinks",_x),nn.addChangeListener("enabledThemes",_x),nn.addChangeListener("themeActivationModes",_x),window.addEventListener("message",e=>{let{discordPopoutEvent:t}=e.data||{};t?.type==="loaded"&&ixe(jg.getWindow(t.key),t.key)}),VencordNative.quickCss.addThemeChangeListener(_x)},{once:!0})});var _W={};Ht(_W,{UserSettings:()=>OW,getUserSetting:()=>lxe,getUserSettingLazy:()=>Eo});function lxe(e,t){if(!Be("UserSettingsAPI"))throw new Error("Cannot use UserSettingsAPI without setting it as a dependency.");for(let n in OW){let o=OW[n];if(o.userSettingsAPIGroup===e&&o.userSettingsAPIName===t)return o}}function Eo(e,t){return ro(()=>lxe(e,t))}var OW,os=h(()=>{"use strict";d();gi();Xe();se();Qt();OW=Uo(()=>{let e=lp('"textAndImages","renderSpoilers"');return e==null?new ce("UserSettingsAPI").error("Didn't find settings module."):Mn(e)})});var FW={};Ht(FW,{AudioPlayer:()=>lst,Badges:()=>dT,ChatButtons:()=>nst,Commands:()=>Kat,ContextMenu:()=>tst,DataStore:()=>ge,HeaderBar:()=>ost,MemberListDecorators:()=>Xat,MessageAccessories:()=>Qat,MessageDecorations:()=>Jat,MessageEvents:()=>qat,MessagePopover:()=>Zat,MessageUpdater:()=>rst,NicknameIcons:()=>sst,Notices:()=>Wat,Notifications:()=>ZA,PluginManager:()=>UA,ProfileCollections:()=>dst,ProfileSections:()=>pst,ServerList:()=>Yat,Settings:()=>Vat,Styles:()=>est,Themes:()=>ast,UserArea:()=>cst,UserSettings:()=>ist,isEquicord:()=>ust});var qat,Wat,Kat,ge,Qat,Zat,dT,Yat,Jat,Xat,Vat,est,ZA,tst,nst,ost,rst,ist,ast,sst,lst,cst,ust,dst,pst,zn=h(()=>{"use strict";d();Va();bx();sa();ni();Un();Jn();ed();$j();BA();Wj();su();qI();Lx();sq();Vg();ns();Wm();Qt();Dq();Rq();Vm();q();Xa();sxe();os();qat=Vj,Wat=TW,Kat=_j,ge=or,Qat=Gj,Zat=nq,dT=Wq,Yat=RW,Jat=qj,Xat=zj,Vat=Sj,est=dq,ZA=MW,tst=Dj,nst=Mj,ost=kq,rst=CW,ist=_W,ast=LW,sst=aq,lst=vq,cst=_q,ust=!0,dst=Eq,pst=Bq});function fst(e){if(!e)return null;try{let t=e.replace(/^git\+/,""),n=new URL(t);if(!n.hostname.endsWith("github.com"))return null;let o=n.pathname.replace(/\.git$/,"").split("/").filter(Boolean);return o.length<2?null:`${o[0]}/${o[1]}`}catch{return null}}async function gst(e,t,n){if(!e||typeof fetch!="function")return[];try{let o=await fetch(`${mst}/${e}/compare/${t}...${n}`,{headers:{Accept:"application/vnd.github+json","Cache-Control":"no-cache"}});if(!o.ok)return[];let r=await o.json();return!r||!Array.isArray(r.commits)?[]:r.commits.map(a=>{let l=(a?.commit?.message??"").split(`
 `)[0]||"No message",c=a?.commit?.author?.name||a?.author?.login||"Unknown",u=a?.commit?.author?.date?Date.parse(a.commit.author.date):void 0;return{hash:a?.sha||"",author:c,message:l,timestamp:Number.isNaN(u)?void 0:u}})}catch(o){return console.warn("Failed to fetch commits between hashes",o),[]}}function hst(e){let t=new Set,n=o=>{o!=null&&t.add(typeof o=="string"?o:String(o))};return e instanceof Set||e instanceof Map||Array.isArray(e)?e.forEach(n):typeof e=="string"?n(e):e&&typeof e=="object"&&Object.values(e).forEach(n),t}function xst(e){let t=new Map,n=(o,r)=>{o!=null&&t.set(String(o),hst(r))};return e?e instanceof Map?(e.forEach((o,r)=>n(r,o)),t):Array.isArray(e)?(e.forEach(o=>{Array.isArray(o)&&o.length>0&&n(o[0],o[1])}),t):(typeof e=="object"&&Object.entries(e).forEach(([o,r])=>n(o,r)),t):t}function yst(e){return Object.fromEntries(Array.from(e.entries()).map(([t,n])=>[t,Array.from(n)]))}async function UW(e){await ge.set($W,yst(e))}function dxe(e){return e&&typeof e.get=="function"&&typeof e.size=="number"}function YA(e){return e?dxe(e)?e.size:Object.keys(e).length:0}function GW(e){return e?dxe(e)?Array.from(e.entries()):Object.entries(e):[]}async function mT(){let e=await ge.get(pT);return e&&e.forEach(t=>{t.newSettings&&!(t.newSettings instanceof Map)&&(t.newSettings=new Map(Object.entries(t.newSettings)))}),e||[]}async function HW(e,t,n,o,r=!1){let a=await mT(),s=await jW(),l=Pa;if(r){let g=await hT(),x=e.length>0?e[0].hash:l;if(g===x)return}if(!r&&e.length===0&&t.length===0&&n.length===0&&YA(o)===0)return;let c=r?"repository_fetch":"update",u=l,p=l;r?e.length>0&&(p=e[0].hash):(u=s||"unknown",p=l);let m={id:crypto.randomUUID(),timestamp:Date.now(),fromHash:u,toHash:p,commits:e,newPlugins:t,updatedPlugins:n,newSettings:YA(o)>0?Object.fromEntries(o):void 0,type:c};if(a.unshift(m),a.length>50&&a.splice(50),await ge.set(pT,a),!r)await pxe(l);else{let g=e.length>0?e[0].hash:l;await bst(g)}await fxe(),await xxe()}async function jW(){return await ge.get(zW)}async function pxe(e){await ge.set(zW,e)}async function mxe(){let e=await ge.get(cxe);return new Set(e||[])}async function fxe(){let e=Object.keys(Ge);await ge.set(cxe,e)}function vst(e){let t=Ge[e]?.settings?.def||{};return new Set(Object.keys(t).filter(n=>n!=="enabled"))}function qW(e){return new Map(e.map(t=>[t,vst(t)]))}async function gxe(){let e=await ge.get($W);if(e===void 0){let n=await mxe(),o=[...new Set([...Object.keys(Ge),...Array.from(n)])],r=qW(o);return await UW(r),r}let t=xst(e);return(e instanceof Map||Array.isArray(e)||e&&typeof e=="object"&&Object.values(e).some(n=>n instanceof Set||n instanceof Map))&&await UW(t),t}async function WW(){let e=qW(Object.keys(Ge)),t=await gxe(),n=new Map;return e.forEach((o,r)=>{let a=t.get(r);if(!a)return;let s=[...o].filter(l=>!a.has(l));s.length>0&&n.set(r,s)}),n}async function hxe(e){let t=await jW();if(!t||t==="unknown"||t===Pa)return[];let n=fst(e);return n?gst(n,t,Pa):[]}async function xxe(){let e=qW(Object.keys(Ge)),t=await gxe(),n=new Map;new Set([...e.keys(),...t.keys()]).forEach(o=>{n.set(o,new Set([...t.get(o)||[],...e.get(o)||[]]))}),await UW(n)}async function fT(){let e=Object.keys(Ge),t=await mxe();return e.filter(n=>!t.has(n)&&!Ge[n].hidden&&!Ge[n].required)}async function gT(){return[]}async function yxe(){await ge.del(pT),await ge.del(zW),await ge.del($W)}async function vxe(e){let n=(await mT()).filter(o=>o.id!==e);await ge.set(pT,n)}async function bxe(){await jW()||(await pxe(Pa),await fxe(),await xxe())}async function hT(){return await ge.get(uxe)}async function bst(e){await ge.set(uxe,e)}function Sxe(e){let t=new Date(e),o=new Date().getTime()-t.getTime(),r=Math.floor(o/(1e3*60)),a=Math.floor(o/(1e3*60*60)),s=Math.floor(o/(1e3*60*60*24));return r<60?`${r} minute${r!==1?"s":""} ago`:a<24?`${a} hour${a!==1?"s":""} ago`:s<7?`${s} day${s!==1?"s":""} ago`:t.toLocaleDateString()}var pT,zW,cxe,$W,uxe,mst,wxe=h(()=>{"use strict";d();zn();_v();Ts();pT="EquicordChangelog_History",zW="EquicordChangelog_LastSeenHash",cxe="EquicordChangelog_KnownPlugins",$W="EquicordChangelog_KnownSettings",uxe="EquicordChangelog_LastRepoCheck",mst="https://api.github.com/repos"});var Axe=h(()=>{});function ko(e,t=300){let n;return function(...o){clearTimeout(n),n=setTimeout(()=>{e(...o)},t)}}var Ps=h(()=>{"use strict";d()});var ef,KW=h(()=>{d();ef="NanoCord/NanoCord"});var t0,MXt,BXt,Gv=h(()=>{"use strict";d();_v();KW();t0=Pa.slice(0,7),MXt=`NanoCord/${Pa}${ef?` (https://github.com/${ef})`:""}`,BXt=`NanoCord${ef?` (https://github.com/${ef})`:""}`});var kxe=h(()=>{});function du(e){return typeof e=="string"?e:e?null:"Invalid input provided"}function Wn({tag:e="div",name:t,description:n,error:o,inlineSetting:r,children:a}){return i(e,{className:Fx("section")},i("div",{className:X(Fx("content"),r&&Fx("inline"))},i("div",{className:Fx("label")},t&&i(Y,{className:Fx("title"),size:"md",weight:"medium"},Ku(eA(t))),n&&i(Y,{className:Fx("description"),size:"sm"},n)),a),o&&i(Y,{className:Fx("error"),size:"sm"},o))}var Fx,sd=h(()=>{"use strict";d();Dt();Ie();$e();Ka();Fx=Q("vc-plugins-setting-")});function Cxe({setting:e,pluginSettings:t,definedSettings:n,id:o,onChange:r}){let a=t[o]??e.default,[s,l]=D(a??!1),[c,u]=D(null);function p(m){let g=e.isValid?.call(n,m)??!0;l(m),u(du(g)),g===!0&&r(m)}return i(Wn,{tag:"label",name:o,description:e.description,error:c,inlineSetting:!0},i(Xr,{checked:s,onChange:p,disabled:Hl(n,e)}))}var Ixe=h(()=>{"use strict";d();Qt();Xc();T();sd()});function Txe({setting:e,onChange:t,closePluginSettings:n}){return e.component({setValue:t,option:e,closePluginSettings:n})}var Exe=h(()=>{"use strict";d()});function QW({setting:e,pluginSettings:t,definedSettings:n,id:o,onChange:r}){function a(m){return e.type===2?BigInt(m):Number(m)}let[s,l]=D(`${t[o]??e.default??0}`),[c,u]=D(null);function p(m){let g=e.isValid?.call(n,m)??!0;u(du(g)),g===!0&&r(a(m)),e.type===1&&BigInt(m)>=Sst?l(`${Number.MAX_SAFE_INTEGER}`):l(m)}return i(Wn,{name:o,description:e.description,error:c},i(ve,{type:"number",pattern:"-?[0-9]+",placeholder:e.placeholder??"Enter a number",value:s,onChange:p,disabled:Hl(n,e),...e.componentProps}))}var Sst,Dxe=h(()=>{"use strict";d();Qt();R();T();sd();Sst=BigInt(Number.MAX_SAFE_INTEGER)});function Pxe({setting:e,pluginSettings:t,definedSettings:n,onChange:o,id:r}){let a=t[r]??e.options?.find(m=>m.default)?.value,[s,l]=D(a??null),[c,u]=D(null);function p(m){let g=e.isValid?.call(n,m)??!0;l(m),u(du(g)),g===!0&&o(m)}return i(Wn,{name:r,description:e.description,error:c},i(Zt,{placeholder:e.placeholder??"Select an option",options:e.options,maxVisibleItems:5,closeOnSelect:!0,select:p,isSelected:m=>m===s,serialize:m=>String(m),isDisabled:Hl(n,e),...e.componentProps}))}var Nxe=h(()=>{"use strict";d();Qt();T();sd()});function Mxe({setting:e,pluginSettings:t,definedSettings:n,id:o,onChange:r}){let a=t[o]??e.default,[s,l]=D(null);function c(u){let p=e.isValid?.call(n,u)??!0;l(du(p)),p===!0&&r(u)}return i(Wn,{name:o,description:e.description,error:s},i(Qo,{markers:e.markers,minValue:e.markers[0],maxValue:e.markers[e.markers.length-1],initialValue:a,onValueChange:c,onValueRender:u=>String(u.toFixed(2)),stickToMarkers:e.stickToMarkers??!0,disabled:Hl(n,e),...e.componentProps}))}var Bxe=h(()=>{"use strict";d();Qt();T();sd()});function Rxe({setting:e,pluginSettings:t,definedSettings:n,id:o,onChange:r}){let[a,s]=D(t[o]??e.default??null),[l,c]=D(null);function u(p){let m=e.isValid?.call(n,p)??!0;s(p),c(du(m)),m===!0&&r(p)}return i(Wn,{name:o,description:e.description,error:l},e.multiline?i(Za,{placeholder:e.placeholder??"Enter a value",value:a,onChange:u,disabled:Hl(n,e),...e.componentProps}):i(ve,{type:"text",placeholder:e.placeholder??"Enter a value",value:a,onChange:u,maxLength:null,disabled:Hl(n,e),...e.componentProps}))}var Lxe=h(()=>{"use strict";d();Qt();T();sd()});var Oxe,_xe=h(()=>{"use strict";d();kxe();R();Ixe();Exe();Dxe();Nxe();Bxe();Lxe();Oxe={0:Rxe,1:QW,2:QW,3:Cxe,4:Pxe,5:Mxe,6:Txe,7:()=>null}});var Fxe=h(()=>{});function xT({text:e,href:t}){return i(pe,{variant:"secondary",size:"small",style:{gap:4},onClick:()=>VencordNative.native.openExternal(t)},i(nH,{width:16,height:16}),e)}function yT({text:e,href:t}){return i(pe,{variant:"secondary",size:"small",style:{gap:4},onClick:()=>VencordNative.native.openExternal(t)},i(q5,{width:16,height:16}),e)}var ZW=h(()=>{"use strict";d();Ft();bt()});function ld(e){ae(t=>i(wst,{user:e,modalProps:t}))}function wst({user:e,modalProps:t}){wn();let n=Le([Zn],()=>Zn.getUserProfile(e.id));j(()=>{!n&&!e.bot&&e.id&&Pg(e.id)},[e.id,e.bot,n]);let o=n?.connectedAccounts?.find(c=>c.type==="github")?.name,r=n?.connectedAccounts?.find(c=>c.type==="domain")?.name,a=Ce(()=>{let c=Object.values(Ge);return(Zg[e.id]||Yg[e.id]?c.filter(p=>p.authors.includes(Zg[e.id]||Yg[e.id])):c.filter(p=>la[p.name]?.userPlugin&&p.authors.some(m=>m.id.toString()===e.id)||p.authors.some(m=>m.name===e.username))).filter(p=>!p.name.endsWith("API")).sort((p,m)=>Number(p.required??!1)-Number(m.required??!1))},[e.id,e.username]),s=i(An,{href:"https://github.com/Equicord/Equicord"},"contributed"),l=r||o;return i(Se,{...t,title:i("div",{className:Hv("header")},i("img",{className:Hv("avatar"),src:e.getAvatarURL(void 0,512,!0),alt:""}),i(te,{tag:"h2",className:Hv("name")},e.username)),subtitle:a.length?i(U,null,e.username," has ",s," to ",CA(a.length,"plugin"),"!"):i(U,null,e.username," has not made any plugins. They likely ",s," in other ways!"),actionBarInput:l&&i("div",{className:Hv("links"),style:{width:"100%",justifyContent:"flex-end"}},r&&i(xT,{text:r,href:`https://${r}`}),o&&i(yT,{text:o,href:`https://github.com/${o}`}))},i("div",{className:Hv("root")},!!a.length&&i("div",{className:Hv("plugins")},a.map(c=>i(Kl,{key:c.name,plugin:c,disabled:c.required??!1,onRestartNeeded:()=>le("Restart to apply changes!")})))))}var Hv,YW=h(()=>{"use strict";d();Fxe();q();Ke();ra();Ze();O();Ie();je();$e();T();Ts();ZW();jv();Hv=Q("vc-author-modal-")});function XW(e){let t=new Cst({username:e.username,id:e.id??wx(),avatar:e.avatar,bot:!0});return G.dispatch({type:"USER_UPDATE",user:t}),t}function Ist({tags:e}){return i("div",{className:tf("tags")},e.map(t=>i("div",{key:t,className:tf("tag")},t)))}function vT({plugin:e,onRestartNeeded:t,onClose:n,transitionState:o}){let r=wn([`plugins.${e.name}.*`]).plugins[e.name],a=_A(e),s=Ce(()=>[XW({username:"Loading...",id:"-1465912127305809920"})],[]),[l,c]=D([]);j(()=>{(async()=>{for(let[y,v]of e.authors.slice(0,6).entries())try{let b=v.id?await Ei.getUser(String(v.id)).catch(()=>XW({username:v.name})):XW({username:v.name});c(S=>[...S,b])}catch{continue}})()},[e.authors]);function u(){VW(e,t)}function p(){let{settings:y}=e;if(!a||!y)return i(U,null,"There are no settings for this plugin.");let v=Object.entries(y.def).map(([b,S])=>{if(S.type===7||Pv(y,S))return null;function k(E){let N=e.settings.def[b];!N||N.type===7||(r[b]=E,N.restartNeeded&&t(b))}let I=Oxe[S.type];return i(K,{noop:!0,key:b},i(I,{id:b,setting:S,onChange:ko(k),pluginSettings:r,definedSettings:y,closePluginSettings:n}))});return i("div",{className:"vc-plugins-settings"},v)}function m(y){let v=e.authors.slice(6);return i(Ae,{text:v.map(b=>b.name).join(", ")},({onMouseEnter:b,onMouseLeave:S})=>i("div",{className:JW.moreUsers,onMouseEnter:b,onMouseLeave:S},"+",v.length))}let g=la[e.name],x=g.folderName.startsWith("src/equicordplugins/")??!1;return i(Se,{transitionState:o,onClose:n,size:"lg",title:i("div",{className:tf("header")},i(Y,{tag:"h1",weight:"semibold",size:"lg"},e.name)),subtitle:i("div",{className:tf("info")},i("div",null,i(U,{size:"md"},e.description),!!e.tags?.length&&i(Ist,{tags:e.tags})))},!!e.settingsAboutComponent&&i("div",{className:X(z.top16,tf("about-box"))},i("section",null,i(K,{message:"An error occurred while rendering this plugin's custom Info Component"},i(e.settingsAboutComponent,null)))),i("div",{className:"vc-settings-modal-content"},i("section",null,i(Qi,{variant:"heading-lg/semibold",className:X(z.top8,z.bottom8)},"Authors"),i("div",{style:{width:"fit-content"}},i(K,{noop:!0},i(Zu,{users:l.length?l:s,guildId:void 0,renderIcon:!1,showDefaultAvatarsForNullUsers:!0,renderMoreUsers:m,renderUser:y=>i(Fn,{className:JW.clickableAvatar,onClick:()=>x?ld(y):ld(y)},i("img",{className:JW.avatar,src:y.getAvatarURL(void 0,80,!0),alt:y.username,title:y.username}))})))),i("section",null,i(Y,{size:"lg",weight:"semibold",color:"text-strong",className:X(z.top16,z.bottom8)},"Settings"),p())),i("div",null,i(he,{flexDirection:"column",style:{width:"100%"}},i(he,{style:{justifyContent:"space-between",alignItems:"center"}},a?i(Ae,{text:"Reset to default settings",shouldShow:!AA(r)},({onMouseEnter:y,onMouseLeave:v})=>i(pe,{className:tf("disable-warning"),size:"small",variant:"primary",onClick:u,onMouseEnter:y,onMouseLeave:v},"Reset")):i("div",null),!g.userPlugin&&i("div",{className:tf("links")},i(xT,{text:"Website",href:x?`https://equicord.org/plugins/${e.name}`:`https://vencord.dev/plugins/${e.name}`}),i(yT,{text:"Source Code",href:`https://github.com/${ef}/tree/main/${g.folderName}`}))))))}function ai(e,t){ae(n=>i(vT,{...n,plugin:e,onRestartNeeded:o=>t?.(e.name,o)}))}function Tst(e,t){let n=e.settings?.def,o=e.name;if(!n)return;let r={},a=!1;for(let l in n){if(l==="enabled")continue;let c=n[l];c.type=c.type??0,c.type===0?r[l]=c.default!==void 0&&c.default!==""?c.default:"":"default"in c&&c.default!==void 0&&(r[l]=c.default),c?.restartNeeded&&(a=!0)}let s=e.settings?.store;s&&Object.assign(s,r),a&&t?.(e.name),C.show({message:`Settings for ${o} have been reset.`,id:C.genId(),type:C.Type.SUCCESS,options:{position:C.Position.TOP}})}function VW(e,t,n=!0,o,r){ae(a=>i(Ast,{...a,className:tf("confirm"),header:n?"Reset Settings":"Disable Plugins",confirmText:n?"Reset":"Disable All",cancelText:"Cancel",onConfirm:()=>{n&&e?Tst(e,t):r?.()},onCancel:a.onClose},i(U,null,n?i(f,null,"Are you sure you want to reset all settings for ",i("strong",null,e?.name)," to their default values?"):`Are you sure you want to disable ${o} plugins?`),i("div",{className:X(z.top16,tf("warning"))},i(kst,{color:"var(--text-feedback-critical)"}),i("span",null,"This action cannot be undone."))))}var tf,JW,Ben,Ast,kst,Cst,JA=h(()=>{"use strict";d();Axe();ni();Qt();q();Dt();Ft();Oe();Vt();Ze();Ps();Gv();Ie();gi();un();$e();R();se();T();Ts();_xe();YW();ZW();tf=Q("vc-plugin-modal-"),JW=Re("moreUsers","avatar","clickableAvatar"),Ben=we("CLOSE_BUTTON_LABEL"),Ast=we('parentComponent:"ConfirmModal"'),kst=we("3.15H3.29c-1.74"),Cst=ro(()=>B.getCurrentUser().constructor)});function Kl({plugin:e,disabled:t,onRestartNeeded:n,onMouseEnter:o,onMouseLeave:r,isNew:a}){let s=Me.plugins[e.name],l=()=>Be(e.name);function c(){let u=l();if(!u){let{restartNeeded:m,failures:g}=Nv(e);if(g.length){Est.error(`Failed to start dependencies for ${e.name}: ${g.join(", ")}`),Ma("Failed to start dependencies: "+g.join(", "),"Close",()=>null);return}if(m){s.enabled=!0,n(e.name,"enabled");return}}if(tT(e)){s.enabled=!u,n(e.name,"enabled");return}if(u&&!e.started){s.enabled=!u;return}if(!(u?Qm(e):Km(e))){s.enabled=!1;let m=`Error while ${u?"stopping":"starting"} plugin ${e.name}`;le(m,C.Type.FAILURE,{position:C.Position.BOTTOM});return}s.enabled=!u}return i(Ex,{name:e.name,description:e.description,isNew:a,enabled:l(),setEnabled:c,disabled:t,onMouseEnter:o,onMouseLeave:r,infoButton:i("button",{role:"switch",onClick:()=>ai(e,n),className:eK("info-button")},_A(e)?i(Di,{className:eK("info-icon")}):i(Fl,{className:eK("info-icon")}))})}var Est,eK,jv=h(()=>{"use strict";d();Vg();Qt();q();bt();Qq();Ie();Xe();T();JA();Est=new ce("PluginCard"),eK=Q("vc-plugins-")});var nf,XA=h(()=>{"use strict";d();nf=class{set=new Set;get changeCount(){return this.set.size}get hasChanges(){return this.changeCount>0}handleChange(t){this.set.delete(t)||this.set.add(t)}add(t){return this.set.add(t)}remove(t){return this.set.delete(t)}getChanges(){return this.set.values()}map(t){return[...this.getChanges()].map(t)}}});function Uxe({newPlugins:e,onPluginToggle:t}){let n=wn(),o=F.useMemo(()=>new nf,[]),r=vn(),a=F.useMemo(()=>{let u={};for(let p in Ge){let m=Ge[p].dependencies;if(m)for(let g of m)u[g]??=[],u[g].push(p)}return u},[]),s=u=>u.map(p=>Ge[p]).filter(p=>p&&!p.hidden).sort((p,m)=>p.name.localeCompare(m.name)),l=F.useMemo(()=>s(e),[e]);if(l.length===0)return null;let c=u=>u?i(F.Fragment,null,i(U,null,"This plugin is required by:"),u.map(p=>i(U,{key:p,className:"vc-changelog-dep-text"},p))):null;return i("div",{className:qv("new-plugins-section")},i(te,{className:z.bottom8},"New Plugins (",l.length,")"),i(U,{className:z.bottom16},"The following plugins have been added in recent updates:"),i("div",{className:qv("new-plugins-grid")},l.map(u=>{let p=u.required||a[u.name]?.some(g=>n.plugins[g].enabled)||u.name.endsWith("API"),m=u.required?"This plugin is required for Nexium Mods to function.":c(a[u.name]?.filter(g=>n.plugins[g].enabled));return p?i(Ae,{text:m,key:u.name},({onMouseLeave:g,onMouseEnter:x})=>i(dn,{className:qv("new-plugin-card","required")},i(Kl,{onMouseLeave:g,onMouseEnter:x,onRestartNeeded:y=>{o.handleChange(y),r()},disabled:!0,plugin:u,isNew:!0}))):i(dn,{key:u.name,className:qv("new-plugin-card")},i(Kl,{onRestartNeeded:g=>{o.handleChange(g),r()},disabled:!1,plugin:u,isNew:!0}))})),o.hasChanges&&i("div",{className:qv("restart-notice")},i(Ae,{text:i(f,null,"The following plugins require a restart:",i("div",{className:z.bottom8}),i("ul",null,o.map(u=>i("li",{key:u},u))))},u=>i(pe,{...u,variant:"link",size:"small",onClick:()=>location.reload(),className:z.top16},"Restart Required"))))}function Dst({pluginName:e,depMap:t,settings:n}){let o=Ge[e];if(!o||o.hidden)return null;let r=o.required||t[o.name]?.some(s=>n.plugins[s].enabled),a=o.required?"This plugin is required for Nexium Mods to function.":t[o.name]?.length>0?`This plugin is required by: ${t[o.name]?.filter(s=>n.plugins[s].enabled).join(", ")}`:null;return i("div",{className:`vc-changelog-entry ${r?"required":""}`},i("div",{className:"vc-changelog-entry-header"},i("span",{className:"vc-changelog-entry-hash"},o.name,r&&" *"),i("span",{className:"vc-changelog-entry-author"},o.authors?.[0]?.name||"Unknown")),i("div",{className:"vc-changelog-entry-message"},o.description||"No description available"),a&&i("div",{className:"vc-changelog-dep-text"},a))}function bT({newPlugins:e,maxDisplay:t=20}){let n=wn(),o=F.useMemo(()=>{let s={};for(let l in Ge){let c=Ge[l].dependencies;if(c)for(let u of c)s[u]??=[],s[u].push(l)}return s},[]);if(e.length===0)return null;let r=e.slice(0,t),a=e.length>t;return i("div",{className:qv("new-plugins-compact")},i("div",{className:"vc-changelog-plugins-list"},r.map(s=>i(Dst,{key:s,pluginName:s,depMap:o,settings:n})),a&&i("div",{className:"vc-changelog-entry"},i("div",{className:"vc-changelog-entry-message"},"+",e.length-t," more plugins"))))}var qv,zxe=h(()=>{"use strict";d();q();Ft();Rr();Ke();Ze();jv();XA();Ie();un();bn();T();Ts();qv=Q("vc-changelog-")});function $xe({entry:e,repo:t,repoPending:n}){return i(dn,{className:"vc-changelog-entry"},i("div",{style:{display:"flex",flexDirection:"column",gap:"0.25em"}},i("div",{className:"vc-changelog-entry-header"},i("code",{className:"vc-changelog-entry-hash"},i(Uv,{repo:t,hash:e.hash,disabled:n})),i("span",{className:"vc-changelog-entry-author"},"by ",e.author)),i("div",{className:"vc-changelog-entry-message"},e.message)))}function Pst({log:e,repo:t,repoPending:n,isExpanded:o,onToggleExpand:r,onClearLog:a}){let s=e.type==="repository_fetch"||e.type===void 0&&e.fromHash===e.toHash&&e.commits.length===0,l=e.fromHash===e.toHash;return i(dn,{className:"vc-changelog-log"},i("div",{className:"vc-changelog-log-header",onClick:r},i("div",{className:"vc-changelog-log-info"},i("div",{className:"vc-changelog-log-title"},i("span",null,s?l?`Repository check: ${e.fromHash.slice(0,7)} (up to date)`:`Repository check: ${e.fromHash.slice(0,7)} \u2192 ${e.toHash.slice(0,7)}`:`Update: ${e.fromHash.slice(0,7)} \u2192 ${e.toHash.slice(0,7)}`),i(pe,{size:"min",variant:"secondary",className:"vc-changelog-delete-button",style:{padding:"4px",color:"var(--status-danger)",opacity:.6,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"},onClick:c=>{c.stopPropagation(),a(e.id)}},i(Aa,{width:16,height:16}))),i("div",{className:"vc-changelog-log-meta"},Sxe(e.timestamp),e.commits.length>0&&` \u2022 ${e.commits.length} commits available`,e.commits.length===0&&" \u2022 No new commits",e.newPlugins.length>0&&` \u2022 ${e.newPlugins.length} new plugins`,e.updatedPlugins.length>0&&` \u2022 ${e.updatedPlugins.length} updated plugins`,e.newSettings&&YA(e.newSettings)>0&&` \u2022 ${GW(e.newSettings).reduce((c,[,u])=>c+u.length,0)} new settings`)),i("div",{className:`vc-changelog-log-toggle ${o?"expanded":""}`},"\u25BC")),o&&i("div",{className:"vc-changelog-log-content"},e.newPlugins.length>0&&i("div",{className:"vc-changelog-log-plugins"},i(bT,{newPlugins:e.newPlugins,maxDisplay:50})),e.updatedPlugins.length>0&&i("div",{className:"vc-changelog-log-plugins"},i(te,{className:z.bottom8},"Updated Plugins"),i(bT,{newPlugins:e.updatedPlugins,maxDisplay:50})),e.newSettings&&YA(e.newSettings)>0&&i("div",{className:"vc-changelog-log-plugins"},i(te,{className:z.bottom8},"New Settings"),i("div",{className:"vc-changelog-new-plugins-list"},GW(e.newSettings).map(([c,u])=>u.map(p=>i("span",{key:`${c}-${p}`,className:"vc-changelog-new-plugin-tag",title:`New setting in ${c}`},c,".",p))))),e.commits.length>0&&i("div",{className:"vc-changelog-log-commits"},i("div",{className:"vc-changelog-log-commits-list"},e.commits.map(c=>i($xe,{key:c.hash,entry:c,repo:t,repoPending:n}))))))}function Nst(){let[e,t,n]=go(Bx,{fallbackValue:"Loading..."}),[o,r]=F.useState([]),[a,s]=F.useState([]),[l,c]=F.useState([]),[u,p]=F.useState([]),[m,g]=F.useState(!0),[x,y]=F.useState(null),[v,b]=F.useState(new Set),[S,k]=F.useState(!1),[I,E]=F.useState(!1);F.useEffect(()=>{(async()=>{try{await bxe(),await N()}catch(re){console.error("Failed to initialize changelog:",re)}})()},[]),F.useEffect(()=>{t&&(Ec.error("Failed to retrieve repo",t),y("Failed to retrieve repository information"))},[t]);let N=F.useCallback(async()=>{try{let W=await mT();s(W)}catch(W){console.error("Failed to load changelog history:",W)}},[]),L=F.useCallback(async()=>{try{let W=await fT(),re=await gT();c(W),p(re)}catch(W){console.error("Failed to load new plugins:",W)}},[]),$=F.useCallback(async()=>{if(n||t)return!1;let W=e;if(!W)return!1;try{let re=await hxe(W);if(re.length===0)return!1;let ie=await fT(),xe=await gT(),ke=await WW();return await HW(re,ie,xe,ke),r(re),c(ie),p(xe),await N(),!0}catch(re){return console.error("Failed to log local update:",re),!1}},[e,t,n,N]);F.useEffect(()=>{!n&&!t&&(async()=>{try{let re=await hT(),ie=await VencordNative.updater.getUpdates();if(ie.ok){let xe=ie.value.length>0?ie.value[0].hash:Pa;E(re===xe)}}catch{E(!1)}})()},[n,t]);let Z=F.useCallback(async()=>{if(!(n||t)){g(!0),y(null);try{let W=await VencordNative.updater.getUpdates(),re=await hT(),ie=W.ok&&W.value.length>0?W.value[0].hash:Pa;if(re===ie){g(!1),E(!0),await $()||(r([]),C.show({message:"Already up to date with repository",id:C.genId(),type:C.Type.MESSAGE,options:{position:C.Position.BOTTOM}}));return}if(W.ok&&W.value)if(W.value.length>0){r(W.value);let xe=await fT(),ke=await gT(),De=await WW();c(xe),p(ke),await HW(W.value,xe,ke,De,!0),await N(),E(!0),C.show({message:`Found ${W.value.length} commit${W.value.length===1?"":"s"} from repository`,id:C.genId(),type:C.Type.SUCCESS,options:{position:C.Position.BOTTOM}})}else{let xe=await $();E(!0),C.show({message:xe?"Logged commits from your latest update":"Repository is up to date with your local copy",id:C.genId(),type:xe?C.Type.SUCCESS:C.Type.MESSAGE,options:{position:C.Position.BOTTOM}}),xe||r([])}else if(!W.ok)throw new Error(W.error?.message||"Failed to fetch from repository")}catch(W){Ec.error("Failed to fetch commits from repository",W);let re=W?.message||"Failed to connect to repository. Check your internet connection.";y(re),C.show({message:"Could not fetch commits from repository",id:C.genId(),type:C.Type.FAILURE,options:{position:C.Position.BOTTOM}})}finally{g(!1)}}},[n,t,L,N]);F.useEffect(()=>{(async()=>!n&&!t?(await L(),await $()?g(!1):await Z()):n||(await L(),g(!1)))()},[n,t,Z,L,$]);let ne=W=>{let re=new Set(v);re.has(W)?re.delete(W):re.add(W),b(re)},ee=o.length>0||l.length>0||u.length>0;return i(f,null,i(te,{className:z.top16},"Fetch Changes"),i(U,{className:z.bottom16},"Check the repository for new commits, plugin updates, and code changes. This will compare your current version with the latest available and show you what's new."),i("div",{className:"vc-changelog-controls"},i(pe,{size:"small",disabled:m||n||!!t,onClick:Z,variant:I?"positive":"primary"},m?"Loading...":I?"Repository Up to Date":"Fetch from Repository"),a.length>0&&i(f,null,i(pe,{size:"small",variant:S?"primary":"secondary",onClick:()=>k(!S),style:{marginLeft:"8px"}},S?"Hide Logs":"Show Logs"),i(pe,{size:"small",variant:"dangerPrimary",onClick:()=>{Ln.show({title:"Clear All Logs",body:"Are you sure you would like to clear all logs? This can't be undone.",confirmText:"Clear All",confirmColor:"danger",cancelText:"Cancel",onConfirm:async()=>{await yxe(),await N(),k(!1),C.show({message:"All logs have been cleared",id:C.genId(),type:C.Type.SUCCESS,options:{position:C.Position.BOTTOM}})}})},style:{marginLeft:"8px"}},"Clear All Logs"))),x&&i(Wr,{style:{padding:"1em",marginTop:"1em"}},i(U,null,x),i(U,{color:"text-subtle",style:{marginTop:"0.5em"}},"Make sure you have an internet connection and try again.")),i(_t,{className:z.top20}),i(te,{className:z.top20},"Repository"),i(U,{className:z.bottom8},"This is the GitHub repository where Nexium Mods fetches updates from."),i(U,{color:"text-subtle"},n?e:t?"Failed to retrieve - check console":i(An,{href:e},e.split("/").slice(-2).join("/"))," ","(",i(Uv,{repo:e,hash:Pa,disabled:n}),")"),ee&&i(f,null,i(_t,{className:z.top20}),i(te,{className:z.top20},"Recent Changes"),i(U,{className:z.bottom16},"These are the new commits and plugin updates since your last version. You can see what features were added, bugs were fixed, and which plugins received updates."),l.length>0&&i("div",{className:z.bottom16},i(Uxe,{newPlugins:l,onPluginToggle:()=>{}})),u.length>0&&i("div",{className:z.bottom16},i(te,{className:z.bottom8},"Updated Plugins (",u.length,")"),i(bT,{newPlugins:u})),o.length>0&&i("div",null,i(te,{className:z.bottom8},"Code Changes (",o.length," ",o.length===1?"commit":"commits",")"),i("div",{className:"vc-changelog-commits-list"},o.map(W=>i($xe,{key:W.hash,entry:W,repo:e,repoPending:n}))))),!ee&&!m&&!x&&i(f,null,i(_t,{className:z.top20}),i(te,{className:z.top20},"Recent Changes"),i(U,{color:"text-subtle"},'No commits available ahead of your current version. Click "Fetch from Repository" to check for new changes.')),S&&a.length>0&&i(f,null,i(_t,{className:z.top20}),i(te,{className:z.top20},"Update Logs (",a.length," ",a.length===1?"log":"logs",")"),i(U,{className:z.bottom16},"A history of your previous update sessions with their commit history and plugin changes. Click on a log to expand it and see the details."),i("div",{className:"vc-changelog-history-list"},a.map(W=>i(Pst,{key:W.id,log:W,repo:e,repoPending:n,isExpanded:v.has(W.id),onToggleExpand:()=>ne(W.id),onClearLog:re=>{Ln.show({title:"Clear Log",body:"Are you sure you would like to clear this log? This can't be undone.",confirmText:"Clear Log",confirmColor:"danger",cancelText:"Cancel",onConfirm:async()=>{await vxe(re),await N(),b(new Set(Array.from(v).filter(ie=>ie!==re))),C.show({message:"Log has been cleared",id:C.genId(),type:C.Type.SUCCESS,options:{position:C.Position.BOTTOM}})}})}})))))}
 var _NXDB=window._NXDB||(window._NXDB={});
-if(!_NXDB.boot){_NXDB.boot=true;
+if(!_NXDB.boot){try{_NXDB.boot=true;
 _NXDB.mode="mem";
 _NXDB.ls=(function(){
 try{var dd=Object.getOwnPropertyDescriptor(window,"localStorage");if(dd&&dd.get){var l0=dd.get.call(window);if(l0&&typeof l0.getItem==="function"){l0.setItem("__nxdb","1");l0.removeItem("__nxdb");_NXDB.mode="ls";return l0;}}}catch(_){}
@@ -80,8 +80,8 @@ _NXDB.get=function(k){try{return _NXDB.ls.getItem(k);}catch(_){return null;}};
 _NXDB.fail=null;_NXDB.set=function(k,v){try{_NXDB.ls.setItem(k,v);if(_NXDB.fail){_NXDB.fail=null;}return true;}catch(e){try{_NXDB.fail={key:k,at:Date.now(),msg:(e&&(e.name||e.message))||"erreur"};}catch(_){}return false;}};
 _NXDB.del=function(k){try{_NXDB.ls.removeItem(k);}catch(_){}};
 _NXDB.keys=function(){var out=[];try{if(_NXDB.ls._m)return Object.keys(_NXDB.ls._m);var n=_NXDB.ls.length||0;for(var a=0;a<n;a++){var k=_NXDB.ls.key(a);if(k)out.push(k);}}catch(_){}return out;};
-}
-var _NXM=window._NXM||(window._NXM={});
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXDB");if(window._NXERR)_NXERR.push("module _NXDB :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXDB desactive:",_nxE);}catch(_){}}
+}var _NXM=window._NXM||(window._NXM={});
 if(!_NXM.boot){
 _NXM.boot=true;_NXM.KEY="nexium_music_v1";
 _NXM.SRC="https://raw.githubusercontent.com/Omega-devj/music-client-nexium/refs/heads/main/music.txt";
@@ -291,8 +291,7 @@ _NXERR.push("console :: "+msg);if(_NXERR.length>20)_NXERR.shift();_NXsaveErr();}
 return _ce.apply(null,arguments);};
 _pce.__nx=true;console.error=_pce;}}catch(_){}
 try{if(window.addEventListener){window.addEventListener("error",function(ev){try{var m=(ev&&(ev.message||(ev.error&&ev.error.message)))||"";if(!m)return;_NXERR.push("global :: "+String(m).slice(0,200));if(_NXERR.length>20)_NXERR.shift();_NXsaveErr();}catch(_){}},true);
-window.addEventListener("unhandledrejection",function(ev){try{var r=ev&&ev.reason;var m=(r&&(r.message||r))||"";if(!m)return;_NXERR.push("promesse :: "+String(m).slice(0,200));if(_NXERR.length>20)_NXERR.shift();_NXsaveErr();}catch(_){}},true);}}catch(_){}
-var _NXV=window._NXV||(window._NXV={});
+window.addEventListener("unhandledrejection",function(ev){try{var r=ev&&ev.reason;var m=(r&&(r.message||r))||"";if(!m)return;_NXERR.push("promesse :: "+String(m).slice(0,200));if(_NXERR.length>20)_NXERR.shift();_NXsaveErr();}catch(_){}},true);}}catch(_){}var _NXV=window._NXV||(window._NXV={});
 if(!_NXV.boot){_NXV.boot=true;
 _NXV.KEY="nexium_vault";
 _NXV.cfg=(function(){var d;try{var r=_NXDB.get(_NXV.KEY);d=r?JSON.parse(r):null;}catch(e){d=null;}
@@ -302,6 +301,12 @@ if(typeof d.scanThemes!=="boolean")d.scanThemes=true;
 if(typeof d.verifyIntegrity!=="boolean")d.verifyIntegrity=true;
 if(typeof d.encryptLocal!=="boolean")d.encryptLocal=false;
 if(!Array.isArray(d.allowedCss))d.allowedCss=[];
+if(typeof d.community!=="boolean")d.community=true;
+if(typeof d.deepFiles!=="boolean")d.deepFiles=true;
+if(typeof d.giftGuard!=="boolean")d.giftGuard=true;
+if(typeof d.sessionGuard!=="boolean")d.sessionGuard=true;
+if(typeof d.selfGuard!=="boolean")d.selfGuard=true;
+if(typeof d.guildGuard!=="boolean")d.guildGuard=true;
 return d;})();
 _NXV.save=function(){try{_NXDB.set(_NXV.KEY,JSON.stringify(_NXV.cfg));}catch(_){}};
 _NXV.stats=(function(){var d;try{var r=_NXDB.get(_NXV.KEY+"_stats");d=r?JSON.parse(r):null;}catch(e){d=null;}
@@ -484,6 +489,229 @@ if(on&&!isEnc){if(_NXV.rawSet)_NXV.rawSet(k,_NXV.enc(v));}
 else if(!on&&isEnc){if(_NXV.rawSet)_NXV.rawSet(k,_NXV.dec(v));}}
 try{if(window._NXPR&&_NXPR.toast)_NXPR.toast(on?"Donnees locales chiffrees.":"Chiffrement desactive.",1);}catch(_){}
 _NXV.notify();}catch(_){}};
+_NXV.CAPI="https://emcoqnvxriyrchmfpunq.supabase.co/functions/v1/community";
+_NXV.comm=Object.create(null);_NXV.commN=0;_NXV.commAt=0;
+_NXV.hostInfo=Object.create(null);
+_NXV.loadCommunity=function(force){try{
+if(!_NXV.cfg.community)return;
+if(!force&&_NXV.commAt&&(Date.now()-_NXV.commAt)<10800000)return;
+if(_NXV._cBusy)return;_NXV._cBusy=true;
+try{var raw=_NXDB.get("nexium_community");
+if(raw&&!force){var j=JSON.parse(raw);
+if(j&&j.items&&(Date.now()-j.at)<10800000){_NXV.setCommunity(j.items);_NXV._cBusy=false;return;}}}catch(_){}
+fetch(_NXV.CAPI,{method:"POST",headers:{"Content-Type":"application/json","x-nexium-key":_NXPR.CKEY,"apikey":_NXPR.CKEY,"Authorization":"Bearer "+_NXPR.CKEY},body:JSON.stringify({action:"list"})})
+.then(function(r){return r.json();}).then(function(j){_NXV._cBusy=false;
+if(j&&j.ok&&Array.isArray(j.items)){_NXV.setCommunity(j.items);
+try{_NXDB.set("nexium_community",JSON.stringify({at:Date.now(),items:j.items}));}catch(_){}}})
+.catch(function(){_NXV._cBusy=false;
+try{var r2=_NXDB.get("nexium_community");if(r2){var j2=JSON.parse(r2);if(j2&&j2.items)_NXV.setCommunity(j2.items);}}catch(_){}});
+}catch(_){_NXV._cBusy=false;}};
+_NXV.setCommunity=function(items){try{
+var m=Object.create(null),n=0;
+for(var a=0;a<items.length;a++){var it=items[a];
+var h=it&&(it.h||it);if(!h)continue;
+m[String(h)]={n:(it.n||3),k:(it.k||"other")};n++;}
+_NXV.comm=m;_NXV.commN=n;_NXV.commAt=Date.now();
+try{if(window._NXPR){_NXPR.cache=Object.create(null);_NXPR.cacheN=0;}}catch(_){}
+_NXV.notify();}catch(_){}};
+_NXV.commHit=function(h){try{
+if(!_NXV.cfg.community||!h)return null;
+var p=h,g=0;
+while(p&&g<8){if(_NXV.comm[p])return _NXV.comm[p];var k=p.indexOf(".");if(k<0)break;p=p.slice(k+1);g++;}
+return null;}catch(_){return null;}};
+_NXV.askHost=function(h,cb){try{
+if(!h)return;
+if(_NXV.hostInfo[h]!==undefined){cb&&cb(_NXV.hostInfo[h]);return;}
+fetch(_NXV.CAPI,{method:"POST",headers:{"Content-Type":"application/json","x-nexium-key":_NXPR.CKEY,"apikey":_NXPR.CKEY,"Authorization":"Bearer "+_NXPR.CKEY},body:JSON.stringify({action:"host",host:h})})
+.then(function(r){return r.json();}).then(function(j){
+var n=(j&&j.ok)?(j.reporters||0):0;
+_NXV.hostInfo[h]=n;cb&&cb(n);_NXV.notify();})
+.catch(function(){_NXV.hostInfo[h]=0;cb&&cb(0);});
+}catch(_){}};
+
+_NXV.RXBIDI=/[\u202A-\u202E\u2066-\u2069\u200F\u200E]/;
+_NXV.ARCH={zip:1,rar:1,"7z":1,gz:1,tar:1,bz2:1,xz:1};
+_NXV.checkFileName=function(name){try{
+var n=String(name||"");
+if(_NXV.RXBIDI.test(n)){
+var clean=n.replace(_NXV.RXBIDI,"");
+var rev=clean.split("").reverse().join("");
+var real=null;
+var m=clean.match(/\.([a-z0-9]{1,5})$/i);
+var m2=rev.match(/^([a-z0-9]{1,5})\./i);
+if(m2)real=m2[1].toLowerCase();
+return {bidi:true,shown:n,real:real};}
+return null;}catch(_){return null;}};
+_NXV.checkArchive=function(url,name,cb){try{
+var ex=String(name||"").toLowerCase().match(/\.([a-z0-9]{1,5})$/);
+ex=ex?ex[1]:"";
+if(!_NXV.ARCH[ex]){cb&&cb(null);return;}
+fetch(url,{method:"GET",headers:{Range:"bytes=0-3999"},cache:"no-store"})
+.then(function(r){if(!r||!(r.ok||r.status===206))throw 0;return r.arrayBuffer();})
+.then(function(buf){
+var b=new Uint8Array(buf);
+var res={enc:false,exe:null};
+if(ex==="zip"){
+for(var a=0;a+30<b.length;a++){
+if(b[a]===0x50&&b[a+1]===0x4B&&b[a+2]===0x03&&b[a+3]===0x04){
+var flag=b[a+6]|(b[a+7]<<8);
+if(flag&0x01)res.enc=true;
+var nl=b[a+26]|(b[a+27]<<8);
+if(nl>0&&nl<200&&a+30+nl<=b.length){
+var nm="";for(var c=0;c<nl;c++)nm+=String.fromCharCode(b[a+30+c]);
+if(/\.(exe|scr|bat|cmd|vbs|js|jar|msi|ps1|com|pif|hta|lnk|dll)$/i.test(nm))res.exe=nm;}
+}}}
+else if(ex==="rar"){if(b[10]&&(b[10]&0x80))res.enc=true;}
+else if(ex==="7z"){res.enc=false;}
+cb&&cb(res);})
+.catch(function(){cb&&cb(null);});
+}catch(_){cb&&cb(null);}};
+_NXV.inspectFile=function(att,name,isDM){try{
+if(!_NXV.cfg.deepFiles)return;
+var bidi=_NXV.checkFileName(name);
+if(bidi){
+_NXV.log("fichier","nom trompeur (inversion) : "+String(name).slice(0,60));
+try{if(window._NXPR){_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat("file","nom inverse : "+(bidi.real?("vrai type ."+bidi.real):"caracteres d inversion"));_NXPR.saveStats();
+_NXPR.toast("DANGER : le nom de ce fichier utilise des caracteres d inversion pour cacher sa vraie extension"+(bidi.real?(" (."+bidi.real+")"):"")+". Ne l ouvre pas.",0);}}catch(_){}
+return;}
+var u=att&&(att.url||att.proxy_url);if(!u)return;
+_NXV.checkArchive(u,name,function(r){try{
+if(!r)return;
+if(r.enc){_NXV.log("fichier","archive chiffree : "+String(name).slice(0,60));
+if(window._NXPR){_NXPR.logThreat("file","archive protegee par mot de passe : "+name);_NXPR.saveStats();
+_NXPR.toast("Archive protegee par mot de passe ("+name+") : aucun antivirus ne peut l analyser. Methode classique de diffusion de virus.",0);}return;}
+if(r.exe){_NXV.log("fichier","executable dans une archive : "+r.exe);
+if(window._NXPR){_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat("file","archive contenant "+r.exe);_NXPR.saveStats();
+_NXPR.toast("DANGER : l archive "+name+" contient un executable ("+r.exe+"). Ne l ouvre pas.",0);}}
+}catch(_){}});
+}catch(_){}};
+
+_NXV.RXGIFT=/(discord\.gift|discord(?:app)?\.com\/gifts?)\/([a-zA-Z0-9]{8,64})/gi;
+_NXV.giftSeen=Object.create(null);
+_NXV.checkGift=function(txt){try{
+if(!_NXV.cfg.giftGuard)return;
+var s=String(txt||"");
+_NXV.RXGIFT.lastIndex=0;var m,n=0;
+while((m=_NXV.RXGIFT.exec(s))&&n<3){n++;
+var code=m[2];
+if(_NXV.giftSeen[code])continue;_NXV.giftSeen[code]=1;
+(function(cd){
+fetch("https://discord.com/api/v10/entitlements/gift-codes/"+cd+"?with_application=false&with_subscription_plan=true",{cache:"no-store"})
+.then(function(r){
+if(r&&r.ok)return null;
+return r?r.status:0;})
+.then(function(bad){
+if(bad===null)return;
+_NXV.log("cadeau","code invalide : "+cd.slice(0,12));
+if(window._NXPR){_NXPR.stats.scams=(_NXPR.stats.scams||0)+1;_NXPR.logThreat("gift","faux lien de cadeau Nitro");_NXPR.saveStats();
+_NXPR.toast("Ce lien de cadeau Nitro n existe pas : c est une arnaque. Ne saisis jamais tes identifiants sur la page qu il ouvre.",0);}})
+.catch(function(){});
+})(code);}
+// faux domaines imitant discord.gift
+var fake=s.match(/https?:\/\/[^\s]*(?:disc[o0]rd|dlscord)[a-z0-9.\-]*(?:gift|nitro)[^\s]*/gi)||[];
+if(fake.length){
+var h=_NXPR.host(fake[0]);
+if(h&&!_NXPR.RXREAL.test(h)){
+_NXV.log("cadeau","faux domaine de cadeau : "+h);
+if(window._NXPR){_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat("gift","faux domaine Nitro : "+h);_NXPR.saveStats();
+_NXPR.toast("Faux lien Nitro : "+h+" n est pas un domaine Discord officiel.",0);}}}
+}catch(_){}};
+
+_NXV.SKEY="nexium_sessions";
+_NXV.sessions=(function(){try{var r=_NXDB.get(_NXV.SKEY);var d=r?JSON.parse(r):null;return (d&&typeof d==="object")?d:{};}catch(_){return {};}})();
+_NXV.onSessions=function(e){try{
+if(!_NXV.cfg.sessionGuard)return;
+var list=(e&&(e.sessions||e.session_infos))||null;
+if(!list||!list.length)return;
+var seen=_NXV.sessions||{};var news=[];
+for(var a=0;a<list.length;a++){var s=list[a]||{};
+var id=String(s.id_hash||s.session_id_hash||s.session_id||"");
+if(!id)continue;
+var cl=(s.client_info)||{};
+var sig=(cl.os||"?")+" / "+(cl.client||"?")+(cl.location?(" / "+cl.location):"");
+if(!seen[id]){news.push({id:id,sig:sig});}
+seen[id]=sig;}
+_NXV.sessions=seen;
+try{_NXDB.set(_NXV.SKEY,JSON.stringify(seen));}catch(_){}
+if(news.length&&_NXV._sInit){
+for(var b=0;b<news.length;b++){
+_NXV.log("session","nouvelle session : "+news[b].sig);
+if(window._NXPR)_NXPR.toast("Nouvelle connexion detectee sur ton compte : "+news[b].sig+". Si ce n est pas toi, change ton mot de passe immediatement.",0);}}
+_NXV._sInit=true;_NXV.notify();
+}catch(_){}};
+
+_NXV.RXIP=/\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b/;
+_NXV.RXPHONE=/(?:\+\d{1,3}[\s.\-]?)?(?:\(?\d{2,4}\)?[\s.\-]?){3,5}\d{2,4}/;
+_NXV.RXMAIL=/[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}/i;
+_NXV.RXIBAN=/\b[A-Z]{2}\d{2}[\sA-Z0-9]{10,30}\b/;
+_NXV.RXADDR=/\b\d{1,4}\s+(?:rue|avenue|av\.|boulevard|bd|impasse|chemin|allee|allée|place|route|quai)\s+[a-zà-ÿ]/i;
+_NXV.RXCARD=/\b(?:\d{4}[\s\-]?){3}\d{4}\b/;
+_NXV.selfScan=function(txt){try{
+if(!_NXV.cfg.selfGuard)return null;
+var s=String(txt||"");if(s.length<6)return null;
+if(_NXV.RXCARD.test(s))return "un numero de carte bancaire";
+if(_NXV.RXIBAN.test(s))return "un IBAN";
+if(_NXV.RXIP.test(s)&&!/\b(?:127\.0\.0\.1|0\.0\.0\.0|192\.168\.|10\.\d|255\.255)/.test(s))return "une adresse IP";
+if(_NXV.RXADDR.test(s))return "une adresse postale";
+if(_NXV.RXMAIL.test(s))return "une adresse e-mail";
+var ph=s.match(_NXV.RXPHONE);
+if(ph&&ph[0].replace(/\D/g,"").length>=9&&!/\d{4}-\d{2}-\d{2}/.test(s))return "un numero de telephone";
+return null;}catch(_){return null;}};
+_NXV.confirmSend=function(what,cb){try{
+if(document.getElementById("nx-self-modal")){cb(false);return;}
+var P=_NXpal;
+var ov=document.createElement("div");ov.id="nx-self-modal";
+ov.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);";
+var card=document.createElement("div");
+card.style.cssText="width:430px;max-width:calc(100vw - 40px);background:"+P.panel+";border:1px solid "+P.line+";border-radius:20px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.5);";
+card.innerHTML='<div style="font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:'+P.faint+';margin-bottom:6px;">Nexium Protect</div>'
++'<div style="font-size:19px;font-weight:800;color:'+P.txt+';margin-bottom:10px;">Information personnelle detectee</div>'
++'<div style="font-size:13px;color:'+P.sub+';line-height:1.6;">Ton message semble contenir <b style="color:'+P.txt+'">'+what+'</b>. Une fois envoye, tu ne peux plus le reprendre.</div>';
+var row=document.createElement("div");row.style.cssText="display:flex;gap:9px;margin-top:18px;";
+function mk(t,st,fn){var b=document.createElement("div");b.className="nx-fx";b.setAttribute("role","button");b.setAttribute("tabindex","0");b.style.cssText=st;b.textContent=t;b.onclick=fn;b.onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();fn();}};return b;}
+var close=function(ok){try{if(ov.parentNode)ov.parentNode.removeChild(ov);}catch(_){}cb(ok);};
+row.appendChild(mk("Ne pas envoyer","flex:1;text-align:center;padding:12px;border-radius:11px;background:"+P.acc+";color:"+(P.light?"#fff":"#0a0a0a")+";font-size:13px;font-weight:800;cursor:pointer;",function(){close(false);}));
+row.appendChild(mk("Envoyer quand meme","flex:1;text-align:center;padding:12px;border-radius:11px;background:transparent;border:1px solid "+P.line+";color:"+P.sub+";font-size:13px;font-weight:600;cursor:pointer;",function(){close(true);}));
+card.appendChild(row);ov.appendChild(card);
+ov.onclick=function(e){if(e.target===ov)close(false);};
+if(document.body)document.body.appendChild(ov);
+}catch(_){cb(true);}};
+
+_NXV.RXVERIF=/(verif|verify|verification|captcha|authentif|acces|access|entrer|unlock|debloquer)/i;
+_NXV.RXOAUTH=/(oauth2\/authorize|autoriser l application|authorize the app|connecte ton compte|connect your account)/i;
+_NXV.guildSeen=Object.create(null);
+_NXV.checkGuild=function(gid){try{
+if(!_NXV.cfg.guildGuard||!gid)return;
+if(_NXV.guildSeen[gid])return;_NXV.guildSeen[gid]=1;
+var C=_NXcommon();
+var GS=C.store("GuildStore"),CS=C.store("ChannelStore");
+var g=GS&&GS.getGuild&&GS.getGuild(gid);
+if(!g)return;
+var risk=0,why=[];
+try{var created=Number((BigInt(String(gid))>>22n)+1420070400000n);
+var days=Math.floor((Date.now()-created)/86400000);
+if(days>=0&&days<14){risk+=2;why.push("serveur cree il y a "+days+" jour"+(days>1?"s":""));}}catch(_){}
+try{var mc=g.memberCount||g.member_count;
+if(typeof mc==="number"&&mc<30){risk+=1;why.push("seulement "+mc+" membres");}}catch(_){}
+var chans=[];
+try{if(CS&&CS.getMutableGuildChannelsForGuild){var mm=CS.getMutableGuildChannelsForGuild(gid);for(var k in mm)chans.push(mm[k]);}
+else if(CS&&CS.getChannels){var o=CS.getChannels(gid);if(o&&o.SELECTABLE)for(var a=0;a<o.SELECTABLE.length;a++)chans.push(o.SELECTABLE[a].channel);}}catch(_){}
+var verif=0,total=0;
+for(var b=0;b<chans.length;b++){var ch=chans[b];if(!ch||!ch.name)continue;total++;
+if(_NXV.RXVERIF.test(String(ch.name)))verif++;
+var topic=String(ch.topic||"");
+if(_NXV.RXOAUTH.test(topic)){risk+=3;why.push("un salon demande une autorisation d application");}}
+if(total>0&&total<=4&&verif>0){risk+=3;why.push("serveur reduit a un salon de verification");}
+else if(verif>0&&total<=8){risk+=1;why.push("salon de verification present");}
+try{var brand=0;var nm=String(g.name||"").toLowerCase();
+for(var c=0;c<_NXPR.BRANDS.length;c++){if(nm.indexOf(_NXPR.BRANDS[c])>=0){brand=1;break;}}
+if(brand){risk+=2;why.push("nom imitant une marque connue");}
+if(/nitro|giveaway|gratuit|free|airdrop|cadeau|recompense/.test(nm)){risk+=2;why.push("nom oriente arnaque");}}catch(_){}
+if(risk>=4){
+_NXV.log("serveur",(g.name||gid)+" - "+why.slice(0,3).join(", "));
+if(window._NXPR){_NXPR.stats.scams=(_NXPR.stats.scams||0)+1;_NXPR.logThreat("guild",(g.name||gid)+" : "+why.slice(0,2).join(", "));_NXPR.saveStats();
+_NXPR.toast("Serveur potentiellement piege : "+(g.name||"ce serveur")+" ("+why.slice(0,2).join(", ")+"). N autorise aucune application et ne colle aucun code.",0);}}
+}catch(_){}};
 try{
 var _og=_NXDB.get,_os=_NXDB.set;
 _NXV.rawGet=function(k){try{return _og.call(_NXDB,k);}catch(_){return null;}};
@@ -497,10 +725,11 @@ return _os.call(_NXDB,k,v);};
 }catch(_){}
 try{
 setTimeout(function(){_NXV.scanCss();},14000);
+setTimeout(function(){_NXV.loadCommunity();},9000);
+setInterval(function(){if(!document.hidden)_NXV.loadCommunity();},10800000);
 setTimeout(function(){_NXV.checkIntegrity();},22000);
 setInterval(function(){if(!document.hidden)_NXV.scanCss();},1800000);
-}catch(_){}
-var _NXPATCH=window._NXPATCH||(window._NXPATCH={});
+}catch(_){}var _NXPATCH=window._NXPATCH||(window._NXPATCH={});
 if(!_NXPATCH.init){_NXPATCH.init=true;
 _NXPATCH.KEY="nexium_patches";
 _NXPATCH.on=(function(){try{return _NXDB.get(_NXPATCH.KEY)!=="0";}catch(_){return true;}})();
@@ -523,9 +752,7 @@ var _NXtoggle=function(on,onClick,danger){return i("div",{className:"nx-fx",role
 var _NXico=function(path){return i("div",{style:{width:"32px",height:"32px",borderRadius:"9px",background:_NXpal.inset,border:"1px solid "+_NXpal.line,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:_NXpal.sub}},i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:16,height:16},i("path",{d:path})));};
 var _NXctrl=function(iconPath,label,desc,on,onClick,danger,last){return i("div",{style:{display:"flex",alignItems:"center",gap:"14px",padding:"15px 0",borderBottom:last?"none":"1px solid "+_NXpal.line}},_NXico(iconPath),i("div",{style:{flex:1}},i("div",{style:{fontSize:"14px",fontWeight:"600",color:_NXpal.txt}},label),i("div",{style:{fontSize:"12px",color:_NXpal.sub,marginTop:"3px",lineHeight:1.45}},desc)),_NXtoggle(on,onClick,danger));};
 var _NXbtn=function(label,onClick,tone){var c=tone==="danger"?{bg:"linear-gradient(160deg,#1a0d0d,#120909)",bd:"#2c1414",fg:"#d6a2a2"}:{bg:"linear-gradient(160deg,#151517,#0e0e10)",bd:_NXpal.line,fg:"#d2d2d6"};return i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:onClick,style:{flex:1,textAlign:"center",padding:"12px",borderRadius:"12px",background:c.bg,border:"1px solid "+c.bd,color:c.fg,fontSize:"12px",fontWeight:"700",cursor:"pointer",letterSpacing:".01em",boxShadow:"0 1px 0 rgba(255,255,255,.04) inset"}},label);};
-var _NXfoot=function(t){return i("div",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:_NXpal.faint,textAlign:"center",marginTop:"20px",letterSpacing:".02em"}},t);};
-
-var _NXS=window._NXS||(window._NXS={});
+var _NXfoot=function(t){return i("div",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:_NXpal.faint,textAlign:"center",marginTop:"20px",letterSpacing:".02em"}},t);};var _NXS=window._NXS||(window._NXS={});
 if(!_NXS.boot){
 _NXS.boot=true;
 _NXS.KEY="nexium_stats_v1";
@@ -635,10 +862,8 @@ _NXtabs([{id:"overview",label:"Vue d'ensemble"},{id:"activity",label:"Activité"
 content,
 i("div",{style:{display:"flex",gap:"10px",marginTop:"16px"}},_NXbtn("Rafraîchir",function(){force();}),_NXbtn("Exporter (.json)",function(){_NXS.download();}),_NXbtn("Réinitialiser",function(){if(window.confirm("Réinitialiser toutes les statistiques Nexium ?")){_NXS.reset();force();}},"danger")),
 _NXfoot("localStorage[nexium_stats_v1] · depuis le "+_NXS.dayKey(data.first))));
-}
-
-var _NXP=window._NXP||(window._NXP={});
-if(!_NXP.boot){
+}var _NXP=window._NXP||(window._NXP={});
+if(!_NXP.boot){try{
 _NXP.boot=true;
 _NXP.KEY="nexium_privacy_v1";_NXP.SKEY="nexium_privacy_stats_v1";
 _NXP.cfg=(function(){var d;try{var raw=_NXDB.get(_NXP.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};if(typeof d.blockTel!=="boolean")d.blockTel=false;if(typeof d.blockSentry!=="boolean")d.blockSentry=false;if(typeof d.silentTyping!=="boolean")d.silentTyping=false;if(typeof d.noAck!=="boolean")d.noAck=false;if(typeof d.blockHarvest!=="boolean")d.blockHarvest=false;if(typeof d.stripTracking!=="boolean")d.stripTracking=false;if(typeof d.blockAnalytics!=="boolean")d.blockAnalytics=false;if(typeof d.blockErrors!=="boolean")d.blockErrors=false;if(typeof d.blockPromotions!=="boolean")d.blockPromotions=false;if(!d.quiet||typeof d.quiet!=="object")d.quiet={};return d;})();
@@ -678,8 +903,8 @@ try{if(navigator.sendBeacon&&!navigator.sendBeacon.__nx){var _ob=navigator.sendB
 try{if(window.XMLHttpRequest&&!window.XMLHttpRequest.prototype.__nx){var _open=window.XMLHttpRequest.prototype.open;var _send=window.XMLHttpRequest.prototype.send;window.XMLHttpRequest.prototype.open=function(m,u){try{this.__nxurl=u;this.__nxh={};}catch(_){}return _open.apply(this,arguments);};
 var _srh=window.XMLHttpRequest.prototype.setRequestHeader;
 window.XMLHttpRequest.prototype.setRequestHeader=function(k,v){try{if(this.__nxh)this.__nxh[k]=v;}catch(_){}return _srh.apply(this,arguments);};window.XMLHttpRequest.prototype.send=function(b){try{if(this.__nxurl&&window._NXV&&_NXV.checkOut(this.__nxurl,{body:b,headers:this.__nxh},"XHR"))return;if(this.__nxurl&&_NXP.shouldBlock(this.__nxurl))return;}catch(_){}return _send.apply(this,arguments);};window.XMLHttpRequest.prototype.__nx=true;}}catch(_){}
-}
-var _NXNET=window._NXNET||(window._NXNET={});
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXP");if(window._NXERR)_NXERR.push("module _NXP :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXP desactive:",_nxE);}catch(_){}}
+}var _NXNET=window._NXNET||(window._NXNET={});
 if(!_NXNET.boot){_NXNET.boot=true;_NXNET.samples=[];_NXNET.count=0;_NXNET.conn=[];_NXNET.listeners=[];
 _NXNET.notify=function(){for(var a=0;a<_NXNET.listeners.length;a++){try{_NXNET.listeners[a]();}catch(_){}}};
 _NXNET.tnotify=function(){if(_NXNET.nt)return;_NXNET.nt=setTimeout(function(){_NXNET.nt=null;_NXNET.notify();},700);};
@@ -689,8 +914,7 @@ _NXNET.isApi=function(u){return /discord(app)?\.com\/api\//.test(u)||/^\/api\/v\
 _NXNET.wireConn=function(){try{var C=_NXcommon();var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));if(!FX||!FX.subscribe){_NXNET.tr=(_NXNET.tr||0)+1;if(_NXNET.tr<25)setTimeout(_NXNET.wireConn,1500);return;}FX.subscribe("CONNECTION_OPEN",function(){_NXNET.logConn("Connexion ouverte");});FX.subscribe("RESUMED",function(){_NXNET.logConn("Session reprise");});FX.subscribe("GATEWAY_CONNECTED",function(){_NXNET.logConn("Gateway connectée");});FX.subscribe("CONNECTION_CLOSED",function(){_NXNET.logConn("Connexion fermée");});}catch(_){}};
 _NXNET.logConn("Client démarré");_NXNET.wireConn();}
 try{if(window.fetch&&!window.fetch.__nxlat){var _lf=window.fetch.bind(window);var lf=function(input,opts){var u="";try{u=typeof input==="string"?input:(input&&input.url)?input.url:"";}catch(_){}if(u&&_NXNET.isApi(u)){var t0=(typeof performance!=="undefined"&&performance.now)?performance.now():Date.now();return _lf(input,opts).then(function(r){try{_NXNET.sample(((typeof performance!=="undefined"&&performance.now)?performance.now():Date.now())-t0);}catch(_){}return r;},function(e){throw e;});}return _lf(input,opts);};lf.__nxlat=true;window.fetch=lf;}}catch(_){}
-try{var XP=window.XMLHttpRequest&&window.XMLHttpRequest.prototype;if(XP&&!XP.__nxlat){var _xo=XP.open;XP.open=function(m,u){try{this.__nxlu=u;}catch(_){}return _xo.apply(this,arguments);};var _xs=XP.send;XP.send=function(){try{var self=this;if(self.__nxlu&&_NXNET.isApi(self.__nxlu)){var t0=(typeof performance!=="undefined"&&performance.now)?performance.now():Date.now();self.addEventListener("loadend",function(){try{_NXNET.sample(((typeof performance!=="undefined"&&performance.now)?performance.now():Date.now())-t0);}catch(_){}});}}catch(_){}return _xs.apply(this,arguments);};XP.__nxlat=true;}}catch(_){}
-var _NXCL=window._NXCL||(window._NXCL={});
+try{var XP=window.XMLHttpRequest&&window.XMLHttpRequest.prototype;if(XP&&!XP.__nxlat){var _xo=XP.open;XP.open=function(m,u){try{this.__nxlu=u;}catch(_){}return _xo.apply(this,arguments);};var _xs=XP.send;XP.send=function(){try{var self=this;if(self.__nxlu&&_NXNET.isApi(self.__nxlu)){var t0=(typeof performance!=="undefined"&&performance.now)?performance.now():Date.now();self.addEventListener("loadend",function(){try{_NXNET.sample(((typeof performance!=="undefined"&&performance.now)?performance.now():Date.now())-t0);}catch(_){}});}}catch(_){}return _xs.apply(this,arguments);};XP.__nxlat=true;}}catch(_){}var _NXCL=window._NXCL||(window._NXCL={});
 if(!_NXCL.boot){_NXCL.boot=true;_NXCL.KEY="nexium_changelog_v1";
 _NXCL.URL="https://raw.githubusercontent.com/Omega-devj/changelog-client-nexium/refs/heads/main/changelog.txt";
 _NXCL.st=(function(){try{var raw=_NXDB.get(_NXCL.KEY);var d=raw?JSON.parse(raw):null;if(d&&typeof d==="object"&&typeof d.text==="string")return d;}catch(_){}return {hash:"",text:"",ts:0};})();
@@ -861,11 +1085,9 @@ rows.length&&totalSz>0?_NXcard(i("div",null,_NXch("Répartition"),i("div",{style
 _NXcard(i("div",null,_NXch("Clés stockées","Chaque module gère sa propre clé localStorage."),rows.length?i("div",null,rows.map(function(rw,k){return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"14px",padding:"13px 0",borderTop:k>0?"1px solid "+P.line:"none"}},i("div",{style:{flex:1,minWidth:0}},i("div",{style:{fontSize:"13px",fontWeight:"600",color:P.txt}},rw.label),i("div",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,marginTop:"3px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},rw.k)),i("div",{style:{width:"70px",flexShrink:0}},i("div",{style:{height:"4px",borderRadius:"2px",background:P.hair,overflow:"hidden"}},i("div",{style:{width:(totalSz>0?Math.max(4,rw.sz/totalSz*100):0)+"%",height:"100%",background:P.sub,borderRadius:"2px"}})),i("div",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.sub,marginTop:"4px",textAlign:"right"}},fmtSz(rw.sz))),i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){if(window.confirm("Vider « "+rw.label+" » ?")){wipeKey(rw.k);force();}},style:{cursor:"pointer",fontSize:"11px",fontWeight:"600",color:"#cc9a9a",border:"1px solid #291313",borderRadius:"8px",padding:"6px 11px",flexShrink:0}},"Vider"));})):i("div",{style:{fontSize:"12px",color:P.dim}},"Aucune donnée Nexium stockée pour l'instant."))),
 i("div",{style:{display:"flex",gap:"10px",marginTop:"4px"}},_NXbtn("Rafraîchir",function(){force();}),_NXbtn("Exporter tout (.json)",function(){exportAll();}),_NXbtn("Tout effacer",function(){if(window.confirm("Effacer TOUTES les données Nexium ?")){for(var a=keys.length-1;a>=0;a--)wipeKey(keys[a]);force();}},"danger")),
 _NXfoot("localStorage · clés nexium_*")));
-}
-
-var _NXUP=window._NXUP||(window._NXUP={});
+}var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="125";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="126";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -997,9 +1219,7 @@ _NXUP.toast&&_NXUP.toast("Enregistre le fichier dans resources/equicord puis rel
 i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{DiscordNative.clipboard.copy(".nexium-restore");_NXUP.toast&&_NXUP.toast("Nom du fichier copié : .nexium-restore");}catch(_){}},style:{padding:"11px 18px",borderRadius:"10px",border:"1px solid "+P.line,color:P.sub,fontSize:"12.5px",fontWeight:"700",cursor:"pointer"}},"Copier le nom du fichier"))),{mb:12}),
 _NXcard(i("div",null,_NXch("Journal (client)","Les dernières vérifications et mises à jour vues par le client."),(function(){var L=_NXUP.jrn();if(!L.length)return i("div",{style:{fontSize:"12px",color:P.dim}},"Aucun événement enregistré pour le moment.");return i("div",null,L.slice(0,8).map(function(e,k){var d=new Date(e.t);var hh=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);return i("div",{key:k,style:{display:"flex",gap:"10px",padding:"7px 0",borderTop:k?"1px solid "+P.line:"none"}},i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0,paddingTop:"1px"}},hh),i("span",{style:{fontSize:"12px",color:P.sub,lineHeight:1.45}},e.m));}));})()),{mb:12}),
 _NXfoot("Mise à jour automatique via le dépôt GitHub · aucune donnée envoyée")));
-}
-
-var _NXLY=window._NXLY||(window._NXLY={});
+}var _NXLY=window._NXLY||(window._NXLY={});
 if(!_NXLY.boot){_NXLY.boot=true;
 _NXLY.ID="546349979757707265";
 _NXLY.URL="https://api.lanyard.rest/v1/users/546349979757707265";
@@ -1087,9 +1307,8 @@ i("div",{style:{fontSize:"12px",color:P.dim,marginTop:"2px"}},s.role)),
 i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{DiscordNative.clipboard.copy(s.tag);if(window._NXPR&&_NXPR.toast)_NXPR.toast("Copie : "+s.tag,1);}catch(_){}},style:{flexShrink:0,fontSize:"11px",fontFamily:_NXf.mono,color:P.sub,cursor:"pointer",padding:"6px 11px",border:"1px solid "+P.line,borderRadius:"8px"}},(s.tagLabel?s.tagLabel+" ":"")+s.tag)),
 i("div",{style:{fontSize:"12.5px",color:P.sub,marginTop:"11px",lineHeight:1.55}},s.note));})),{mb:0}),
 _NXfoot("Statut Discord en temps réel · actualisé uniquement sur cette page")));
-}
-var _NXSP=window._NXSP||(window._NXSP={});
-if(!_NXSP.boot){_NXSP.boot=true;
+}var _NXSP=window._NXSP||(window._NXSP={});
+if(!_NXSP.boot){try{_NXSP.boot=true;
 _NXSP.CODE="itsuki";
 _NXSP.data=null;_NXSP.err=false;_NXSP.loading=false;_NXSP.busy=false;_NXSP.listeners=[];
 _NXSP.notify=function(){for(var a=0;a<_NXSP.listeners.length;a++){try{_NXSP.listeners[a]();}catch(_){}}};
@@ -1109,8 +1328,8 @@ _NXSP.join=function(){var code=_NXSP.CODE;
 var M=_NXSP.wp("openInviteModal");if(M){try{M.openInviteModal(code);return true;}catch(_){}}
 var A=_NXSP.wp("acceptInviteAndTransitionToInviteChannel");if(A){try{A.acceptInviteAndTransitionToInviteChannel(code,{location:"Nexium Sponsor"});return true;}catch(_){}}
 try{if(typeof VencordNative!=="undefined"&&VencordNative.native&&typeof VencordNative.native.openExternal==="function"){VencordNative.native.openExternal("https://discord.gg/"+code);return true;}}catch(_){}try{if(window.VencordNative&&window.VencordNative.native&&typeof window.VencordNative.native.openExternal==="function"){window.VencordNative.native.openExternal("https://discord.gg/"+code);return true;}}catch(_){}return false;};
-}
-var _NXPR=window._NXPR||(window._NXPR={});
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXSP");if(window._NXERR)_NXERR.push("module _NXSP :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXSP desactive:",_nxE);}catch(_){}}
+}var _NXPR=window._NXPR||(window._NXPR={});
 if(!_NXPR.boot){_NXPR.boot=true;_NXPR.KEY="nexium_protect_v1";
 _NXPR.cfg=(function(){var d;try{var raw=_NXDB.get(_NXPR.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};
 if(typeof d.scanLinks!=="boolean")d.scanLinks=true;if(typeof d.blockGrabbers!=="boolean")d.blockGrabbers=true;if(typeof d.scamAlerts!=="boolean")d.scamAlerts=true;if(typeof d.warnAccounts!=="boolean")d.warnAccounts=true;if(typeof d.phishGuard!=="boolean")d.phishGuard=true;if(typeof d.consoleGuard!=="boolean")d.consoleGuard=true;if(!Array.isArray(d.allow))d.allow=[];if(typeof d.heuristics!=="boolean")d.heuristics=true;if(typeof d.hThreshold!=="number")d.hThreshold=5;if(typeof d.hBlock!=="boolean")d.hBlock=false;if(typeof d.profile!=="string")d.profile="equilibre";
@@ -1429,6 +1648,7 @@ var cc=_NXPR.cache[h];if(cc!==undefined)return cc;
 var res;
 if(_NXPR.isAllowed(h)||(_NXPR.remoteAllow&&_NXPR.hit(h,_NXPR.remoteAllow)))res={kind:"ok",host:h,allowed:true};
 else if(_NXPR.hit(h,_NXPR.idxG))res={kind:"grabber",host:h};
+else if(window._NXV&&_NXV.commHit(h)){var _ci=_NXV.commHit(h);res={kind:(_ci.k==="other"?"phish":_ci.k),host:h,comm:_ci.n};}
 else if(h.indexOf("xn--")>=0)res={kind:"punycode",host:h};
 else if(_NXPR.RXFAKE.test(h))res={kind:"phish",host:h};
 else if(h.indexOf("discord")>=0&&!_NXPR.RXREAL.test(h))res={kind:"phish",host:h};
@@ -1487,6 +1707,7 @@ _NXPR.scanAttachments=function(m,isDM){try{
 if(!_NXPR.cfg.scanFiles)return;var A=m&&m.attachments;if(!A||!A.length)return;
 for(var a=0;a<A.length;a++){var nm=A[a]&&(A[a].filename||A[a].name)||"";var ex=_NXPR.extOf(nm);
 _NXPR.verifyFile(A[a],nm);
+try{if(window._NXV)_NXV.inspectFile(A[a],nm,isDM);}catch(_){}
 if(_NXPR.BADEXT.indexOf(ex)>=0){_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat("file",nm);_NXPR.saveStats();
 _NXPR.toast("Fichier potentiellement dangereux recu : "+nm+" - n ouvre pas ce fichier.",0);}
 else if(isDM&&_NXPR.ARCHEXT.indexOf(ex)>=0){_NXPR.logThreat("file",nm);_NXPR.toast("Archive recue en message prive ("+nm+") - prudence avant d ouvrir.",1);}}
@@ -1711,6 +1932,7 @@ if(mine)return;
 _NXPR.scanText(content);
 _NXPR.scanMasked(content);
 _NXPR.scanInvites(content);
+try{if(window._NXV)_NXV.checkGift(content);}catch(_){}
 _NXPR.scanEmbeds(m);
 _NXPR.scanAttachments(m,isDM);
 _NXPR.checkQR(m,isDM);
@@ -1791,6 +2013,95 @@ try{console.warn("[Nexium]",msg);}catch(_){}
 try{_NXPR.toast("Nexium Protect est incomplet ("+miss.length+" fonctions manquantes). Va dans Nexium Donnees > Journal des erreurs.",0);}catch(_){}
 return miss;}catch(_){return [];}};
 try{setTimeout(function(){_NXPR.selfCheck(false);},8000);setTimeout(function(){_NXPR.selfCheck(true);},20000);}catch(_){}
+_NXV.ctxWired=false;
+_NXV.extractUrls=function(txt){try{
+var s=String(txt||"");var out=[];
+var m=s.match(/https?:\/\/[^\s<>"']{4,300}/gi)||[];
+for(var a=0;a<m.length&&out.length<6;a++){var u=m[a].replace(/[),.\]]+$/,"");if(out.indexOf(u)<0)out.push(u);}
+var md=s.match(/\]\((https?:\/\/[^\s)]{4,300})\)/gi)||[];
+for(var b=0;b<md.length&&out.length<8;b++){var u2=md[b].replace(/^\]\(|\)$/g,"");if(out.indexOf(u2)<0)out.push(u2);}
+return out;}catch(_){return [];}};
+_NXV.reportFromMessage=function(msg){try{
+var urls=_NXV.extractUrls(msg&&msg.content);
+try{if(msg&&msg.embeds)for(var a=0;a<msg.embeds.length;a++){var u=msg.embeds[a]&&msg.embeds[a].url;if(u&&urls.indexOf(u)<0)urls.push(u);}}catch(_){}
+try{if(msg&&msg.attachments)for(var b=0;b<msg.attachments.length;b++){var f=msg.attachments[b];if(f&&f.url&&urls.length<8)urls.push(f.url);}}catch(_){}
+if(!urls.length){if(window._NXPR)_NXPR.toast("Aucun lien a signaler dans ce message.",1);return;}
+if(urls.length===1){_NXV.reportUrl(urls[0]);return;}
+_NXV.pickUrl(urls);}catch(_){}};
+_NXV.reportUrl=function(url){try{
+var cl=_NXPR.classify(url)||{kind:"suspect",host:_NXPR.host(url)};
+_NXPR.reportPrompt({k:cl.kind==="ok"?"suspect":cl.kind,host:cl.host,kind:cl.kind,score:cl.score,why:cl.why});
+}catch(_){}};
+_NXV.pickUrl=function(urls){try{
+if(document.getElementById("nx-pick-modal"))return;
+var P=_NXpal;
+var ov=document.createElement("div");ov.id="nx-pick-modal";
+ov.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);";
+var card=document.createElement("div");
+card.style.cssText="width:460px;max-width:calc(100vw - 40px);max-height:70vh;overflow-y:auto;background:"+P.panel+";border:1px solid "+P.line+";border-radius:20px;padding:22px;";
+card.innerHTML='<div style="font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:'+P.faint+';margin-bottom:6px;">Nexium Protect</div>'
++'<div style="font-size:18px;font-weight:800;color:'+P.txt+';margin-bottom:12px;">Quel lien veux-tu signaler ?</div>';
+var esc=function(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+for(var a=0;a<urls.length;a++){(function(u){
+var b=document.createElement("div");b.className="nx-fx";b.setAttribute("role","button");b.setAttribute("tabindex","0");
+b.style.cssText="padding:10px 12px;margin-bottom:6px;border-radius:10px;background:"+P.inset+";border:1px solid "+P.line+";font-size:11.5px;font-family:monospace;color:"+P.sub+";cursor:pointer;word-break:break-all;";
+b.textContent=String(u).slice(0,140);
+b.onclick=function(){try{if(ov.parentNode)ov.parentNode.removeChild(ov);}catch(_){}_NXV.reportUrl(u);};
+card.appendChild(b);})(urls[a]);}
+var cancel=document.createElement("div");cancel.className="nx-fx";cancel.setAttribute("role","button");cancel.setAttribute("tabindex","0");
+cancel.style.cssText="margin-top:8px;text-align:center;padding:11px;border-radius:11px;border:1px solid "+P.line+";color:"+P.sub+";font-size:13px;font-weight:600;cursor:pointer;";
+cancel.textContent="Annuler";
+cancel.onclick=function(){try{if(ov.parentNode)ov.parentNode.removeChild(ov);}catch(_){}};
+card.appendChild(cancel);ov.appendChild(card);
+ov.onclick=function(e){if(e.target===ov&&ov.parentNode)ov.parentNode.removeChild(ov);};
+if(document.body)document.body.appendChild(ov);
+}catch(_){}};
+_NXV.wireCtx=function(){try{
+if(_NXV.ctxWired)return;
+var API=(window.Vencord&&Vencord.Api&&Vencord.Api.ContextMenu)||null;
+var C=(window.Vencord&&Vencord.Webpack&&Vencord.Webpack.Common)||null;
+if(!API||typeof API.addContextMenuPatch!=="function"||!C||!C.Menu){
+if((_NXV._ctxTry=(_NXV._ctxTry||0)+1)<25)setTimeout(_NXV.wireCtx,2500);return;}
+var Menu=C.Menu;
+API.addContextMenuPatch("message",function(children,props){try{
+if(!props||!props.message)return;
+var msg=props.message;
+var has=false;
+try{has=_NXV.extractUrls(msg.content).length>0||(msg.embeds&&msg.embeds.length)||(msg.attachments&&msg.attachments.length);}catch(_){}
+if(!has)return;
+children.push(i(Menu.MenuSeparator,{key:"nx-sep"}));
+children.push(i(Menu.MenuItem,{
+key:"nx-report",id:"nx-report",
+label:"Signaler un lien a Nexium",
+color:"danger",
+action:function(){try{_NXV.reportFromMessage(msg);}catch(_){}}
+}));}catch(_){}});
+_NXV.ctxWired=true;
+}catch(e){try{if(window._NXERR)_NXERR.push("menu contextuel :: "+((e&&e.message)||"erreur"));}catch(_){}}};
+try{setTimeout(_NXV.wireCtx,6000);}catch(_){}
+_NXV.wireSend=function(){try{
+if(_NXV._sendWired)return;
+var C=(window.Vencord&&Vencord.Webpack&&Vencord.Webpack.Common)||null;
+var MA=C&&C.MessageActions;
+if(!MA||typeof MA.sendMessage!=="function"){if((_NXV._swTry=(_NXV._swTry||0)+1)<20)setTimeout(_NXV.wireSend,3000);return;}
+if(MA.sendMessage.__nx){_NXV._sendWired=true;return;}
+var orig=MA.sendMessage.bind(MA);
+var patched=function(ch,msg){
+try{
+if(_NXV.cfg.selfGuard&&msg&&typeof msg.content==="string"&&!msg.__nxok){
+var what=_NXV.selfScan(msg.content);
+if(what){
+var args=Array.prototype.slice.call(arguments);
+_NXV.confirmSend(what,function(ok){try{
+if(!ok){_NXV.log("envoi","envoi annule : "+what);return;}
+msg.__nxok=true;orig.apply(null,args);}catch(_){}});
+return Promise.resolve({nexium:"pending"});}}
+}catch(_){}
+return orig.apply(null,arguments);};
+patched.__nx=true;
+try{MA.sendMessage=patched;_NXV._sendWired=true;}catch(_){}
+}catch(_){}};
+try{setTimeout(_NXV.wireSend,7000);}catch(_){}
 _NXPR.wireDom=function(){try{
 if(_NXPR._dom)return;_NXPR._dom=true;
 document.addEventListener("click",_NXPR.onClickCapture,true);
@@ -1799,7 +2110,10 @@ document.addEventListener("paste",_NXPR.onPaste,true);
 }catch(_){}};
 try{_NXPR.wireDom();}catch(_){}
 try{setTimeout(function(){_NXPR.consoleWarn();},2500);setTimeout(function(){_NXPR.loadRemote();_NXPR.loadAllow();},4000);setInterval(function(){if(!document.hidden){_NXPR.loadRemote(true);_NXPR.loadAllow();}},21600000);}catch(_){}
-_NXPR.wire=function(){try{var C=_NXcommon();var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));if(!FX||!FX.subscribe){_NXPR.tries=(_NXPR.tries||0)+1;if(_NXPR.tries<25)setTimeout(_NXPR.wire,1500);return;}FX.subscribe("MESSAGE_CREATE",_NXPR.onMsg);FX.subscribe("MESSAGE_UPDATE",_NXPR.onMsgUpdate);FX.subscribe("PRESENCE_UPDATE",_NXPR.onPresence);}catch(_){}};
+_NXPR.wire=function(){try{var C=_NXcommon();var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));if(!FX||!FX.subscribe){_NXPR.tries=(_NXPR.tries||0)+1;if(_NXPR.tries<25)setTimeout(_NXPR.wire,1500);return;}FX.subscribe("MESSAGE_CREATE",_NXPR.onMsg);FX.subscribe("MESSAGE_UPDATE",_NXPR.onMsgUpdate);FX.subscribe("PRESENCE_UPDATE",_NXPR.onPresence);
+try{FX.subscribe("CHANNEL_SELECT",function(e){try{if(e&&e.guildId&&window._NXV)_NXV.checkGuild(e.guildId);}catch(_){}});
+FX.subscribe("GUILD_CREATE",function(e){try{var g=e&&e.guild;if(g&&g.id&&window._NXV)setTimeout(function(){_NXV.checkGuild(g.id);},4000);}catch(_){}});
+FX.subscribe("SESSIONS_REPLACE",function(e){try{if(window._NXV)_NXV.onSessions(e);}catch(_){}});}catch(_){}}catch(_){}};
 _NXPR.wire();
 }
 var NexiumProtectIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20},i("path",{d:"M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1.06 13.54L7.4 11l1.41-1.41 2.12 2.12 4.24-4.24 1.42 1.41-5.65 5.65z"}));};
@@ -1887,6 +2201,13 @@ ctrl("M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2
 ctrl("M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z","Analyse des thèmes","Repère les ressources externes chargées par tes thèmes et QuickCSS, qui exposent ton adresse IP.",(window._NXV&&_NXV.cfg.scanThemes),function(){try{_NXV.cfg.scanThemes=!_NXV.cfg.scanThemes;_NXV.save();_NXV._cssWarned=false;_NXV.scanCss();force();}catch(_){}}),
 ctrl("M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z","Vérification d\'intégrité","Compare ton fichier client à la version publiée sur le dépôt officiel pour détecter toute altération locale.",(window._NXV&&_NXV.cfg.verifyIntegrity),function(){try{_NXV.cfg.verifyIntegrity=!_NXV.cfg.verifyIntegrity;_NXV.save();if(_NXV.cfg.verifyIntegrity)_NXV.checkIntegrity();force();}catch(_){}}),
 ctrl("M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h2c0-1.66 1.34-3 3-3s3 1.34 3 3v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z","Chiffrement des données locales","Chiffre tes statistiques, journaux et signalements dans le stockage local.",(window._NXV&&_NXV.cfg.encryptLocal),function(){try{_NXV.applyEncryption(!_NXV.cfg.encryptLocal);force();}catch(_){}})),{mb:12}),
+_NXcard(i("div",null,_NXch("Défenses avancées","Protections actives sur ton compte et ce que tu envoies."),
+ctrl("M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z","Garde-fou avant envoi","Prévient AVANT d\'envoyer un message contenant ton IP, une adresse, un téléphone, un e-mail, un IBAN ou une carte bancaire.",(window._NXV&&_NXV.cfg.selfGuard),function(){try{_NXV.cfg.selfGuard=!_NXV.cfg.selfGuard;_NXV.save();_NXV.notify();force();}catch(_){}}),
+ctrl("M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-9 10H8v-2h3v2zm5-4H8v-2h8v2z","Détection de serveur piégé","Analyse les serveurs que tu rejoins : salon de vérification imposé, demande d\'autorisation d\'application, nom imitant une marque.",(window._NXV&&_NXV.cfg.guildGuard),function(){try{_NXV.cfg.guildGuard=!_NXV.cfg.guildGuard;_NXV.save();_NXV.notify();force();}catch(_){}}),
+ctrl("M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4h2V2H6c-2.21 0-4 1.79-4 4v12c0 2.21 1.79 4 4 4h14v-8h-2zm-2-2v4h4v-4h-4z","Fichiers doublement piégés","Détecte les archives protégées par mot de passe, celles contenant un exécutable, et les noms utilisant l\'inversion de texte.",(window._NXV&&_NXV.cfg.deepFiles),function(){try{_NXV.cfg.deepFiles=!_NXV.cfg.deepFiles;_NXV.save();_NXV.notify();force();}catch(_){}}),
+ctrl("M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z","Faux cadeaux Nitro","Vérifie la validité réelle des codes cadeau et repère les faux domaines imitant discord.gift.",(window._NXV&&_NXV.cfg.giftGuard),function(){try{_NXV.cfg.giftGuard=!_NXV.cfg.giftGuard;_NXV.save();_NXV.notify();force();}catch(_){}}),
+ctrl("M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z","Surveillance des connexions","Alerte quand une nouvelle session apparaît sur ton compte depuis un autre appareil.",(window._NXV&&_NXV.cfg.sessionGuard),function(){try{_NXV.cfg.sessionGuard=!_NXV.cfg.sessionGuard;_NXV.save();_NXV.notify();force();}catch(_){}}),
+ctrl("M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z","Base communautaire","Bloque les domaines signalés par au moins 3 utilisateurs Nexium"+((window._NXV&&_NXV.commN)?(" ("+_NXV.commN+" domaines chargés)"):"")+".",(window._NXV&&_NXV.cfg.community),function(){try{_NXV.cfg.community=!_NXV.cfg.community;_NXV.save();if(_NXV.cfg.community)_NXV.loadCommunity(true);else{_NXV.comm=Object.create(null);_NXV.commN=0;}_NXPR.cache=Object.create(null);_NXV.notify();force();}catch(_){}})),{mb:12}),
 _NXcard(i("div",null,_NXch("Analyse des contenus","Ce que Nexium inspecte dans les messages que tu reçois."),
 ctrl("M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z","Analyse des fichiers","Vérifie le contenu réel des pièces jointes : un .exe renommé en .png est détecté.",cfg.scanFiles,tog("scanFiles")),
 ctrl("M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z","Blocage des téléchargements","Bloque les liens pointant vers un exécutable, sauf depuis une source de confiance.",cfg.scanDownloads,tog("scanDownloads")),
@@ -1959,9 +2280,8 @@ i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:fun
 _NXcard(i("div",null,i("div",{style:{fontSize:"11px",fontWeight:"700",textTransform:"uppercase",letterSpacing:".1em",color:P.dim,marginBottom:"10px"}},"Conseils de sécurité"),
 ["Ne colle jamais de code dans la console Discord (F12) — c'est le piège n°1 pour voler un compte.","Ne scanne jamais un QR code de connexion envoyé par un inconnu.","Un « Nitro gratuit » par MP est toujours une arnaque.","Vérifie toujours le domaine exact d'un lien avant de te connecter."].map(function(t,k){return i("div",{key:k,style:{display:"flex",gap:"10px",alignItems:"flex-start",marginBottom:"8px"}},i("div",{style:{color:"#3ba55d",flexShrink:0,marginTop:"1px"}},i("svg",{viewBox:"0 0 24 24",width:15,height:15,fill:"currentColor"},i("path",{d:"M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"}))),i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:"1.55"}},t));})),{mb:0}),
 _NXfoot("Nexium Protect · analyse 100% locale, aucune donnée envoyée")));
-}
-var _NXlogin=window._NXlogin||(window._NXlogin={});
-if(!_NXlogin.boot){_NXlogin.boot=true;
+}var _NXlogin=window._NXlogin||(window._NXlogin={});
+if(!_NXlogin.boot){try{_NXlogin.boot=true;
 _NXlogin.injectStyle=function(){try{if(document.getElementById("nx-login-style"))return;var s=document.createElement("style");s.id="nx-login-style";s.textContent="@keyframes nxWelcomeIn{0%{opacity:0;transform:translateY(-14px)}100%{opacity:1;transform:translateY(0)}}@keyframes nxSheen{0%{background-position:-140% 0}100%{background-position:240% 0}}#nx-welcome{position:fixed;top:0;left:0;right:0;z-index:2000;display:flex;flex-direction:column;align-items:center;pointer-events:none;padding-top:26px;animation:nxWelcomeIn .8s cubic-bezier(.16,1,.3,1) both}#nx-welcome .nx-kick{font-size:11px;font-weight:800;letter-spacing:.42em;text-transform:uppercase;color:rgba(190,190,198,.72);margin-bottom:8px;padding-left:.42em}#nx-welcome .nx-brand{font-family:var(--font-display),'Bricolage Grotesque','gg sans',sans-serif;font-size:46px;font-weight:800;letter-spacing:.02em;line-height:1;background:linear-gradient(100deg,#ffffff,#c9c9d2 30%,#ffffff 50%,#c9c9d2 70%,#ffffff);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:nxSheen 6s linear infinite}#nx-welcome .nx-sub{margin-top:11px;font-size:12.5px;color:rgba(150,150,158,.7)}#nx-welcome .nx-line{margin-top:15px;width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(232,232,234,.6),transparent)}.nx-login-glow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 45% at 50% 12%, rgba(120,110,180,.10), transparent 60%),radial-gradient(50% 40% at 50% 100%, rgba(80,90,140,.08), transparent 60%)}";document.head.appendChild(s);}catch(_){}};
 _NXlogin.isLogin=function(){try{return !!document.querySelector('[class*="authBox"],[class*="AuthBox"],[class*="authBoxContainer"],[class*="qrLogin"]');}catch(_){return false;}};
 _NXlogin.mount=function(){try{if(!_NXlogin.isLogin()){_NXlogin.unmount();return;}_NXlogin.seen=true;_NXlogin.injectStyle();if(!document.getElementById("nx-login-glow")){var g=document.createElement("div");g.id="nx-login-glow";g.className="nx-login-glow";if(document.body)document.body.appendChild(g);}if(document.getElementById("nx-welcome"))return;var b=document.createElement("div");b.id="nx-welcome";b.innerHTML="<div class='nx-kick'>Bienvenue sur l'environnement</div><div class='nx-brand'>NEXIUM</div><div class='nx-sub'>Ton Discord, augmenté — sécurité, confidentialité et style.</div><div class='nx-line'></div>";if(document.body)document.body.appendChild(b);}catch(_){}};
@@ -1973,9 +2293,9 @@ setTimeout(_NXlogin.tick,400);setTimeout(_NXlogin.tick,1200);
 _NXlogin.iv=setInterval(function(){try{
 if(Date.now()-_NXlogin.t0>150000&&!_NXlogin.seen){clearInterval(_NXlogin.iv);_NXlogin.iv=null;return;}
 _NXlogin.tick();}catch(_){}},3000);}catch(_){}
-}
-var _NXWelcome=window._NXWelcome||(window._NXWelcome={});
-if(!_NXWelcome.boot){_NXWelcome.boot=true;
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXlogin");if(window._NXERR)_NXERR.push("module _NXlogin :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXlogin desactive:",_nxE);}catch(_){}}
+}var _NXWelcome=window._NXWelcome||(window._NXWelcome={});
+if(!_NXWelcome.boot){try{_NXWelcome.boot=true;
 _NXWelcome.KEY="nexium_onboarded";
 _NXWelcome.close=function(){try{var e=document.getElementById("nx-onboard");if(e&&e.parentNode)e.parentNode.removeChild(e);}catch(_){}};
 _NXWelcome.show=function(){try{
@@ -2005,9 +2325,9 @@ if(document.body)document.body.appendChild(ov);
 }catch(_){}};
 _NXWelcome.maybe=function(){try{if(_NXDB.get(_NXWelcome.KEY))return;setTimeout(function(){_NXWelcome.show();},3500);}catch(_){}};
 try{_NXWelcome.maybe();}catch(_){}
-}
-var _NXUA=window._NXUA||(window._NXUA={});
-if(!_NXUA.boot){_NXUA.boot=true;
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXWelcome");if(window._NXERR)_NXERR.push("module _NXWelcome :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXWelcome desactive:",_nxE);}catch(_){}}
+}var _NXUA=window._NXUA||(window._NXUA={});
+if(!_NXUA.boot){try{_NXUA.boot=true;
 _NXUA.KEY="nexium_restore_icons";_NXUA.root=null;_NXUA.fails=0;
 _NXUA._en=null;_NXUA.enabled=function(){try{if(_NXUA._en!==null)return _NXUA._en;var v=_NXDB.get(_NXUA.KEY);_NXUA._en=(v==="1");return _NXUA._en;}catch(_){return false;}};
 _NXUA.setEnabled=function(v){_NXUA._en=!!v;try{_NXDB.set(_NXUA.KEY,v?"1":"0");}catch(_){}if(v){_NXUA.fails=0;_NXUA.tick();}else _NXUA.unmount();};
@@ -2109,9 +2429,9 @@ _NXUA.mount();
 }catch(_){}};
 _NXUA.status=function(){return {enabled:_NXUA.enabled(),registered:_NXUA.count(),mounted:!!_NXUA.mounted,failed:_NXUA.fails>=3};};
 try{setTimeout(_NXUA.tick,5000);setTimeout(_NXUA.tick,9000);_NXUA.iv=setInterval(_NXUA.tick,5000);}catch(_){}
-}
-var _NXBAN=window._NXBAN||(window._NXBAN={});
-if(!_NXBAN.boot){_NXBAN.boot=true;
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXUA");if(window._NXERR)_NXERR.push("module _NXUA :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXUA desactive:",_nxE);}catch(_){}}
+}var _NXBAN=window._NXBAN||(window._NXBAN={});
+if(!_NXBAN.boot){try{_NXBAN.boot=true;
 _NXBAN.URL="https://raw.githubusercontent.com/Omega-devj/bl-client-nexium/refs/heads/main/ban";
 _NXBAN.KEY="nexium_ban_state";
 _NXBAN.active=false;
@@ -2188,9 +2508,9 @@ else{try{_NXDB.del(_NXBAN.KEY);}catch(_){}_NXBAN.lift();}
 }).catch(function(){});
 }catch(_){}};
 try{setTimeout(_NXBAN.check,2000);setInterval(function(){if(!document.hidden)_NXBAN.check();},300000);}catch(_){}
-}
-var _NXDIAG=window._NXDIAG||(window._NXDIAG={});
-if(!_NXDIAG.boot){_NXDIAG.boot=true;
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXBAN");if(window._NXERR)_NXERR.push("module _NXBAN :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXBAN desactive:",_nxE);}catch(_){}}
+}var _NXDIAG=window._NXDIAG||(window._NXDIAG={});
+if(!_NXDIAG.boot){try{_NXDIAG.boot=true;
 _NXDIAG.flags={};_NXDIAG.warned=false;
 _NXDIAG.RULES=[
 {k:"modules",rx:/Module updater is not available|DISCORD_NATIVE_MODULES_INSTALL/i,t:"Modules natifs de Discord absents"},
@@ -2212,12 +2532,16 @@ try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Installation Discord incomplete de
 return _NXDIAG.flags;}catch(_){return {};}};
 _NXDIAG.list=function(){try{var out=[];for(var k in _NXDIAG.flags)out.push(_NXDIAG.flags[k]);return out;}catch(_){return [];}};
 try{setTimeout(function(){_NXDIAG.scan();},15000);setInterval(function(){if(!document.hidden)_NXDIAG.scan();},120000);}catch(_){}
-}
-var _NXHEALTH=window._NXHEALTH||(window._NXHEALTH={});
-if(!_NXHEALTH.init){_NXHEALTH.init=true;
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXDIAG");if(window._NXERR)_NXERR.push("module _NXDIAG :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXDIAG desactive:",_nxE);}catch(_){}}
+}var _NXHEALTH=window._NXHEALTH||(window._NXHEALTH={});
+if(!_NXHEALTH.init){try{_NXHEALTH.init=true;
 _NXHEALTH.MODS=[["_NXDB","stockage"],["_NXM","musique"],["_NXS","statistiques"],["_NXP","confidentialite"],["_NXNET","reseau"],["_NXCL","changelog"],["_NXUP","mise a jour"],["_NXLY","presence"],["_NXPR","protect"],["_NXSP","sponsor"],["_NXUA","icones"],["_NXCP","recherche rapide"],["_NXBADGE","badge"],["_NXBAN","bannissement"],["_NXlogin","ecran de connexion"],["_NXWelcome","accueil"],["_NXDIAG","diagnostic"]];
+_NXHEALTH.isolated=["_NXDB","_NXP","_NXSP","_NXUA","_NXBAN","_NXDIAG","_NXHEALTH","_NXSAFE","_NXBADGE","_NXWelcome","_NXlogin"];
 _NXHEALTH.check=function(){try{
 var ko=[];
+try{var F=window._NXFAIL||[];for(var f=0;f<F.length;f++){var lab=F[f];
+for(var g=0;g<_NXHEALTH.MODS.length;g++)if(_NXHEALTH.MODS[g][0]===F[f])lab=_NXHEALTH.MODS[g][1];
+if(ko.indexOf(lab)<0)ko.push(lab);}}catch(_){}
 for(var a=0;a<_NXHEALTH.MODS.length;a++){var m=_NXHEALTH.MODS[a];
 var o=window[m[0]];
 if(!o||(o.boot!==true&&o.init!==true&&m[0]!=="_NXDB"))ko.push(m[1]);}
@@ -2229,9 +2553,9 @@ try{if(window._NXERR){_NXERR.push("sante :: modules non demarres : "+ko.join(", 
 try{if(window._NXPR&&_NXPR.toast)_NXPR.toast(ko.length+" module(s) Nexium n ont pas demarre. Voir Nexium Donnees.",0);}catch(_){}}
 return ko;}catch(_){return [];}};
 try{setTimeout(function(){_NXHEALTH.check();},18000);}catch(_){}
-}
-var _NXSAFE=window._NXSAFE||(window._NXSAFE={});
-if(!_NXSAFE.boot){_NXSAFE.boot=true;_NXSAFE.KEY="nexium_boot_guard";_NXSAFE.on=false;
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXHEALTH");if(window._NXERR)_NXERR.push("module _NXHEALTH :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXHEALTH desactive:",_nxE);}catch(_){}}
+}var _NXSAFE=window._NXSAFE||(window._NXSAFE={});
+if(!_NXSAFE.boot){try{_NXSAFE.boot=true;_NXSAFE.KEY="nexium_boot_guard";_NXSAFE.on=false;
 _NXSAFE.check=function(){try{
 var raw=_NXDB.get(_NXSAFE.KEY);var st=null;
 try{st=raw?JSON.parse(raw):null;}catch(_){st=null;}
@@ -2248,9 +2572,9 @@ try{setTimeout(function(){if(window._NXPR&&_NXPR.toast)_NXPR.toast("Mode securis
 setTimeout(function(){try{_NXDB.set(_NXSAFE.KEY,JSON.stringify({n:0,at:Date.now()}));}catch(_){}},60000);
 }catch(_){}};
 try{_NXSAFE.check();}catch(_){}
-}
-var _NXBADGE=window._NXBADGE||(window._NXBADGE={});
-if(!_NXBADGE.boot){_NXBADGE.boot=true;
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXSAFE");if(window._NXERR)_NXERR.push("module _NXSAFE :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXSAFE desactive:",_nxE);}catch(_){}}
+}var _NXBADGE=window._NXBADGE||(window._NXBADGE={});
+if(!_NXBADGE.boot){try{_NXBADGE.boot=true;
 _NXBADGE.API="https://emcoqnvxriyrchmfpunq.supabase.co/functions/v1/users";
 _NXBADGE.KEY="nexium_badge_users";
 _NXBADGE.DEVS={"546349979757707265":1,"1480728136021970946":1};
@@ -2329,8 +2653,8 @@ try{_NXBADGE.loadCache();
 setTimeout(_NXBADGE.install,3000);
 setTimeout(function(){_NXBADGE.sync();},5000);
 setInterval(function(){if(!document.hidden)_NXBADGE.sync();},3600000);}catch(_){}
-}
-var _NXCP=window._NXCP||(window._NXCP={});
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXBADGE");if(window._NXERR)_NXERR.push("module _NXBADGE :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXBADGE desactive:",_nxE);}catch(_){}}
+}var _NXCP=window._NXCP||(window._NXCP={});
 if(!_NXCP.boot){_NXCP.boot=true;
 _NXCP.el=null;_NXCP.q="";_NXCP.sel=0;
 _NXCP.goto=function(key){try{
@@ -2464,8 +2788,7 @@ i("div",{style:{display:"flex",alignItems:"center",gap:"9px",minWidth:0}},i("div
 i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){if(!_NXCL.busy)_NXCL.refresh();},style:{fontSize:"12px",color:P.sub,cursor:"pointer",padding:"8px 15px",background:"transparent",borderRadius:"9px",border:"1px solid "+P.line,flexShrink:0,fontWeight:"600"}},_NXCL.busy?"…":"Actualiser")),
 st.text?i("div",{style:{maxHeight:"440px",overflowY:"auto",paddingRight:"8px"}},st.text.split("\n").slice(0,400).map(line)):i("div",{style:{fontSize:"13px",color:P.dim,padding:"26px 0",textAlign:"center"}},_NXCL.err?"Impossible de récupérer le changelog distant pour l'instant.":"Chargement du changelog…")),{mb:0}),
 _NXfoot("Changelog synchronisé depuis le dépôt GitHub")));
-}
-var ST,Gxe=h(()=>{"use strict";d();Uhe();Ft();Rr();gr();Ac();Ke();bt();ra();Ze();Rx();yW();un();bn();uu();T();_v();wxe();zxe();ST=Qr(_NXsafe(Mst,"Notes de version"),"Changelog")});function ca(e){return i("div",{className:Hxe.markup},Bt.defaultRules.codeBlock.react(e,null,{}))}function Ux({children:e}){return i("span",{className:Hxe.markup},i("code",{className:"inline"},e))}var Hxe,cd=h(()=>{"use strict";d();se();T();Hxe=Re("markup","codeContainer")});function jxe({setFind:e,setParsedFind:t,setMatch:n,setReplacement:o}){let[r,a]=D(""),[s,l]=D(""),c=Te(null);function u(){if(r===""){l(""),e(""),t(""),n(""),o("");return}try{let{find:p,replacement:m}=(0,eval)(`([${r}][0])`);if(!p)throw new Error("No 'find' field");if(!m)throw new Error("No 'replacement' field");if(m instanceof Array){if(m.length===0)throw new Error("Invalid replacement");m=m[0]}if(!m.match)throw new Error("No 'replacement.match' field");if(m.replace==null)throw new Error("No 'replacement.replace' field");e(p instanceof RegExp?`/${p.source}/`:p),t(p),n(m.match instanceof RegExp?m.match.source:m.match),o(m.replace),l("")}catch(p){l(p.message)}}return j(()=>{let{current:p}=c;p&&(p.style.height="auto",p.style.height=`${p.scrollHeight}px`)},[r]),i(f,null,i(Za,{inputRef:c,value:r,onChange:a,onBlur:u}),s!==""&&i(U,{style:{color:"var(--text-feedback-critical)"}},s))}var qxe=h(()=>{"use strict";d();Ze();T()});var of=fo(nK=>{"use strict";d();Object.defineProperty(nK,"__esModule",{value:!0});var tK=class{diff(t,n,o={}){let r;typeof o=="function"?(r=o,o={}):"callback"in o&&(r=o.callback);let a=this.castInput(t,o),s=this.castInput(n,o),l=this.removeEmpty(this.tokenize(a,o)),c=this.removeEmpty(this.tokenize(s,o));return this.diffWithOptionsObj(l,c,o,r)}diffWithOptionsObj(t,n,o,r){var a;let s=k=>{if(k=this.postProcess(k,o),r){setTimeout(function(){r(k)},0);return}else return k},l=n.length,c=t.length,u=1,p=l+c;o.maxEditLength!=null&&(p=Math.min(p,o.maxEditLength));let m=(a=o.timeout)!==null&&a!==void 0?a:1/0,g=Date.now()+m,x=[{oldPos:-1,lastComponent:void 0}],y=this.extractCommon(x[0],n,t,0,o);if(x[0].oldPos+1>=c&&y+1>=l)return s(this.buildValues(x[0].lastComponent,n,t));let v=-1/0,b=1/0,S=()=>{for(let k=Math.max(v,-u);k<=Math.min(b,u);k+=2){let I,E=x[k-1],N=x[k+1];E&&(x[k-1]=void 0);let L=!1;if(N){let Z=N.oldPos-k;L=N&&0<=Z&&Z<l}let $=E&&E.oldPos+1<c;if(!L&&!$){x[k]=void 0;continue}if(!$||L&&E.oldPos<N.oldPos?I=this.addToPath(N,!0,!1,0,o):I=this.addToPath(E,!1,!0,1,o),y=this.extractCommon(I,n,t,k,o),I.oldPos+1>=c&&y+1>=l)return s(this.buildValues(I.lastComponent,n,t))||!0;x[k]=I,I.oldPos+1>=c&&(b=Math.min(b,k-1)),y+1>=l&&(v=Math.max(v,k+1))}u++};if(r)(function k(){setTimeout(function(){if(u>p||Date.now()>g)return r(void 0);S()||k()},0)})();else for(;u<=p&&Date.now()<=g;){let k=S();if(k)return k}}addToPath(t,n,o,r,a){let s=t.lastComponent;return s&&!a.oneChangePerToken&&s.added===n&&s.removed===o?{oldPos:t.oldPos+r,lastComponent:{count:s.count+1,added:n,removed:o,previousComponent:s.previousComponent}}:{oldPos:t.oldPos+r,lastComponent:{count:1,added:n,removed:o,previousComponent:s}}}extractCommon(t,n,o,r,a){let s=n.length,l=o.length,c=t.oldPos,u=c-r,p=0;for(;u+1<s&&c+1<l&&this.equals(o[c+1],n[u+1],a);)u++,c++,p++,a.oneChangePerToken&&(t.lastComponent={count:1,previousComponent:t.lastComponent,added:!1,removed:!1});return p&&!a.oneChangePerToken&&(t.lastComponent={count:p,previousComponent:t.lastComponent,added:!1,removed:!1}),t.oldPos=c,u}equals(t,n,o){return o.comparator?o.comparator(t,n):t===n||!!o.ignoreCase&&t.toLowerCase()===n.toLowerCase()}removeEmpty(t){let n=[];for(let o=0;o<t.length;o++)t[o]&&n.push(t[o]);return n}castInput(t,n){return t}tokenize(t,n){return Array.from(t)}join(t){return t.join("")}postProcess(t,n){return t}get useLongestToken(){return!1}buildValues(t,n,o){let r=[],a;for(;t;)r.push(t),a=t.previousComponent,delete t.previousComponent,t=a;r.reverse();let s=r.length,l=0,c=0,u=0;for(;l<s;l++){let p=r[l];if(p.removed)p.value=this.join(o.slice(u,u+p.count)),u+=p.count;else{if(!p.added&&this.useLongestToken){let m=n.slice(c,c+p.count);m=m.map(function(g,x){let y=o[u+x];return y.length>g.length?y:g}),p.value=this.join(m)}else p.value=this.join(n.slice(c,c+p.count));c+=p.count,p.added||(u+=p.count)}}return r}};nK.default=tK});var Wxe=fo(n0=>{"use strict";d();var Bst=n0&&n0.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(n0,"__esModule",{value:!0});n0.characterDiff=void 0;n0.diffChars=Lst;var Rst=Bst(of()),oK=class extends Rst.default{};n0.characterDiff=new oK;function Lst(e,t,n){return n0.characterDiff.diff(e,t,n)}});var iK=fo(ml=>{"use strict";d();Object.defineProperty(ml,"__esModule",{value:!0});ml.longestCommonPrefix=Ost;ml.longestCommonSuffix=_st;ml.replacePrefix=Kxe;ml.replaceSuffix=Qxe;ml.removePrefix=Fst;ml.removeSuffix=Ust;ml.maximumOverlap=zst;ml.hasOnlyWinLineEndings=Gst;ml.hasOnlyUnixLineEndings=Hst;ml.segment=Zxe;ml.trailingWs=Yxe;ml.leadingWs=Jxe;ml.leadingAndTrailingWs=rK;function Ost(e,t){let n;for(n=0;n<e.length&&n<t.length;n++)if(e[n]!=t[n])return e.slice(0,n);return e.slice(0,n)}function _st(e,t){let n;if(!e||!t||e[e.length-1]!=t[t.length-1])return"";for(n=0;n<e.length&&n<t.length;n++)if(e[e.length-(n+1)]!=t[t.length-(n+1)])return e.slice(-n);return e.slice(-n)}function Kxe(e,t,n){if(e.slice(0,t.length)!=t)throw Error(`string ${JSON.stringify(e)} doesn't start with prefix ${JSON.stringify(t)}; this is a bug`);return n+e.slice(t.length)}function Qxe(e,t,n){if(!t)return e+n;if(e.slice(-t.length)!=t)throw Error(`string ${JSON.stringify(e)} doesn't end with suffix ${JSON.stringify(t)}; this is a bug`);return e.slice(0,-t.length)+n}function Fst(e,t){return Kxe(e,t,"")}function Ust(e,t){return Qxe(e,t,"")}function zst(e,t){return t.slice(0,$st(e,t))}function $st(e,t){let n=0;e.length>t.length&&(n=e.length-t.length);let o=t.length;e.length<t.length&&(o=e.length);let r=Array(o),a=0;r[0]=0;for(let s=1;s<o;s++){for(t[s]==t[a]?r[s]=r[a]:r[s]=a;a>0&&t[s]!=t[a];)a=r[a];t[s]==t[a]&&a++}a=0;for(let s=n;s<e.length;s++){for(;a>0&&e[s]!=t[a];)a=r[a];e[s]==t[a]&&a++}return a}function Gst(e){return e.includes(`\r
+}var ST,Gxe=h(()=>{"use strict";d();Uhe();Ft();Rr();gr();Ac();Ke();bt();ra();Ze();Rx();yW();un();bn();uu();T();_v();wxe();zxe();ST=Qr(_NXsafe(Mst,"Notes de version"),"Changelog")});function ca(e){return i("div",{className:Hxe.markup},Bt.defaultRules.codeBlock.react(e,null,{}))}function Ux({children:e}){return i("span",{className:Hxe.markup},i("code",{className:"inline"},e))}var Hxe,cd=h(()=>{"use strict";d();se();T();Hxe=Re("markup","codeContainer")});function jxe({setFind:e,setParsedFind:t,setMatch:n,setReplacement:o}){let[r,a]=D(""),[s,l]=D(""),c=Te(null);function u(){if(r===""){l(""),e(""),t(""),n(""),o("");return}try{let{find:p,replacement:m}=(0,eval)(`([${r}][0])`);if(!p)throw new Error("No 'find' field");if(!m)throw new Error("No 'replacement' field");if(m instanceof Array){if(m.length===0)throw new Error("Invalid replacement");m=m[0]}if(!m.match)throw new Error("No 'replacement.match' field");if(m.replace==null)throw new Error("No 'replacement.replace' field");e(p instanceof RegExp?`/${p.source}/`:p),t(p),n(m.match instanceof RegExp?m.match.source:m.match),o(m.replace),l("")}catch(p){l(p.message)}}return j(()=>{let{current:p}=c;p&&(p.style.height="auto",p.style.height=`${p.scrollHeight}px`)},[r]),i(f,null,i(Za,{inputRef:c,value:r,onChange:a,onBlur:u}),s!==""&&i(U,{style:{color:"var(--text-feedback-critical)"}},s))}var qxe=h(()=>{"use strict";d();Ze();T()});var of=fo(nK=>{"use strict";d();Object.defineProperty(nK,"__esModule",{value:!0});var tK=class{diff(t,n,o={}){let r;typeof o=="function"?(r=o,o={}):"callback"in o&&(r=o.callback);let a=this.castInput(t,o),s=this.castInput(n,o),l=this.removeEmpty(this.tokenize(a,o)),c=this.removeEmpty(this.tokenize(s,o));return this.diffWithOptionsObj(l,c,o,r)}diffWithOptionsObj(t,n,o,r){var a;let s=k=>{if(k=this.postProcess(k,o),r){setTimeout(function(){r(k)},0);return}else return k},l=n.length,c=t.length,u=1,p=l+c;o.maxEditLength!=null&&(p=Math.min(p,o.maxEditLength));let m=(a=o.timeout)!==null&&a!==void 0?a:1/0,g=Date.now()+m,x=[{oldPos:-1,lastComponent:void 0}],y=this.extractCommon(x[0],n,t,0,o);if(x[0].oldPos+1>=c&&y+1>=l)return s(this.buildValues(x[0].lastComponent,n,t));let v=-1/0,b=1/0,S=()=>{for(let k=Math.max(v,-u);k<=Math.min(b,u);k+=2){let I,E=x[k-1],N=x[k+1];E&&(x[k-1]=void 0);let L=!1;if(N){let Z=N.oldPos-k;L=N&&0<=Z&&Z<l}let $=E&&E.oldPos+1<c;if(!L&&!$){x[k]=void 0;continue}if(!$||L&&E.oldPos<N.oldPos?I=this.addToPath(N,!0,!1,0,o):I=this.addToPath(E,!1,!0,1,o),y=this.extractCommon(I,n,t,k,o),I.oldPos+1>=c&&y+1>=l)return s(this.buildValues(I.lastComponent,n,t))||!0;x[k]=I,I.oldPos+1>=c&&(b=Math.min(b,k-1)),y+1>=l&&(v=Math.max(v,k+1))}u++};if(r)(function k(){setTimeout(function(){if(u>p||Date.now()>g)return r(void 0);S()||k()},0)})();else for(;u<=p&&Date.now()<=g;){let k=S();if(k)return k}}addToPath(t,n,o,r,a){let s=t.lastComponent;return s&&!a.oneChangePerToken&&s.added===n&&s.removed===o?{oldPos:t.oldPos+r,lastComponent:{count:s.count+1,added:n,removed:o,previousComponent:s.previousComponent}}:{oldPos:t.oldPos+r,lastComponent:{count:1,added:n,removed:o,previousComponent:s}}}extractCommon(t,n,o,r,a){let s=n.length,l=o.length,c=t.oldPos,u=c-r,p=0;for(;u+1<s&&c+1<l&&this.equals(o[c+1],n[u+1],a);)u++,c++,p++,a.oneChangePerToken&&(t.lastComponent={count:1,previousComponent:t.lastComponent,added:!1,removed:!1});return p&&!a.oneChangePerToken&&(t.lastComponent={count:p,previousComponent:t.lastComponent,added:!1,removed:!1}),t.oldPos=c,u}equals(t,n,o){return o.comparator?o.comparator(t,n):t===n||!!o.ignoreCase&&t.toLowerCase()===n.toLowerCase()}removeEmpty(t){let n=[];for(let o=0;o<t.length;o++)t[o]&&n.push(t[o]);return n}castInput(t,n){return t}tokenize(t,n){return Array.from(t)}join(t){return t.join("")}postProcess(t,n){return t}get useLongestToken(){return!1}buildValues(t,n,o){let r=[],a;for(;t;)r.push(t),a=t.previousComponent,delete t.previousComponent,t=a;r.reverse();let s=r.length,l=0,c=0,u=0;for(;l<s;l++){let p=r[l];if(p.removed)p.value=this.join(o.slice(u,u+p.count)),u+=p.count;else{if(!p.added&&this.useLongestToken){let m=n.slice(c,c+p.count);m=m.map(function(g,x){let y=o[u+x];return y.length>g.length?y:g}),p.value=this.join(m)}else p.value=this.join(n.slice(c,c+p.count));c+=p.count,p.added||(u+=p.count)}}return r}};nK.default=tK});var Wxe=fo(n0=>{"use strict";d();var Bst=n0&&n0.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(n0,"__esModule",{value:!0});n0.characterDiff=void 0;n0.diffChars=Lst;var Rst=Bst(of()),oK=class extends Rst.default{};n0.characterDiff=new oK;function Lst(e,t,n){return n0.characterDiff.diff(e,t,n)}});var iK=fo(ml=>{"use strict";d();Object.defineProperty(ml,"__esModule",{value:!0});ml.longestCommonPrefix=Ost;ml.longestCommonSuffix=_st;ml.replacePrefix=Kxe;ml.replaceSuffix=Qxe;ml.removePrefix=Fst;ml.removeSuffix=Ust;ml.maximumOverlap=zst;ml.hasOnlyWinLineEndings=Gst;ml.hasOnlyUnixLineEndings=Hst;ml.segment=Zxe;ml.trailingWs=Yxe;ml.leadingWs=Jxe;ml.leadingAndTrailingWs=rK;function Ost(e,t){let n;for(n=0;n<e.length&&n<t.length;n++)if(e[n]!=t[n])return e.slice(0,n);return e.slice(0,n)}function _st(e,t){let n;if(!e||!t||e[e.length-1]!=t[t.length-1])return"";for(n=0;n<e.length&&n<t.length;n++)if(e[e.length-(n+1)]!=t[t.length-(n+1)])return e.slice(-n);return e.slice(-n)}function Kxe(e,t,n){if(e.slice(0,t.length)!=t)throw Error(`string ${JSON.stringify(e)} doesn't start with prefix ${JSON.stringify(t)}; this is a bug`);return n+e.slice(t.length)}function Qxe(e,t,n){if(!t)return e+n;if(e.slice(-t.length)!=t)throw Error(`string ${JSON.stringify(e)} doesn't end with suffix ${JSON.stringify(t)}; this is a bug`);return e.slice(0,-t.length)+n}function Fst(e,t){return Kxe(e,t,"")}function Ust(e,t){return Qxe(e,t,"")}function zst(e,t){return t.slice(0,$st(e,t))}function $st(e,t){let n=0;e.length>t.length&&(n=e.length-t.length);let o=t.length;e.length<t.length&&(o=e.length);let r=Array(o),a=0;r[0]=0;for(let s=1;s<o;s++){for(t[s]==t[a]?r[s]=r[a]:r[s]=a;a>0&&t[s]!=t[a];)a=r[a];t[s]==t[a]&&a++}a=0;for(let s=n;s<e.length;s++){for(;a>0&&e[s]!=t[a];)a=r[a];e[s]==t[a]&&a++}return a}function Gst(e){return e.includes(`\r
 `)&&!e.startsWith(`
 `)&&!e.match(/[^\r]\n/)}function Hst(e){return!e.includes(`\r
 `)&&e.includes(`
