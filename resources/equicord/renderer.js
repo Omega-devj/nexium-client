@@ -292,6 +292,214 @@ return _ce.apply(null,arguments);};
 _pce.__nx=true;console.error=_pce;}}catch(_){}
 try{if(window.addEventListener){window.addEventListener("error",function(ev){try{var m=(ev&&(ev.message||(ev.error&&ev.error.message)))||"";if(!m)return;_NXERR.push("global :: "+String(m).slice(0,200));if(_NXERR.length>20)_NXERR.shift();_NXsaveErr();}catch(_){}},true);
 window.addEventListener("unhandledrejection",function(ev){try{var r=ev&&ev.reason;var m=(r&&(r.message||r))||"";if(!m)return;_NXERR.push("promesse :: "+String(m).slice(0,200));if(_NXERR.length>20)_NXERR.shift();_NXsaveErr();}catch(_){}},true);}}catch(_){}
+var _NXV=window._NXV||(window._NXV={});
+if(!_NXV.boot){_NXV.boot=true;
+_NXV.KEY="nexium_vault";
+_NXV.cfg=(function(){var d;try{var r=_NXDB.get(_NXV.KEY);d=r?JSON.parse(r):null;}catch(e){d=null;}
+if(!d||typeof d!=="object")d={};
+if(typeof d.blockExfil!=="boolean")d.blockExfil=true;
+if(typeof d.scanThemes!=="boolean")d.scanThemes=true;
+if(typeof d.verifyIntegrity!=="boolean")d.verifyIntegrity=true;
+if(typeof d.encryptLocal!=="boolean")d.encryptLocal=false;
+if(!Array.isArray(d.allowedCss))d.allowedCss=[];
+return d;})();
+_NXV.save=function(){try{_NXDB.set(_NXV.KEY,JSON.stringify(_NXV.cfg));}catch(_){}};
+_NXV.stats=(function(){var d;try{var r=_NXDB.get(_NXV.KEY+"_stats");d=r?JSON.parse(r):null;}catch(e){d=null;}
+if(!d||typeof d!=="object")d={};
+if(typeof d.blocked!=="number")d.blocked=0;
+if(typeof d.css!=="number")d.css=0;
+if(!Array.isArray(d.log))d.log=[];
+return d;})();
+_NXV.saveStats=function(){try{_NXDB.set(_NXV.KEY+"_stats",JSON.stringify(_NXV.stats));}catch(_){}};
+_NXV.listeners=[];
+_NXV.notify=function(){for(var a=0;a<_NXV.listeners.length;a++){try{_NXV.listeners[a]();}catch(_){}}};
+_NXV.log=function(kind,detail){try{
+_NXV.stats.log.unshift({k:kind,d:String(detail||"").slice(0,160),t:Date.now()});
+if(_NXV.stats.log.length>40)_NXV.stats.log=_NXV.stats.log.slice(0,40);
+_NXV.saveStats();_NXV.notify();}catch(_){}};
+
+_NXV.SAFE=/(^|\.)(discord\.com|discordapp\.com|discordapp\.net|discord\.gg|discord\.media|discord\.dev|discordstatus\.com|githubusercontent\.com|github\.com|supabase\.co)$/i;
+_NXV.hostOf=function(u){try{var h=new URL(String(u),"https://discord.com").hostname.toLowerCase();return h.replace(/^www\./,"");}catch(_){return "";}};
+_NXV.isSafeHost=function(h){try{return _NXV.SAFE.test(h||"");}catch(_){return false;}};
+
+_NXV.token=function(){try{
+if(_NXV._tk&&(Date.now()-_NXV._tkAt)<60000)return _NXV._tk;
+var t=null;
+try{var W=window.Vencord&&Vencord.Webpack;
+var m=W&&W.findByProps&&W.findByProps("getToken");
+if(m&&typeof m.getToken==="function")t=m.getToken();}catch(_){}
+if(!t){try{var raw=window.localStorage&&window.localStorage.getItem("token");if(raw)t=String(raw).replace(/^"|"$/g,"");}catch(_){}}
+_NXV._tk=(t&&String(t).length>20)?String(t):null;_NXV._tkAt=Date.now();
+return _NXV._tk;}catch(_){return null;}};
+
+_NXV.RXTK=/(mfa\.[\w-]{20,})|([\w-]{23,28}\.[\w-]{6}\.[\w-]{27,38})/;
+_NXV.RXPWD=/("password"\s*:\s*"[^"]{6,})|(&password=)|("new_password")/i;
+_NXV.scanPayload=function(body){try{
+if(!body)return null;
+var s="";
+if(typeof body==="string")s=body;
+else if(typeof FormData!=="undefined"&&body instanceof FormData){try{var p=[];body.forEach(function(v,k){p.push(k+"="+String(v).slice(0,200));});s=p.join("&");}catch(_){}}
+else if(body&&typeof body==="object"){try{s=JSON.stringify(body);}catch(_){s="";}}
+if(!s)return null;
+s=s.slice(0,20000);
+var tk=_NXV.token();
+if(tk&&s.indexOf(tk)>=0)return "jeton de session";
+if(_NXV.RXTK.test(s))return "jeton Discord";
+if(_NXV.RXPWD.test(s))return "mot de passe";
+try{if(document.cookie&&document.cookie.length>20&&s.indexOf(document.cookie.slice(0,40))>=0)return "cookies de session";}catch(_){}
+return null;}catch(_){return null;}};
+
+_NXV.headerLeak=function(init){try{
+if(!init||!init.headers)return null;
+var tk=_NXV.token();if(!tk)return null;
+var h=init.headers;var vals=[];
+try{if(typeof Headers!=="undefined"&&h instanceof Headers){h.forEach(function(v){vals.push(String(v));});}
+else if(Array.isArray(h)){for(var a=0;a<h.length;a++)vals.push(String(h[a][1]));}
+else{for(var k in h)vals.push(String(h[k]));}}catch(_){}
+for(var b=0;b<vals.length;b++){if(vals[b].indexOf(tk)>=0)return "jeton dans les en-tetes";}
+return null;}catch(_){return null;}};
+
+_NXV.deny=function(host,what,where){try{
+_NXV.stats.blocked=(_NXV.stats.blocked||0)+1;
+_NXV.log("exfil",what+" vers "+host+(where?(" ("+where+")"):""));
+_NXV.saveStats();
+if(!_NXV._lastAlert||(Date.now()-_NXV._lastAlert)>8000){_NXV._lastAlert=Date.now();
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("BLOQUE : une tentative d envoi de ton "+what+" vers "+host+" a ete stoppee. Change ton mot de passe si tu as colle du code recemment.",0);}catch(_){}}
+try{if(window._NXPR){_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat("exfil",what+" vers "+host);_NXPR.saveStats();}}catch(_){}
+}catch(_){}};
+
+_NXV.checkOut=function(url,init,where){try{
+if(!_NXV.cfg.blockExfil)return false;
+var h=_NXV.hostOf(url);
+if(!h||_NXV.isSafeHost(h))return false;
+var what=_NXV.headerLeak(init)||_NXV.scanPayload(init&&init.body);
+if(!what)return false;
+_NXV.deny(h,what,where);
+return true;}catch(_){return false;}};
+}
+_NXV.RXCSSURL=/url\(\s*['"]?(https?:\/\/[^'")\s]+)/gi;
+_NXV.RXIMPORT=/@import\s+(?:url\(\s*)?['"]?(https?:\/\/[^'")\s;]+)/gi;
+_NXV.cssSources=function(){try{
+var out=[];var W=window.Vencord&&Vencord.Webpack;
+try{var qs=_NXDB.ls&&_NXDB.ls.getItem?null:null;}catch(_){}
+try{var V=window.Vencord;
+if(V&&V.Settings&&V.Settings.plain){var s=V.Settings.plain;
+if(s.themeLinks&&s.themeLinks.length)for(var a=0;a<s.themeLinks.length;a++)out.push({n:"lien de theme",v:String(s.themeLinks[a]),link:true});}
+if(V&&V.QuickCss&&typeof V.QuickCss==="string")out.push({n:"QuickCSS",v:V.QuickCss});}catch(_){}
+try{var el=document.getElementById("vencord-custom-css")||document.getElementById("vencord-quickcss");
+if(el&&el.textContent)out.push({n:"QuickCSS",v:String(el.textContent)});}catch(_){}
+try{var sts=document.querySelectorAll?document.querySelectorAll("style[id*='vencord'],style[id*='theme'],style[id*='equicord']"):[];
+for(var b=0;b<sts.length&&b<12;b++){var t=sts[b].textContent||"";if(t.length>40)out.push({n:sts[b].id||"theme",v:t});}}catch(_){}
+return out;}catch(_){return [];}};
+_NXV.scanCss=function(){try{
+if(!_NXV.cfg.scanThemes)return [];
+var found=[],seen=Object.create(null);
+var srcs=_NXV.cssSources();
+for(var a=0;a<srcs.length;a++){
+var s=srcs[a];var txt=String(s.v||"");
+if(s.link){var h0=_NXV.hostOf(txt);if(h0&&!seen["L"+h0]){seen["L"+h0]=1;found.push({t:"lien",h:h0,u:txt,src:s.n,imp:true});}continue;}
+var m;
+_NXV.RXIMPORT.lastIndex=0;
+while((m=_NXV.RXIMPORT.exec(txt))){var h=_NXV.hostOf(m[1]);
+if(h&&!seen["I"+h]){seen["I"+h]=1;found.push({t:"import",h:h,u:m[1],src:s.n,imp:true});}}
+_NXV.RXCSSURL.lastIndex=0;
+while((m=_NXV.RXCSSURL.exec(txt))){var h2=_NXV.hostOf(m[1]);
+if(!h2||seen["U"+h2])continue;seen["U"+h2]=1;
+found.push({t:"ressource",h:h2,u:m[1],src:s.n,imp:false});}}
+_NXV.css=found;
+var risky=found.filter(function(f){return !_NXV.isSafeHost(f.h)&&_NXV.cfg.allowedCss.indexOf(f.h)<0;});
+_NXV.cssRisky=risky;
+if(risky.length&&!_NXV._cssWarned){_NXV._cssWarned=true;
+_NXV.stats.css=risky.length;_NXV.saveStats();
+_NXV.log("css",risky.length+" source(s) externe(s) dans tes themes : "+risky.slice(0,3).map(function(f){return f.h;}).join(", "));
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Tes themes chargent "+risky.length+" ressource(s) externe(s) : ton IP est transmise a ces serveurs. Voir Nexium Protect.",0);}catch(_){}}
+_NXV.notify();
+return found;}catch(_){return [];}};
+_NXV.blockCssHost=function(h){try{
+if(!h)return;
+if(!_NXV._cssBlocked)_NXV._cssBlocked=Object.create(null);
+_NXV._cssBlocked[h]=1;
+var id="nx-css-guard";
+var st=document.getElementById(id);
+if(!st){st=document.createElement("style");st.id=id;if(document.head)document.head.appendChild(st);}
+var rules=[];
+for(var k in _NXV._cssBlocked)rules.push('[style*="'+k+'"]{background-image:none !important;}');
+st.textContent=rules.join("\n");
+_NXV.log("css","ressource bloquee : "+h);
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Ressource "+h+" bloquee. Redemarre pour un effet complet.",1);}catch(_){}
+}catch(_){}};
+_NXV.allowCss=function(h){try{
+if(_NXV.cfg.allowedCss.indexOf(h)<0)_NXV.cfg.allowedCss.push(h);
+_NXV.save();_NXV._cssWarned=false;_NXV.scanCss();}catch(_){}};
+
+_NXV.SUMURL="https://raw.githubusercontent.com/Omega-devj/nexium-client/refs/heads/main/resources/equicord/renderer.js.nxsum";
+_NXV.sum=function(t){try{var h=5381,a=0,n=t.length;for(;a<n;a++)h=(((h<<5)+h)^t.charCodeAt(a))|0;return "nx"+(h>>>0).toString(16)+"-"+n;}catch(_){return null;}};
+_NXV.integrity={state:"inconnu"};
+_NXV.checkIntegrity=function(){try{
+if(!_NXV.cfg.verifyIntegrity){_NXV.integrity={state:"desactive"};_NXV.notify();return;}
+var RAW="https://raw.githubusercontent.com/Omega-devj/nexium-client/refs/heads/main/resources/equicord/renderer.js";
+Promise.all([
+fetch(_NXV.SUMURL,{cache:"no-store"}).then(function(r){return r&&r.ok?r.text():null;}).catch(function(){return null;}),
+fetch(RAW,{cache:"no-store"}).then(function(r){return r&&r.ok?r.text():null;}).catch(function(){return null;})
+]).then(function(res){
+var pub=res[0],ref=res[1];
+if(!pub||!ref){_NXV.integrity={state:"injoignable"};_NXV.notify();return;}
+pub=pub.trim();
+var refSum=_NXV.sum(ref);
+var refV=(ref.match(/_NXUP\.VERSION="(\d+)"/)||[])[1]||null;
+var myV=_NXUP.VERSION;
+if(refV&&myV&&parseInt(refV,10)!==parseInt(myV,10)){
+_NXV.integrity={state:"version differente",repo:refV,local:myV};_NXV.notify();return;}
+if(refSum!==pub){_NXV.integrity={state:"reference incoherente"};_NXV.notify();return;}
+_NXV.integrity={state:"conforme",sum:pub,at:Date.now()};
+_NXV.notify();
+}).catch(function(){_NXV.integrity={state:"injoignable"};_NXV.notify();});
+}catch(_){}};
+
+_NXV.ck=function(){try{
+var k=_NXDB.get("nexium_ck");
+if(k&&k.length>=16)return k;
+var s="";var c="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+for(var a=0;a<24;a++)s+=c.charAt(Math.floor(Math.random()*c.length));
+_NXDB.set("nexium_ck",s);return s;}catch(_){return "nexium-default-key-fallback";}};
+_NXV.enc=function(txt){try{
+var k=_NXV.ck(),s=String(txt),out=[];
+for(var a=0;a<s.length;a++){var v=(s.charCodeAt(a)^k.charCodeAt(a%k.length))&0xFFFF;out.push(("000"+v.toString(16)).slice(-4));}
+return "NXE2:"+out.join("");}catch(_){return txt;}};
+_NXV.dec=function(txt){try{
+var s=String(txt||"");
+if(s.indexOf("NXE2:")!==0)return s;
+var h=s.slice(5),k=_NXV.ck(),out=[];
+for(var a=0,b=0;a+4<=h.length;a+=4,b++){var v=parseInt(h.substr(a,4),16);out.push(String.fromCharCode(v^k.charCodeAt(b%k.length)));}
+return out.join("");}catch(_){return txt;}};
+_NXV.SECRET=["nexium_stats_v1","nexium_protect_v1_stats","nexium_reports","nexium_errors","nexium_quarantine","nexium_privacy_v1"];
+_NXV.applyEncryption=function(on){try{
+_NXV.cfg.encryptLocal=!!on;_NXV.save();
+var ks=_NXDB.keys();
+for(var a=0;a<ks.length;a++){var k=ks[a];
+if(_NXV.SECRET.indexOf(k)<0)continue;
+var v=(_NXV.rawGet?_NXV.rawGet(k):null);if(!v)continue;
+var isEnc=String(v).indexOf("NXE2:")===0;
+if(on&&!isEnc){if(_NXV.rawSet)_NXV.rawSet(k,_NXV.enc(v));}
+else if(!on&&isEnc){if(_NXV.rawSet)_NXV.rawSet(k,_NXV.dec(v));}}
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast(on?"Donnees locales chiffrees.":"Chiffrement desactive.",1);}catch(_){}
+_NXV.notify();}catch(_){}};
+try{
+var _og=_NXDB.get,_os=_NXDB.set;
+_NXV.rawGet=function(k){try{return _og.call(_NXDB,k);}catch(_){return null;}};
+_NXV.rawSet=function(k,v){try{return _os.call(_NXDB,k,v);}catch(_){return false;}};
+_NXDB.get=function(k){var v=_og.call(_NXDB,k);
+try{if(v&&String(v).indexOf("NXE2:")===0)return _NXV.dec(v);}catch(_){}
+return v;};
+_NXDB.set=function(k,v){
+try{if(_NXV.cfg.encryptLocal&&_NXV.SECRET.indexOf(k)>=0)return _os.call(_NXDB,k,_NXV.enc(v));}catch(_){}
+return _os.call(_NXDB,k,v);};
+}catch(_){}
+try{
+setTimeout(function(){_NXV.scanCss();},14000);
+setTimeout(function(){_NXV.checkIntegrity();},22000);
+setInterval(function(){if(!document.hidden)_NXV.scanCss();},1800000);
+}catch(_){}
 var _NXPATCH=window._NXPATCH||(window._NXPATCH={});
 if(!_NXPATCH.init){_NXPATCH.init=true;
 _NXPATCH.KEY="nexium_patches";
@@ -464,9 +672,12 @@ _NXP.open=function(u){try{if(window._NXPR&&_NXPR.cfg&&_NXPR.cfg.scanLinks&&typeo
 _NXP.wireFlux();
 try{window.addEventListener("beforeunload",_NXP.saveStatsNow);}catch(_){}
 try{document.addEventListener("visibilitychange",function(){if(document.hidden)_NXP.saveStatsNow();});}catch(_){}
-try{if(window.fetch&&!window.fetch.__nx){var _of=window.fetch.bind(window);var pf=function(input,opts){try{var url=typeof input==="string"?input:(input&&input.url)?input.url:"";if(url&&_NXP.shouldBlock(url))return Promise.resolve(new Response("",{status:204,statusText:"No Content"}));}catch(_){}return _of(input,opts);};pf.__nx=true;window.fetch=pf;}}catch(_){}
-try{if(navigator.sendBeacon&&!navigator.sendBeacon.__nx){var _ob=navigator.sendBeacon.bind(navigator);var pb=function(url,data){try{if(url&&_NXP.shouldBlock(url))return true;}catch(_){}return _ob(url,data);};pb.__nx=true;navigator.sendBeacon=pb;}}catch(_){}
-try{if(window.XMLHttpRequest&&!window.XMLHttpRequest.prototype.__nx){var _open=window.XMLHttpRequest.prototype.open;var _send=window.XMLHttpRequest.prototype.send;window.XMLHttpRequest.prototype.open=function(m,u){try{this.__nxurl=u;}catch(_){}return _open.apply(this,arguments);};window.XMLHttpRequest.prototype.send=function(b){try{if(this.__nxurl&&_NXP.shouldBlock(this.__nxurl))return;}catch(_){}return _send.apply(this,arguments);};window.XMLHttpRequest.prototype.__nx=true;}}catch(_){}
+try{if(window.fetch&&!window.fetch.__nx){var _of=window.fetch.bind(window);var pf=function(input,opts){try{var url=typeof input==="string"?input:(input&&input.url)?input.url:"";if(url&&window._NXV&&_NXV.checkOut(url,opts||(input&&typeof input==="object"?input:null),"requete"))return Promise.resolve(new Response("",{status:403,statusText:"Blocked by Nexium"}));
+if(url&&_NXP.shouldBlock(url))return Promise.resolve(new Response("",{status:204,statusText:"No Content"}));}catch(_){}return _of(input,opts);};pf.__nx=true;window.fetch=pf;}}catch(_){}
+try{if(navigator.sendBeacon&&!navigator.sendBeacon.__nx){var _ob=navigator.sendBeacon.bind(navigator);var pb=function(url,data){try{if(url&&window._NXV&&_NXV.checkOut(url,{body:data},"balise"))return true;if(url&&_NXP.shouldBlock(url))return true;}catch(_){}return _ob(url,data);};pb.__nx=true;navigator.sendBeacon=pb;}}catch(_){}
+try{if(window.XMLHttpRequest&&!window.XMLHttpRequest.prototype.__nx){var _open=window.XMLHttpRequest.prototype.open;var _send=window.XMLHttpRequest.prototype.send;window.XMLHttpRequest.prototype.open=function(m,u){try{this.__nxurl=u;this.__nxh={};}catch(_){}return _open.apply(this,arguments);};
+var _srh=window.XMLHttpRequest.prototype.setRequestHeader;
+window.XMLHttpRequest.prototype.setRequestHeader=function(k,v){try{if(this.__nxh)this.__nxh[k]=v;}catch(_){}return _srh.apply(this,arguments);};window.XMLHttpRequest.prototype.send=function(b){try{if(this.__nxurl&&window._NXV&&_NXV.checkOut(this.__nxurl,{body:b,headers:this.__nxh},"XHR"))return;if(this.__nxurl&&_NXP.shouldBlock(this.__nxurl))return;}catch(_){}return _send.apply(this,arguments);};window.XMLHttpRequest.prototype.__nx=true;}}catch(_){}
 }
 var _NXNET=window._NXNET||(window._NXNET={});
 if(!_NXNET.boot){_NXNET.boot=true;_NXNET.samples=[];_NXNET.count=0;_NXNET.conn=[];_NXNET.listeners=[];
@@ -654,7 +865,7 @@ _NXfoot("localStorage · clés nexium_*")));
 
 var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="124";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="125";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -1564,20 +1775,22 @@ if(cl.kind==="short"){_NXPR.bumpSafe();_NXPR.toast("Lien raccourci : destination
 _NXPR.bumpSafe();
 }catch(_){}};
 _NXPR.CRITICAL=["classify","scanText","scanMasked","scanInvites","scanEmbeds","scanAttachments","scanSecrets","verifyFile","deepFile","matchSig","warnAccount","checkImpostor","checkWave","consoleWarn","onPaste","onMsg","onMsgUpdate","onClickCapture","report","loadRemote","parseList","buildIndex","heuristic","applyProfile"];
-_NXPR.selfCheck=function(){try{
+_NXPR.selfCheck=function(final){try{
 var miss=[];
 for(var a=0;a<_NXPR.CRITICAL.length;a++){var f=_NXPR.CRITICAL[a];
 if(typeof _NXPR[f]!=="function")miss.push(f);}
 var rx=["RXTOKEN","RXHOOK","RXSELFXSS","RXREAL","RXFAKE","RXINV"];
 for(var b=0;b<rx.length;b++){if(!(_NXPR[rx[b]] instanceof RegExp))miss.push(rx[b]);}
+if(!miss.length){_NXPR.missing=[];_NXPR._scOK=true;return [];}
+if(!final){_NXPR._scPend=miss;return miss;}
+if(!_NXPR._scPend||_NXPR._scPend.length!==miss.length){_NXPR.missing=[];return [];}
 _NXPR.missing=miss;
-if(miss.length){
 var msg="Nexium Protect incomplet : "+miss.length+" element(s) manquant(s) - "+miss.slice(0,6).join(", ");
-try{if(window._NXERR){_NXERR.push("selfCheck :: "+msg);if(_NXERR.length>20)_NXERR.shift();}}catch(_){}
+try{if(window._NXERR){_NXERR.push("selfCheck :: "+msg);if(window._NXsaveErr)_NXsaveErr();}}catch(_){}
 try{console.warn("[Nexium]",msg);}catch(_){}
-try{_NXPR.toast("Nexium Protect est incomplet ("+miss.length+" fonctions manquantes). Va dans Nexium Donnees > Journal des erreurs.",0);}catch(_){}}
+try{_NXPR.toast("Nexium Protect est incomplet ("+miss.length+" fonctions manquantes). Va dans Nexium Donnees > Journal des erreurs.",0);}catch(_){}
 return miss;}catch(_){return [];}};
-try{setTimeout(function(){_NXPR.selfCheck();},6000);}catch(_){}
+try{setTimeout(function(){_NXPR.selfCheck(false);},8000);setTimeout(function(){_NXPR.selfCheck(true);},20000);}catch(_){}
 _NXPR.wireDom=function(){try{
 if(_NXPR._dom)return;_NXPR._dom=true;
 document.addEventListener("click",_NXPR.onClickCapture,true);
@@ -1593,7 +1806,7 @@ var NexiumProtectIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"curre
 function NexiumProtectComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 var _c0=F.useState("");var chk=_c0[0];var setChk=_c0[1];var _cf=F.useState("");var flt=_cf[0];var setFlt=_cf[1];var _cs=F.useState(null);var res=_cs[0];var setRes=_cs[1];var _cb=F.useState(false);var busy=_cb[0];var setBusy=_cb[1];
-F.useEffect(function(){_NXPR.listeners.push(force);return function(){_NXPR.listeners=_NXPR.listeners.filter(function(f){return f!==force;});};},[]);
+F.useEffect(function(){_NXPR.listeners.push(force);try{if(window._NXV)_NXV.listeners.push(force);}catch(_){}return function(){_NXPR.listeners=_NXPR.listeners.filter(function(f){return f!==force;});};},[]);
 var P=_NXpal;var cfg=_NXPR.cfg;var st=_NXPR.stats;
 function tog(k){return function(){cfg[k]=!cfg[k];_NXPR.saveCfg();force();};}
 var _KEYS=["scanLinks","blockGrabbers","scamAlerts","warnAccounts","phishGuard","consoleGuard","heuristics","scanFiles","scanDownloads","scanMasked","scanEmbeds","scanEdits","scanInvites","scanImpostor","scanWaves","qrGuard","clipGuard","scanStatus"];
@@ -1645,6 +1858,35 @@ ctrl("M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-
 ctrl("M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z","Vigilance comptes suspects","Signale les MP venant de comptes très récents (usurpateurs, faux profils).",cfg.warnAccounts,tog("warnAccounts")),
 ctrl("M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z","Protection console (anti-self-XSS)","Avertit contre les arnaques « colle ce code dans la console » qui volent ton compte.",cfg.consoleGuard,tog("consoleGuard")),
 ctrl("M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z","Détection intelligente (sans liste)","Repère les domaines inconnus qui imitent une marque, utilisent une extension à risque ou des mots-clés d\'arnaque.",cfg.heuristics,tog("heuristics"))),{mb:12}),
+(function(){var V=window._NXV;if(!V)return null;
+var integ=V.integrity||{state:"inconnu"};
+var iCol=integ.state==="conforme"?"#8fd19e":(integ.state==="injoignable"||integ.state==="inconnu"||integ.state==="desactive")?P.dim:"#e79a9a";
+var iTxt=integ.state==="conforme"?"Fichier conforme au dépôt officiel":integ.state==="version differente"?("Version locale v"+integ.local+" ≠ dépôt v"+integ.repo):integ.state==="desactive"?"Vérification désactivée":integ.state==="injoignable"?"Dépôt injoignable":integ.state==="reference incoherente"?"Référence incohérente sur le dépôt":"Vérification en cours…";
+var risky=(V.cssRisky||[]);
+return i("div",{style:{position:"relative",overflow:"hidden",borderRadius:"18px",border:"1px solid "+P.line,background:P.panel,padding:"22px",marginBottom:"12px"}},
+i("div",{style:{position:"absolute",inset:0,background:"radial-gradient(120% 130% at 88% -12%, rgba(143,209,158,.16), transparent 58%)",pointerEvents:"none"}}),
+i("div",{style:{position:"relative"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"4px"}},"Coffre-fort Nexium"),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"19px",fontWeight:"800",color:P.txt,letterSpacing:"-.02em",marginBottom:"4px"}},"Protection du compte"),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.55,marginBottom:"16px"}},"Ces protections n\'avertissent pas : elles bloquent."),
+_NXstrip([{v:_NXn((V.stats&&V.stats.blocked)||0),label:"Exfiltrations bloquées",color:"#8fd19e"},{v:_NXn(risky.length),label:"Sources externes CSS",color:risky.length?"#e6c48a":P.txt},{v:integ.state==="conforme"?"OK":"—",label:"Intégrité",color:iCol}]),
+i("div",{style:{marginTop:"14px",padding:"11px 13px",borderRadius:"11px",background:P.inset,border:"1px solid "+P.line}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"9px"}},
+i("div",{style:{width:"7px",height:"7px",borderRadius:"50%",background:iCol,flexShrink:0}}),
+i("div",{style:{flex:1,fontSize:"12px",color:P.sub}},iTxt),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){V.checkIntegrity();_NXPR.toast("Vérification en cours…",1);},style:{fontSize:"10.5px",fontWeight:"700",color:P.dim,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"7px"}},"Vérifier"))),
+risky.length?i("div",{style:{marginTop:"10px"}},
+i("div",{style:{fontSize:"11.5px",color:"#e6c48a",marginBottom:"7px",lineHeight:1.5}},"Tes thèmes chargent des ressources externes : ton adresse IP est transmise à ces serveurs à chaque démarrage."),
+risky.slice(0,4).map(function(f,k){
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"8px",padding:"8px 10px",background:P.inset,border:"1px solid "+P.line,borderRadius:"9px",marginBottom:"5px"}},
+i("div",{style:{flex:1,minWidth:0,fontSize:"11px",fontFamily:_NXf.mono,color:P.sub,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},f.h+(f.imp?" (import)":"")),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){V.blockCssHost(f.h);force();},style:{fontSize:"10px",fontWeight:"700",color:"#e79a9a",cursor:"pointer",padding:"4px 9px",border:"1px solid rgba(214,72,72,.3)",borderRadius:"7px",flexShrink:0}},"Bloquer"),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){V.allowCss(f.h);force();},style:{fontSize:"10px",fontWeight:"700",color:P.dim,cursor:"pointer",padding:"4px 9px",border:"1px solid "+P.line,borderRadius:"7px",flexShrink:0}},"Autoriser"));})):null));})(),
+_NXcard(i("div",null,_NXch("Coffre-fort","Protections actives : le client agit au lieu de prévenir."),
+ctrl("M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm3 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z","Blocage de l\'exfiltration","Toute requête sortante contenant ton jeton, ton mot de passe ou tes cookies vers un domaine non-Discord est BLOQUÉE.",(window._NXV&&_NXV.cfg.blockExfil),function(){try{_NXV.cfg.blockExfil=!_NXV.cfg.blockExfil;_NXV.save();force();}catch(_){}}),
+ctrl("M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z","Analyse des thèmes","Repère les ressources externes chargées par tes thèmes et QuickCSS, qui exposent ton adresse IP.",(window._NXV&&_NXV.cfg.scanThemes),function(){try{_NXV.cfg.scanThemes=!_NXV.cfg.scanThemes;_NXV.save();_NXV._cssWarned=false;_NXV.scanCss();force();}catch(_){}}),
+ctrl("M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z","Vérification d\'intégrité","Compare ton fichier client à la version publiée sur le dépôt officiel pour détecter toute altération locale.",(window._NXV&&_NXV.cfg.verifyIntegrity),function(){try{_NXV.cfg.verifyIntegrity=!_NXV.cfg.verifyIntegrity;_NXV.save();if(_NXV.cfg.verifyIntegrity)_NXV.checkIntegrity();force();}catch(_){}}),
+ctrl("M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h2c0-1.66 1.34-3 3-3s3 1.34 3 3v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z","Chiffrement des données locales","Chiffre tes statistiques, journaux et signalements dans le stockage local.",(window._NXV&&_NXV.cfg.encryptLocal),function(){try{_NXV.applyEncryption(!_NXV.cfg.encryptLocal);force();}catch(_){}})),{mb:12}),
 _NXcard(i("div",null,_NXch("Analyse des contenus","Ce que Nexium inspecte dans les messages que tu reçois."),
 ctrl("M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z","Analyse des fichiers","Vérifie le contenu réel des pièces jointes : un .exe renommé en .png est détecté.",cfg.scanFiles,tog("scanFiles")),
 ctrl("M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z","Blocage des téléchargements","Bloque les liens pointant vers un exécutable, sauf depuis une source de confiance.",cfg.scanDownloads,tog("scanDownloads")),
@@ -1657,6 +1899,15 @@ ctrl("M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM6 9h12v2H6V
 ctrl("M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM17 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2z","Arnaque au QR code","Avertit quand on te demande de scanner un QR code de connexion.",cfg.qrGuard,tog("qrGuard")),
 ctrl("M17 7h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5zm-6 8H7c-1.71 0-3.1-1.39-3.1-3.1S5.29 8.8 7 8.8h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9zM8 11h8v2H8z","Liens dans les statuts","Analyse les liens présents dans les statuts personnalisés.",cfg.scanStatus,tog("scanStatus")),
 ctrl("M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z","Surveillance du presse-papiers","Prévient si un jeton ou un webhook se retrouve dans ton presse-papiers.",cfg.clipGuard,tog("clipGuard"))),{mb:12}),
+(window._NXV&&_NXV.stats&&_NXV.stats.log&&_NXV.stats.log.length)?_NXcard(i("div",null,
+_NXch("Journal du coffre-fort","Actions de blocage effectuées."),
+_NXV.stats.log.slice(0,8).map(function(L,k){
+var d=new Date(L.t);var hh=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+var col=L.k==="exfil"?"#e79a9a":"#e6c48a";
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 10px",background:P.inset,border:"1px solid "+P.line,borderRadius:"9px",marginBottom:"5px"}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0}},hh),
+i("span",{style:{fontSize:"10px",fontWeight:"800",color:col,textTransform:"uppercase",letterSpacing:".06em",flexShrink:0}},L.k==="exfil"?"bloqué":"thème"),
+i("span",{style:{flex:1,minWidth:0,fontSize:"11.5px",color:P.sub,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},L.d));})),{mb:12}):null,
 (_NXPR.quar&&_NXPR.quar.length)?_NXcard(i("div",null,
 _NXch("Quarantaine",i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){if(window.confirm("Vider la quarantaine ?")){_NXPR.clearQuar();force();}},style:{fontSize:"11px",color:P.dim,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"8px"}},"Tout vider")),
 i("div",{style:{fontSize:"12px",color:P.dim,marginBottom:"10px",lineHeight:1.5}},"Liens bloques avant ouverture. Tu peux les ouvrir quand meme ou autoriser le domaine."),
@@ -1971,11 +2222,13 @@ for(var a=0;a<_NXHEALTH.MODS.length;a++){var m=_NXHEALTH.MODS[a];
 var o=window[m[0]];
 if(!o||(o.boot!==true&&o.init!==true&&m[0]!=="_NXDB"))ko.push(m[1]);}
 _NXHEALTH.failed=ko;
+if(ko.length&&!_NXHEALTH._once){_NXHEALTH._once=ko.join(",");setTimeout(function(){_NXHEALTH.check();},15000);return ko;}
+if(ko.length&&_NXHEALTH._once!==ko.join(",")){_NXHEALTH._once=ko.join(",");return ko;}
 if(ko.length){
 try{if(window._NXERR){_NXERR.push("sante :: modules non demarres : "+ko.join(", "));if(window._NXsaveErr)_NXsaveErr();}}catch(_){}
 try{if(window._NXPR&&_NXPR.toast)_NXPR.toast(ko.length+" module(s) Nexium n ont pas demarre. Voir Nexium Donnees.",0);}catch(_){}}
 return ko;}catch(_){return [];}};
-try{setTimeout(function(){_NXHEALTH.check();},12000);}catch(_){}
+try{setTimeout(function(){_NXHEALTH.check();},18000);}catch(_){}
 }
 var _NXSAFE=window._NXSAFE||(window._NXSAFE={});
 if(!_NXSAFE.boot){_NXSAFE.boot=true;_NXSAFE.KEY="nexium_boot_guard";_NXSAFE.on=false;

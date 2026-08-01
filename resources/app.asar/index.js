@@ -158,6 +158,19 @@ function asyncFallback() {
     } catch (e) { log("applyPending: " + (e && e.message)); }
 })();
 
+// 1c) Reparation demandee : re-telecharge tous les fichiers, quelle que soit la version.
+var NX_REPAIR = false;
+(function askRepair() {
+    try {
+        var trigger = path.join(equicordDir, ".nexium-repair");
+        if (fs.existsSync(trigger)) {
+            NX_REPAIR = true;
+            try { fs.unlinkSync(trigger); } catch (_) {}
+            log("REPARATION demandee : retelechargement complet des fichiers");
+        }
+    } catch (_) {}
+})();
+
 // 2) Auto-repair + synchronous version check + apply BEFORE loading the patcher.
 (function syncUpdate() {
     try {
@@ -189,7 +202,7 @@ function asyncFallback() {
                 log("TÉLÉCHARGEMENT REFUSÉ : " + why + " — fichier actuel conservé");
             } else {
                 var repoV = versionOfText(txt);
-                if (liveV != null && repoV <= liveV) {
+                if (!NX_REPAIR && liveV != null && repoV <= liveV) {
                     log("à jour (v" + liveV + ")");
                     repoV = null; // rien à appliquer
                 }
@@ -209,7 +222,7 @@ function asyncFallback() {
                     // déjà à jour, rien à faire
                 } else if (!sumOk) {
                     log("TÉLÉCHARGEMENT REFUSÉ : somme de contrôle incorrecte — fichier actuel conservé");
-                } else if (state.blockedVersion != null && repoV === state.blockedVersion) {
+                } else if (!NX_REPAIR && state.blockedVersion != null && repoV === state.blockedVersion) {
                     log("v" + repoV + " ignorée (bloquée après restauration) — publie une version supérieure pour débloquer");
                 } else {
                     try { if (liveV != null) fs.copyFileSync(live, bak); } catch (_) {}
@@ -217,7 +230,7 @@ function asyncFallback() {
                     fs.writeFileSync(w, txt); fs.renameSync(w, live);
                     state.version = repoV; if (state.blockedVersion != null && repoV > state.blockedVersion) delete state.blockedVersion;
                     saveState(state);
-                    log("MIS À JOUR renderer.js v" + (liveV == null ? "?" : liveV) + " → v" + repoV + sumInfo + " (sauvegarde conservée)");
+                    log((NX_REPAIR ? "RÉPARÉ" : "MIS À JOUR") + " renderer.js v" + (liveV == null ? "?" : liveV) + " → v" + repoV + sumInfo + " (sauvegarde conservée)");
                 }
             }
         }
@@ -227,7 +240,7 @@ function asyncFallback() {
             if (ctxt != null && ctxt.length > 0) {
                 var cssPath = path.join(equicordDir, "renderer.css");
                 var localCss = null; try { localCss = fs.readFileSync(cssPath, "utf8"); } catch (_) { localCss = null; }
-                if (localCss !== ctxt) {
+                if (NX_REPAIR || localCss !== ctxt) {
                     var ctmp = cssPath + ".newtmp";
                     fs.writeFileSync(ctmp, ctxt); fs.renameSync(ctmp, cssPath);
                     log("MIS À JOUR renderer.css");
