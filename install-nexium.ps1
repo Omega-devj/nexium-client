@@ -1,17 +1,18 @@
 # ============================================================
 #  Nexium Client - installateur automatique
+#  Réinstallation propre + spinner + UI plus jolie
 # ============================================================
 
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$Repo      = "Omega-devj/nexium-client"
-$ZipUrl    = "https://codeload.github.com/$Repo/zip/refs/heads/main"
-$ApiUrl    = "https://api.github.com/repos/$Repo/releases/latest"
-$Racine    = Join-Path $env:LOCALAPPDATA "Nexium"
-$Dossier   = Join-Path $Racine "nexium-client-main"
-$TempZip   = Join-Path $env:TEMP "nexium-client.zip"
-$TempKeep  = Join-Path $env:TEMP "nx_garde"
+$Repo     = "Omega-devj/nexium-client"
+$ZipUrl   = "https://codeload.github.com/$Repo/zip/refs/heads/main"
+$ApiUrl   = "https://api.github.com/repos/$Repo/releases/latest"
+$Racine   = Join-Path $env:LOCALAPPDATA "Nexium"
+$Dossier  = Join-Path $Racine "nexium-client-main"
+$TempZip  = Join-Path $env:TEMP "nexium-client.zip"
+$Shortcut = Join-Path ([Environment]::GetFolderPath("Desktop")) "Nexium Client.lnk"
 
 $Host.UI.RawUI.WindowTitle = "Nexium Client - Installateur"
 
@@ -22,9 +23,9 @@ function Write-Blank { Write-Host "" }
 
 function Titre([string]$t) {
     Write-Blank
-    Write-Host ("  ╔" + ("═" * 60) + "╗") -ForegroundColor DarkCyan
-    Write-Host ("  ║ " + $t.PadRight(59) + "║") -ForegroundColor Cyan
-    Write-Host ("  ╚" + ("═" * 60) + "╝") -ForegroundColor DarkCyan
+    Write-Host ("  ╔" + ("═" * 62) + "╗") -ForegroundColor DarkCyan
+    Write-Host ("  ║ " + $t.PadRight(61) + "║") -ForegroundColor Cyan
+    Write-Host ("  ╚" + ("═" * 62) + "╝") -ForegroundColor DarkCyan
 }
 
 function Info([string]$t)   { Write-Host ("  • " + $t) -ForegroundColor Gray }
@@ -49,9 +50,9 @@ function Show-Header {
 
 function Stop2([string]$t) {
     Write-Blank
-    Write-Host ("  ╔" + ("═" * 60) + "╗") -ForegroundColor DarkRed
-    Write-Host ("  ║ " + "ERREUR".PadRight(59) + "║") -ForegroundColor Red
-    Write-Host ("  ╚" + ("═" * 60) + "╝") -ForegroundColor DarkRed
+    Write-Host ("  ╔" + ("═" * 62) + "╗") -ForegroundColor DarkRed
+    Write-Host ("  ║ " + "ERREUR".PadRight(61) + "║") -ForegroundColor Red
+    Write-Host ("  ╚" + ("═" * 62) + "╝") -ForegroundColor DarkRed
     Erreur $t
     Write-Blank
     Read-Host "  Appuie sur Entrée pour fermer" | Out-Null
@@ -59,30 +60,33 @@ function Stop2([string]$t) {
 }
 
 # ============================
-# Spinner / task runner
+# Spinner
 # ============================
-function Invoke-SpinnerTask {
+function Invoke-WithSpinner {
     param(
-        [Parameter(Mandatory=$true)][string]$Message,
-        [Parameter(Mandatory=$true)][scriptblock]$ScriptBlock
+        [Parameter(Mandatory = $true)][string]$Message,
+        [Parameter(Mandatory = $true)][scriptblock]$Action,
+        [object[]]$ArgumentList = @()
     )
 
     $frames = @("⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏")
-    $job = Start-Job -ScriptBlock $ScriptBlock
+
+    $job = Start-Job -ScriptBlock {
+        param($InnerAction, $InnerArgs)
+        & $InnerAction @InnerArgs
+    } -ArgumentList $Action, $ArgumentList
 
     $i = 0
     while ($job.State -eq "Running" -or $job.State -eq "NotStarted") {
         $frame = $frames[$i % $frames.Count]
         Write-Host -NoNewline ("`r  {0}  {1}" -f $frame, $Message) -ForegroundColor Cyan
-        Start-Sleep -Milliseconds 90
+        Start-Sleep -Milliseconds 85
         $i++
     }
 
-    # Nettoyage ligne spinner
-    Write-Host ("`r  " + (" " * 90)) -NoNewline
+    Write-Host ("`r  " + (" " * 100)) -NoNewline
     Write-Host "`r" -NoNewline
 
-    $result = $null
     try {
         $result = Receive-Job $job -ErrorAction Stop
     } catch {
@@ -94,21 +98,6 @@ function Invoke-SpinnerTask {
     return $result
 }
 
-function Show-SpinnerOK([string]$Text) {
-    Write-Host ("  ✔  $Text") -ForegroundColor Green
-}
-
-function Show-SpinnerWarn([string]$Text) {
-    Write-Host ("  !  $Text") -ForegroundColor Yellow
-}
-
-function Show-SpinnerInfo([string]$Text) {
-    Write-Host ("  •  $Text") -ForegroundColor Gray
-}
-
-# ============================
-# Helpers
-# ============================
 function Ensure-Directory([string]$Path) {
     if (-not (Test-Path $Path)) {
         New-Item -ItemType Directory -Force -Path $Path | Out-Null
@@ -117,26 +106,25 @@ function Ensure-Directory([string]$Path) {
 
 function Download-FilePretty {
     param(
-        [Parameter(Mandatory=$true)][string]$Url,
-        [Parameter(Mandatory=$true)][string]$OutFile,
-        [Parameter(Mandatory=$true)][string]$Label
+        [Parameter(Mandatory = $true)][string]$Url,
+        [Parameter(Mandatory = $true)][string]$OutFile,
+        [Parameter(Mandatory = $true)][string]$Label
     )
 
     if (Test-Path $OutFile) {
         Remove-Item $OutFile -Force -ErrorAction SilentlyContinue
     }
 
-    Invoke-SpinnerTask -Message $Label -ScriptBlock {
-        param($Url, $OutFile)
-
+    Invoke-WithSpinner -Message $Label -Action {
+        param($u, $o)
         $wc = New-Object System.Net.WebClient
         $wc.Headers.Add("User-Agent", "Nexium-Installer")
         try {
-            $wc.DownloadFile($Url, $OutFile)
+            $wc.DownloadFile($u, $o)
         } finally {
             $wc.Dispose()
         }
-    }.GetNewClosure().Invoke($Url, $OutFile) | Out-Null
+    } -ArgumentList @($Url, $OutFile) | Out-Null
 }
 
 # ============================
@@ -144,147 +132,109 @@ function Download-FilePretty {
 # ============================
 Show-Header
 
-# --- 0) Discord doit etre ferme ---
-Titre "1/5  Verification"
-Show-SpinnerInfo "Recherche des processus ouverts..."
+# --- 0) Fermeture des processus ---
+Titre "1/5  Vérification"
 
+Info "Recherche des processus ouverts..."
 $noms = @("Discord","DiscordCanary","DiscordPTB","DiscordDevelopment","Nexium")
 $proc = Get-Process -Name $noms -ErrorAction SilentlyContinue
 
-if (-not $proc -and (Test-Path $Dossier)) {
+if (-not $proc -and (Test-Path $Racine)) {
     $proc = Get-Process -ErrorAction SilentlyContinue | Where-Object {
-        $_.Path -and $_.Path.StartsWith($Dossier, [StringComparison]::OrdinalIgnoreCase)
+        $_.Path -and $_.Path.StartsWith($Racine, [StringComparison]::OrdinalIgnoreCase)
     }
 }
 
 if ($proc) {
-    Show-SpinnerWarn "Discord est ouvert, fermeture..."
     try {
-        Invoke-SpinnerTask -Message "Fermeture des processus..." -ScriptBlock {
-            param($procIds)
-            foreach ($id in $procIds) {
+        Invoke-WithSpinner -Message "Fermeture des processus..." -Action {
+            param($ids)
+            foreach ($id in $ids) {
                 try { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue } catch {}
             }
             Start-Sleep -Seconds 1
-        }.GetNewClosure().Invoke(@($proc | Select-Object -ExpandProperty Id)) | Out-Null
+        } -ArgumentList @(@($proc | Select-Object -ExpandProperty Id)) | Out-Null
 
-        Bon "Discord ferme"
+        Bon "Processus fermés"
     } catch {
-        Stop2 "Impossible de fermer Discord. Ferme-le a la main puis relance ce script."
+        Stop2 "Impossible de fermer Discord/Nexium. Ferme-les à la main puis relance le script."
     }
 } else {
-    Bon "Aucun processus bloquant detecte"
+    Bon "Aucun processus bloquant détecté"
 }
 
-# --- 1) Dossier d'installation ---
-Titre "2/5  Preparation"
-$maj = Test-Path $Dossier
+# --- 1) Nettoyage complet si ancien install ---
+Titre "2/5  Préparation"
 
-if ($maj) {
-    Info "Installation existante detectee : mise a jour"
-    Ensure-Directory $TempKeep
-
-    $garde = @(".nexium-dev", ".nexium-update.json", ".nexium-update.log")
-
+$ancienneInstall = Test-Path $Racine
+if ($ancienneInstall) {
+    Info "Ancienne installation détectée : suppression complète"
     try {
-        Invoke-SpinnerTask -Message "Sauvegarde des fichiers personnels..." -ScriptBlock {
-            param($Dossier, $TempKeep, $garde)
-            foreach ($g in $garde) {
-                $src = Join-Path $Dossier "resources\equicord\$g"
-                if (Test-Path $src) {
-                    Copy-Item $src $TempKeep -Force -ErrorAction SilentlyContinue
-                }
+        if (Test-Path $Shortcut) {
+            Remove-Item $Shortcut -Force -ErrorAction SilentlyContinue
+        }
+
+        Invoke-WithSpinner -Message "Suppression de l'ancienne installation..." -Action {
+            param($path)
+            if (Test-Path $path) {
+                Remove-Item $path -Recurse -Force -ErrorAction Stop
             }
-        }.GetNewClosure().Invoke($Dossier, $TempKeep, $garde) | Out-Null
-        Bon "Fichiers personnels sauvegardes"
+        } -ArgumentList @($Racine) | Out-Null
+
+        Bon "Ancienne installation supprimée"
     } catch {
-        Stop2 "Impossible de sauvegarder les fichiers personnels."
+        Stop2 "Suppression impossible. Ferme tout ce qui utilise Nexium, puis réessaie."
     }
 } else {
-    Info "Nouvelle installation dans : $Racine"
+    Info "Aucune ancienne installation détectée"
 }
-
-Ensure-Directory $Racine
-Bon "Dossier pret"
-
-# --- 2) Telechargement du client ---
-Titre "3/5  Telechargement"
-Info "Recuperation de l'archive principale..."
 
 try {
-    Invoke-SpinnerTask -Message "Telechargement du client..." -ScriptBlock {
-        param($ZipUrl, $TempZip)
-        $wc = New-Object System.Net.WebClient
-        $wc.Headers.Add("User-Agent", "Nexium-Installer")
-        try {
-            $wc.DownloadFile($ZipUrl, $TempZip)
-        } finally {
-            $wc.Dispose()
-        }
-    }.GetNewClosure().Invoke($ZipUrl, $TempZip) | Out-Null
+    Ensure-Directory $Racine
+    Bon "Dossier d'installation prêt"
 } catch {
-    Stop2 "Telechargement impossible. Verifie ta connexion internet."
+    Stop2 "Impossible de créer le dossier d'installation."
+}
+
+# --- 2) Téléchargement du client ---
+Titre "3/5  Téléchargement"
+Info "Récupération de l'archive principale..."
+
+try {
+    Download-FilePretty -Url $ZipUrl -OutFile $TempZip -Label "Téléchargement du client..."
+} catch {
+    Stop2 "Téléchargement impossible. Vérifie ta connexion internet."
 }
 
 if (-not (Test-Path $TempZip) -or (Get-Item $TempZip).Length -lt 1MB) {
-    Stop2 "Le fichier telecharge est invalide."
+    Stop2 "Le fichier téléchargé est invalide."
 }
 
 $taille = [math]::Round((Get-Item $TempZip).Length / 1MB)
-Bon ("Telecharge (${taille} Mo)")
+Bon ("Archive téléchargée (${taille} Mo)")
 
-# --- 3) Installation des fichiers ---
+# --- 3) Installation propre ---
 Titre "4/5  Installation des fichiers"
 
-if (Test-Path $Dossier) {
-    try {
-        Invoke-SpinnerTask -Message "Suppression de l'ancienne version..." -ScriptBlock {
-            param($Dossier)
-            Remove-Item $Dossier -Recurse -Force -ErrorAction SilentlyContinue
-        }.GetNewClosure().Invoke($Dossier) | Out-Null
-        Bon "Ancienne version supprimee"
-    } catch {
-        Stop2 "Impossible de remplacer l'ancienne version. Ferme Discord et reessaie."
-    }
-}
-
 try {
-    Invoke-SpinnerTask -Message "Decompression des fichiers..." -ScriptBlock {
-        param($TempZip, $Racine)
+    Invoke-WithSpinner -Message "Extraction des fichiers..." -Action {
+        param($zip, $dest)
         Add-Type -AssemblyName System.IO.Compression.FileSystem
-        [System.IO.Compression.ZipFile]::ExtractToDirectory($TempZip, $Racine)
-    }.GetNewClosure().Invoke($TempZip, $Racine) | Out-Null
+        [System.IO.Compression.ZipFile]::ExtractToDirectory($zip, $dest)
+    } -ArgumentList @($TempZip, $Racine) | Out-Null
 } catch {
-    Stop2 "Decompression impossible : $($_.Exception.Message)"
+    Stop2 "Décompression impossible : $($_.Exception.Message)"
 }
 
 Remove-Item $TempZip -Force -ErrorAction SilentlyContinue
+
 if (-not (Test-Path $Dossier)) {
-    Stop2 "Le dossier attendu est introuvable apres decompression."
+    Stop2 "Le dossier attendu est introuvable après décompression."
 }
 
-Bon "Fichiers installes"
+Bon "Fichiers installés"
 
-# Remise des fichiers personnels
-if ($maj) {
-    $dest = Join-Path $Dossier "resources\equicord"
-    if (Test-Path $dest) {
-        try {
-            Invoke-SpinnerTask -Message "Restauration des reglages precedents..." -ScriptBlock {
-                param($TempKeep, $dest)
-                Get-ChildItem $TempKeep -ErrorAction SilentlyContinue | ForEach-Object {
-                    Copy-Item $_.FullName $dest -Force -ErrorAction SilentlyContinue
-                }
-            }.GetNewClosure().Invoke($TempKeep, $dest) | Out-Null
-            Bon "Reglages precedents conserves"
-        } catch {
-            Show-SpinnerWarn "Restauration des reglages impossible, sans consequence"
-        }
-    }
-    Remove-Item $TempKeep -Recurse -Force -ErrorAction SilentlyContinue
-}
-
-# --- 4) Recuperation du lanceur (.exe) ---
+# --- 4) Récupération du lanceur ---
 Titre "5/5  Finalisation"
 
 $exeUrl = $null
@@ -292,8 +242,12 @@ $exeNom = $null
 
 try {
     Info "Recherche du lanceur dans les releases..."
-    $head = @{ "User-Agent" = "Nexium-Installer"; "Accept" = "application/vnd.github+json" }
-    $rel  = Invoke-RestMethod -Uri $ApiUrl -Headers $head -TimeoutSec 30
+    $head = @{
+        "User-Agent" = "Nexium-Installer"
+        "Accept"     = "application/vnd.github+json"
+    }
+
+    $rel = Invoke-RestMethod -Uri $ApiUrl -Headers $head -TimeoutSec 30
 
     foreach ($a in $rel.assets) {
         if ($a.name -match "\.exe$") {
@@ -309,57 +263,46 @@ try {
 if ($exeUrl) {
     $exePath = Join-Path $Dossier $exeNom
     try {
-        Invoke-SpinnerTask -Message "Telechargement du lanceur..." -ScriptBlock {
-            param($exeUrl, $exePath)
-            $wc = New-Object System.Net.WebClient
-            $wc.Headers.Add("User-Agent", "Nexium-Installer")
-            try {
-                $wc.DownloadFile($exeUrl, $exePath)
-            } finally {
-                $wc.Dispose()
-            }
-        }.GetNewClosure().Invoke($exeUrl, $exePath) | Out-Null
-
-        Bon "Lanceur installe : $exeNom"
+        Download-FilePretty -Url $exeUrl -OutFile $exePath -Label "Téléchargement du lanceur..."
+        Bon "Lanceur installé : $exeNom"
     } catch {
-        Souci "Telechargement du lanceur impossible"
+        Souci "Téléchargement du lanceur impossible"
         $exeUrl = $null
     }
 }
 
 if (-not $exeUrl) {
-    Souci "Le lanceur n'a pas pu etre recupere automatiquement."
-    Info  "Telecharge-le ici : https://github.com/$Repo/releases"
+    Souci "Le lanceur n'a pas pu être récupéré automatiquement."
+    Info  "Télécharge-le ici : https://github.com/$Repo/releases"
     Info  "Puis place le .exe dans : $Dossier"
     Start-Process "https://github.com/$Repo/releases"
 }
 
-# --- 5) Raccourci sur le Bureau ---
+# --- 5) Raccourci Bureau ---
 $exeLocal = Get-ChildItem $Dossier -Filter *.exe -ErrorAction SilentlyContinue | Select-Object -First 1
 if ($exeLocal) {
     try {
-        Invoke-SpinnerTask -Message "Creation du raccourci Bureau..." -ScriptBlock {
-            param($exeFullName, $Dossier)
-            $lien = Join-Path ([Environment]::GetFolderPath("Desktop")) "Nexium Client.lnk"
-            $sh   = New-Object -ComObject WScript.Shell
-            $sc   = $sh.CreateShortcut($lien)
-            $sc.TargetPath       = $exeFullName
-            $sc.WorkingDirectory = $Dossier
-            $sc.Description      = "Discord avec les mods Nexium"
+        Invoke-WithSpinner -Message "Création du raccourci Bureau..." -Action {
+            param($exeFullName, $workDir, $lnkPath)
+            $sh = New-Object -ComObject WScript.Shell
+            $sc = $sh.CreateShortcut($lnkPath)
+            $sc.TargetPath = $exeFullName
+            $sc.WorkingDirectory = $workDir
+            $sc.Description = "Discord avec les mods Nexium"
             $sc.Save()
-        }.GetNewClosure().Invoke($exeLocal.FullName, $Dossier) | Out-Null
+        } -ArgumentList @($exeLocal.FullName, $Dossier, $Shortcut) | Out-Null
 
-        Bon "Raccourci cree sur le Bureau"
+        Bon "Raccourci créé sur le Bureau"
     } catch {
-        Souci "Raccourci non cree (sans consequence)"
+        Souci "Raccourci non créé (sans conséquence)"
     }
 }
 
 # --- Fin ---
 Write-Blank
-Write-Host ("  " + ("=" * 62)) -ForegroundColor Green
-Write-Host "  Installation terminee" -ForegroundColor Green
-Write-Host ("  " + ("=" * 62)) -ForegroundColor Green
+Write-Host ("  " + ("=" * 64)) -ForegroundColor Green
+Write-Host "  Installation terminée" -ForegroundColor Green
+Write-Host ("  " + ("=" * 64)) -ForegroundColor Green
 Write-Blank
 Info "Emplacement : $Dossier"
 Write-Blank
@@ -368,7 +311,7 @@ if ($exeLocal) {
     $rep = Read-Host "  Lancer Nexium maintenant ? (O/n)"
     if ($rep -eq "" -or $rep -match "^[oOyY]") {
         Start-Process -FilePath $exeLocal.FullName -WorkingDirectory $Dossier
-        Bon "Nexium demarre"
+        Bon "Nexium démarre"
         Start-Sleep -Seconds 2
     }
 } else {
