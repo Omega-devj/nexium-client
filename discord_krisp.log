@@ -26347,3 +26347,61 @@
 [2026-Aug-02 00:25:33.514 +02:00][33124:29508][info ] Initializing krisp SDK...
 [2026-Aug-02 00:25:33.514 +02:00][33124:29508][warning] Failed to setup Krisp module, error code: -3
 [2026-Aug-02 00:25:33.514 +02:00][33124:29508][info ] Krisp SDK initialized
+[2026-Aug-02 13:00:17.148 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 13:00:17.148 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 13:00:17.148 +02:00][19308:31736][info ] DoKrispInitialize
+[2026-Aug-02 13:00:17.150 +02:00][19308:31736][warning] Application not signed by Discord, Krisp is not enabled
+[2026-Aug-02 13:00:17.150 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 13:00:17.150 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 13:01:01.845 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 13:01:01.845 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 13:01:01.845 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 13:01:01.845 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 13:07:46.438 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 13:07:46.438 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 13:07:46.438 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 13:07:46.438 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 13:45:00.095 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 13:45:00.095 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 13:45:00.095 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 13:45:00.095 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 14:24:27.642 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 14:24:27.642 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 14:24:27.642 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 14:24:27.642 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 15:36:02.759 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 15:36:02.759 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 15:36:02.759 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 15:36:02.759 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 15:36:14.600 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 15:36:14.600 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 15:36:14.600 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 15:36:14.600 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 15:47:16.615 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 15:47:16.615 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 15:47:16.615 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 15:47:16.615 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 15:49:45.520 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 15:49:45.520 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 15:49:45.520 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 15:49:45.520 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 17:23:34.696 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 17:23:34.696 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 17:23:34.696 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 17:23:34.696 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 17:23:38.184 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 17:23:38.184 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 17:23:38.184 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 17:23:38.184 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 17:28:53.182 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 17:28:53.182 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 17:28:53.182 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 17:28:53.182 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 18:29:23.666 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 18:29:23.667 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 18:29:23.667 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 18:29:23.667 +02:00][19308:31736][info ] Krisp SDK initialized
+[2026-Aug-02 19:36:30.905 +02:00][19308:31736][info ] Logging initialized
+[2026-Aug-02 19:36:30.905 +02:00][19308:31736][info ] Initializing krisp SDK...
+[2026-Aug-02 19:36:30.905 +02:00][19308:31736][warning] Failed to setup Krisp module, error code: -3
+[2026-Aug-02 19:36:30.905 +02:00][19308:31736][info ] Krisp SDK initialized
