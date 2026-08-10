@@ -1,21 +1,3 @@
-[2026-07-15T21:49:00.725Z] à jour (raw17a1d06f)
-[2026-07-15T21:51:30.012Z] SYNC appliqué au démarrage (raw17a1d06f, installé avant=__NEXIUM_APPLIED_SHA__)
-[2026-07-15T21:51:31.034Z] à jour (raw17a1d06f)
-[2026-07-15T22:10:52.273Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, tes modifications locales sont conservées.
-[2026-07-16T12:13:11.309Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, tes modifications locales sont conservées.
-[2026-07-16T12:19:14.220Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, tes modifications locales sont conservées.
-[2026-07-16T12:25:08.972Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, tes modifications locales sont conservées.
-[2026-07-16T12:30:34.680Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, tes modifications locales sont conservées.
-[2026-07-16T13:09:15.910Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, tes modifications locales sont conservées.
-[2026-07-17T12:42:06.209Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
-[2026-07-18T12:44:47.553Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
-[2026-07-19T12:00:05.401Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
-[2026-07-20T02:41:08.586Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
-[2026-07-20T11:06:54.379Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
-[2026-07-20T13:21:01.274Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
-[2026-07-21T11:23:36.919Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
-[2026-07-21T19:52:58.566Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
-[2026-07-22T01:46:26.685Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
 [2026-07-22T10:48:38.335Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
 [2026-07-23T11:54:10.217Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
 [2026-07-23T17:58:10.167Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
@@ -77,3 +59,21 @@
 [2026-08-02T10:42:06.219Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
 [2026-08-02T17:42:06.532Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
 [2026-08-02T17:47:39.129Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-03T02:23:56.710Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-03T12:02:34.077Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-04T00:17:43.108Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-04T12:31:13.852Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-05T12:04:04.966Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-05T12:20:22.622Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-05T14:09:17.526Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-06T13:08:43.010Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-06T18:38:02.107Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-06T20:36:34.908Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-07T09:27:08.058Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-07T22:25:59.398Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-07T22:26:55.014Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-08T12:36:39.786Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-08T12:37:34.529Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-09T17:16:45.392Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-10T02:35:15.289Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
+[2026-08-10T11:55:37.571Z] MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.
