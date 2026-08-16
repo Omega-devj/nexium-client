@@ -81,7 +81,38 @@ _NXDB.fail=null;_NXDB.set=function(k,v){try{_NXDB.ls.setItem(k,v);if(_NXDB.fail)
 _NXDB.del=function(k){try{_NXDB.ls.removeItem(k);}catch(_){}};
 _NXDB.keys=function(){var out=[];try{if(_NXDB.ls._m)return Object.keys(_NXDB.ls._m);var n=_NXDB.ls.length||0;for(var a=0;a<n;a++){var k=_NXDB.ls.key(a);if(k)out.push(k);}}catch(_){}return out;};
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXDB");if(window._NXERR)_NXERR.push("module _NXDB :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXDB desactive:",_nxE);}catch(_){}}
-}var _NXM=window._NXM||(window._NXM={});
+}var _NXNETX=window._NXNETX||(window._NXNETX={});
+if(!_NXNETX.boot){try{_NXNETX.boot=true;
+_NXNETX.MS=15000;
+_NXNETX.timeouts=0;
+_NXNETX.go=function(u,o,ms){
+var to=null;
+try{
+var opt=o||{};var t=(typeof ms==="number"&&ms>0)?ms:_NXNETX.MS;
+var o2=null,c=null;
+try{if(typeof AbortController==="function"&&!opt.signal){c=new AbortController();o2={};for(var k in opt)o2[k]=opt[k];o2.signal=c.signal;}}catch(_){o2=null;c=null;}
+if(o2&&c){
+to=setTimeout(function(){try{_NXNETX.timeouts++;c.abort();}catch(_){}},t);
+return fetch(u,o2).then(function(r){try{clearTimeout(to);}catch(_){}return r;},function(e){try{clearTimeout(to);}catch(_){}throw e;});
+}
+return Promise.race([fetch(u,opt),new Promise(function(_r,rj){to=setTimeout(function(){_NXNETX.timeouts++;rj(new Error("nx-timeout"));},t);})]);
+}catch(e){try{if(to)clearTimeout(to);}catch(_){}return Promise.reject(e);}
+};
+_NXNETX.tries={};
+_NXNETX.DELAYS=[20000,60000,180000,420000];
+_NXNETX.ok=function(k){try{_NXNETX.tries[k]=0;}catch(_){}};
+_NXNETX.retry=function(k,fn,max){try{
+if(typeof fn!=="function")return;
+var n=_NXNETX.tries[k]||0;var mx=(typeof max==="number")?max:_NXNETX.DELAYS.length;
+if(n>=mx)return;
+_NXNETX.tries[k]=n+1;
+var d=_NXNETX.DELAYS[n]||_NXNETX.DELAYS[_NXNETX.DELAYS.length-1];
+setTimeout(function(){try{if(!document.hidden)fn();else _NXNETX.retry(k,fn,max);}catch(_){}},d);
+}catch(_){}};
+_NXNETX.status=function(){return {timeouts:_NXNETX.timeouts,tries:_NXNETX.tries};};
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXNETX");if(window._NXERR)_NXERR.push("module _NXNETX :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXNETX desactive:",_nxE);}catch(_){}}
+}
+var _NXM=window._NXM||(window._NXM={});
 if(!_NXM.boot){
 _NXM.boot=true;_NXM.KEY="nexium_music_v1";
 _NXM.SRC="https://raw.githubusercontent.com/Omega-devj/music-client-nexium/refs/heads/main/music.txt";
@@ -90,7 +121,7 @@ _NXM.cfg=(function(){var d;try{var raw=_NXDB.get(_NXM.KEY);d=raw?JSON.parse(raw)
 _NXM.save=function(){_NXDB.set(_NXM.KEY,JSON.stringify(_NXM.cfg));};
 _NXM.save();
 _NXM.parse=function(txt){var out=[];var seen={};var lines=String(txt||"").split(/\r?\n/);for(var a=0;a<lines.length;a++){var l=lines[a].trim();if(!l||l.charAt(0)==="#")continue;var title="",url="";var sep=l.indexOf("|");if(sep<0)sep=l.indexOf(";");if(sep>=0){title=l.slice(0,sep).trim();url=l.slice(sep+1).trim();}else{url=l;}if(!/^https?:\/\//.test(url))continue;if(seen[url])continue;seen[url]=1;if(!title){try{var fn=url.split("/").pop().split("?")[0];title=decodeURIComponent(fn)||("Piste "+(out.length+1));}catch(_){title="Piste "+(out.length+1);}}out.push({title:title,url:url});}return out;};
-_NXM.loadRemote=function(){if(_NXM.remoteBusy)return;_NXM.remoteBusy=true;_NXM.remoteErr=false;_NXM.notify&&_NXM.notify();try{fetch(_NXM.SRC+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.text();}).then(function(t){var list=_NXM.parse(t);_NXM.remoteBusy=false;_NXM.remoteLoaded=true;_NXM.remoteEmpty=(!list||!list.length);_NXM.cfg.tracks=list;if(_NXM.idx>=list.length)_NXM.idx=Math.max(0,list.length-1);_NXM.cfg.idx=_NXM.idx;_NXM.save();_NXM.notify&&_NXM.notify();}).catch(function(){_NXM.remoteBusy=false;_NXM.remoteErr=true;_NXM.notify&&_NXM.notify();});}catch(_){_NXM.remoteBusy=false;_NXM.remoteErr=true;_NXM.notify&&_NXM.notify();}};
+_NXM.loadRemote=function(){if(_NXM.remoteBusy)return;_NXM.remoteBusy=true;_NXM.remoteErr=false;_NXM.notify&&_NXM.notify();try{_NXNETX.go(_NXM.SRC+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.text();}).then(function(t){var list=_NXM.parse(t);_NXM.remoteBusy=false;_NXM.remoteLoaded=true;_NXM.remoteEmpty=(!list||!list.length);_NXM.cfg.tracks=list;if(_NXM.idx>=list.length)_NXM.idx=Math.max(0,list.length-1);_NXM.cfg.idx=_NXM.idx;_NXM.save();_NXM.notify&&_NXM.notify();}).catch(function(){_NXM.remoteBusy=false;_NXM.remoteErr=true;_NXM.notify&&_NXM.notify();});}catch(_){_NXM.remoteBusy=false;_NXM.remoteErr=true;_NXM.notify&&_NXM.notify();}};
 _NXM.audio=null;_NXM.idx=Math.min(_NXM.cfg.idx,Math.max(0,_NXM.cfg.tracks.length-1));_NXM.playing=false;_NXM.progress=0;_NXM.dur=0;_NXM.listeners=[];_NXM.fails=0;_NXM.err={};_NXM.remain=false;
 _NXM.notify=function(){if(_NXM._nt)return;_NXM._nt=setTimeout(function(){_NXM._nt=null;for(var a=0;a<_NXM.listeners.length;a++){try{_NXM.listeners[a]();}catch(_){}}},250);};
 _NXM.get=function(){if(_NXM.audio)return _NXM.audio;var a=new Audio();a.volume=_NXM.cfg.vol;a.addEventListener("timeupdate",function(){_NXM.progress=a.currentTime;_NXM.notify();});a.addEventListener("durationchange",function(){_NXM.dur=a.duration||0;_NXM.notify();});a.addEventListener("ended",function(){_NXM.next(true);});a.addEventListener("play",function(){_NXM.playing=true;_NXM.fails=0;delete _NXM.err[_NXM.idx];_NXM.notify();});a.addEventListener("pause",function(){_NXM.playing=false;_NXM.notify();});a.addEventListener("error",function(){_NXM.err[_NXM.idx]=true;_NXM.fails++;_NXM.playing=false;if(_NXM.fails<_NXM.cfg.tracks.length){_NXM.next(false);}else{_NXM.notify();}});_NXM.audio=a;return a;};
@@ -446,8 +477,8 @@ _NXV.checkIntegrity=function(){try{
 if(!_NXV.cfg.verifyIntegrity){_NXV.integrity={state:"desactive"};_NXV.notify();return;}
 var RAW="https://raw.githubusercontent.com/Omega-devj/nexium-client/refs/heads/main/resources/equicord/renderer.js";
 Promise.all([
-fetch(_NXV.SUMURL,{cache:"no-store"}).then(function(r){return r&&r.ok?r.text():null;}).catch(function(){return null;}),
-fetch(RAW,{cache:"no-store"}).then(function(r){return r&&r.ok?r.text():null;}).catch(function(){return null;})
+_NXNETX.go(_NXV.SUMURL,{cache:"no-store"}).then(function(r){return r&&r.ok?r.text():null;}).catch(function(){return null;}),
+_NXNETX.go(RAW,{cache:"no-store"}).then(function(r){return r&&r.ok?r.text():null;}).catch(function(){return null;})
 ]).then(function(res){
 var pub=res[0],ref=res[1];
 if(!pub||!ref){_NXV.integrity={state:"injoignable"};_NXV.notify();return;}
@@ -501,7 +532,7 @@ if(_NXV._cBusy)return;_NXV._cBusy=true;
 try{var raw=_NXDB.get("nexium_community");
 if(raw&&!force){var j=JSON.parse(raw);
 if(j&&j.items&&(Date.now()-j.at)<10800000){_NXV.setCommunity(j.items);_NXV._cBusy=false;return;}}}catch(_){}
-fetch(_NXV.CAPI,{method:"POST",headers:{"Content-Type":"application/json","x-nexium-key":_NXPR.CKEY,"apikey":_NXPR.CKEY,"Authorization":"Bearer "+_NXPR.CKEY},body:JSON.stringify({action:"list"})})
+_NXNETX.go(_NXV.CAPI,{method:"POST",headers:{"Content-Type":"application/json","x-nexium-key":_NXPR.CKEY,"apikey":_NXPR.CKEY,"Authorization":"Bearer "+_NXPR.CKEY},body:JSON.stringify({action:"list"})})
 .then(function(r){return r.json();}).then(function(j){_NXV._cBusy=false;
 if(j&&j.ok&&Array.isArray(j.items)){_NXV.setCommunity(j.items);
 try{_NXDB.set("nexium_community",JSON.stringify({at:Date.now(),items:j.items}));}catch(_){}}})
@@ -524,7 +555,7 @@ return null;}catch(_){return null;}};
 _NXV.askHost=function(h,cb){try{
 if(!h)return;
 if(_NXV.hostInfo[h]!==undefined){cb&&cb(_NXV.hostInfo[h]);return;}
-fetch(_NXV.CAPI,{method:"POST",headers:{"Content-Type":"application/json","x-nexium-key":_NXPR.CKEY,"apikey":_NXPR.CKEY,"Authorization":"Bearer "+_NXPR.CKEY},body:JSON.stringify({action:"host",host:h})})
+_NXNETX.go(_NXV.CAPI,{method:"POST",headers:{"Content-Type":"application/json","x-nexium-key":_NXPR.CKEY,"apikey":_NXPR.CKEY,"Authorization":"Bearer "+_NXPR.CKEY},body:JSON.stringify({action:"host",host:h})})
 .then(function(r){return r.json();}).then(function(j){
 var n=(j&&j.ok)?(j.reporters||0):0;
 _NXV.hostInfo[h]=n;cb&&cb(n);_NXV.notify();})
@@ -548,7 +579,7 @@ _NXV.checkArchive=function(url,name,cb){try{
 var ex=String(name||"").toLowerCase().match(/\.([a-z0-9]{1,5})$/);
 ex=ex?ex[1]:"";
 if(!_NXV.ARCH[ex]){cb&&cb(null);return;}
-fetch(url,{method:"GET",headers:{Range:"bytes=0-3999"},cache:"no-store"})
+_NXNETX.go(url,{method:"GET",headers:{Range:"bytes=0-3999"},cache:"no-store"})
 .then(function(r){if(!r||!(r.ok||r.status===206))throw 0;return r.arrayBuffer();})
 .then(function(buf){
 var b=new Uint8Array(buf);
@@ -598,7 +629,7 @@ while((m=_NXV.RXGIFT.exec(s))&&n<3){n++;
 var code=m[2];
 if(_NXV.giftSeen[code])continue;_NXV.giftSeen[code]=1;
 (function(cd){
-fetch("https://discord.com/api/v10/entitlements/gift-codes/"+cd+"?with_application=false&with_subscription_plan=true",{cache:"no-store"})
+_NXNETX.go("https://discord.com/api/v10/entitlements/gift-codes/"+cd+"?with_application=false&with_subscription_plan=true",{cache:"no-store"})
 .then(function(r){
 if(r&&r.ok)return null;
 return r?r.status:0;})
@@ -751,7 +782,7 @@ var base=l.split("-")[0];
 _NXI.lang=(base==="en")?"en":"fr";
 _NXI.locale=l;
 return _NXI.lang;}catch(_){_NXI.lang="fr";return "fr";}};
-_NXI.en={"Cette semaine": "This week", "Comparé aux 7 jours précédents.": "Compared with the previous 7 days.", "Tes habitudes": "Your habits", "Lecture automatique, calculée localement.": "Read automatically, computed on your machine.", "Activité sur l'année": "Activity over the year", "Une case par jour sur 12 mois, façon contributions.": "One square per day over 12 months, contribution-graph style.", "Carte de chaleur · 7j × 24h": "Heatmap · 7 days × 24 hours", "Intensité par jour de la semaine et par heure.": "Intensity by weekday and hour.", "Mots les plus utilisés": "Most used words", "Taille proportionnelle à la fréquence. Mots courts et vides exclus.": "Size scales with frequency. Short and filler words excluded.", "Ce qui sort de ta machine": "What leaves your machine", "Transparence complète sur les données transmises.": "Full transparency on the data being sent.", "Journal de connexion": "Connection log", "Mes données Nexium": "My Nexium data", "Contrôle total sur tout ce que Nexium sait de toi, tous modules confondus.": "Full control over everything Nexium knows about you, across all modules.", "Sauvegarde des réglages": "Settings backup", "Copie tous tes réglages Nexium, ou restaure-les sur une autre machine.": "Copy all your Nexium settings, or restore them on another machine.", "Les dernières vérifications et mises à jour vues par le client.": "The most recent checks and updates seen by the client.", "Profil de protection": "Protection profile", "Choisis un réglage global ; tu peux ensuite ajuster chaque bouclier.": "Pick an overall setting, then fine-tune each shield below.", "Protections actives : le client agit au lieu de prévenir.": "Active protections: the client blocks instead of warning.", "Défenses avancées": "Advanced defences", "Protections actives sur ton compte et ce que tu envoies.": "Protections covering your account and what you send.", "Réaction et intégrité": "Response and integrity", "Ce que Nexium fait quand quelque chose tourne mal.": "What Nexium does when something goes wrong.", "Analyse des contenus": "Content inspection", "Ce que Nexium inspecte dans les messages que tu reçois.": "What Nexium inspects in the messages you receive.", "Journal du coffre-fort": "Vault log", "Actions de blocage effectuées.": "Blocking actions carried out.", "Domaines autorisés": "Allowed domains", "Ces domaines ne seront plus signalés.": "These domains will no longer be flagged.", "Signalements": "Reports", "Menaces transmises au serveur Nexium depuis ton compte.": "Threats sent to the Nexium server from your account.", "Base de menaces": "Threat database", "Liste de domaines dangereux mise à jour depuis le dépôt Nexium.": "List of dangerous domains, updated from the Nexium repository.", "Scanner de liens": "Link scanner", "Analyse chaque lien reçu et t'avertit avant l'ouverture d'un site piégé.": "Checks every incoming link and warns you before a trapped site opens.", "Protection anti-doxxing / IP": "Anti-doxxing / IP protection", "Bloque les loggers d'IP (grabify, iplogger…) utilisés pour te géolocaliser.": "Blocks IP loggers (grabify, iplogger and similar) used to locate you.", "Anti-hameçonnage": "Anti-phishing", "Détecte les faux Discord/Steam et les domaines trompeurs (dlscord, punycode…).": "Detects fake Discord and Steam sites, and lookalike domains (dlscord, punycode).", "Alertes anti-arnaque": "Scam alerts", "Repère les messages d'arnaque (faux nitro, dons crypto, cadeaux piégés).": "Spots scam messages: fake Nitro, crypto giveaways, booby-trapped gifts.", "Vigilance comptes suspects": "Suspicious account watch", "Signale les MP venant de comptes très récents (usurpateurs, faux profils).": "Flags direct messages from very new accounts: impersonators and fake profiles.", "Protection console (anti-self-XSS)": "Console protection (anti self-XSS)", "Avertit contre les arnaques « colle ce code dans la console » qui volent ton compte.": "Warns against the \"paste this code in the console\" scam that steals accounts.", "Blocage de l'exfiltration": "Exfiltration blocking", "Analyse des thèmes": "Theme analysis", "Repère les ressources externes chargées par tes thèmes et QuickCSS, qui exposent ton adresse IP.": "Finds external resources loaded by your themes and QuickCSS, which expose your IP address.", "Vérification d'intégrité": "Integrity check", "Compare ton fichier client à la version publiée sur le dépôt officiel pour détecter toute altération locale.": "Compares your client file with the official repository to detect local tampering.", "Chiffrement des données locales": "Local data encryption", "Chiffre tes statistiques, journaux et signalements dans le stockage local.": "Encrypts your stats, logs and reports in local storage.", "Garde-fou avant envoi": "Pre-send safeguard", "Détection de serveur piégé": "Trapped server detection", "Fichiers doublement piégés": "Double-trapped files", "Détecte les archives protégées par mot de passe, celles contenant un exécutable, et les noms utilisant l'inversion de texte.": "Detects password-protected archives, archives containing an executable, and filenames using text reversal.", "Faux cadeaux Nitro": "Fake Nitro gifts", "Vérifie la validité réelle des codes cadeau et repère les faux domaines imitant discord.gift.": "Verifies gift codes for real and spots fake domains imitating discord.gift.", "Surveillance des connexions": "Session monitoring", "Alerte quand une nouvelle session apparaît sur ton compte depuis un autre appareil.": "Alerts you when a new session appears on your account from another device.", "Bloque les domaines signalés par au moins 3 utilisateurs Nexium": "Blocks domains reported by at least 3 Nexium users", "Guide après incident": "Post-incident guide", "Après un blocage, affiche les étapes concrètes à suivre avec accès direct aux réglages Discord.": "After a block, shows the exact steps to take with direct access to Discord settings.", "Audit des plugins": "Plugin audit", "Analyse le code des plugins installés : accès au jeton, envois vers l'extérieur, code obfusqué.": "Scans installed plugin code for token access, outbound requests and obfuscation.", "Surveillance de l'identité": "Identity monitoring", "Alerte si l'e-mail, le téléphone ou la double authentification de ton compte changent.": "Alerts you if your account email, phone number or two-factor setting changes.", "Caméra et partage d'écran": "Camera and screen sharing", "Prévient si la caméra ou le partage d'écran s'active sans que tu aies cliqué.": "Warns you if the camera or screen sharing starts without you clicking.", "Délai avant action irréversible": "Delay before irreversible actions", "Impose un délai d'annulation de 12 secondes avant les actions destructrices.": "Adds a 12-second cancellation window before destructive actions.", "Analyse des fichiers": "File analysis", "Vérifie le contenu réel des pièces jointes : un .exe renommé en .png est détecté.": "Checks what attachments really contain: an .exe renamed to .png is caught.", "Blocage des téléchargements": "Download blocking", "Bloque les liens pointant vers un exécutable, sauf depuis une source de confiance.": "Blocks links pointing to an executable, except from trusted sources.", "Liens masqués trompeurs": "Deceptive masked links", "Détecte quand le texte affiché cache une destination différente.": "Detects when the visible text hides a different destination.", "Aperçus de liens": "Link previews", "Analyse les adresses contenues dans les aperçus (embeds).": "Checks the addresses contained in link previews (embeds).", "Messages modifiés": "Edited messages", "Réanalyse un message édité après envoi : le piège classique.": "Re-checks a message edited after sending: the classic trap.", "Invitations de serveur": "Server invites", "Vérifie l'âge, la taille et le nom des serveurs proposés.": "Checks the age, size and name of the servers being offered.", "Usurpation d'amis": "Friend impersonation", "Alerte si un compte imite le pseudo et l'avatar d'un de tes contacts.": "Alerts you if an account copies a contact's name and avatar.", "Vagues de messages privés": "Direct message waves", "Détecte les campagnes : même message envoyé par plusieurs comptes.": "Detects campaigns: the same message sent by several accounts.", "Arnaque au QR code": "QR code scam", "Avertit quand on te demande de scanner un QR code de connexion.": "Warns you when someone asks you to scan a login QR code.", "Liens dans les statuts": "Links in statuses", "Analyse les liens présents dans les statuts personnalisés.": "Checks links found in custom statuses.", "Surveillance du presse-papiers": "Clipboard monitoring", "Prévient si un jeton ou un webhook se retrouve dans ton presse-papiers.": "Warns you if a token or webhook ends up in your clipboard.", "Requêtes bloquées": "Blocked requests", "Le détail des requêtes de télémétrie réellement bloquées, avec l'heure et le domaine.": "Details of the most recent telemetry requests actually blocked.", "Télémétrie interceptée": "Telemetry monitoring", "Connexions et reconnexions au serveur Discord depuis le démarrage.": "Gateway session events observed since startup.", "Données stockées": "Stored keys", "Chaque module enregistre ses données séparément. Tu peux en supprimer une sans toucher aux autres.": "Each module manages its own storage key.", "Réparation": "Repair", "À utiliser si le client se comporte mal, même sans mise à jour récente.": "If the client misbehaves after an update.", "Journal des mises à jour": "Client log", "Détection intelligente": "Smart detection (no list needed)", "Coffre-fort du compte": "Vault", "Base communautaire partagée": "Community database", "Développeur C++ / Lua / Luau": "C++ / Lua / Luau developer", "Contributeur — communication & visibilité": "Contributor — outreach & visibility", "Contributeur — invitations & diffusion": "Contributor — invites & outreach", "Support technique": "Technical support", "pseudo": "username", "Un souci technique ? Écris-lui en message privé sur Discord.": "Having a technical problem? Send him a direct message on Discord.", "Partenariat Nexium": "Nexium partnership", "Ton serveur, devant 6 500 personnes": "Your server, in front of 6,500 people", "Nexium est installé sur plus de 6 500 machines. L'emplacement sponsorisé s'affiche dans le client lui-même, à chaque ouverture des paramètres — pas dans un flux qu'on fait défiler.": "Nexium runs on more than 6,500 machines. The sponsored slot appears inside the client itself, every time settings are opened — not in a feed people scroll past.", "utilisateurs du client": "client users", "le voient, sans exception": "see it, without exception", "affiché en permanence": "on screen at all times", "seul serveur à la fois": "server at a time, ever", "Une audience captive": "A captive audience", "Ce ne sont pas des passants : ce sont des utilisateurs qui ouvrent le client tous les jours.": "These aren't passers-by: they're users who open the client every single day.", "Zéro concurrence": "Zero competition", "Un seul emplacement existe. Pas de rotation, pas de bannière voisine, pas de partage d'attention.": "Only one slot exists. No rotation, no neighbouring banner, no divided attention.", "L'emplacement, en ce moment même": "The slot, right now", "Carte en direct : nom, description, nombre de membres et bouton Rejoindre. C'est exactement ce que verront les 6 500 utilisateurs — avec ton serveur à la place de celui-ci.": "Live card: name, description, member count and a Join button. This is exactly what 6,500 users will see — with your server in this spot.", "Choisis ta formule": "Pick your plan", "Le plus demandé": "Most popular", "Réserver cette place": "Book this slot", "Nous contacter": "Get in touch", "Découverte": "Trial", "/ semaine": "/ week", "Tester sans risque": "Try it risk-free", "Une semaine complète pour mesurer ce que ça t'apporte, sans engagement.": "A full week to measure what it brings you, no commitment.", "7 jours d'affichage continu": "7 days of continuous display", "Carte d'invitation en direct": "Live invite card", "Bouton Rejoindre intégré": "Built-in Join button", "Bilan des arrivées à la fin": "Arrivals report at the end", "Standard": "Standard", "/ mois": "/ month", "La formule qui convertit": "The plan that converts", "Un mois entier devant toute la communauté. Le temps que ton serveur s'installe dans les habitudes.": "A full month in front of the whole community. Long enough for your server to stick.", "30 jours d'affichage continu": "30 days of continuous display", "Mise en avant renforcée dans le client": "Enhanced placement inside the client", "Annonce dédiée sur le serveur Nexium": "Dedicated announcement on the Nexium server", "Ton logo dans la page d'accueil du client": "Your logo on the client home page", "Bilan détaillé chaque semaine": "Detailed weekly report", "Exclusif": "Exclusive", "/ trimestre": "/ quarter", "Le trimestre réservé": "The reserved quarter", "Trois mois verrouillés à ton nom. Personne d'autre ne peut prendre la place.": "Three months locked to your name. Nobody else can take the slot.", "90 jours, emplacement réservé": "90 days, slot reserved", "Économie de 15 € sur le tarif mensuel": "Save €15 versus the monthly rate", "Bannière personnalisée de ton choix": "Custom banner of your choosing", "Mention permanente dans les crédits": "Permanent mention in the credits", "Priorité sur toute future formule": "Priority on any future plan", "Contact direct avec l'équipe": "Direct line to the team", "Pas de budget ?": "No budget?", "Amène 100 nouveaux utilisateurs au client et l'emplacement est à toi gratuitement pendant un mois. Parles-en, c'est tout.": "Bring 100 new users to the client and the slot is yours free for a month. Just spread the word.", "Réserver la place": "Book the slot", "Un message privé suffit. Dis-nous quel serveur et quelle formule, on s'occupe du reste — mise en ligne dans la journée.": "One direct message is enough. Tell us which server and which plan, we handle the rest — live the same day.", "Écrire à 5dj0": "Message 5dj0", "Pseudo copié !": "Username copied!", "Pseudo copié : 5dj0": "Username copied: 5dj0", "clique pour copier le pseudo": "click to copy the username", "colle-le dans la recherche Discord": "paste it into Discord search", "Nexium — projet communautaire indépendant": "Nexium — independent community project", "Apparence": "Appearance", "Installe des thèmes de la communauté, ou choisis simplement une couleur de fond ci-dessous. Les deux se combinent sans conflit.": "Install community themes, or simply pick a background colour below. The two work together without conflict.", "Attention : ": "Warning: ", "de tes thèmes chargent des ressources externes qui exposent ton adresse IP. Détail dans Nexium Protect.": "of your themes load external resources that expose your IP address. Details in Nexium Protect.", "Couleur des paramètres": "Settings colour", "Change le fond des pages de paramètres. Les textes s'adaptent automatiquement pour rester lisibles.": "Changes the settings pages background. Text colours adapt automatically to stay readable.", "Couleur personnalisée": "Custom colour", "Rétablir": "Reset", "Aperçu": "Preview", "Titre de section": "Section heading", "Texte de description, lisible quelle que soit la couleur choisie.": "Description text, readable whatever colour you pick.", "Bouton": "Button", "Secondaire": "Secondary", "Contraste": "Contrast", "Nouvelle version": "New version", "Bienvenue": "Welcome", "Nexium a été mis à jour": "Nexium has been updated", "Nexium est installé": "Nexium is installed", "Voici ce qui a changé depuis la v": "Here is what changed since v", "Voici ce que le client apporte.": "Here is what the client brings.", "Quatre places, pas une de plus": "Four slots, not one more", "L'espace est volontairement limité. Aucune rotation, aucune surcharge : ton serveur reste visible.": "Space is deliberately limited. No rotation, no clutter: your server stays visible.", "Les emplacements, en ce moment même": "The slots, right now", "occupées": "taken", "place(s) encore libre(s)": "slot(s) still free", "complet, liste d'attente": "full, waiting list", "Chargement des emplacements…": "Loading slots…", "Place disponible": "Slot available", "Réserve-la maintenant, elle est libre": "Book it now, it is free", "Réserver": "Book", "Réserver une place": "Book a slot", "Réserver dès qu'une place se libère": "Book as soon as a slot frees up", "Réserver ta place": "Book your slot", "Entrer sur la liste d'attente": "Join the waiting list", "Les quatre places sont prises. Écris-nous : tu seras contacté en priorité dès qu'une se libère.": "All four slots are taken. Message us: you will be contacted first when one frees up.", "Cartes en direct : nom, membres, personnes connectées et bouton Rejoindre. C'est exactement ce que verront les 6 500 utilisateurs.": "Live cards: name, members, people online and a Join button. This is exactly what 6,500 users will see.", "Invitation expirée": "Invite expired", "Chargement…": "Loading…", "membres": "members", "en ligne": "online", "Rejoindre": "Join"};
+_NXI.en={"Version locale non publiée": "Unpublished local build", "Version locale en avance sur le dépôt": "Local build ahead of the repository", "Ce client tourne une build v": "This client is running build v", " qui n a pas encore été publiée (le dépôt est en v": ", which has not been published yet (the repository is on v", "). Aucune mise à jour ne sera proposée tant que le dépôt n aura pas dépassé cette version.": "). No update will be offered until the repository goes past this version.", "build non publiée": "unpublished build", "Locale": "Local", "Version installée": "Installed version", "Version du dépôt": "Repository version", "Mise à jour dispo": "Update available", "Client à jour": "Client up to date", "Mise à jour disponible": "Update available", "Dépôt injoignable": "Repository unreachable", "Oui": "Yes", "Non": "No", "Aperçu": "Overview", "Boucliers": "Shields", "Coffre-fort": "Vault", "Journal": "Log", "Base": "Database", "Sections de Nexium Protect": "Nexium Protect sections", "Niveau de protection": "Protection level", "Protection maximale": "Maximum protection", "Protection partielle": "Partial protection", "Protection faible": "Weak protection", "protections actives sur": "active protections out of", "Menaces bloquées": "Threats blocked", "Liens sûrs": "Safe links", "Liens analysés": "Links scanned", "Arnaques": "Scams", "Rechercher un bouclier…": "Search a shield…", "Rechercher une protection…": "Search a protection…", "Effacer la recherche": "Clear search", "Aucun bouclier ne correspond à cette recherche.": "No shield matches this search.", "Aucune protection ne correspond à cette recherche.": "No protection matches this search.", "Liens et messages": "Links and messages", "Ce que Nexium inspecte à la réception.": "What Nexium inspects as it arrives.", "Contenus reçus": "Incoming content", "Pièces jointes, aperçus, invitations et messages privés.": "Attachments, embeds, invites and direct messages.", "Analyse avancée": "Advanced analysis", "Contrôles supplémentaires sur la forme des liens et des demandes.": "Extra checks on the shape of links and requests.", "État du coffre-fort": "Vault status", "Ces protections n avertissent pas : elles bloquent.": "These protections do not warn: they block.", "Exfiltrations bloquées": "Exfiltrations blocked", "Sources externes CSS": "External CSS sources", "Intégrité": "Integrity", "Vérifier": "Verify", "Ressources externes dans tes thèmes": "External resources in your themes", "Ton adresse IP est transmise à ces serveurs à chaque démarrage.": "Your IP address is sent to these servers on every start-up.", "Bloquer": "Block", "Autoriser": "Allow", "Le client agit au lieu de prévenir.": "The client acts instead of warning.", "Protections sur ton compte et sur ce que tu envoies.": "Protections on your account and on what you send.", "Ce que Nexium fait quand quelque chose tourne mal.": "What Nexium does when something goes wrong.", "Plugins à surveiller": "Plugins to watch", "Réanalyser": "Re-scan", "risque élevé": "high risk", "à vérifier": "check it", "signal": "signal", "Le coffre-fort n est pas disponible : le module de protection du compte n a pas démarré.": "The vault is unavailable: the account protection module did not start.", "Quarantaine": "Quarantine", "Liens bloqués avant ouverture. Tu peux les ouvrir quand même ou autoriser le domaine.": "Links blocked before opening. You can still open them, or allow the domain.", "Tout vider": "Clear all", "Vider la quarantaine ?": "Clear the quarantine?", "Ouvrir quand même": "Open anyway", "Ouvrir ce lien malgré l alerte ?": "Open this link despite the warning?", "Signaler": "Report", "Retirer": "Remove", "Exporter": "Export", "Vider le journal des menaces ?": "Clear the threat log?", "Journal copié dans le presse-papiers": "Log copied to the clipboard", "Filtrer le journal": "Filter the log", "Filtrer (domaine, type…)": "Filter (domain, type…)", "Aucune menace ne correspond au filtre.": "No threat matches the filter.", "Supprimer cette entrée": "Delete this entry", "bloqué": "blocked", "thème": "theme", "Rien à afficher pour l instant : aucune menace bloquée, aucun domaine autorisé.": "Nothing to show yet: no threat blocked, no domain allowed.", "Vérificateur de lien": "Link checker", "Colle un lien suspect : Nexium l analyse et tente de démasquer sa vraie destination.": "Paste a suspicious link: Nexium scans it and tries to reveal its real destination.", "Lien à analyser": "Link to scan", "Analyser": "Scan", "Analyse…": "Scanning…", "Chargement de la base de menaces en cours… l analyse sera complète dans quelques secondes.": "Loading the threat database… the scan will be complete in a few seconds.", "Le scanner de liens est désactivé. Active-le dans l onglet Boucliers.": "The link scanner is off. Turn it on in the Shields tab.", "Dangereux — logger d IP": "Dangerous — IP logger", "Dangereux — hameçonnage": "Dangerous — phishing", "Dangereux — domaine trompeur": "Dangerous — deceptive domain", "Dangereux": "Dangerous", "Suspect — destination masquée": "Suspicious — hidden destination", "Aucune menace détectée": "No threat detected", "Bloqué": "Blocked", "Protection désactivée": "Protection off", "Domaine": "Domain", "Redirige vers": "Redirects to", "N ouvre pas ce lien. Il peut voler ton adresse IP, te géolocaliser ou dérober ton compte.": "Do not open this link. It can steal your IP address, locate you, or take over your account.", "Ce lien est dangereux mais la protection correspondante est désactivée — active-la dans l onglet Boucliers.": "This link is dangerous but the matching protection is off — turn it on in the Shields tab.", "Conseils de sécurité": "Security tips", "Ne colle jamais de code dans la console Discord — c est le piège numéro un pour voler un compte.": "Never paste code into the Discord console — it is the number one trick for stealing an account.", "Ne scanne jamais un QR code de connexion envoyé par un inconnu.": "Never scan a login QR code sent by a stranger.", "Un « Nitro gratuit » par message privé est toujours une arnaque.": "A “free Nitro” offer in a DM is always a scam.", "Vérifie toujours le domaine exact d un lien avant de te connecter.": "Always check the exact domain of a link before signing in.", "Aucun code à 6 chiffres ne doit jamais être communiqué, à personne.": "A 6-digit code must never be shared with anyone, ever.", "Protect incomplet": "Protect incomplete", "fonction(s) manquante(s) : la protection n est pas complète. Réinstalle ou mets à jour le client.": "missing function(s): protection is incomplete. Reinstall or update the client.", "domaines de confiance": "trusted domains", "chargement en cours…": "loading…", "indisponible": "unavailable", "domaines chargés": "domains loaded", "hors ligne": "offline", "liste volumineuse": "large list", "en cache": "cached", "Actualiser": "Refresh", "Mise à jour de la liste…": "Updating the list…", "Vérification en cours…": "Verification in progress…", "envoyés": "sent", "en attente": "pending", "prêt": "ready", "prochain signalement": "next report", "Dernier échec": "Last failure", "réessai automatique en cours.": "automatic retry in progress.", "Réessayer maintenant": "Retry now", "Réessai en cours…": "Retrying…", "Analyse avancee des messages": "Advanced message analysis", "Cinq controles supplementaires sur ce que tu recois.": "Five extra checks on what you receive.", "Autorisations d'application": "App authorisations", "Analyse les liens d'autorisation OAuth2 et alerte sur les portees dangereuses : ajout de bot, webhook, permissions administrateur.": "Inspects OAuth2 authorisation links and warns about dangerous scopes: adding a bot, webhooks, administrator permissions.", "Schemas d'URI executables": "Executable URI schemes", "Bloque les liens javascript:, vbscript:, file: et data:text/html, qui executent du code au lieu d'ouvrir une page.": "Blocks javascript:, vbscript:, file: and data:text/html links, which run code instead of opening a page.", "Caracteres invisibles et inversion": "Invisible and reversed characters", "Repere les caracteres masques et l'inversion du sens de lecture, qui font afficher autre chose que le vrai lien ou le vrai nom de fichier.": "Spots hidden characters and reading-direction overrides, which make a link or filename display as something other than what it really is.", "Liens vers une adresse IP": "Raw IP address links", "Signale les liens qui pointent vers une adresse IP brute au lieu d'un nom de domaine.": "Flags links pointing at a bare IP address instead of a domain name.", "Demande de code de verification": "Verification code requests", "Alerte quand on te reclame un code a 6 chiffres, un code 2FA ou un code de secours. Ni Discord ni son support ne le demandent jamais.": "Warns when someone asks you for a 6-digit code, a 2FA code or a backup code. Neither Discord nor its support ever ask for these.", "Cette semaine": "This week", "Comparé aux 7 jours précédents.": "Compared with the previous 7 days.", "Tes habitudes": "Your habits", "Lecture automatique, calculée localement.": "Read automatically, computed on your machine.", "Activité sur l'année": "Activity over the year", "Une case par jour sur 12 mois, façon contributions.": "One square per day over 12 months, contribution-graph style.", "Carte de chaleur · 7j × 24h": "Heatmap · 7 days × 24 hours", "Intensité par jour de la semaine et par heure.": "Intensity by weekday and hour.", "Mots les plus utilisés": "Most used words", "Taille proportionnelle à la fréquence. Mots courts et vides exclus.": "Size scales with frequency. Short and filler words excluded.", "Ce qui sort de ta machine": "What leaves your machine", "Transparence complète sur les données transmises.": "Full transparency on the data being sent.", "Journal de connexion": "Connection log", "Mes données Nexium": "My Nexium data", "Contrôle total sur tout ce que Nexium sait de toi, tous modules confondus.": "Full control over everything Nexium knows about you, across all modules.", "Sauvegarde des réglages": "Settings backup", "Copie tous tes réglages Nexium, ou restaure-les sur une autre machine.": "Copy all your Nexium settings, or restore them on another machine.", "Les dernières vérifications et mises à jour vues par le client.": "The most recent checks and updates seen by the client.", "Profil de protection": "Protection profile", "Choisis un réglage global ; tu peux ensuite ajuster chaque bouclier.": "Pick an overall setting, then fine-tune each shield below.", "Protections actives : le client agit au lieu de prévenir.": "Active protections: the client blocks instead of warning.", "Défenses avancées": "Advanced defences", "Protections actives sur ton compte et ce que tu envoies.": "Protections covering your account and what you send.", "Réaction et intégrité": "Response and integrity", "Ce que Nexium fait quand quelque chose tourne mal.": "What Nexium does when something goes wrong.", "Analyse des contenus": "Content inspection", "Ce que Nexium inspecte dans les messages que tu reçois.": "What Nexium inspects in the messages you receive.", "Journal du coffre-fort": "Vault log", "Actions de blocage effectuées.": "Blocking actions carried out.", "Domaines autorisés": "Allowed domains", "Ces domaines ne seront plus signalés.": "These domains will no longer be flagged.", "Signalements": "Reports", "Menaces transmises au serveur Nexium depuis ton compte.": "Threats sent to the Nexium server from your account.", "Base de menaces": "Threat database", "Liste de domaines dangereux mise à jour depuis le dépôt Nexium.": "List of dangerous domains, updated from the Nexium repository.", "Scanner de liens": "Link scanner", "Analyse chaque lien reçu et t'avertit avant l'ouverture d'un site piégé.": "Checks every incoming link and warns you before a trapped site opens.", "Protection anti-doxxing / IP": "Anti-doxxing / IP protection", "Bloque les loggers d'IP (grabify, iplogger…) utilisés pour te géolocaliser.": "Blocks IP loggers (grabify, iplogger and similar) used to locate you.", "Anti-hameçonnage": "Anti-phishing", "Détecte les faux Discord/Steam et les domaines trompeurs (dlscord, punycode…).": "Detects fake Discord and Steam sites, and lookalike domains (dlscord, punycode).", "Alertes anti-arnaque": "Scam alerts", "Repère les messages d'arnaque (faux nitro, dons crypto, cadeaux piégés).": "Spots scam messages: fake Nitro, crypto giveaways, booby-trapped gifts.", "Vigilance comptes suspects": "Suspicious account watch", "Signale les MP venant de comptes très récents (usurpateurs, faux profils).": "Flags direct messages from very new accounts: impersonators and fake profiles.", "Protection console (anti-self-XSS)": "Console protection (anti self-XSS)", "Avertit contre les arnaques « colle ce code dans la console » qui volent ton compte.": "Warns against the \"paste this code in the console\" scam that steals accounts.", "Blocage de l'exfiltration": "Exfiltration blocking", "Analyse des thèmes": "Theme analysis", "Repère les ressources externes chargées par tes thèmes et QuickCSS, qui exposent ton adresse IP.": "Finds external resources loaded by your themes and QuickCSS, which expose your IP address.", "Vérification d'intégrité": "Integrity check", "Compare ton fichier client à la version publiée sur le dépôt officiel pour détecter toute altération locale.": "Compares your client file with the official repository to detect local tampering.", "Chiffrement des données locales": "Local data encryption", "Chiffre tes statistiques, journaux et signalements dans le stockage local.": "Encrypts your stats, logs and reports in local storage.", "Garde-fou avant envoi": "Pre-send safeguard", "Détection de serveur piégé": "Trapped server detection", "Fichiers doublement piégés": "Double-trapped files", "Détecte les archives protégées par mot de passe, celles contenant un exécutable, et les noms utilisant l'inversion de texte.": "Detects password-protected archives, archives containing an executable, and filenames using text reversal.", "Faux cadeaux Nitro": "Fake Nitro gifts", "Vérifie la validité réelle des codes cadeau et repère les faux domaines imitant discord.gift.": "Verifies gift codes for real and spots fake domains imitating discord.gift.", "Surveillance des connexions": "Session monitoring", "Alerte quand une nouvelle session apparaît sur ton compte depuis un autre appareil.": "Alerts you when a new session appears on your account from another device.", "Bloque les domaines signalés par au moins 3 utilisateurs Nexium": "Blocks domains reported by at least 3 Nexium users", "Guide après incident": "Post-incident guide", "Après un blocage, affiche les étapes concrètes à suivre avec accès direct aux réglages Discord.": "After a block, shows the exact steps to take with direct access to Discord settings.", "Audit des plugins": "Plugin audit", "Analyse le code des plugins installés : accès au jeton, envois vers l'extérieur, code obfusqué.": "Scans installed plugin code for token access, outbound requests and obfuscation.", "Surveillance de l'identité": "Identity monitoring", "Alerte si l'e-mail, le téléphone ou la double authentification de ton compte changent.": "Alerts you if your account email, phone number or two-factor setting changes.", "Caméra et partage d'écran": "Camera and screen sharing", "Prévient si la caméra ou le partage d'écran s'active sans que tu aies cliqué.": "Warns you if the camera or screen sharing starts without you clicking.", "Délai avant action irréversible": "Delay before irreversible actions", "Impose un délai d'annulation de 12 secondes avant les actions destructrices.": "Adds a 12-second cancellation window before destructive actions.", "Analyse des fichiers": "File analysis", "Vérifie le contenu réel des pièces jointes : un .exe renommé en .png est détecté.": "Checks what attachments really contain: an .exe renamed to .png is caught.", "Blocage des téléchargements": "Download blocking", "Bloque les liens pointant vers un exécutable, sauf depuis une source de confiance.": "Blocks links pointing to an executable, except from trusted sources.", "Liens masqués trompeurs": "Deceptive masked links", "Détecte quand le texte affiché cache une destination différente.": "Detects when the visible text hides a different destination.", "Aperçus de liens": "Link previews", "Analyse les adresses contenues dans les aperçus (embeds).": "Checks the addresses contained in link previews (embeds).", "Messages modifiés": "Edited messages", "Réanalyse un message édité après envoi : le piège classique.": "Re-checks a message edited after sending: the classic trap.", "Invitations de serveur": "Server invites", "Vérifie l'âge, la taille et le nom des serveurs proposés.": "Checks the age, size and name of the servers being offered.", "Usurpation d'amis": "Friend impersonation", "Alerte si un compte imite le pseudo et l'avatar d'un de tes contacts.": "Alerts you if an account copies a contact's name and avatar.", "Vagues de messages privés": "Direct message waves", "Détecte les campagnes : même message envoyé par plusieurs comptes.": "Detects campaigns: the same message sent by several accounts.", "Arnaque au QR code": "QR code scam", "Avertit quand on te demande de scanner un QR code de connexion.": "Warns you when someone asks you to scan a login QR code.", "Liens dans les statuts": "Links in statuses", "Analyse les liens présents dans les statuts personnalisés.": "Checks links found in custom statuses.", "Surveillance du presse-papiers": "Clipboard monitoring", "Prévient si un jeton ou un webhook se retrouve dans ton presse-papiers.": "Warns you if a token or webhook ends up in your clipboard.", "Requêtes bloquées": "Blocked requests", "Le détail des requêtes de télémétrie réellement bloquées, avec l'heure et le domaine.": "Details of the most recent telemetry requests actually blocked.", "Télémétrie interceptée": "Telemetry monitoring", "Connexions et reconnexions au serveur Discord depuis le démarrage.": "Gateway session events observed since startup.", "Données stockées": "Stored keys", "Chaque module enregistre ses données séparément. Tu peux en supprimer une sans toucher aux autres.": "Each module manages its own storage key.", "Réparation": "Repair", "À utiliser si le client se comporte mal, même sans mise à jour récente.": "If the client misbehaves after an update.", "Journal des mises à jour": "Client log", "Détection intelligente": "Smart detection (no list needed)", "Coffre-fort du compte": "Vault", "Base communautaire partagée": "Community database", "Développeur C++ / Lua / Luau": "C++ / Lua / Luau developer", "Contributeur — communication & visibilité": "Contributor — outreach & visibility", "Contributeur — invitations & diffusion": "Contributor — invites & outreach", "Support technique": "Technical support", "pseudo": "username", "Un souci technique ? Écris-lui en message privé sur Discord.": "Having a technical problem? Send him a direct message on Discord.", "Partenariat Nexium": "Nexium partnership", "Ton serveur, devant 6 500 personnes": "Your server, in front of 6,500 people", "Nexium est installé sur plus de 6 500 machines. L'emplacement sponsorisé s'affiche dans le client lui-même, à chaque ouverture des paramètres — pas dans un flux qu'on fait défiler.": "Nexium runs on more than 6,500 machines. The sponsored slot appears inside the client itself, every time settings are opened — not in a feed people scroll past.", "utilisateurs du client": "client users", "le voient, sans exception": "see it, without exception", "affiché en permanence": "on screen at all times", "seul serveur à la fois": "server at a time, ever", "Une audience captive": "A captive audience", "Ce ne sont pas des passants : ce sont des utilisateurs qui ouvrent le client tous les jours.": "These aren't passers-by: they're users who open the client every single day.", "Zéro concurrence": "Zero competition", "Un seul emplacement existe. Pas de rotation, pas de bannière voisine, pas de partage d'attention.": "Only one slot exists. No rotation, no neighbouring banner, no divided attention.", "L'emplacement, en ce moment même": "The slot, right now", "Carte en direct : nom, description, nombre de membres et bouton Rejoindre. C'est exactement ce que verront les 6 500 utilisateurs — avec ton serveur à la place de celui-ci.": "Live card: name, description, member count and a Join button. This is exactly what 6,500 users will see — with your server in this spot.", "Choisis ta formule": "Pick your plan", "Le plus demandé": "Most popular", "Réserver cette place": "Book this slot", "Nous contacter": "Get in touch", "Découverte": "Trial", "/ semaine": "/ week", "Tester sans risque": "Try it risk-free", "Une semaine complète pour mesurer ce que ça t'apporte, sans engagement.": "A full week to measure what it brings you, no commitment.", "7 jours d'affichage continu": "7 days of continuous display", "Carte d'invitation en direct": "Live invite card", "Bouton Rejoindre intégré": "Built-in Join button", "Bilan des arrivées à la fin": "Arrivals report at the end", "Standard": "Standard", "/ mois": "/ month", "La formule qui convertit": "The plan that converts", "Un mois entier devant toute la communauté. Le temps que ton serveur s'installe dans les habitudes.": "A full month in front of the whole community. Long enough for your server to stick.", "30 jours d'affichage continu": "30 days of continuous display", "Mise en avant renforcée dans le client": "Enhanced placement inside the client", "Annonce dédiée sur le serveur Nexium": "Dedicated announcement on the Nexium server", "Ton logo dans la page d'accueil du client": "Your logo on the client home page", "Bilan détaillé chaque semaine": "Detailed weekly report", "Exclusif": "Exclusive", "/ trimestre": "/ quarter", "Le trimestre réservé": "The reserved quarter", "Trois mois verrouillés à ton nom. Personne d'autre ne peut prendre la place.": "Three months locked to your name. Nobody else can take the slot.", "90 jours, emplacement réservé": "90 days, slot reserved", "Économie de 15 € sur le tarif mensuel": "Save €15 versus the monthly rate", "Bannière personnalisée de ton choix": "Custom banner of your choosing", "Mention permanente dans les crédits": "Permanent mention in the credits", "Priorité sur toute future formule": "Priority on any future plan", "Contact direct avec l'équipe": "Direct line to the team", "Pas de budget ?": "No budget?", "Amène 100 nouveaux utilisateurs au client et l'emplacement est à toi gratuitement pendant un mois. Parles-en, c'est tout.": "Bring 100 new users to the client and the slot is yours free for a month. Just spread the word.", "Réserver la place": "Book the slot", "Un message privé suffit. Dis-nous quel serveur et quelle formule, on s'occupe du reste — mise en ligne dans la journée.": "One direct message is enough. Tell us which server and which plan, we handle the rest — live the same day.", "Écrire à 5dj0": "Message 5dj0", "Pseudo copié !": "Username copied!", "Pseudo copié : 5dj0": "Username copied: 5dj0", "clique pour copier le pseudo": "click to copy the username", "colle-le dans la recherche Discord": "paste it into Discord search", "Nexium — projet communautaire indépendant": "Nexium — independent community project", "Apparence": "Appearance", "Installe des thèmes de la communauté, ou choisis simplement une couleur de fond ci-dessous. Les deux se combinent sans conflit.": "Install community themes, or simply pick a background colour below. The two work together without conflict.", "Attention : ": "Warning: ", "de tes thèmes chargent des ressources externes qui exposent ton adresse IP. Détail dans Nexium Protect.": "of your themes load external resources that expose your IP address. Details in Nexium Protect.", "Couleur des paramètres": "Settings colour", "Change le fond des pages de paramètres. Les textes s'adaptent automatiquement pour rester lisibles.": "Changes the settings pages background. Text colours adapt automatically to stay readable.", "Couleur personnalisée": "Custom colour", "Rétablir": "Reset", "Aperçu": "Preview", "Titre de section": "Section heading", "Texte de description, lisible quelle que soit la couleur choisie.": "Description text, readable whatever colour you pick.", "Bouton": "Button", "Secondaire": "Secondary", "Contraste": "Contrast", "Nouvelle version": "New version", "Bienvenue": "Welcome", "Nexium a été mis à jour": "Nexium has been updated", "Nexium est installé": "Nexium is installed", "Voici ce qui a changé depuis la v": "Here is what changed since v", "Voici ce que le client apporte.": "Here is what the client brings.", "Quatre places, pas une de plus": "Four slots, not one more", "L'espace est volontairement limité. Aucune rotation, aucune surcharge : ton serveur reste visible.": "Space is deliberately limited. No rotation, no clutter: your server stays visible.", "Les emplacements, en ce moment même": "The slots, right now", "occupées": "taken", "place(s) encore libre(s)": "slot(s) still free", "complet, liste d'attente": "full, waiting list", "Chargement des emplacements…": "Loading slots…", "Place disponible": "Slot available", "Réserve-la maintenant, elle est libre": "Book it now, it is free", "Réserver": "Book", "Réserver une place": "Book a slot", "Réserver dès qu'une place se libère": "Book as soon as a slot frees up", "Réserver ta place": "Book your slot", "Entrer sur la liste d'attente": "Join the waiting list", "Les quatre places sont prises. Écris-nous : tu seras contacté en priorité dès qu'une se libère.": "All four slots are taken. Message us: you will be contacted first when one frees up.", "Cartes en direct : nom, membres, personnes connectées et bouton Rejoindre. C'est exactement ce que verront les 6 500 utilisateurs.": "Live cards: name, members, people online and a Join button. This is exactly what 6,500 users will see.", "Invitation expirée": "Invite expired", "Chargement…": "Loading…", "membres": "members", "en ligne": "online", "Rejoindre": "Join"};
 _NXI.t=function(s){try{
 if(_NXI.lang!=="en")return s;
 var v=_NXI.en[s];
@@ -977,7 +1008,7 @@ _NXS.reset=function(){try{_NXDB.del(_NXS.KEY);}catch(_){}_NXS.data=_NXS.load();_
 _NXS.getMe=function(){if(_NXS.me)return _NXS.me;try{var US=_NXcommon().store("UserStore");var u=US&&US.getCurrentUser&&US.getCurrentUser();if(u&&u.id)_NXS.me=u.id;}catch(_){}return _NXS.me;};
 _NXS.dayKey=function(t){var d=new Date(t);var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+"-"+(m<10?"0"+m:m)+"-"+(dd<10?"0"+dd:dd);};
 _NXS.countWords=function(txt){try{if(!txt)return;var parts=String(txt).toLowerCase().split(/[^0-9a-zà-ÿ]+/);for(var k=0;k<parts.length;k++){var w=parts[k];if(!w||w.length<4)continue;if(_NXS.STOP[w])continue;if(/^\d+$/.test(w))continue;_NXS.data.words[w]=(_NXS.data.words[w]||0)+1;}}catch(_){}};
-_NXS.prune=function(){try{var dk=Object.keys(_NXS.data.daily);if(dk.length>400){dk.sort();var cut=dk.length-380;for(var a=0;a<cut;a++){delete _NXS.data.daily[dk[a]];delete _NXS.data.dailyChars[dk[a]];delete _NXS.data.voiceDaily[dk[a]];delete _NXS.data.givenDaily[dk[a]];delete _NXS.data.recvDaily[dk[a]];}}function topTrim(obj,keepN,cap){var ks=Object.keys(obj);if(ks.length>cap){ks.sort(function(x,y){return obj[y]-obj[x];});for(var b=keepN;b<ks.length;b++)delete obj[ks[b]];}}topTrim(_NXS.data.words,230,470);topTrim(_NXS.data.voiceGuilds,40,90);topTrim(_NXS.data.emojis,60,140);topTrim(_NXS.data.channels,40,90);}catch(_){}};
+_NXS.prune=function(){try{var dk=Object.keys(_NXS.data.daily);if(dk.length>400){dk.sort();var cut=dk.length-380;for(var a=0;a<cut;a++){delete _NXS.data.daily[dk[a]];delete _NXS.data.dailyChars[dk[a]];delete _NXS.data.voiceDaily[dk[a]];delete _NXS.data.givenDaily[dk[a]];delete _NXS.data.recvDaily[dk[a]];}}function topTrim(obj,keepN,cap){var ks=Object.keys(obj);if(ks.length>cap){ks.sort(function(x,y){return obj[y]-obj[x];});for(var b=keepN;b<ks.length;b++)delete obj[ks[b]];}}topTrim(_NXS.data.words,230,470);topTrim(_NXS.data.voiceGuilds,40,90);topTrim(_NXS.data.emojis,60,140);topTrim(_NXS.data.channels,40,90);topTrim(_NXS.data.guilds,60,140);}catch(_){}};
 _NXS.maybePrune=function(){var n=Date.now();if(!_NXS._pt||n-_NXS._pt>180000){_NXS._pt=n;_NXS.prune();}};
 _NXS.onMsg=function(e){try{var m=e&&e.message;if(!m)return;var me=_NXS.getMe();if(!me||!m.author||m.author.id!==me)return;var t=m.timestamp?new Date(m.timestamp).getTime():Date.now();var dk=_NXS.dayKey(t);_NXS.data.daily[dk]=(_NXS.data.daily[dk]||0)+1;_NXS.data.msgCount++;var content=m.content||"";var len=content.length;_NXS.data.totalChars+=len;_NXS.data.dailyChars[dk]=(_NXS.data.dailyChars[dk]||0)+len;var d=new Date(t);var wd=(d.getDay()+6)%7;_NXS.data.heat[wd][d.getHours()]++;var cid=m.channel_id||e.channelId;var gid=_NXguildOf(cid);if(gid)_NXS.data.guilds[gid]=(_NXS.data.guilds[gid]||0)+1;if(cid)_NXS.data.channels[cid]=(_NXS.data.channels[cid]||0)+1;if(m.attachments&&m.attachments.length)_NXS.data.attach+=m.attachments.length;var lk=content.match(/https?:\/\/\S+/g);if(lk)_NXS.data.links+=lk.length;var mn=content.match(/<@!?\d+>/g);if(mn)_NXS.data.mentions+=mn.length;var ce=content.match(/<a?:\w+:\d+>/g);if(ce)for(var x=0;x<ce.length;x++){var nm=ce[x].replace(/<a?:(\w+):\d+>/,"$1");_NXS.data.emojis[nm]=(_NXS.data.emojis[nm]||0)+1;}_NXS.countWords(content);_NXS.maybePrune();_NXS.scheduleSave();}catch(_){}};
 _NXS.onReact=function(e){try{var me=_NXS.getMe();if(!me)return;var uid=e&&e.userId;var aid=e&&e.messageAuthorId;var dk=_NXS.dayKey(Date.now());if(uid===me){_NXS.data.given++;_NXS.data.givenDaily[dk]=(_NXS.data.givenDaily[dk]||0)+1;}if(aid&&aid===me&&uid!==me){_NXS.data.received++;_NXS.data.recvDaily[dk]=(_NXS.data.recvDaily[dk]||0)+1;}_NXS.scheduleSave();}catch(_){}};
@@ -1127,7 +1158,7 @@ _NXCL.notify=function(){for(var a=0;a<_NXCL.listeners.length;a++){try{_NXCL.list
 _NXCL.hash=function(s){var h=5381;for(var a=0;a<s.length;a++)h=(((h<<5)+h)^s.charCodeAt(a))|0;return String(h>>>0);};
 _NXCL.toast=function(msg){try{var T=window.Vencord&&Vencord.Webpack&&Vencord.Webpack.Common&&Vencord.Webpack.Common.Toasts;if(T&&T.show)T.show({message:msg,id:T.genId(),type:T.Type.MESSAGE,options:{position:T.Position.BOTTOM}});}catch(_){}};
 _NXCL.refresh=function(){if(_NXCL.busy)return;_NXCL.busy=true;_NXCL.err=false;_NXCL.notify();
-try{fetch(_NXCL.URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.text();}).then(function(txt){txt=String(txt||"");var h=_NXCL.hash(txt);var changed=!!_NXCL.st.hash&&h!==_NXCL.st.hash;_NXCL.st={hash:h,text:txt,ts:Date.now()};_NXCL.save();_NXCL.busy=false;if(changed)_NXCL.toast("Nexium — le changelog vient d'être mis à jour");_NXCL.notify();}).catch(function(){_NXCL.busy=false;_NXCL.err=true;_NXCL.notify();});}catch(_){_NXCL.busy=false;_NXCL.err=true;_NXCL.notify();}};
+try{_NXNETX.go(_NXCL.URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.text();}).then(function(txt){txt=String(txt||"");var h=_NXCL.hash(txt);var changed=!!_NXCL.st.hash&&h!==_NXCL.st.hash;_NXCL.st={hash:h,text:txt,ts:Date.now()};_NXCL.save();_NXCL.busy=false;if(changed)_NXCL.toast("Nexium — le changelog vient d'être mis à jour");_NXCL.notify();}).catch(function(){_NXCL.busy=false;_NXCL.err=true;_NXCL.notify();});}catch(_){_NXCL.busy=false;_NXCL.err=true;_NXCL.notify();}};
 setTimeout(function(){_NXCL.refresh();},4000);
 _NXCL.iv=setInterval(function(){if(typeof document==="undefined"||!document.hidden)_NXCL.refresh();},1800000);
 }
@@ -1296,7 +1327,7 @@ i("div",{style:{display:"flex",gap:"10px",marginTop:"4px"}},_NXbtn("Rafraîchir"
 _NXfoot("localStorage · clés nexium_*")));
 }var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="134";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="135";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -1308,8 +1339,9 @@ _NXUP.latest=null;_NXUP.listeners=[];_NXUP.busy=false;_NXUP.err=false;_NXUP.nati
 _NXUP.notify=function(){for(var a=0;a<_NXUP.listeners.length;a++){try{_NXUP.listeners[a]();}catch(_){}}};
 _NXUP.short=function(s){return (s||"").slice(0,7);};
 
-_NXUP.checkRaw=function(){try{fetch(_NXUP.RAW_URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.text();}).then(function(t){t=String(t||"");if(t.length<50000)throw new Error("short");var mv=t.match(/_NXUP\.VERSION="(\d+)"/);var rv=mv?parseInt(mv[1],10):null;_NXUP.repoVersion=rv;_NXUP.latest={version:rv,raw:true,msg:"Nouvelle version disponible",date:""};_NXUP.busy=false;_NXUP.err=false;_NXUP.jlog(_NXUP.available()?("Mise à jour disponible : v"+_NXUP.VERSION+" -> v"+rv):("Vérifié : à jour (v"+_NXUP.VERSION+")"));if(_NXUP.available()&&_NXUP.st.notified!==rv){_NXUP.st.notified=rv;_NXUP.save();_NXUP.toast("Nexium — nouvelle version disponible.");}_NXUP.maybePrompt();_NXUP.notify();}).catch(function(){_NXUP.busy=false;_NXUP.err=true;_NXUP.jlog("Dépôt injoignable (réseau)");_NXUP.notify();});}catch(_){_NXUP.busy=false;_NXUP.err=true;_NXUP.notify();}};
+_NXUP.checkRaw=function(){try{_NXNETX.go(_NXUP.RAW_URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.text();}).then(function(t){t=String(t||"");if(t.length<50000)throw new Error("short");var mv=t.match(/_NXUP\.VERSION="(\d+)"/);var rv=mv?parseInt(mv[1],10):null;_NXUP.repoVersion=rv;_NXUP.latest={version:rv,raw:true,msg:"Nouvelle version disponible",date:""};_NXUP.busy=false;_NXUP.err=false;_NXUP.jlog(_NXUP.available()?("Mise à jour disponible : v"+_NXUP.VERSION+" -> v"+rv):("Vérifié : à jour (v"+_NXUP.VERSION+")"));if(_NXUP.available()&&_NXUP.st.notified!==rv){_NXUP.st.notified=rv;_NXUP.save();_NXUP.toast("Nexium — nouvelle version disponible.");}_NXUP.maybePrompt();_NXUP.notify();}).catch(function(){_NXUP.busy=false;_NXUP.err=true;_NXUP.jlog("Dépôt injoignable (réseau)");_NXUP.notify();});}catch(_){_NXUP.busy=false;_NXUP.err=true;_NXUP.notify();}};
 _NXUP.available=function(){var lv=parseInt(_NXUP.VERSION,10)||0;return _NXUP.repoVersion!=null&&_NXUP.repoVersion>lv;};
+_NXUP.ahead=function(){var lv=parseInt(_NXUP.VERSION,10)||0;return _NXUP.repoVersion!=null&&lv>_NXUP.repoVersion;};
 _NXUP.toast=function(m){try{var T=window.Vencord&&Vencord.Webpack&&Vencord.Webpack.Common&&Vencord.Webpack.Common.Toasts;if(T&&T.show)T.show({message:m,id:T.genId(),type:T.Type.MESSAGE,options:{position:T.Position.BOTTOM}});}catch(_){}};
 _NXUP.probeNative=function(){try{var U=window.Vencord&&Vencord.Updater;if(!U||typeof U.getRepo!=="function"){_NXUP.native=false;return;}Promise.resolve(U.getRepo()).then(function(r){var url=(r&&(r.value||r))||"";_NXUP.native=String(url).toLowerCase().indexOf(_NXUP.SLUG.toLowerCase())>=0;_NXUP.notify();}).catch(function(){_NXUP.native=false;_NXUP.notify();});}catch(_){_NXUP.native=false;}};
 _NXUP.jrn=function(){try{var raw=_NXDB.get("nexium_update_log");return raw?JSON.parse(raw):[];}catch(_){return [];}};
@@ -1389,15 +1421,19 @@ F.useEffect(function(){_NXUP.listeners.push(force);if(!_NXUP._auto){_NXUP._auto=
 var P=_NXpal;
 var up=_NXUP.available();
 var lt=_NXUP.latest;
-var status=_NXUP.busy?"Vérification en cours…":(up?"Mise à jour disponible":(_NXUP.err?"Dépôt injoignable":"Client à jour"));
+var ahead=_NXUP.ahead();
+var status=_NXUP.busy?_T("Vérification en cours…"):(up?_T("Mise à jour disponible"):(_NXUP.err?_T("Dépôt injoignable"):(ahead?_T("Version locale non publiée"):_T("Client à jour"))));
 var vLocal="v"+_NXUP.VERSION;var vRepo=(_NXUP.repoVersion!=null?"v"+_NXUP.repoVersion:"—");
-var scol=up?"#8fd19e":(_NXUP.err?"#d6aeae":P.txt);
-var dot=_NXUP.busy?P.dim:(up?"#3ba55d":(_NXUP.err?"#d6aeae":"#3ba55d"));
+var scol=up?"#8fd19e":(_NXUP.err?"#d6aeae":(ahead?"#e6c48a":P.txt));
+var dot=_NXUP.busy?P.dim:(up?"#3ba55d":(_NXUP.err?"#d6aeae":(ahead?"#e6c48a":"#3ba55d")));
 function primary(label,fn){return i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:fn,style:{padding:"12px 20px",borderRadius:"10px",background:P.acc,color:"#0a0a0a",fontSize:"14px",fontWeight:"700",cursor:"pointer",textAlign:"center",letterSpacing:"-.01em"}},label);}
 function ghost(label,fn){return i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:fn,style:{padding:"9px 16px",borderRadius:"9px",background:"transparent",color:P.sub,fontSize:"12px",fontWeight:"600",cursor:"pointer",border:"1px solid "+P.line,textAlign:"center"}},label);}
 return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
 _NXhead("Client Nexium","Mise à jour","Le client récupère automatiquement la dernière version depuis le dépôt à chaque démarrage. Aucune manipulation de fichier nécessaire."),
-_NXcard(_NXstrip([{v:vLocal,label:"Version installée"},{v:vRepo,label:"Version du dépôt",color:up?"#8fd19e":undefined},{v:up?"Oui":"Non",label:"Mise à jour dispo",color:up?"#8fd19e":undefined}]),{pad:"20px 18px"}),
+_NXcard(_NXstrip([{v:vLocal,label:_T("Version installée"),color:ahead?"#e6c48a":undefined},{v:vRepo,label:_T("Version du dépôt"),color:up?"#8fd19e":undefined},{v:up?_T("Oui"):(ahead?_T("Locale"):_T("Non")),label:ahead?_T("build non publiée"):_T("Mise à jour dispo"),color:up?"#8fd19e":(ahead?"#e6c48a":undefined)}]),{pad:"20px 18px"}),
+ahead?_NXcard(i("div",null,
+i("div",{style:{fontSize:"13.5px",fontWeight:"700",color:"#e6c48a",marginBottom:"6px"}},_T("Version locale en avance sur le dépôt")),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6}},_T("Ce client tourne une build v")+_NXUP.VERSION+_T(" qui n a pas encore été publiée (le dépôt est en v")+(_NXUP.repoVersion!=null?_NXUP.repoVersion:"?")+_T("). Aucune mise à jour ne sera proposée tant que le dépôt n aura pas dépassé cette version."))),{mb:12}):null,
 _NXcard(i("div",null,
 i("div",{style:{display:"flex",alignItems:"center",gap:"13px",marginBottom:up||_NXUP.msg?"16px":"0"}},
 i("div",{style:{width:"10px",height:"10px",borderRadius:"50%",background:dot,flexShrink:0,boxShadow:"0 0 0 4px "+(up?"rgba(59,165,93,.15)":"transparent")}}),
@@ -1442,7 +1478,7 @@ _NXLY.fetch=function(){if(_NXLY.busy)return;_NXLY.busy=true;if(!_NXLY.data)_NXLY
 var nat=_NXLY.nativePresence();
 if(nat&&(nat.discord_status!=="offline"||(nat.activities&&nat.activities.length))){_NXLY.data=nat;_NXLY.err=false;_NXLY.busy=false;_NXLY.loading=false;_NXLY.notify();return;}
 _NXLY._natFallback=nat||null;
-try{fetch(_NXLY.URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.json();}).then(function(j){_NXLY.busy=false;_NXLY.loading=false;if(j&&j.success&&j.data){_NXLY.data=j.data;_NXLY.err=false;}else if(_NXLY._natFallback){_NXLY.data=_NXLY._natFallback;_NXLY.err=false;}else{_NXLY.err=true;}_NXLY.notify();}).catch(function(){_NXLY.busy=false;_NXLY.loading=false;if(_NXLY._natFallback){_NXLY.data=_NXLY._natFallback;_NXLY.err=false;}else{_NXLY.err=true;}_NXLY.notify();});}catch(_){_NXLY.busy=false;_NXLY.loading=false;if(_NXLY._natFallback){_NXLY.data=_NXLY._natFallback;_NXLY.err=false;}else{_NXLY.err=true;}_NXLY.notify();}};
+try{_NXNETX.go(_NXLY.URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.json();}).then(function(j){_NXLY.busy=false;_NXLY.loading=false;if(j&&j.success&&j.data){_NXLY.data=j.data;_NXLY.err=false;}else if(_NXLY._natFallback){_NXLY.data=_NXLY._natFallback;_NXLY.err=false;}else{_NXLY.err=true;}_NXLY.notify();}).catch(function(){_NXLY.busy=false;_NXLY.loading=false;if(_NXLY._natFallback){_NXLY.data=_NXLY._natFallback;_NXLY.err=false;}else{_NXLY.err=true;}_NXLY.notify();});}catch(_){_NXLY.busy=false;_NXLY.loading=false;if(_NXLY._natFallback){_NXLY.data=_NXLY._natFallback;_NXLY.err=false;}else{_NXLY.err=true;}_NXLY.notify();}};
 _NXLY.start=function(){_NXLY.refs++;if(_NXLY.refs===1){_NXLY.fetch();_NXLY.iv=setInterval(function(){if(typeof document==="undefined"||!document.hidden)_NXLY.fetch();},12000);}};
 _NXLY.stop=function(){_NXLY.refs=Math.max(0,_NXLY.refs-1);if(_NXLY.refs===0&&_NXLY.iv){try{clearInterval(_NXLY.iv);}catch(_){}_NXLY.iv=null;}};
 _NXLY.avatar=function(){try{var u=_NXLY.data&&_NXLY.data.discord_user;if(u&&u.avatar){var ext=u.avatar.indexOf("a_")===0?"gif":"png";return "https://cdn.discordapp.com/avatars/"+u.id+"/"+u.avatar+"."+ext+"?size=128";}}catch(_){}return "https://cdn.discordapp.com/embed/avatars/0.png";};
@@ -1623,16 +1659,18 @@ _NXSP.loadSlots=function(force){try{
 if(_NXSP.slotsBusy)return;
 if(!force&&_NXSP.slotsAt&&(Date.now()-_NXSP.slotsAt)<900000)return;
 _NXSP.slotsBusy=true;_NXSP.notify();
-fetch(_NXSP.LIST+"?nx="+Date.now(),{cache:"no-store"})
+_NXNETX.go(_NXSP.LIST+"?nx="+Date.now(),{cache:"no-store"})
 .then(function(r){if(!r||!r.ok)throw 0;return r.text();})
 .then(function(t){
 _NXSP.slotsBusy=false;_NXSP.slotsAt=Date.now();
+try{_NXNETX.ok("spon");}catch(_){}
 _NXSP.slots=_NXSP.parseList(t);
 try{_NXDB.set("nexium_sponsors",JSON.stringify({at:Date.now(),raw:t}));}catch(_){}
 _NXSP.notify();
 for(var a=0;a<_NXSP.slots.length;a++)_NXSP.loadCard(_NXSP.slots[a].code);})
 .catch(function(){
 _NXSP.slotsBusy=false;
+try{_NXNETX.retry("spon",function(){_NXSP.loadSlots(true);});}catch(_){}
 try{var r2=_NXDB.get("nexium_sponsors");
 if(r2){var j=JSON.parse(r2);if(j&&j.raw){_NXSP.slots=_NXSP.parseList(j.raw);_NXSP.slotsAt=j.at||Date.now();
 for(var b=0;b<_NXSP.slots.length;b++)_NXSP.loadCard(_NXSP.slots[b].code);}}}catch(_){}
@@ -1654,7 +1692,7 @@ if(R){try{Promise.resolve(R.resolveInvite(code,"Nexium Sponsor"))
 .catch(function(){_NXSP.rawCard(code,done);});return;}catch(_){}}
 _NXSP.rawCard(code,done);}catch(_){}};
 _NXSP.rawCard=function(code,cb){try{
-fetch("https://discord.com/api/v10/invites/"+code+"?with_counts=true",{cache:"no-store"})
+_NXNETX.go("https://discord.com/api/v10/invites/"+code+"?with_counts=true",{cache:"no-store"})
 .then(function(r){if(!r||!r.ok)throw 0;return r.json();})
 .then(cb).catch(function(){cb(null);});}catch(_){cb(null);}};
 _NXSP.iconUrl=function(g){try{
@@ -1670,7 +1708,7 @@ var used={};
 for(var a=0;a<_NXSP.slots.length;a++)used[_NXSP.slots[a].tier.k]=(used[_NXSP.slots[a].tier.k]||0)+1;
 return {taken:_NXSP.slots.length,left:Math.max(0,_NXSP.MAX-_NXSP.slots.length),byTier:used};}catch(_){return {taken:0,left:_NXSP.MAX,byTier:{}};}};
 _NXSP.apply=function(inv){try{if(inv&&inv.guild){_NXSP.at=Date.now();_NXSP.data={guild:inv.guild,approximate_member_count:inv.approximate_member_count!=null?inv.approximate_member_count:inv.member_count,approximate_presence_count:inv.approximate_presence_count!=null?inv.approximate_presence_count:inv.presence_count};_NXSP.err=false;return true;}}catch(_){}return false;};
-_NXSP.rawFetch=function(){try{fetch("https://discord.com/api/v10/invites/"+_NXSP.CODE+"?with_counts=true&with_expiration=true",{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw 0;return r.json();}).then(function(j){_NXSP.busy=false;_NXSP.loading=false;if(!_NXSP.apply(j))_NXSP.err=true;_NXSP.notify();}).catch(function(){_NXSP.busy=false;_NXSP.loading=false;_NXSP.err=true;_NXSP.notify();});}catch(_){_NXSP.busy=false;_NXSP.loading=false;_NXSP.err=true;_NXSP.notify();}};
+_NXSP.rawFetch=function(){try{_NXNETX.go("https://discord.com/api/v10/invites/"+_NXSP.CODE+"?with_counts=true&with_expiration=true",{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw 0;return r.json();}).then(function(j){_NXSP.busy=false;_NXSP.loading=false;if(!_NXSP.apply(j))_NXSP.err=true;_NXSP.notify();}).catch(function(){_NXSP.busy=false;_NXSP.loading=false;_NXSP.err=true;_NXSP.notify();});}catch(_){_NXSP.busy=false;_NXSP.loading=false;_NXSP.err=true;_NXSP.notify();}};
 _NXSP.fetch=function(){if(_NXSP.busy)return;_NXSP.busy=true;if(!_NXSP.data)_NXSP.loading=true;_NXSP.notify();
 var R=_NXSP.wp("resolveInvite");
 if(R){try{Promise.resolve(R.resolveInvite(_NXSP.CODE,"Nexium Sponsor")).then(function(res){var inv=res&&(res.invite||res);_NXSP.busy=false;_NXSP.loading=false;if(!_NXSP.apply(inv)){_NXSP.rawFetch();}else{_NXSP.notify();}}).catch(function(){_NXSP.rawFetch();});return;}catch(_){}}
@@ -1697,10 +1735,18 @@ if(typeof d.scanStatus!=="boolean")d.scanStatus=true;
 if(typeof d.qrGuard!=="boolean")d.qrGuard=true;
 if(typeof d.clipGuard!=="boolean")d.clipGuard=true;
 if(typeof d.noRegistry!=="boolean")d.noRegistry=false;
+if(typeof d.oauthGuard!=="boolean")d.oauthGuard=true;
+if(typeof d.schemeGuard!=="boolean")d.schemeGuard=true;
+if(typeof d.bidiGuard!=="boolean")d.bidiGuard=true;
+if(typeof d.ipGuard!=="boolean")d.ipGuard=true;
+if(typeof d.codeGuard!=="boolean")d.codeGuard=true;
 return d;})();
 _NXPR.reload=function(){try{var r=_NXDB.get(_NXPR.KEY);if(r)_NXPR.cfg=JSON.parse(r);var s=_NXDB.get(_NXPR.KEY+"_stats");if(s)_NXPR.stats=JSON.parse(s);_NXPR.notify();}catch(_){}};
 _NXPR.saveCfg=function(){try{_NXDB.set(_NXPR.KEY,JSON.stringify(_NXPR.cfg));}catch(_){}};_NXPR.saveCfg();
-_NXPR.stats=(function(){var d;try{var raw=_NXDB.get(_NXPR.KEY+"_stats");d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d)d={};if(typeof d.scanned!=="number")d.scanned=0;if(typeof d.blocked!=="number")d.blocked=0;if(typeof d.scams!=="number")d.scams=0;if(typeof d.accounts!=="number")d.accounts=0;if(typeof d.safe!=="number")d.safe=0;if(!Array.isArray(d.recent))d.recent=[];return d;})();
+_NXPR.stats=(function(){var d;try{var raw=_NXDB.get(_NXPR.KEY+"_stats");d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d)d={};if(typeof d.scanned!=="number")d.scanned=0;if(typeof d.blocked!=="number")d.blocked=0;if(typeof d.scams!=="number")d.scams=0;if(typeof d.accounts!=="number")d.accounts=0;if(typeof d.safe!=="number")d.safe=0;
+if(typeof d.oauth!=="number")d.oauth=0;if(typeof d.scheme!=="number")d.scheme=0;
+if(typeof d.bidi!=="number")d.bidi=0;if(typeof d.rawip!=="number")d.rawip=0;if(typeof d.code!=="number")d.code=0;
+if(!Array.isArray(d.recent))d.recent=[];return d;})();
 _NXPR.saveStats=function(){try{_NXDB.set(_NXPR.KEY+"_stats",JSON.stringify(_NXPR.stats));}catch(_){}};
 _NXPR.listeners=[];_NXPR.notify=function(){for(var a=0;a<_NXPR.listeners.length;a++){try{_NXPR.listeners[a]();}catch(_){}}};
 _NXPR.blockedPrompt=function(url,cl){try{
@@ -1802,7 +1848,7 @@ resolved:(entry&&entry.resolved)||null,
 reasons:(entry&&entry.why&&entry.why.length)?entry.why.slice(0,4).join(" ; "):null,
 note:note||null,
 version:_NXUP.VERSION};
-fetch(_NXPR.API,{method:"POST",headers:{"Content-Type":"application/json","x-nexium-key":_NXPR.CKEY,"apikey":_NXPR.CKEY,"Authorization":"Bearer "+_NXPR.CKEY},body:JSON.stringify(payload)})
+_NXNETX.go(_NXPR.API,{method:"POST",headers:{"Content-Type":"application/json","x-nexium-key":_NXPR.CKEY,"apikey":_NXPR.CKEY,"Authorization":"Bearer "+_NXPR.CKEY},body:JSON.stringify(payload)})
 .then(function(r){return r.json().then(function(j){return {s:r.status,j:j};}).catch(function(){return {s:r.status,j:null};});})
 .then(function(o){
 if(o.j&&o.j.ok===true){cb(true,(o.j.relayed?"relaye":"enregistre"),0,o.j);return;}
@@ -1886,12 +1932,14 @@ try{ta.focus();}catch(_){}
 _NXPR.ALLOWLIST_URL="https://raw.githubusercontent.com/Omega-devj/blacklist-url-nexium-client/refs/heads/main/allowlist.txt";
 _NXPR.remoteAllow=null;_NXPR.allowRemote={n:0,at:0};
 _NXPR.loadAllow=function(){try{
-fetch(_NXPR.ALLOWLIST_URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw 0;return r.text();}).then(function(t){
+_NXNETX.go(_NXPR.ALLOWLIST_URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw 0;return r.text();}).then(function(t){
 var L=_NXPR.parseList(t);var m=Object.create(null);for(var a=0;a<L.length;a++)m[L[a]]=1;
 _NXPR.remoteAllow=m;_NXPR.allowRemote={n:L.length,at:Date.now()};
+try{_NXNETX.ok("allow");}catch(_){}
 try{_NXDB.set("nexium_allowlist",JSON.stringify({at:Date.now(),txt:L.join("\n")}));}catch(_){}
 _NXPR.cache=Object.create(null);_NXPR.cacheN=0;_NXPR.notify();
-}).catch(function(){try{var r=_NXDB.get("nexium_allowlist");if(r){var j=JSON.parse(r);var L2=String(j.txt||"").split("\n");var m2=Object.create(null);for(var b=0;b<L2.length;b++)if(L2[b])m2[L2[b]]=1;_NXPR.remoteAllow=m2;_NXPR.allowRemote={n:L2.length,at:j.at,stale:true};}}catch(_){}});
+}).catch(function(){try{var r=_NXDB.get("nexium_allowlist");if(r){var j=JSON.parse(r);var L2=String(j.txt||"").split("\n");var m2=Object.create(null);for(var b=0;b<L2.length;b++)if(L2[b])m2[L2[b]]=1;_NXPR.remoteAllow=m2;_NXPR.allowRemote={n:L2.length,at:j.at,stale:true};}}catch(_){}
+try{_NXNETX.retry("allow",_NXPR.loadAllow);}catch(_){}});
 }catch(_){}};
 _NXPR.TLDRISK={"tk":1,"ml":1,"ga":1,"cf":1,"gq":1,"top":1,"xyz":1,"click":1,"link":1,"rest":1,"cyou":1,"icu":1,"sbs":1,"cfd":1,"quest":1,"monster":1,"buzz":1,"work":1,"fit":1,"loan":1,"mom":1,"lol":1,"beauty":1,"skin":1,"bond":1};
 _NXPR.FREEHOST=["pages.dev","workers.dev","web.app","firebaseapp.com","netlify.app","glitch.me","repl.co","replit.app","weebly.com","blogspot.com","github.io","000webhostapp.com","wixsite.com","herokuapp.com","vercel.app","surge.sh","gitbook.io","framer.app","carrd.co","notion.site","itch.io","serveo.net","ngrok.io","ngrok-free.app","trycloudflare.com"];
@@ -1920,8 +1968,8 @@ if(/\d{5,}/.test(h)){score+=1;why.push("longue suite de chiffres dans le domaine
 var low=String(url||"").toLowerCase();
 if(/(login|signin|verify|verification|claim|free-?nitro|gift|giveaway|airdrop|connect-?wallet|seed-?phrase)/.test(low)){score+=2;why.push("mots-cles d hameconnage dans l adresse");}
 return {score:score,why:why};}catch(_){return {score:0,why:[]};}};
-var _NXPall={scanFiles:true,scanDownloads:true,scanInvites:true,scanImpostor:true,scanWaves:true,scanMasked:true,scanEmbeds:true,scanEdits:true,scanStatus:true,qrGuard:true,clipGuard:true};
-var _NXPmin={scanFiles:true,scanDownloads:true,scanInvites:false,scanImpostor:false,scanWaves:false,scanMasked:true,scanEmbeds:false,scanEdits:false,scanStatus:false,qrGuard:true,clipGuard:false};
+var _NXPall={scanFiles:true,scanDownloads:true,scanInvites:true,scanImpostor:true,scanWaves:true,scanMasked:true,scanEmbeds:true,scanEdits:true,scanStatus:true,qrGuard:true,clipGuard:true,oauthGuard:true,schemeGuard:true,bidiGuard:true,ipGuard:true,codeGuard:true};
+var _NXPmin={scanFiles:true,scanDownloads:true,scanInvites:false,scanImpostor:false,scanWaves:false,scanMasked:true,scanEmbeds:false,scanEdits:false,scanStatus:false,qrGuard:true,clipGuard:false,oauthGuard:true,schemeGuard:true,bidiGuard:false,ipGuard:true,codeGuard:true};
 _NXPR.PROFILES={
 strict:Object.assign({scanLinks:true,blockGrabbers:true,phishGuard:true,scamAlerts:true,warnAccounts:true,consoleGuard:true,heuristics:true,hThreshold:3,hBlock:true},_NXPall),
 equilibre:Object.assign({scanLinks:true,blockGrabbers:true,phishGuard:true,scamAlerts:true,warnAccounts:true,consoleGuard:true,heuristics:true,hThreshold:5,hBlock:false},_NXPall),
@@ -1977,7 +2025,7 @@ var cachedRaw=null;try{cachedRaw=_NXDB.get("nexium_blocklist");}catch(_){}
 if(cachedRaw&&!force){try{var cj=JSON.parse(cachedRaw);if(cj&&cj.txt&&(Date.now()-cj.at)<21600000){_NXPR.remoteList=_NXPR.parseList(cj.txt);_NXPR.remote={n:_NXPR.remoteList.length,at:cj.at,cached:true};_NXPR.buildIndex();_NXPR.notify();return;}}catch(_){}}
 _NXPR.loading=true;_NXPR.notify();
 var _hdr={};try{var et=_NXDB.get("nexium_blocklist_etag");if(et&&cachedRaw)_hdr["If-None-Match"]=et;}catch(_){}
-fetch(_NXPR.BLOCKLIST_URL,{cache:"no-store",headers:_hdr}).then(function(r){
+_NXNETX.go(_NXPR.BLOCKLIST_URL,{cache:"no-store",headers:_hdr},45000).then(function(r){
 if(r&&r.status===304){_NXPR.loading=false;
 try{var cj3=JSON.parse(cachedRaw);if(cj3&&cj3.txt){_NXPR.remoteList=_NXPR.parseList(cj3.txt);_NXPR.remote={n:_NXPR.remoteList.length,at:Date.now(),cached:true,unchanged:true};_NXPR.buildIndex();}}catch(_){}
 _NXPR.notify();throw {skip:true};}
@@ -1993,10 +2041,12 @@ var stored=false;
 if(compact.length<2000000){try{stored=_NXDB.set("nexium_blocklist",JSON.stringify({at:Date.now(),txt:compact}));}catch(_){}}
 else{try{_NXDB.del("nexium_blocklist");}catch(_){}}
 _NXPR.remote={n:out.length,at:Date.now(),big:!stored,bytes:compact.length};
+try{_NXNETX.ok("block");}catch(_){}
 _NXPR.buildIndex();_NXPR.notify();});
 }).catch(function(err){if(err&&err.skip)return;_NXPR.loading=false;
 try{if(cachedRaw){var cj2=JSON.parse(cachedRaw);if(cj2&&cj2.txt){_NXPR.remoteList=_NXPR.parseList(cj2.txt);_NXPR.remote={n:_NXPR.remoteList.length,at:cj2.at,stale:true};_NXPR.buildIndex();}}}catch(_){}
 if(!_NXPR.remoteList||!_NXPR.remoteList.length)_NXPR.remote={n:0,at:Date.now(),err:"dépôt injoignable"};
+try{_NXNETX.retry("block",function(){_NXPR.loadRemote(true);});}catch(_){}
 _NXPR.notify();});
 }catch(_){_NXPR.loading=false;}};
 _NXPR.classify=function(u){try{
@@ -2025,7 +2075,7 @@ _NXPR.scanUrl=function(u,announce){if(!_NXPR.cfg.scanLinks)return {kind:"ok"};va
 _NXPR.protectedFor=function(kind){if(kind==="grabber")return !!_NXPR.cfg.blockGrabbers;if(kind==="phish"||kind==="punycode")return !!_NXPR.cfg.phishGuard;if(kind==="short")return !!_NXPR.cfg.scanLinks;return true;};
 _NXPR.finish=function(cb,r){try{_NXPR.stats.scanned++;if(r.verdict==="danger"){r.blocked=_NXPR.protectedFor(r.kind);if(r.blocked)_NXPR.stats.blocked++;_NXPR.logThreat(r.kind,r.host||r.resolved||"lien");}else if(r.verdict==="warn"){r.blocked=false;_NXPR.logThreat("short",r.host||"lien raccourci");}_NXPR.saveStats();_NXPR.notify();}catch(_){}cb&&cb(r);};
 _NXPR.deepScan=function(u,cb){if(!_NXPR.cfg.scanLinks){cb&&cb({verdict:"off"});return;}var base=_NXPR.classify(u);if(_NXPR.threat(base)){_NXPR.finish(cb,{verdict:"danger",kind:base.kind,host:base.host,resolved:null});return;}
-try{fetch(u,{method:"GET",redirect:"follow",mode:"cors",cache:"no-store"}).then(function(r){var fin=(r&&r.url)||u;var fc=_NXPR.classify(fin);var host=_NXPR.host(fin);if(_NXPR.threat(fc)){_NXPR.finish(cb,{verdict:"danger",kind:fc.kind,host:host,resolved:(host!==(base&&base.host)?fin:null)});}else if(_NXPR.suspicious(base)&&host&&base&&host!==base.host){_NXPR.finish(cb,{verdict:"ok",kind:"ok",host:host,resolved:fin,wasShort:true});}else if(_NXPR.suspicious(base)||_NXPR.suspicious(fc)){_NXPR.finish(cb,{verdict:"warn",kind:"short",host:(base&&base.host)||host,resolved:(host!==(base&&base.host)?fin:null)});}else{_NXPR.finish(cb,{verdict:"ok",kind:"ok",host:host,resolved:(host!==(base&&base.host)?fin:null)});}}).catch(function(){if(_NXPR.suspicious(base))_NXPR.finish(cb,{verdict:"warn",kind:"short",host:base.host,resolved:null});else _NXPR.finish(cb,{verdict:(base&&base.kind==="ok")?"ok":"warn",kind:(base&&base.kind)||"unknown",host:base&&base.host,resolved:null});});}
+try{_NXNETX.go(u,{method:"GET",redirect:"follow",mode:"cors",cache:"no-store"}).then(function(r){var fin=(r&&r.url)||u;var fc=_NXPR.classify(fin);var host=_NXPR.host(fin);if(_NXPR.threat(fc)){_NXPR.finish(cb,{verdict:"danger",kind:fc.kind,host:host,resolved:(host!==(base&&base.host)?fin:null)});}else if(_NXPR.suspicious(base)&&host&&base&&host!==base.host){_NXPR.finish(cb,{verdict:"ok",kind:"ok",host:host,resolved:fin,wasShort:true});}else if(_NXPR.suspicious(base)||_NXPR.suspicious(fc)){_NXPR.finish(cb,{verdict:"warn",kind:"short",host:(base&&base.host)||host,resolved:(host!==(base&&base.host)?fin:null)});}else{_NXPR.finish(cb,{verdict:"ok",kind:"ok",host:host,resolved:(host!==(base&&base.host)?fin:null)});}}).catch(function(){if(_NXPR.suspicious(base))_NXPR.finish(cb,{verdict:"warn",kind:"short",host:base.host,resolved:null});else _NXPR.finish(cb,{verdict:(base&&base.kind==="ok")?"ok":"warn",kind:(base&&base.kind)||"unknown",host:base&&base.host,resolved:null});});}
 catch(_){if(_NXPR.suspicious(base))_NXPR.finish(cb,{verdict:"warn",kind:"short",host:base.host,resolved:null});else _NXPR.finish(cb,{verdict:"ok",kind:"ok",host:base&&base.host,resolved:null});}};
 _NXPR.scanText=function(txt){try{if(!txt)return;var s=String(txt);if(s.length>4000)s=s.slice(0,4000);var low=s.toLowerCase();var hasLink=low.indexOf("http")>=0;var hasBait=/nitro|gift|free|gratuit|claim|airdrop|crypto|robux|vbucks|steam|verify|qr|cadeau|gagn/.test(low);if(!hasLink&&!hasBait)return;var urls=hasLink?(s.match(/https?:\/\/[^\s<>"')]+/gi)||[]):[];for(var a=0;a<urls.length;a++){_NXPR.scanUrl(urls[a],true);
 var f=_NXPR.fileLink(urls[a]);
@@ -2044,7 +2094,7 @@ if(ok)return s;}}catch(_){}return null;};
 _NXPR.EXTKIND={png:"img",jpg:"img",jpeg:"img",gif:"img",webp:"img",bmp:"img",pdf:"doc",txt:"doc",mp4:"media",webm:"media",mkv:"media",mp3:"media",wav:"media",ogg:"media",zip:"arch",rar:"arch"};
 _NXPR.deepFile=function(url,name,cb){try{
 if(!url){cb(null);return;}
-fetch(url,{method:"GET",headers:{Range:"bytes=0-15"},cache:"no-store"}).then(function(r){
+_NXNETX.go(url,{method:"GET",headers:{Range:"bytes=0-15"},cache:"no-store"}).then(function(r){
 if(!r||!(r.ok||r.status===206))throw 0;return r.arrayBuffer();}).then(function(buf){
 var bytes=new Uint8Array(buf);var sig=_NXPR.matchSig(bytes);
 if(!sig){cb(null);return;}
@@ -2147,7 +2197,7 @@ _NXPR.toast("Invitation suspecte ("+(g.name||cd)+") : "+why.slice(0,2).join(", "
 var W=window.Vencord&&Vencord.Webpack;
 var R=W&&W.findByProps&&W.findByProps("resolveInvite");
 if(R&&typeof R.resolveInvite==="function"){Promise.resolve(R.resolveInvite(cd,"Nexium Protect")).then(function(res){handle((res&&(res.invite||res))||null);}).catch(function(){});}
-else{fetch("https://discord.com/api/v10/invites/"+cd+"?with_counts=true",{cache:"no-store"}).then(function(r){return r&&r.ok?r.json():null;}).then(handle).catch(function(){});}
+else{_NXNETX.go("https://discord.com/api/v10/invites/"+cd+"?with_counts=true",{cache:"no-store"}).then(function(r){return r&&r.ok?r.json():null;}).then(handle).catch(function(){});}
 }catch(_){}};
 _NXPR.scanInvites=function(txt){try{
 if(!_NXPR.cfg.scamAlerts||!_NXPR.cfg.scanInvites)return;var s=String(txt||"");
@@ -2288,6 +2338,7 @@ if(!hasAtt&&!hasEmb&&content.length<12&&content.indexOf("http")<0){return;}
 _NXPR.scanSecrets(content,mine);
 if(mine)return;
 _NXPR.scanText(content);
+_NXPR.scanExtra(content,isDM);
 _NXPR.scanMasked(content);
 _NXPR.scanInvites(content);
 try{if(window._NXV)_NXV.checkGift(content);}catch(_){}
@@ -2354,12 +2405,147 @@ _NXPR.toast("Lien suspect ("+cl.host+") : "+r1+". Verifie avant de continuer.",0
 if(cl.kind==="short"){_NXPR.bumpSafe();_NXPR.toast("Lien raccourci : destination masquee ("+cl.host+")",1);return;}
 _NXPR.bumpSafe();
 }catch(_){}};
-_NXPR.CRITICAL=["classify","scanText","scanMasked","scanInvites","scanEmbeds","scanAttachments","scanSecrets","verifyFile","deepFile","matchSig","warnAccount","checkImpostor","checkWave","consoleWarn","onPaste","onMsg","onMsgUpdate","onClickCapture","report","loadRemote","parseList","buildIndex","heuristic","applyProfile"];
+_NXPR.RXOAUTH=/https?:\/\/(?:[\w-]+\.)?discord(?:app)?\.com\/(?:api\/)?oauth2\/authorize\?[^\s<>"')]+/gi;
+_NXPR.OAUTHRISK={"bot":"ajouter un bot a tes serveurs","webhook.incoming":"creer un webhook dans tes salons","guilds.join":"te faire rejoindre des serveurs","gdm.join":"t ajouter a des groupes prives","connections":"lire tes comptes lies","email":"lire ton adresse e-mail","messages.read":"lire tes messages","relationships.read":"lire ta liste d amis","applications.entitlements":"lire tes achats"};
+_NXPR.oauthInfo=function(u){try{
+var q=String(u||"").split("?")[1]||"";
+var out={scopes:[],perms:"0",admin:false,risky:[]};
+var parts=q.split("&");
+for(var a=0;a<parts.length;a++){
+var eq=parts[a].indexOf("=");if(eq<0)continue;
+var k="",v="";
+try{k=decodeURIComponent(parts[a].slice(0,eq));v=decodeURIComponent(parts[a].slice(eq+1).replace(/\+/g," "));}catch(_){continue;}
+if(k==="scope"){var sc=v.split(/[\s,]+/);for(var b=0;b<sc.length;b++)if(sc[b])out.scopes.push(sc[b].toLowerCase());}
+if(k==="permissions")out.perms=String(v||"0").replace(/[^0-9]/g,"")||"0";}
+for(var c=0;c<out.scopes.length;c++){if(_NXPR.OAUTHRISK[out.scopes[c]]&&out.risky.indexOf(out.scopes[c])<0)out.risky.push(out.scopes[c]);}
+try{if(typeof BigInt==="function")out.admin=((BigInt(out.perms)&8n)===8n);else out.admin=((parseInt(out.perms,10)&8)===8);}catch(_){}
+return out;}catch(_){return null;}};
+_NXPR.scanOAuth=function(txt){try{
+if(!_NXPR.cfg.oauthGuard)return null;
+var s=String(txt||"");
+if(s.toLowerCase().indexOf("oauth2/authorize")<0)return null;
+_NXPR.RXOAUTH.lastIndex=0;
+var m,found=null;
+while((m=_NXPR.RXOAUTH.exec(s))){
+var inf=_NXPR.oauthInfo(m[0]);
+if(!inf)continue;
+if(!inf.risky.length&&!inf.admin)continue;
+found={url:m[0],info:inf};break;}
+if(!found)return null;
+var why=[];
+if(found.info.admin)why.push("permissions administrateur");
+for(var a=0;a<found.info.risky.length&&a<3;a++)why.push(_NXPR.OAUTHRISK[found.info.risky[a]]);
+_NXPR.stats.oauth=(_NXPR.stats.oauth||0)+1;
+_NXPR.logThreat("oauth",why.join(" ; ").slice(0,90));
+_NXPR.saveStats();
+_NXPR.toast("Autorisation d application a portee dangereuse : "+why.join(", ")+". N autorise pas.",0);
+return found;}catch(_){return null;}};
+_NXPR.RXSCHEME=/(?:^|[\s(<\[|"'])((?:javascript|vbscript|jar|file|about|chrome|data)\s*:[^\s<>"')\]]{4,})/gi;
+_NXPR.SCHEMEBAD={javascript:1,vbscript:1,jar:1,file:1,about:1,chrome:1};
+_NXPR.RXDATABAD=/^data\s*:\s*(?:text\/html|image\/svg\+xml|application\/(?:x-)?(?:javascript|ecmascript))/i;
+_NXPR.scanScheme=function(txt){try{
+if(!_NXPR.cfg.schemeGuard)return null;
+var s=String(txt||"");
+if(!/(?:javascript|vbscript|jar|file|about|chrome|data)\s*:/i.test(s))return null;
+_NXPR.RXSCHEME.lastIndex=0;
+var m,hit=null;
+while((m=_NXPR.RXSCHEME.exec(s))){
+var raw=m[1];
+var sch=raw.split(":")[0].trim().toLowerCase();
+if(sch==="data"){if(!_NXPR.RXDATABAD.test(raw))continue;}
+else if(!_NXPR.SCHEMEBAD[sch])continue;
+hit={scheme:sch,raw:raw.slice(0,120)};break;}
+if(!hit)return null;
+_NXPR.stats.scheme=(_NXPR.stats.scheme||0)+1;
+_NXPR.logThreat("scheme",hit.scheme+" : "+hit.raw.slice(0,50));
+_NXPR.saveStats();
+_NXPR.toast("Lien a schema executable ("+hit.scheme+":) : ne le colle nulle part, il execute du code.",0);
+return hit;}catch(_){return null;}};
+_NXPR.RXBIDI=/[\u202A-\u202E\u2066-\u2069]/;
+_NXPR.RXINVIS=/[\u200B\u200C\u200E\u200F\u2060-\u2064\u206A-\u206F\uFEFF\u180E]/;
+_NXPR.RXNONLAT=/[\u0400-\u04FF\u0370-\u03FF\u0530-\u058F\u0590-\u05FF]/;
+_NXPR.rawHost=function(u){try{
+var t=String(u||"").replace(/^[a-z]+:\/\//i,"");
+t=t.split(/[\/?#]/)[0];
+var at=t.indexOf("@");if(at>=0)t=t.slice(at+1);
+var co=t.lastIndexOf(":");if(co>0&&t.indexOf("]")<0)t=t.slice(0,co);
+return t;}catch(_){return "";}};
+_NXPR.mixedScript=function(h){try{
+var t=String(h||"");
+return _NXPR.RXNONLAT.test(t)&&/[a-z]/i.test(t);}catch(_){return false;}};
+_NXPR.scanBidi=function(txt){try{
+if(!_NXPR.cfg.bidiGuard)return null;
+var s=String(txt||"");if(!s)return null;
+var why=null;
+if(_NXPR.RXBIDI.test(s))why="inversion du sens de lecture";
+if(!why){
+var urls=s.match(/https?:\/\/[^\s<>"')]+/gi)||[];
+for(var a=0;a<urls.length&&!why;a++){
+if(_NXPR.RXINVIS.test(urls[a]))why="caracteres invisibles dans un lien";
+else{var h=_NXPR.rawHost(urls[a]);if(h&&_NXPR.mixedScript(h))why="alphabets melanges dans "+h;}}}
+if(!why)return null;
+_NXPR.stats.bidi=(_NXPR.stats.bidi||0)+1;
+_NXPR.logThreat("bidi",why);
+_NXPR.saveStats();
+_NXPR.toast("Contenu trompeur : "+why+". Le texte affiche ne correspond pas au texte reel.",0);
+return {why:why};}catch(_){return null;}};
+_NXPR.RXIP4=/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+_NXPR.isRawIp=function(h){try{
+var t=String(h||"");
+if(!t)return false;
+if(t.charAt(0)==="["&&t.indexOf("]")>0)return true;
+var m=t.match(_NXPR.RXIP4);
+if(!m)return false;
+for(var a=1;a<=4;a++){var n=parseInt(m[a],10);if(!(n>=0&&n<=255))return false;}
+return true;}catch(_){return false;}};
+_NXPR.scanRawIp=function(txt){try{
+if(!_NXPR.cfg.ipGuard)return null;
+var s=String(txt||"");
+if(s.indexOf("http")<0)return null;
+var urls=s.match(/https?:\/\/[^\s<>"')]+/gi)||[];
+var hit=null;
+for(var a=0;a<urls.length;a++){var h=_NXPR.host(urls[a]);if(h&&_NXPR.isRawIp(h)){hit=h;break;}}
+if(!hit)return null;
+_NXPR.stats.rawip=(_NXPR.stats.rawip||0)+1;
+_NXPR.logThreat("rawip",hit);
+_NXPR.saveStats();
+_NXPR.toast("Lien vers une adresse IP brute ("+hit+") : aucun service legitime ne partage ses liens ainsi.",0);
+return {host:hit};}catch(_){return null;}};
+_NXPR.CODEPAT=[
+/code\s+(?:a|\u00e0)\s+(?:6|six)\s+chiffres/i,
+/code\s+de\s+(?:v\u00e9rification|verification|secours|sauvegarde|r\u00e9cup\u00e9ration|recuperation)/i,
+/(?:verification|backup|recovery|login|security)\s+code/i,
+/(?:envoie|envoi|donne|passe|transmets|balance|dis)[^.\n]{0,45}\bcode\b/i,
+/(?:send|give|share|paste|tell)[^.\n]{0,45}\bcode\b/i,
+/\bcode\b[^.\n]{0,45}(?:que|qu')\s*(?:discord|je|tu|on)[^.\n]{0,35}(?:envoy|re\u00e7u|recu)/i,
+/\b(?:2fa|otp|mfa)\b[^.\n]{0,30}\bcode\b|\bcode\b[^.\n]{0,30}\b(?:2fa|otp|mfa)\b/i
+];
+_NXPR.scanCode=function(txt,isDM){try{
+if(!_NXPR.cfg.codeGuard)return null;
+var s=String(txt||"");
+if(s.length<10)return null;
+if(!/\bcode\b|\b2fa\b|\botp\b|\bmfa\b/i.test(s))return null;
+var hit=false;
+for(var a=0;a<_NXPR.CODEPAT.length;a++){if(_NXPR.CODEPAT[a].test(s)){hit=true;break;}}
+if(!hit)return null;
+_NXPR.stats.code=(_NXPR.stats.code||0)+1;
+_NXPR.logThreat("code",s.slice(0,60));
+_NXPR.saveStats();
+_NXPR.toast("On te demande un code de verification. Ni Discord ni son support ne demandent jamais ca : ne le donne a personne.",0);
+return {dm:!!isDM};}catch(_){return null;}};
+_NXPR.scanExtra=function(content,isDM){try{
+_NXPR.scanOAuth(content);
+_NXPR.scanScheme(content);
+_NXPR.scanBidi(content);
+_NXPR.scanRawIp(content);
+_NXPR.scanCode(content,isDM);
+}catch(_){}};
+_NXPR.CRITICAL=["classify","scanText","scanMasked","scanInvites","scanEmbeds","scanAttachments","scanSecrets","verifyFile","deepFile","matchSig","warnAccount","checkImpostor","checkWave","consoleWarn","onPaste","onMsg","onMsgUpdate","onClickCapture","report","loadRemote","parseList","buildIndex","heuristic","applyProfile","oauthInfo","scanOAuth","scanScheme","scanBidi","isRawIp","scanRawIp","scanCode","scanExtra","rawHost","mixedScript"];
 _NXPR.selfCheck=function(final){try{
 var miss=[];
 for(var a=0;a<_NXPR.CRITICAL.length;a++){var f=_NXPR.CRITICAL[a];
 if(typeof _NXPR[f]!=="function")miss.push(f);}
-var rx=["RXTOKEN","RXHOOK","RXSELFXSS","RXREAL","RXFAKE","RXINV"];
+var rx=["RXTOKEN","RXHOOK","RXSELFXSS","RXREAL","RXFAKE","RXINV","RXOAUTH","RXSCHEME","RXBIDI","RXINVIS","RXIP4"];
 for(var b=0;b<rx.length;b++){if(!(_NXPR[rx[b]] instanceof RegExp))miss.push(rx[b]);}
 if(!miss.length){_NXPR.missing=[];_NXPR._scOK=true;return [];}
 if(!final){_NXPR._scPend=miss;return miss;}
@@ -2698,184 +2884,244 @@ _NXPR.wire();
 var NexiumProtectIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20},i("path",{d:"M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1.06 13.54L7.4 11l1.41-1.41 2.12 2.12 4.24-4.24 1.42 1.41-5.65 5.65z"}));};
 function NexiumProtectComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
-var _c0=F.useState("");var chk=_c0[0];var setChk=_c0[1];var _cf=F.useState("");var flt=_cf[0];var setFlt=_cf[1];var _cs=F.useState(null);var res=_cs[0];var setRes=_cs[1];var _cb=F.useState(false);var busy=_cb[0];var setBusy=_cb[1];
+var _t0=F.useState("apercu");var tab=_t0[0];var setTab=_t0[1];
+var _c0=F.useState("");var chk=_c0[0];var setChk=_c0[1];
+var _cq=F.useState("");var q=_cq[0];var setQ=_cq[1];
+var _cf=F.useState("");var flt=_cf[0];var setFlt=_cf[1];
+var _cs=F.useState(null);var res=_cs[0];var setRes=_cs[1];
+var _cb=F.useState(false);var busy=_cb[0];var setBusy=_cb[1];
 F.useEffect(function(){_NXPR.listeners.push(force);try{if(window._NXV)_NXV.listeners.push(force);}catch(_){}return function(){_NXPR.listeners=_NXPR.listeners.filter(function(f){return f!==force;});};},[]);
-var P=_NXpal;var cfg=_NXPR.cfg;var st=_NXPR.stats;
+var P=_NXpal;var cfg=_NXPR.cfg;var st=_NXPR.stats;var V=window._NXV||null;
 function tog(k){return function(){cfg[k]=!cfg[k];_NXPR.saveCfg();force();};}
-var _KEYS=["scanLinks","blockGrabbers","scamAlerts","warnAccounts","phishGuard","consoleGuard","heuristics","scanFiles","scanDownloads","scanMasked","scanEmbeds","scanEdits","scanInvites","scanImpostor","scanWaves","qrGuard","clipGuard","scanStatus"];
+function vtog(k,after){return function(){try{if(!V)return;V.cfg[k]=!V.cfg[k];V.save();if(after)after(V.cfg[k]);if(V.notify)V.notify();force();}catch(_){}};}
+function vget(k){return !!(V&&V.cfg&&V.cfg[k]);}
+var SH_LIENS=[
+{k:"scanLinks",ic:"M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z",t:"Scanner de liens",d:"Analyse chaque lien reçu et t avertit avant l ouverture d un site piégé."},
+{k:"blockGrabbers",ic:"M12 2L2 7v7c0 5 3.5 8.5 10 10 6.5-1.5 10-5 10-10V7L12 2zm3 11h-2v2h-2v-2H9v-2h2V9h2v2h2v2z",t:"Protection anti-doxxing / IP",d:"Bloque les loggers d IP (grabify, iplogger…) utilisés pour te géolocaliser."},
+{k:"phishGuard",ic:"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z",t:"Anti-hameçonnage",d:"Détecte les faux Discord/Steam et les domaines trompeurs (dlscord, punycode…)."},
+{k:"scamAlerts",ic:"M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z",t:"Alertes anti-arnaque",d:"Repère les messages d arnaque : faux Nitro, dons crypto, cadeaux piégés."},
+{k:"warnAccounts",ic:"M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z",t:"Vigilance comptes suspects",d:"Signale les messages privés venant de comptes très récents."},
+{k:"consoleGuard",ic:"M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z",t:"Protection console",d:"Avertit contre les arnaques « colle ce code dans la console » qui volent ton compte."},
+{k:"heuristics",ic:"M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",t:"Détection intelligente",d:"Repère les domaines inconnus qui imitent une marque ou utilisent une extension à risque."}];
+var SH_CONTENU=[
+{k:"scanFiles",ic:"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z",t:"Analyse des fichiers",d:"Vérifie le contenu réel des pièces jointes : un .exe renommé en .png est détecté."},
+{k:"scanDownloads",ic:"M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z",t:"Blocage des téléchargements",d:"Bloque les liens pointant vers un exécutable, sauf depuis une source de confiance."},
+{k:"scanMasked",ic:"M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z",t:"Liens masqués trompeurs",d:"Détecte quand le texte affiché cache une destination différente."},
+{k:"scanEmbeds",ic:"M21 3H3v18h18V3zm-2 16H5V5h14v14zM7 10h10v2H7z",t:"Aperçus de liens",d:"Analyse les adresses contenues dans les aperçus (embeds)."},
+{k:"scanEdits",ic:"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",t:"Messages modifiés",d:"Réanalyse un message édité après envoi : le piège classique."},
+{k:"scanInvites",ic:"M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z",t:"Invitations de serveur",d:"Vérifie l âge, la taille et le nom des serveurs proposés."},
+{k:"scanImpostor",ic:"M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z",t:"Usurpation d amis",d:"Alerte si un compte imite le pseudo et l avatar d un de tes contacts."},
+{k:"scanWaves",ic:"M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z",t:"Vagues de messages privés",d:"Détecte les campagnes : même message envoyé par plusieurs comptes."},
+{k:"qrGuard",ic:"M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM17 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2z",t:"Arnaque au QR code",d:"Avertit quand on te demande de scanner un QR code de connexion."},
+{k:"scanStatus",ic:"M17 7h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5zm-6 8H7c-1.71 0-3.1-1.39-3.1-3.1S5.29 8.8 7 8.8h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9zM8 11h8v2H8z",t:"Liens dans les statuts",d:"Analyse les liens présents dans les statuts personnalisés."},
+{k:"clipGuard",ic:"M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z",t:"Surveillance du presse-papiers",d:"Prévient si un jeton ou un webhook se retrouve dans ton presse-papiers."}];
+var SH_AVANCE=[
+{k:"oauthGuard",ic:"M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z",t:"Autorisations d application",d:"Analyse les liens OAuth2 et alerte sur les portées dangereuses : ajout de bot, webhook, permissions administrateur."},
+{k:"schemeGuard",ic:"M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z",t:"Schémas d URI exécutables",d:"Bloque les liens javascript:, vbscript:, file: et data:text/html, qui exécutent du code au lieu d ouvrir une page."},
+{k:"bidiGuard",ic:"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",t:"Caractères invisibles et inversion",d:"Repère les caractères masqués et l inversion du sens de lecture, qui font afficher autre chose que le vrai lien."},
+{k:"ipGuard",ic:"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z",t:"Liens vers une adresse IP",d:"Signale les liens qui pointent vers une adresse IP brute au lieu d un nom de domaine."},
+{k:"codeGuard",ic:"M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z",t:"Demande de code de vérification",d:"Alerte quand on te réclame un code à 6 chiffres, un code 2FA ou un code de secours."}];
+var VA_COFFRE=[
+{k:"blockExfil",ic:"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm3 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z",t:"Blocage de l exfiltration",d:"Toute requête sortante contenant ton jeton, ton mot de passe ou tes cookies vers un domaine non-Discord est bloquée."},
+{k:"scanThemes",ic:"M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z",t:"Analyse des thèmes",d:"Repère les ressources externes chargées par tes thèmes et QuickCSS, qui exposent ton adresse IP.",a:function(on){try{V._cssWarned=false;V.scanCss();}catch(_){}}},
+{k:"verifyIntegrity",ic:"M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z",t:"Vérification d intégrité",d:"Compare ton fichier client à la version publiée sur le dépôt officiel pour détecter toute altération locale.",a:function(on){try{if(on)V.checkIntegrity();}catch(_){}}},
+{k:"community",ic:"M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z",t:"Base communautaire partagée",d:"Bloque les domaines signalés par au moins 3 utilisateurs Nexium.",a:function(on){try{if(on)V.loadCommunity(true);else{V.comm=Object.create(null);V.commN=0;}_NXPR.cache=Object.create(null);}catch(_){}}}];
+var VA_DEFENSE=[
+{k:"selfGuard",ic:"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",t:"Garde-fou avant envoi",d:"Prévient avant d envoyer un message contenant ton IP, une adresse, un téléphone, un e-mail, un IBAN ou une carte bancaire."},
+{k:"guildGuard",ic:"M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-9 10H8v-2h3v2zm5-4H8v-2h8v2z",t:"Détection de serveur piégé",d:"Analyse les serveurs que tu rejoins : salon de vérification imposé, demande d autorisation d application, nom imitant une marque."},
+{k:"deepFiles",ic:"M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4h2V2H6c-2.21 0-4 1.79-4 4v12c0 2.21 1.79 4 4 4h14v-8h-2zm-2-2v4h4v-4h-4z",t:"Fichiers doublement piégés",d:"Détecte les archives protégées par mot de passe, celles contenant un exécutable, et les noms utilisant l inversion de texte."},
+{k:"giftGuard",ic:"M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z",t:"Faux cadeaux Nitro",d:"Vérifie la validité réelle des codes cadeau et repère les faux domaines imitant discord.gift."},
+{k:"sessionGuard",ic:"M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z",t:"Surveillance des connexions",d:"Alerte quand une nouvelle session apparaît sur ton compte depuis un autre appareil."},
+{k:"encryptLocal",ic:"M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h2c0-1.66 1.34-3 3-3s3 1.34 3 3v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z",t:"Chiffrement des données locales",d:"Chiffre tes statistiques, journaux et signalements dans le stockage local.",x:function(){try{V.applyEncryption(!V.cfg.encryptLocal);force();}catch(_){}}}];
+var VA_REACTION=[
+{k:"aftermath",ic:"M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z",t:"Guide après incident",d:"Après un blocage, affiche les étapes concrètes à suivre avec accès direct aux réglages Discord."},
+{k:"auditPlugins",ic:"M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z",t:"Audit des plugins",d:"Analyse le code des plugins installés : accès au jeton, envois vers l extérieur, code obfusqué.",a:function(on){try{if(on){V._plWarned=false;V.auditPlugins();}else V.plugins=[];}catch(_){}}},
+{k:"identityGuard",ic:"M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm7-6.5l1.5 1.5L23 6.5 21.5 5 19 7.5z",t:"Surveillance de l identité",d:"Alerte si l e-mail, le téléphone ou la double authentification de ton compte changent."},
+{k:"mediaGuard",ic:"M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z",t:"Caméra et partage d écran",d:"Prévient si la caméra ou le partage d écran s active sans que tu aies cliqué."},
+{k:"graceDelay",ic:"M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z",t:"Délai avant action irréversible",d:"Impose un délai d annulation de 12 secondes avant les actions destructrices."}];
+var _KEYS=[];for(var _a=0;_a<SH_LIENS.length;_a++)_KEYS.push(SH_LIENS[_a].k);
+for(var _b=0;_b<SH_CONTENU.length;_b++)_KEYS.push(SH_CONTENU[_b].k);
+for(var _c=0;_c<SH_AVANCE.length;_c++)_KEYS.push(SH_AVANCE[_c].k);
 var active=0;for(var _k=0;_k<_KEYS.length;_k++)if(cfg[_KEYS[_k]])active++;
 var total=_KEYS.length;
 var score=Math.round(active/total*100);
-var scol=score>=85?"#3ba55d":score>=50?"#faa61a":"#d6aeae";
+var scol=score>=85?P.txt:score>=50?P.sub:"#c8a06a";
 var sclabel=score>=85?"Protection maximale":score>=50?"Protection partielle":"Protection faible";
-function ctrl(icon,title,desc,on,onClick){return i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:onClick,style:{display:"flex",alignItems:"center",gap:"14px",padding:"14px",background:P.inset,border:"1px solid "+(on?"rgba(59,165,93,.22)":P.line),borderRadius:"13px",marginBottom:"8px",cursor:"pointer"}},
-i("div",{style:{width:"38px",height:"38px",borderRadius:"11px",background:on?"rgba(59,165,93,.12)":P.panel,border:"1px solid "+(on?"rgba(59,165,93,.25)":P.hair),display:"flex",alignItems:"center",justifyContent:"center",color:on?"#3ba55d":P.faint,flexShrink:0}},i("svg",{viewBox:"0 0 24 24",width:19,height:19,fill:"currentColor"},i("path",{d:icon}))),
-i("div",{style:{flex:1,minWidth:0}},i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt}},title),i("div",{style:{fontSize:"12px",color:P.dim,marginTop:"2px",lineHeight:"1.5"}},desc)),
-i("div",{style:{width:"40px",height:"23px",borderRadius:"12px",background:on?"#3ba55d":P.faint,position:"relative",flexShrink:0,transition:"background .2s"}},i("div",{style:{position:"absolute",top:"2px",left:on?"19px":"2px",width:"19px",height:"19px",borderRadius:"50%",background:"#fff",transition:"left .2s"}})));}
-function kindLabel(k){return k==="grabber"?"Logger d'IP":k==="phish"?"Hameçonnage":k==="punycode"?"Domaine trompeur":k==="scam"?"Arnaque":k;}
-return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
-_NXhead("Sécurité","Nexium Protect","Un bouclier en temps réel contre les liens piégés, les arnaques, le doxxing et l'usurpation. Tout est analysé localement, rien n'est envoyé."),
-i("div",{style:{position:"relative",overflow:"hidden",borderRadius:"18px",border:"1px solid "+P.line,background:"linear-gradient(135deg,#0e0e10,#0a0a0b)",padding:"22px",marginBottom:"12px"}},
-i("div",{style:{position:"absolute",inset:0,background:"radial-gradient(120% 130% at 85% -10%, "+scol+"22, transparent 55%)",pointerEvents:"none"}}),
-i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"20px"}},
-i("div",{style:{flexShrink:0,width:"88px",height:"88px",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",background:"conic-gradient("+scol+" "+(score*3.6)+"deg, #1a1a1e 0deg)"}},i("div",{style:{width:"70px",height:"70px",borderRadius:"50%",background:"#0b0b0c",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}},i("svg",{viewBox:"0 0 24 24",width:26,height:26,fill:scol},i("path",{d:"M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"})))),
-i("div",{style:{flex:1,minWidth:0}},i("div",{style:{fontSize:"10px",textTransform:"uppercase",letterSpacing:".14em",color:P.faint,fontWeight:"700"}},"Niveau de protection"),i("div",{style:{fontFamily:_NXf.disp,fontSize:"22px",fontWeight:"800",color:scol,letterSpacing:"-.02em",marginTop:"3px"}},sclabel),i("div",{style:{fontSize:"12px",color:P.sub,marginTop:"6px",lineHeight:"1.5"}},active+" protections actives sur "+total))))
-,
+function sw(on){return i("div",{style:{width:"38px",height:"22px",borderRadius:"11px",background:on?P.txt:"transparent",border:"1px solid "+(on?P.txt:P.faint),position:"relative",flexShrink:0,transition:"background .18s ease, border-color .18s ease"}},i("div",{style:{position:"absolute",top:"3px",left:on?"19px":"3px",width:"14px",height:"14px",borderRadius:"50%",background:on?P.panel:P.faint,transition:"left .18s ease, background .18s ease"}}));}
+function row(it,on,onClick,last){return i("div",{key:it.k,className:"nx-fx",role:"button","aria-label":_T(it.t),"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,onClick:onClick,style:{display:"flex",alignItems:"flex-start",gap:"13px",padding:"14px 0",borderBottom:last?"none":"1px solid "+P.line,cursor:"pointer"}},
+i("div",{style:{width:"22px",flexShrink:0,marginTop:"1px",color:on?P.txt:P.faint,transition:"color .18s ease"}},i("svg",{viewBox:"0 0 24 24",width:18,height:18,fill:"currentColor","aria-hidden":"true"},i("path",{d:it.ic}))),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13.5px",fontWeight:"600",color:on?P.txt:P.sub,letterSpacing:"-.01em",transition:"color .18s ease"}},_T(it.t)),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"4px",lineHeight:1.55}},_T(it.d))),
+sw(on));}
+function match(it){var s=(q||"").trim().toLowerCase();if(!s)return true;return (_T(it.t)+" "+_T(it.d)+" "+it.k).toLowerCase().indexOf(s)>=0;}
+function group(label,desc,list,isV){var L=list.filter(match);
+if(!L.length)return null;
+return _NXcard(i("div",null,_NXch(_T(label),desc?_T(desc):null),
+L.map(function(it,k){
+var on=isV?vget(it.k):!!cfg[it.k];
+var click=isV?(it.x||vtog(it.k,it.a)):tog(it.k);
+return row(it,on,click,k===L.length-1);})),{mb:12});}
+function searchBox(ph){return i("div",{style:{position:"relative",marginBottom:"12px"}},
+i("input",{value:q,onChange:function(e){setQ(e.target.value);},placeholder:_T(ph),spellCheck:false,"aria-label":_T(ph),style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,borderRadius:"12px",padding:"11px 13px",color:P.txt,fontSize:"12.5px",outline:"none"}}),
+q?i("div",{className:"nx-fx",role:"button","aria-label":_T("Effacer la recherche"),tabIndex:0,onKeyDown:_NXkey,onClick:function(){setQ("");},style:{position:"absolute",right:"10px",top:"9px",padding:"3px 7px",color:P.faint,cursor:"pointer",fontSize:"14px",lineHeight:1.2}},"×"):null);}
+function empty(t){return _NXcard(i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},_T(t)),{mb:12});}
+function kindLabel(k){return k==="grabber"?"Logger d IP":k==="phish"?"Hameçonnage":k==="punycode"?"Domaine trompeur":k==="scam"?"Arnaque":k==="oauth"?"Autorisation d application":k==="scheme"?"Schéma exécutable":k==="bidi"?"Texte trompeur":k==="rawip"?"Adresse IP brute":k==="code"?"Demande de code":k==="download"?"Téléchargement":k==="short"?"Lien raccourci":k==="secret"?"Secret exposé":k==="selfxss"?"Console":k;}
+function pill(txt,tone){return i("span",{style:{display:"inline-block",fontSize:"9.5px",fontWeight:"800",letterSpacing:".08em",textTransform:"uppercase",padding:"3px 8px",borderRadius:"99px",border:"1px solid "+(tone||P.line),color:tone||P.dim,whiteSpace:"nowrap"}},txt);}
+function btn(label,onClick,strong){return i("div",{className:"nx-fx",role:"button","aria-label":label,tabIndex:0,onKeyDown:_NXkey,onClick:onClick,style:{display:"inline-block",padding:strong?"11px 20px":"7px 12px",borderRadius:"10px",border:"1px solid "+P.line,background:strong?P.acc:"transparent",color:strong?"#0a0a0a":P.sub,fontSize:strong?"12.5px":"11px",fontWeight:"700",cursor:"pointer",whiteSpace:"nowrap"}},label);}
+var TABS=[["apercu","Aperçu"],["boucliers","Boucliers"],["coffre","Coffre-fort"],["journal","Journal"],["base","Base"]];
+function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Protect"),style:{display:"flex",gap:"0",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto"}},
+TABS.map(function(t){var on=tab===t[0];
+return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,onClick:function(){setTab(t[0]);setQ("");},style:{padding:"11px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,borderBottom:"2px solid "+(on?P.txt:"transparent"),marginBottom:"-1px",whiteSpace:"nowrap",transition:"color .16s ease"}},_T(t[1]));}));}
+function tApercu(){
+return i("div",null,
+i("div",{style:{border:"1px solid "+P.line,borderRadius:"20px",background:P.panel,padding:"24px",marginBottom:"14px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"12px"}},_T("Niveau de protection")),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"12px",flexWrap:"wrap"}},
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"44px",fontWeight:"800",color:scol,letterSpacing:"-.045em",lineHeight:1}},score+"%"),
+i("div",{style:{fontSize:"13px",color:P.sub,fontWeight:"600"}},_T(sclabel))),
+i("div",{style:{marginTop:"16px",height:"3px",borderRadius:"2px",background:P.line,overflow:"hidden"}},
+i("div",{style:{width:Math.max(2,score)+"%",height:"100%",background:scol,transition:"width .3s ease"}})),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"11px"}},active+" "+_T("protections actives sur")+" "+total)),
+_NXcard(_NXstrip([{v:_NXn(st.blocked||0),label:_T("Menaces bloquées")},{v:_NXn(st.safe||0),label:_T("Liens sûrs")},{v:_NXn(st.scanned||0),label:_T("Liens analysés")},{v:_NXn(st.scams||0),label:_T("Arnaques")}]),{pad:"20px 18px",mb:12}),
 _NXcard(i("div",null,_NXch(_T("Profil de protection"),_T("Choisis un réglage global ; tu peux ensuite ajuster chaque bouclier.")),
 i("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[["strict","Strict","Bloque au moindre doute"],["equilibre","Équilibré","Recommandé"],["minimal","Minimal","Le strict nécessaire"]].map(function(p,k){var on=(cfg.profile||"equilibre")===p[0];
-return i("div",{key:k,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.applyProfile(p[0]);force();},style:{flex:1,minWidth:"120px",padding:"12px 14px",borderRadius:"12px",cursor:"pointer",background:on?(P.light?"#eceef1":"#17171a"):P.inset,border:"1px solid "+(on?P.sub:P.line)}},
-i("div",{style:{fontSize:"13px",fontWeight:"800",color:on?P.txt:P.sub}},p[1]),
-i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"2px"}},p[2]));}))),{mb:12}),
-_NXcard(_NXstrip([{v:_NXn(st.blocked||0),label:"Menaces bloquées",color:"#d6aeae"},{v:_NXn(st.safe||0),label:"Liens sûrs vérifiés",color:"#8fd19e"},{v:_NXn(st.scanned||0),label:"Liens analysés"},{v:_NXn(st.scams||0),label:"Arnaques",color:"#faa61a"}]),{pad:"20px 18px",mb:12}),
-i("div",{style:{position:"relative",overflow:"hidden",borderRadius:"18px",border:"1px solid "+P.line,background:"linear-gradient(160deg,#101012,#0a0a0b)",padding:"20px",marginBottom:"12px"}},
-i("div",{style:{fontSize:"11px",fontWeight:"800",textTransform:"uppercase",letterSpacing:".1em",color:P.dim,marginBottom:"4px"}},"Vérificateur de lien"),
-i("div",{style:{fontSize:"12px",color:P.dim,marginBottom:"13px",lineHeight:"1.5"}},"Colle un lien suspect : Nexium l'analyse et tente de démasquer sa vraie destination."),
+return i("div",{key:k,className:"nx-fx",role:"button","aria-label":_T(p[1]),"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.applyProfile(p[0]);force();},style:{flex:1,minWidth:"124px",padding:"13px 14px",borderRadius:"13px",cursor:"pointer",background:on?P.inset:"transparent",border:"1px solid "+(on?P.sub:P.line),transition:"border-color .16s ease"}},
+i("div",{style:{fontSize:"13px",fontWeight:"800",color:on?P.txt:P.sub}},_T(p[1])),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"3px"}},_T(p[2])));}))),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Vérificateur de lien"),_T("Colle un lien suspect : Nexium l analyse et tente de démasquer sa vraie destination.")),
 i("div",{style:{display:"flex",gap:"8px"}},
-i("input",{value:chk,onChange:function(e){setChk(e.target.value);},placeholder:"https://…",spellCheck:false,style:{flex:1,minWidth:0,background:P.inset,border:"1px solid "+P.line,borderRadius:"11px",padding:"11px 13px",color:P.txt,fontSize:"13px",fontFamily:_NXf.mono,outline:"none"}}),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){var u=(chk||"").trim();if(!u||busy)return;if(!/^https?:\/\//.test(u))u="https://"+u;setBusy(true);setRes(null);_NXPR.deepScan(u,function(r){setBusy(false);setRes(r);force();});},style:{flexShrink:0,padding:"11px 20px",borderRadius:"11px",background:P.acc,color:"#0a0a0a",fontSize:"13px",fontWeight:"800",cursor:busy?"default":"pointer",opacity:busy?.6:1}},busy?"Analyse…":"Analyser")),
-(_NXPR.loading&&!res)?i("div",{style:{marginTop:"13px",padding:"14px",borderRadius:"12px",background:P.inset,border:"1px solid "+P.line,fontSize:"12.5px",color:P.sub}},"Chargement de la base de menaces en cours… l'analyse sera complète dans quelques secondes."):null,
-res?(res.verdict==="off"?i("div",{style:{marginTop:"13px",padding:"14px",borderRadius:"12px",background:P.inset,border:"1px solid "+P.line,fontSize:"12.5px",color:P.sub,lineHeight:"1.5"}},"Le scanner de liens est désactivé. Active « Scanner de liens » ci-dessous pour analyser."):i("div",{style:{marginTop:"13px",padding:"14px",borderRadius:"12px",background:res.verdict==="danger"?"rgba(214,72,72,.08)":res.verdict==="warn"?"rgba(250,166,97,.08)":"rgba(59,165,93,.08)",border:"1px solid "+(res.verdict==="danger"?"rgba(214,72,72,.3)":res.verdict==="warn"?"rgba(250,166,97,.3)":"rgba(59,165,93,.3)")}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"9px"}},
-i("div",{style:{width:"22px",height:"22px",borderRadius:"50%",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",background:res.verdict==="danger"?"#d6484a":res.verdict==="warn"?"#faa61a":"#3ba55d",color:"#fff",fontWeight:"800",fontSize:"13px"}},res.verdict==="danger"?"!":res.verdict==="warn"?"?":"✓"),
-i("div",{style:{flex:1,minWidth:0}},i("div",{style:{fontSize:"14px",fontWeight:"800",color:res.verdict==="danger"?"#e79a9a":res.verdict==="warn"?"#e6c48a":"#8fd19e"}},res.verdict==="danger"?(res.kind==="grabber"?"Dangereux — logger d'IP / doxxing":res.kind==="phish"?"Dangereux — hameçonnage":res.kind==="punycode"?"Dangereux — domaine trompeur":"Dangereux"):res.verdict==="warn"?"Suspect — destination masquée":"Aucune menace détectée"),
-res.verdict==="danger"?i("div",{style:{display:"inline-block",marginTop:"5px",fontSize:"10px",fontWeight:"800",letterSpacing:".05em",textTransform:"uppercase",padding:"3px 9px",borderRadius:"99px",background:res.blocked?"rgba(59,165,93,.16)":"rgba(250,166,97,.16)",color:res.blocked?"#8fd19e":"#e6c48a"}},res.blocked?"Bloqué par Nexium":"Détecté — protection désactivée"):null)),
-res.host?i("div",{style:{fontSize:"12px",color:P.sub,marginTop:"9px",fontFamily:_NXf.mono,wordBreak:"break-all"}},"Domaine : "+res.host):null,
-res.resolved?i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"4px",fontFamily:_NXf.mono,wordBreak:"break-all"}},"Redirige vers : "+res.resolved):null,
-res.verdict==="danger"?i("div",{style:{fontSize:"12px",color:P.sub,marginTop:"9px",lineHeight:"1.5"}},res.blocked?"N'ouvre pas ce lien. Il peut voler ton adresse IP, te géolocaliser ou dérober ton compte.":"Ce lien est dangereux mais la protection correspondante est désactivée — active-la ci-dessous."):null)):null),
-
-_NXcard(i("div",null,_NXch("Boucliers actifs"),
-ctrl("M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z",_T("Scanner de liens"),_T("Analyse chaque lien reçu et t'avertit avant l'ouverture d'un site piégé."),cfg.scanLinks,tog("scanLinks")),
-ctrl("M12 2L2 7v7c0 5 3.5 8.5 10 10 6.5-1.5 10-5 10-10V7L12 2zm3 11h-2v2h-2v-2H9v-2h2V9h2v2h2v2z",_T("Protection anti-doxxing / IP"),_T("Bloque les loggers d'IP (grabify, iplogger…) utilisés pour te géolocaliser."),cfg.blockGrabbers,tog("blockGrabbers")),
-ctrl("M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z",_T("Anti-hameçonnage"),_T("Détecte les faux Discord/Steam et les domaines trompeurs (dlscord, punycode…)."),cfg.phishGuard,tog("phishGuard")),
-ctrl("M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z",_T("Alertes anti-arnaque"),_T("Repère les messages d'arnaque (faux nitro, dons crypto, cadeaux piégés)."),cfg.scamAlerts,tog("scamAlerts")),
-ctrl("M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z",_T("Vigilance comptes suspects"),_T("Signale les MP venant de comptes très récents (usurpateurs, faux profils)."),cfg.warnAccounts,tog("warnAccounts")),
-ctrl("M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z",_T("Protection console (anti-self-XSS)"),_T("Avertit contre les arnaques « colle ce code dans la console » qui volent ton compte."),cfg.consoleGuard,tog("consoleGuard")),
-ctrl("M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",_T("Détection intelligente"),_T("Repère les domaines inconnus qui imitent une marque, utilisent une extension à risque ou des mots-clés d\'arnaque."),cfg.heuristics,tog("heuristics"))),{mb:12}),
-(function(){var V=window._NXV;if(!V)return null;
+i("input",{value:chk,onChange:function(e){setChk(e.target.value);},placeholder:"https://…",spellCheck:false,"aria-label":_T("Lien à analyser"),style:{flex:1,minWidth:0,background:P.inset,border:"1px solid "+P.line,borderRadius:"11px",padding:"11px 13px",color:P.txt,fontSize:"13px",fontFamily:_NXf.mono,outline:"none"}}),
+i("div",{className:"nx-fx",role:"button","aria-label":_T("Analyser"),tabIndex:0,onKeyDown:_NXkey,onClick:function(){var u=(chk||"").trim();if(!u||busy)return;if(!/^https?:\/\//.test(u))u="https://"+u;setBusy(true);setRes(null);_NXPR.deepScan(u,function(r){setBusy(false);setRes(r);force();});},style:{flexShrink:0,padding:"11px 20px",borderRadius:"11px",background:P.acc,color:"#0a0a0a",fontSize:"12.5px",fontWeight:"800",cursor:busy?"default":"pointer",opacity:busy?.6:1}},busy?_T("Analyse…"):_T("Analyser"))),
+(_NXPR.loading&&!res)?i("div",{style:{marginTop:"13px",fontSize:"12px",color:P.dim,lineHeight:1.55}},_T("Chargement de la base de menaces en cours… l analyse sera complète dans quelques secondes.")):null,
+res?(res.verdict==="off"?i("div",{style:{marginTop:"13px",fontSize:"12.5px",color:P.sub,lineHeight:1.55}},_T("Le scanner de liens est désactivé. Active-le dans l onglet Boucliers.")):i("div",{style:{marginTop:"14px",paddingTop:"14px",borderTop:"1px solid "+P.line}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},
+i("div",{style:{fontSize:"15px",fontWeight:"800",color:res.verdict==="danger"?"#e79a9a":res.verdict==="warn"?"#e6c48a":P.txt,letterSpacing:"-.01em"}},res.verdict==="danger"?(res.kind==="grabber"?_T("Dangereux — logger d IP"):res.kind==="phish"?_T("Dangereux — hameçonnage"):res.kind==="punycode"?_T("Dangereux — domaine trompeur"):_T("Dangereux")):res.verdict==="warn"?_T("Suspect — destination masquée"):_T("Aucune menace détectée")),
+res.verdict==="danger"?pill(res.blocked?_T("Bloqué"):_T("Protection désactivée"),res.blocked?"#8fd19e":"#e6c48a"):null),
+res.host?i("div",{style:{fontSize:"11.5px",color:P.sub,marginTop:"9px",fontFamily:_NXf.mono,wordBreak:"break-all"}},_T("Domaine")+" : "+res.host):null,
+res.resolved?i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"4px",fontFamily:_NXf.mono,wordBreak:"break-all"}},_T("Redirige vers")+" : "+res.resolved):null,
+res.verdict==="danger"?i("div",{style:{fontSize:"12px",color:P.sub,marginTop:"10px",lineHeight:1.55}},res.blocked?_T("N ouvre pas ce lien. Il peut voler ton adresse IP, te géolocaliser ou dérober ton compte."):_T("Ce lien est dangereux mais la protection correspondante est désactivée — active-la dans l onglet Boucliers.")):null)):null),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Conseils de sécurité")),
+["Ne colle jamais de code dans la console Discord — c est le piège numéro un pour voler un compte.","Ne scanne jamais un QR code de connexion envoyé par un inconnu.","Un « Nitro gratuit » par message privé est toujours une arnaque.","Vérifie toujours le domaine exact d un lien avant de te connecter.","Aucun code à 6 chiffres ne doit jamais être communiqué, à personne."].map(function(t,k,arr){
+return i("div",{key:k,style:{display:"flex",gap:"11px",alignItems:"flex-start",padding:"10px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{style:{color:P.faint,flexShrink:0,fontFamily:_NXf.mono,fontSize:"10px",marginTop:"2px"}},("0"+(k+1)).slice(-2)),
+i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.6}},_T(t)));})),{mb:0}));}
+function tBoucliers(){
+var none=!SH_LIENS.filter(match).length&&!SH_CONTENU.filter(match).length&&!SH_AVANCE.filter(match).length;
+return i("div",null,
+searchBox("Rechercher un bouclier…"),
+none?empty("Aucun bouclier ne correspond à cette recherche."):null,
+group("Liens et messages","Ce que Nexium inspecte à la réception.",SH_LIENS),
+group("Contenus reçus","Pièces jointes, aperçus, invitations et messages privés.",SH_CONTENU),
+group("Analyse avancée","Contrôles supplémentaires sur la forme des liens et des demandes.",SH_AVANCE));}
+function tCoffre(){
+if(!V)return empty("Le coffre-fort n est pas disponible : le module de protection du compte n a pas démarré.");
 var integ=V.integrity||{state:"inconnu"};
-var iCol=integ.state==="conforme"?"#8fd19e":(integ.state==="injoignable"||integ.state==="inconnu"||integ.state==="desactive")?P.dim:"#e79a9a";
 var iTxt=integ.state==="conforme"?"Fichier conforme au dépôt officiel":integ.state==="version differente"?("Version locale v"+integ.local+" ≠ dépôt v"+integ.repo):integ.state==="desactive"?"Vérification désactivée":integ.state==="injoignable"?"Dépôt injoignable":integ.state==="reference incoherente"?"Référence incohérente sur le dépôt":"Vérification en cours…";
+var iCol=integ.state==="conforme"?"#8fd19e":(integ.state==="injoignable"||integ.state==="inconnu"||integ.state==="desactive")?P.dim:"#e79a9a";
 var risky=(V.cssRisky||[]);
-return i("div",{style:{position:"relative",overflow:"hidden",borderRadius:"18px",border:"1px solid "+P.line,background:P.panel,padding:"22px",marginBottom:"12px"}},
-i("div",{style:{position:"absolute",inset:0,background:"radial-gradient(120% 130% at 88% -12%, rgba(143,209,158,.16), transparent 58%)",pointerEvents:"none"}}),
-i("div",{style:{position:"relative"}},
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"4px"}},"Coffre-fort Nexium"),
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"19px",fontWeight:"800",color:P.txt,letterSpacing:"-.02em",marginBottom:"4px"}},"Protection du compte"),
-i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.55,marginBottom:"16px"}},"Ces protections n\'avertissent pas : elles bloquent."),
-_NXstrip([{v:_NXn((V.stats&&V.stats.blocked)||0),label:"Exfiltrations bloquées",color:"#8fd19e"},{v:_NXn(risky.length),label:"Sources externes CSS",color:risky.length?"#e6c48a":P.txt},{v:integ.state==="conforme"?"OK":"—",label:"Intégrité",color:iCol}]),
-i("div",{style:{marginTop:"14px",padding:"11px 13px",borderRadius:"11px",background:P.inset,border:"1px solid "+P.line}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"9px"}},
-i("div",{style:{width:"7px",height:"7px",borderRadius:"50%",background:iCol,flexShrink:0}}),
-i("div",{style:{flex:1,fontSize:"12px",color:P.sub}},iTxt),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){V.checkIntegrity();_NXPR.toast("Vérification en cours…",1);},style:{fontSize:"10.5px",fontWeight:"700",color:P.dim,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"7px"}},"Vérifier"))),
-risky.length?i("div",{style:{marginTop:"10px"}},
-i("div",{style:{fontSize:"11.5px",color:"#e6c48a",marginBottom:"7px",lineHeight:1.5}},"Tes thèmes chargent des ressources externes : ton adresse IP est transmise à ces serveurs à chaque démarrage."),
-risky.slice(0,4).map(function(f,k){
-return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"8px",padding:"8px 10px",background:P.inset,border:"1px solid "+P.line,borderRadius:"9px",marginBottom:"5px"}},
-i("div",{style:{flex:1,minWidth:0,fontSize:"11px",fontFamily:_NXf.mono,color:P.sub,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},f.h+(f.imp?" (import)":"")),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){V.blockCssHost(f.h);force();},style:{fontSize:"10px",fontWeight:"700",color:"#e79a9a",cursor:"pointer",padding:"4px 9px",border:"1px solid rgba(214,72,72,.3)",borderRadius:"7px",flexShrink:0}},"Bloquer"),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){V.allowCss(f.h);force();},style:{fontSize:"10px",fontWeight:"700",color:P.dim,cursor:"pointer",padding:"4px 9px",border:"1px solid "+P.line,borderRadius:"7px",flexShrink:0}},"Autoriser"));})):null));})(),
-_NXcard(i("div",null,_NXch(_T("Coffre-fort du compte"),_T("Protections actives : le client agit au lieu de prévenir.")),
-ctrl("M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm3 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z",_T("Blocage de l\'exfiltration"),_T("Toute requête sortante contenant ton jeton, ton mot de passe ou tes cookies vers un domaine non-Discord est BLOQUÉE."),(window._NXV&&_NXV.cfg.blockExfil),function(){try{_NXV.cfg.blockExfil=!_NXV.cfg.blockExfil;_NXV.save();force();}catch(_){}}),
-ctrl("M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z",_T("Analyse des thèmes"),_T("Repère les ressources externes chargées par tes thèmes et QuickCSS, qui exposent ton adresse IP."),(window._NXV&&_NXV.cfg.scanThemes),function(){try{_NXV.cfg.scanThemes=!_NXV.cfg.scanThemes;_NXV.save();_NXV._cssWarned=false;_NXV.scanCss();force();}catch(_){}}),
-ctrl("M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z",_T("Vérification d\'intégrité"),_T("Compare ton fichier client à la version publiée sur le dépôt officiel pour détecter toute altération locale."),(window._NXV&&_NXV.cfg.verifyIntegrity),function(){try{_NXV.cfg.verifyIntegrity=!_NXV.cfg.verifyIntegrity;_NXV.save();if(_NXV.cfg.verifyIntegrity)_NXV.checkIntegrity();force();}catch(_){}}),
-ctrl("M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h2c0-1.66 1.34-3 3-3s3 1.34 3 3v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z",_T("Chiffrement des données locales"),_T("Chiffre tes statistiques, journaux et signalements dans le stockage local."),(window._NXV&&_NXV.cfg.encryptLocal),function(){try{_NXV.applyEncryption(!_NXV.cfg.encryptLocal);force();}catch(_){}})),{mb:12}),
-_NXcard(i("div",null,_NXch(_T("Défenses avancées"),_T("Protections actives sur ton compte et ce que tu envoies.")),
-ctrl("M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z",_T("Garde-fou avant envoi"),_T("Prévient AVANT d\'envoyer un message contenant ton IP, une adresse, un téléphone, un e-mail, un IBAN ou une carte bancaire."),(window._NXV&&_NXV.cfg.selfGuard),function(){try{_NXV.cfg.selfGuard=!_NXV.cfg.selfGuard;_NXV.save();_NXV.notify();force();}catch(_){}}),
-ctrl("M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-9 10H8v-2h3v2zm5-4H8v-2h8v2z",_T("Détection de serveur piégé"),_T("Analyse les serveurs que tu rejoins : salon de vérification imposé, demande d\'autorisation d\'application, nom imitant une marque."),(window._NXV&&_NXV.cfg.guildGuard),function(){try{_NXV.cfg.guildGuard=!_NXV.cfg.guildGuard;_NXV.save();_NXV.notify();force();}catch(_){}}),
-ctrl("M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4h2V2H6c-2.21 0-4 1.79-4 4v12c0 2.21 1.79 4 4 4h14v-8h-2zm-2-2v4h4v-4h-4z",_T("Fichiers doublement piégés"),_T("Détecte les archives protégées par mot de passe, celles contenant un exécutable, et les noms utilisant l\'inversion de texte."),(window._NXV&&_NXV.cfg.deepFiles),function(){try{_NXV.cfg.deepFiles=!_NXV.cfg.deepFiles;_NXV.save();_NXV.notify();force();}catch(_){}}),
-ctrl("M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z",_T("Faux cadeaux Nitro"),_T("Vérifie la validité réelle des codes cadeau et repère les faux domaines imitant discord.gift."),(window._NXV&&_NXV.cfg.giftGuard),function(){try{_NXV.cfg.giftGuard=!_NXV.cfg.giftGuard;_NXV.save();_NXV.notify();force();}catch(_){}}),
-ctrl("M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z",_T("Surveillance des connexions"),_T("Alerte quand une nouvelle session apparaît sur ton compte depuis un autre appareil."),(window._NXV&&_NXV.cfg.sessionGuard),function(){try{_NXV.cfg.sessionGuard=!_NXV.cfg.sessionGuard;_NXV.save();_NXV.notify();force();}catch(_){}}),
-ctrl("M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z",_T("Base communautaire partagée"),_T("Bloque les domaines signalés par au moins 3 utilisateurs Nexium")+((window._NXV&&_NXV.commN)?(" ("+_NXV.commN+" domaines chargés)"):"")+".",(window._NXV&&_NXV.cfg.community),function(){try{_NXV.cfg.community=!_NXV.cfg.community;_NXV.save();if(_NXV.cfg.community)_NXV.loadCommunity(true);else{_NXV.comm=Object.create(null);_NXV.commN=0;}_NXPR.cache=Object.create(null);_NXV.notify();force();}catch(_){}})),{mb:12}),
-_NXcard(i("div",null,_NXch(_T("Réaction et intégrité"),_T("Ce que Nexium fait quand quelque chose tourne mal.")),
-ctrl("M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z",_T("Guide après incident"),_T("Après un blocage, affiche les étapes concrètes à suivre avec accès direct aux réglages Discord."),(window._NXV&&_NXV.cfg.aftermath),function(){try{_NXV.cfg.aftermath=!_NXV.cfg.aftermath;_NXV.save();_NXV.notify();force();}catch(_){}}),
-ctrl("M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z",_T("Audit des plugins"),_T("Analyse le code des plugins installés : accès au jeton, envois vers l\'extérieur, code obfusqué."),(window._NXV&&_NXV.cfg.auditPlugins),function(){try{_NXV.cfg.auditPlugins=!_NXV.cfg.auditPlugins;_NXV.save();if(_NXV.cfg.auditPlugins){_NXV._plWarned=false;_NXV.auditPlugins();}else _NXV.plugins=[];force();}catch(_){}}),
-ctrl("M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm7-6.5l1.5 1.5L23 6.5 21.5 5 19 7.5z",_T("Surveillance de l\'identité"),_T("Alerte si l\'e-mail, le téléphone ou la double authentification de ton compte changent."),(window._NXV&&_NXV.cfg.identityGuard),function(){try{_NXV.cfg.identityGuard=!_NXV.cfg.identityGuard;_NXV.save();_NXV.notify();force();}catch(_){}}),
-ctrl("M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z",_T("Caméra et partage d\'écran"),_T("Prévient si la caméra ou le partage d\'écran s\'active sans que tu aies cliqué."),(window._NXV&&_NXV.cfg.mediaGuard),function(){try{_NXV.cfg.mediaGuard=!_NXV.cfg.mediaGuard;_NXV.save();_NXV.notify();force();}catch(_){}}),
-ctrl("M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z",_T("Délai avant action irréversible"),_T("Impose un délai d\'annulation de 12 secondes avant les actions destructrices."),(window._NXV&&_NXV.cfg.graceDelay),function(){try{_NXV.cfg.graceDelay=!_NXV.cfg.graceDelay;_NXV.save();_NXV.notify();force();}catch(_){}})),{mb:12}),
-(function(){var PL=(window._NXV&&_NXV.plugins)||[];
-if(!PL.length)return null;
-return _NXcard(i("div",null,
-_NXch("Plugins à surveiller",i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXV._plWarned=false;_NXV.auditPlugins();force();},style:{fontSize:"11px",color:P.dim,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"8px"}},"Réanalyser")),
-PL.slice(0,6).map(function(pl,k){
+var PL=(V.plugins||[]);
+var none=!VA_COFFRE.filter(match).length&&!VA_DEFENSE.filter(match).length&&!VA_REACTION.filter(match).length;
+return i("div",null,
+q?null:_NXcard(i("div",null,_NXch(_T("État du coffre-fort"),_T("Ces protections n avertissent pas : elles bloquent.")),
+_NXstrip([{v:_NXn((V.stats&&V.stats.blocked)||0),label:_T("Exfiltrations bloquées")},{v:_NXn(risky.length),label:_T("Sources externes CSS"),color:risky.length?"#e6c48a":P.txt},{v:integ.state==="conforme"?"OK":"—",label:_T("Intégrité"),color:iCol}]),
+i("div",{style:{marginTop:"16px",paddingTop:"14px",borderTop:"1px solid "+P.line,display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},
+i("div",{style:{width:"6px",height:"6px",borderRadius:"50%",background:iCol,flexShrink:0}}),
+i("div",{style:{flex:1,minWidth:"140px",fontSize:"12px",color:P.sub}},_T(iTxt)),
+btn(_T("Vérifier"),function(){V.checkIntegrity();_NXPR.toast(_T("Vérification en cours…"),1);}))),{mb:12}),
+(!q&&risky.length)?_NXcard(i("div",null,_NXch(_T("Ressources externes dans tes thèmes"),_T("Ton adresse IP est transmise à ces serveurs à chaque démarrage.")),
+risky.slice(0,6).map(function(f,k,arr){
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"9px",padding:"11px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{style:{flex:1,minWidth:0,fontSize:"11.5px",fontFamily:_NXf.mono,color:P.sub,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},f.h+(f.imp?" (import)":"")),
+btn(_T("Bloquer"),function(){V.blockCssHost(f.h);force();}),
+btn(_T("Autoriser"),function(){V.allowCss(f.h);force();}));})),{mb:12}):null,
+searchBox("Rechercher une protection…"),
+none?empty("Aucune protection ne correspond à cette recherche."):null,
+group("Coffre-fort du compte","Le client agit au lieu de prévenir.",VA_COFFRE,true),
+group("Défenses avancées","Protections sur ton compte et sur ce que tu envoies.",VA_DEFENSE,true),
+group("Réaction et intégrité","Ce que Nexium fait quand quelque chose tourne mal.",VA_REACTION,true),
+(!q&&PL.length)?_NXcard(i("div",null,
+_NXch(_T("Plugins à surveiller"),null,btn(_T("Réanalyser"),function(){V._plWarned=false;V.auditPlugins();force();})),
+PL.slice(0,8).map(function(pl,k,arr){
 var col=pl.risk>=3?"#e79a9a":pl.risk===2?"#e6c48a":P.dim;
-return i("div",{key:k,style:{padding:"11px 12px",background:P.inset,border:"1px solid "+(pl.risk>=3?"rgba(214,72,72,.28)":P.line),borderRadius:"10px",marginBottom:"6px"}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"5px"}},
-i("div",{style:{width:"7px",height:"7px",borderRadius:"50%",background:col,flexShrink:0}}),
-i("div",{style:{flex:1,minWidth:0,fontSize:"13px",fontWeight:"700",color:P.txt}},pl.n),
-i("div",{style:{fontSize:"10px",fontWeight:"800",color:col,textTransform:"uppercase",letterSpacing:".06em"}},pl.risk>=3?"risque élevé":pl.risk===2?"à vérifier":"signal")),
-pl.f.map(function(fl,k2){return i("div",{key:k2,style:{fontSize:"11.5px",color:P.sub,lineHeight:1.5}},"• "+fl);}));})),{mb:12});})(),
-_NXcard(i("div",null,_NXch(_T("Analyse des contenus"),_T("Ce que Nexium inspecte dans les messages que tu reçois.")),
-ctrl("M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z",_T("Analyse des fichiers"),_T("Vérifie le contenu réel des pièces jointes : un .exe renommé en .png est détecté."),cfg.scanFiles,tog("scanFiles")),
-ctrl("M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z",_T("Blocage des téléchargements"),_T("Bloque les liens pointant vers un exécutable, sauf depuis une source de confiance."),cfg.scanDownloads,tog("scanDownloads")),
-ctrl("M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z",_T("Liens masqués trompeurs"),_T("Détecte quand le texte affiché cache une destination différente."),cfg.scanMasked,tog("scanMasked")),
-ctrl("M21 3H3v18h18V3zm-2 16H5V5h14v14zM7 10h10v2H7z",_T("Aperçus de liens"),_T("Analyse les adresses contenues dans les aperçus (embeds)."),cfg.scanEmbeds,tog("scanEmbeds")),
-ctrl("M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",_T("Messages modifiés"),_T("Réanalyse un message édité après envoi : le piège classique."),cfg.scanEdits,tog("scanEdits")),
-ctrl("M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z",_T("Invitations de serveur"),_T("Vérifie l\'âge, la taille et le nom des serveurs proposés."),cfg.scanInvites,tog("scanInvites")),
-ctrl("M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z",_T("Usurpation d\'amis"),_T("Alerte si un compte imite le pseudo et l\'avatar d\'un de tes contacts."),cfg.scanImpostor,tog("scanImpostor")),
-ctrl("M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z",_T("Vagues de messages privés"),_T("Détecte les campagnes : même message envoyé par plusieurs comptes."),cfg.scanWaves,tog("scanWaves")),
-ctrl("M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM17 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2z",_T("Arnaque au QR code"),_T("Avertit quand on te demande de scanner un QR code de connexion."),cfg.qrGuard,tog("qrGuard")),
-ctrl("M17 7h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5zm-6 8H7c-1.71 0-3.1-1.39-3.1-3.1S5.29 8.8 7 8.8h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9zM8 11h8v2H8z",_T("Liens dans les statuts"),_T("Analyse les liens présents dans les statuts personnalisés."),cfg.scanStatus,tog("scanStatus")),
-ctrl("M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z",_T("Surveillance du presse-papiers"),_T("Prévient si un jeton ou un webhook se retrouve dans ton presse-papiers."),cfg.clipGuard,tog("clipGuard"))),{mb:12}),
-(window._NXV&&_NXV.stats&&_NXV.stats.log&&_NXV.stats.log.length)?_NXcard(i("div",null,
-_NXch(_T("Journal du coffre-fort"),_T("Actions de blocage effectuées.")),
-_NXV.stats.log.slice(0,8).map(function(L,k){
-var d=new Date(L.t);var hh=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
-var col=L.k==="exfil"?"#e79a9a":"#e6c48a";
-return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 10px",background:P.inset,border:"1px solid "+P.line,borderRadius:"9px",marginBottom:"5px"}},
-i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0}},hh),
-i("span",{style:{fontSize:"10px",fontWeight:"800",color:col,textTransform:"uppercase",letterSpacing:".06em",flexShrink:0}},L.k==="exfil"?"bloqué":"thème"),
-i("span",{style:{flex:1,minWidth:0,fontSize:"11.5px",color:P.sub,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},L.d));})),{mb:12}):null,
-(_NXPR.quar&&_NXPR.quar.length)?_NXcard(i("div",null,
-_NXch("Quarantaine",i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){if(window.confirm("Vider la quarantaine ?")){_NXPR.clearQuar();force();}},style:{fontSize:"11px",color:P.dim,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"8px"}},"Tout vider")),
-i("div",{style:{fontSize:"12px",color:P.dim,marginBottom:"10px",lineHeight:1.5}},"Liens bloques avant ouverture. Tu peux les ouvrir quand meme ou autoriser le domaine."),
-_NXPR.quar.slice(0,8).map(function(q,k){
-var col=q.k==="download"?"#e6c48a":"#d6aeae";
-var d=new Date(q.t);var hh=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
-return i("div",{key:k,style:{padding:"11px 12px",background:P.inset,border:"1px solid "+P.line,borderRadius:"10px",marginBottom:"6px"}},
+return i("div",{key:k,style:{padding:"12px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
 i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"6px"}},
-i("div",{style:{width:"7px",height:"7px",borderRadius:"50%",background:col,flexShrink:0}}),
-i("div",{style:{flex:1,minWidth:0,fontSize:"12px",fontWeight:"700",color:P.txt,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},_NXPR.kindFr(q.k)+" - "+q.h),
-i("span",{style:{fontSize:"10px",color:P.faint,fontFamily:_NXf.mono,flexShrink:0}},hh+(q.n>1?(" x"+q.n):""))),
-i("div",{style:{fontSize:"10.5px",color:P.dim,fontFamily:_NXf.mono,wordBreak:"break-all",marginBottom:"8px"}},String(q.u).slice(0,110)),
+i("div",{style:{flex:1,minWidth:0,fontSize:"13px",fontWeight:"700",color:P.txt}},pl.n),
+pill(pl.risk>=3?_T("risque élevé"):pl.risk===2?_T("à vérifier"):_T("signal"),col)),
+pl.f.map(function(fl,k2){return i("div",{key:k2,style:{fontSize:"11.5px",color:P.sub,lineHeight:1.55}},"— "+fl);}));})),{mb:12}):null);}
+function tJournal(){
+var quar=(_NXPR.quar||[]);
+var recent=(st.recent||[]);
+var vlog=(V&&V.stats&&V.stats.log)||[];
+var allow=(cfg.allow||[]);
+if(!quar.length&&!recent.length&&!vlog.length&&!allow.length)return empty("Rien à afficher pour l instant : aucune menace bloquée, aucun domaine autorisé.");
+return i("div",null,
+quar.length?_NXcard(i("div",null,
+_NXch(_T("Quarantaine"),_T("Liens bloqués avant ouverture. Tu peux les ouvrir quand même ou autoriser le domaine."),btn(_T("Tout vider"),function(){if(window.confirm(_T("Vider la quarantaine ?"))){_NXPR.clearQuar();force();}})),
+quar.slice(0,8).map(function(qq,k,arr){
+var d=new Date(qq.t);var hh=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+return i("div",{key:k,style:{padding:"13px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"6px",flexWrap:"wrap"}},
+i("div",{style:{flex:1,minWidth:0,fontSize:"12.5px",fontWeight:"700",color:P.txt,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},_NXPR.kindFr(qq.k)+" · "+qq.h),
+i("span",{style:{fontSize:"10px",color:P.faint,fontFamily:_NXf.mono,flexShrink:0}},hh+(qq.n>1?(" ×"+qq.n):""))),
+i("div",{style:{fontSize:"10.5px",color:P.dim,fontFamily:_NXf.mono,wordBreak:"break-all",marginBottom:"9px"}},String(qq.u).slice(0,110)),
 i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap"}},
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){if(window.confirm("Ouvrir ce lien malgre l alerte ?")){_NXPR.openQuar(q.u);}},style:{fontSize:"10.5px",fontWeight:"700",color:P.sub,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"7px"}},"Ouvrir quand meme"),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.allowHost(q.h);_NXPR.delQuar(k);force();},style:{fontSize:"10.5px",fontWeight:"700",color:P.sub,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"7px"}},"Autoriser "+q.h),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.reportPrompt({k:q.k,host:q.h});},style:{fontSize:"10.5px",fontWeight:"700",color:P.sub,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"7px"}},"Signaler"),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.delQuar(k);force();},style:{fontSize:"10.5px",color:P.faint,cursor:"pointer",padding:"5px 8px"}},"Retirer")));})),{mb:12}):null,
-st.recent&&st.recent.length?_NXcard(i("div",null,
-_NXch("Menaces récentes",null,i("div",{style:{display:"flex",gap:"7px"}},i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{var L=(st.recent||[]).map(function(r){return new Date(r.t).toISOString()+" | "+kindLabel(r.k)+" | "+(r.d||"");}).join("\n");DiscordNative.clipboard.copy(L||"(journal vide)");_NXPR.toast("Journal copié dans le presse-papiers",1);}catch(_){}},style:{fontSize:"11px",color:P.dim,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"8px"}},"Exporter"),i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){if(window.confirm("Vider le journal des menaces ?")){_NXPR.clearThreats();force();}},style:{fontSize:"11px",color:P.dim,cursor:"pointer",padding:"5px 10px",border:"1px solid "+P.line,borderRadius:"8px"}},"Tout vider"))),
-i("input",{value:flt,onChange:function(e){setFlt(e.target.value);},placeholder:"Filtrer (domaine, type…)",spellCheck:false,style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,borderRadius:"10px",padding:"9px 12px",color:P.txt,fontSize:"12px",fontFamily:_NXf.mono,outline:"none",marginBottom:"10px"}}),
-(function(){var q=(flt||"").toLowerCase();var list=st.recent.map(function(r,idx){return {r:r,idx:idx};}).filter(function(o){if(!q)return true;return (kindLabel(o.r.k)+" "+(o.r.d||"")).toLowerCase().indexOf(q)>=0;});
-if(!list.length)return i("div",{style:{fontSize:"12px",color:P.dim,padding:"8px 2px"}},"Aucune menace ne correspond au filtre.");
-return i("div",null,list.slice(0,12).map(function(o,k){var r=o.r;var col=r.k==="scam"?"#faa61a":"#d6aeae";var host=(r.d||"").split("/")[0];
-return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"11px",padding:"10px 12px",background:P.inset,borderRadius:"10px",marginBottom:"6px",border:"1px solid "+P.line}},
-i("div",{style:{width:"8px",height:"8px",borderRadius:"50%",background:col,flexShrink:0}}),
-i("div",{style:{flex:1,minWidth:0}},i("div",{style:{fontSize:"12px",fontWeight:"700",color:P.txt}},kindLabel(r.k)),i("div",{style:{fontSize:"11px",color:P.dim,fontFamily:_NXf.mono,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},r.d)),
-(host)?i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.reportPrompt(r);},title:"Signaler au serveur Nexium",style:{flexShrink:0,fontSize:"10px",fontWeight:"700",color:P.sub,cursor:"pointer",padding:"4px 9px",border:"1px solid "+P.line,borderRadius:"7px"}},"Signaler"):null,
-(r.k!=="scam"&&host)?i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.allowHost(host);force();},title:"Autoriser ce domaine",style:{flexShrink:0,fontSize:"10px",fontWeight:"700",color:P.sub,cursor:"pointer",padding:"4px 9px",border:"1px solid "+P.line,borderRadius:"7px"}},"Autoriser"):null,
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.removeThreat(o.idx);force();},title:"Supprimer",style:{flexShrink:0,color:P.faint,cursor:"pointer",padding:"3px",lineHeight:1}},i("svg",{viewBox:"0 0 24 24",width:14,height:14,fill:"currentColor"},i("path",{d:"M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"}))));}));})()),{mb:12}):null,
-(cfg.allow&&cfg.allow.length)?_NXcard(i("div",null,_NXch(_T("Domaines autorisés"),_T("Ces domaines ne seront plus signalés.")),i("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px"}},cfg.allow.map(function(h,k){return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"7px",padding:"6px 10px",background:P.inset,border:"1px solid "+P.line,borderRadius:"99px"}},i("span",{style:{fontSize:"11px",color:P.sub,fontFamily:_NXf.mono}},h),i("span",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.unallowHost(h);force();},title:"Retirer",style:{cursor:"pointer",color:P.faint,fontSize:"13px",lineHeight:1}},"\u00d7"));}))),{mb:12}):null,
+btn(_T("Ouvrir quand même"),function(){if(window.confirm(_T("Ouvrir ce lien malgré l alerte ?"))){_NXPR.openQuar(qq.u);}}),
+btn(_T("Autoriser")+" "+qq.h,function(){_NXPR.allowHost(qq.h);_NXPR.delQuar(k);force();}),
+btn(_T("Signaler"),function(){_NXPR.reportPrompt({k:qq.k,host:qq.h});}),
+btn(_T("Retirer"),function(){_NXPR.delQuar(k);force();})));})),{mb:12}):null,
+recent.length?_NXcard(i("div",null,
+_NXch(_T("Menaces récentes"),null,i("div",{style:{display:"flex",gap:"6px"}},
+btn(_T("Exporter"),function(){try{var L=recent.map(function(r){return new Date(r.t).toISOString()+" | "+kindLabel(r.k)+" | "+(r.d||"");}).join("\n");DiscordNative.clipboard.copy(L||"(journal vide)");_NXPR.toast(_T("Journal copié dans le presse-papiers"),1);}catch(_){}}),
+btn(_T("Tout vider"),function(){if(window.confirm(_T("Vider le journal des menaces ?"))){_NXPR.clearThreats();force();}}))),
+i("input",{value:flt,onChange:function(e){setFlt(e.target.value);},placeholder:_T("Filtrer (domaine, type…)"),spellCheck:false,"aria-label":_T("Filtrer le journal"),style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,borderRadius:"10px",padding:"9px 12px",color:P.txt,fontSize:"12px",fontFamily:_NXf.mono,outline:"none",marginBottom:"4px"}}),
+(function(){var s=(flt||"").toLowerCase();
+var list=recent.map(function(r,idx){return {r:r,idx:idx};}).filter(function(o){if(!s)return true;return (kindLabel(o.r.k)+" "+(o.r.d||"")).toLowerCase().indexOf(s)>=0;});
+if(!list.length)return i("div",{style:{fontSize:"12px",color:P.dim,padding:"12px 0"}},_T("Aucune menace ne correspond au filtre."));
+return i("div",null,list.slice(0,14).map(function(o,k,arr){var r=o.r;var host=(r.d||"").split("/")[0];
+var d=new Date(r.t);var hh=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"10px",padding:"12px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0}},hh),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:P.txt}},kindLabel(r.k)),
+i("div",{style:{fontSize:"11px",color:P.dim,fontFamily:_NXf.mono,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginTop:"2px"}},r.d)),
+host?btn(_T("Signaler"),function(){_NXPR.reportPrompt(r);}):null,
+(r.k!=="scam"&&host)?btn(_T("Autoriser"),function(){_NXPR.allowHost(host);force();}):null,
+i("div",{className:"nx-fx",role:"button","aria-label":_T("Supprimer cette entrée"),tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.removeThreat(o.idx);force();},style:{flexShrink:0,color:P.faint,cursor:"pointer",padding:"4px",lineHeight:1}},i("svg",{viewBox:"0 0 24 24",width:13,height:13,fill:"currentColor","aria-hidden":"true"},i("path",{d:"M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"}))));}));})()),{mb:12}):null,
+vlog.length?_NXcard(i("div",null,_NXch(_T("Journal du coffre-fort"),_T("Actions de blocage effectuées.")),
+vlog.slice(0,10).map(function(L,k,arr){
+var d=new Date(L.t);var hh=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"10px",padding:"10px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0}},hh),
+pill(L.k==="exfil"?_T("bloqué"):_T("thème"),L.k==="exfil"?"#e79a9a":"#e6c48a"),
+i("span",{style:{flex:1,minWidth:0,fontSize:"11.5px",color:P.sub,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},L.d));})),{mb:12}):null,
+allow.length?_NXcard(i("div",null,_NXch(_T("Domaines autorisés"),_T("Ces domaines ne seront plus signalés.")),
+i("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px"}},allow.map(function(h,k){
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"8px",padding:"6px 10px",background:P.inset,border:"1px solid "+P.line,borderRadius:"99px"}},
+i("span",{style:{fontSize:"11px",color:P.sub,fontFamily:_NXf.mono}},h),
+i("span",{className:"nx-fx",role:"button","aria-label":_T("Retirer")+" "+h,tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.unallowHost(h);force();},style:{cursor:"pointer",color:P.faint,fontSize:"13px",lineHeight:1}},"×"));}))),{mb:12}):null);}
+function tBase(){
+var R=_NXPR.rep||{};var qn=(R.queue||[]).length;
+var nextMin=(_NXPR.nextSlotMin&&_NXPR.nextSlotMin())||0;
+return i("div",null,
 (_NXPR.missing&&_NXPR.missing.length)?_NXcard(i("div",null,
-i("div",{style:{fontSize:"14px",fontWeight:"800",color:"#d6aeae",marginBottom:"6px"}},"Protect incomplet"),
-i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.55}},_NXPR.missing.length+" fonction(s) manquante(s) : la protection n est pas complete. Reinstalle ou mets a jour le client."),
-i("div",{style:{fontSize:"11px",color:P.faint,fontFamily:_NXf.mono,marginTop:"8px",wordBreak:"break-word"}},_NXPR.missing.slice(0,8).join(", "))),{mb:12,glow:"rgba(214,72,72,.14)"}):null,
-(function(){var R=_NXPR.rep||{};var q=(R.queue||[]).length;
-return _NXcard(i("div",null,_NXch(_T("Signalements"),_T("Menaces transmises au serveur Nexium depuis ton compte.")),
-i("div",{style:{display:"flex",gap:"18px",flexWrap:"wrap",alignItems:"flex-start"}},
-i("div",null,i("div",{style:{fontFamily:_NXf.disp,fontSize:"22px",fontWeight:"800",color:P.txt}},_NXn(R.total||0)),i("div",{style:{fontSize:"11px",color:P.dim}},"envoyes")),
-i("div",null,i("div",{style:{fontFamily:_NXf.disp,fontSize:"22px",fontWeight:"800",color:q?"#e6c48a":P.txt}},_NXn(q)),i("div",{style:{fontSize:"11px",color:P.dim}},"en attente")),
-i("div",null,i("div",{style:{fontFamily:_NXf.disp,fontSize:"22px",fontWeight:"800",color:(_NXPR.nextSlotMin&&_NXPR.nextSlotMin()>0)?"#e6c48a":"#8fd19e"}},(_NXPR.nextSlotMin&&_NXPR.nextSlotMin()>0)?(_NXPR.nextSlotMin()+" min"):"pret"),i("div",{style:{fontSize:"11px",color:P.dim}},"prochain signalement"))),
-R.lastErr?i("div",{style:{marginTop:"12px",fontSize:"12px",color:"#e6c48a",background:"rgba(250,166,97,.08)",border:"1px solid rgba(250,166,97,.25)",borderRadius:"10px",padding:"10px 12px",lineHeight:1.5}},"Dernier echec : "+R.lastErr+(q?" - reessai automatique en cours.":"")):null,
-q?i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.queueFlush();_NXPR.toast("Reessai en cours...",1);},style:{marginTop:"11px",display:"inline-block",padding:"9px 16px",borderRadius:"10px",border:"1px solid "+P.line,color:P.sub,fontSize:"12px",fontWeight:"700",cursor:"pointer"}},"Reessayer maintenant"):null),{mb:12});})(),
+i("div",{style:{fontSize:"14px",fontWeight:"800",color:"#e79a9a",marginBottom:"7px"}},_T("Protect incomplet")),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6}},_NXPR.missing.length+" "+_T("fonction(s) manquante(s) : la protection n est pas complète. Réinstalle ou mets à jour le client.")),
+i("div",{style:{fontSize:"11px",color:P.faint,fontFamily:_NXf.mono,marginTop:"9px",wordBreak:"break-word"}},_NXPR.missing.slice(0,8).join(", "))),{mb:12,glow:"rgba(214,72,72,.14)"}):null,
 _NXcard(i("div",null,_NXch(_T("Base de menaces"),_T("Liste de domaines dangereux mise à jour depuis le dépôt Nexium.")),
-i("div",{style:{display:"flex",alignItems:"center",gap:"12px",flexWrap:"wrap"}},
-i("div",{style:{flex:1,minWidth:"160px"}},
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"22px",fontWeight:"800",color:P.txt,letterSpacing:"-.03em"}},_NXn((_NXPR.remote&&_NXPR.remote.n)||0)),
-i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"2px",lineHeight:1.5}},(_NXPR.allowRemote&&_NXPR.allowRemote.n?("+ "+_NXPR.allowRemote.n+" domaines de confiance · "):"")+(_NXPR.loading?"chargement en cours…":((_NXPR.remote&&_NXPR.remote.err)?("indisponible : "+_NXPR.remote.err):"domaines chargés"+((_NXPR.remote&&_NXPR.remote.at)?(" · "+new Date(_NXPR.remote.at).toLocaleDateString()):"")+((_NXPR.remote&&_NXPR.remote.stale)?" · hors ligne":"")+((_NXPR.remote&&_NXPR.remote.big)?" · liste volumineuse, rechargée à chaque démarrage":" · en cache"))))),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.loadRemote(true);_NXPR.toast("Mise à jour de la liste…",1);},style:{flexShrink:0,padding:"9px 16px",borderRadius:"10px",border:"1px solid "+P.line,color:P.sub,fontSize:"12px",fontWeight:"700",cursor:"pointer"}},"Actualiser"))),{mb:12}),
-_NXcard(i("div",null,i("div",{style:{fontSize:"11px",fontWeight:"700",textTransform:"uppercase",letterSpacing:".1em",color:P.dim,marginBottom:"10px"}},"Conseils de sécurité"),
-["Ne colle jamais de code dans la console Discord (F12) — c'est le piège n°1 pour voler un compte.","Ne scanne jamais un QR code de connexion envoyé par un inconnu.","Un « Nitro gratuit » par MP est toujours une arnaque.","Vérifie toujours le domaine exact d'un lien avant de te connecter."].map(function(t,k){return i("div",{key:k,style:{display:"flex",gap:"10px",alignItems:"flex-start",marginBottom:"8px"}},i("div",{style:{color:"#3ba55d",flexShrink:0,marginTop:"1px"}},i("svg",{viewBox:"0 0 24 24",width:15,height:15,fill:"currentColor"},i("path",{d:"M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"}))),i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:"1.55"}},t));})),{mb:0}),
+i("div",{style:{display:"flex",alignItems:"center",gap:"14px",flexWrap:"wrap"}},
+i("div",{style:{flex:1,minWidth:"170px"}},
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"30px",fontWeight:"800",color:P.txt,letterSpacing:"-.035em",lineHeight:1}},_NXn((_NXPR.remote&&_NXPR.remote.n)||0)),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"6px",lineHeight:1.55}},(_NXPR.allowRemote&&_NXPR.allowRemote.n?("+ "+_NXPR.allowRemote.n+" "+_T("domaines de confiance")+" · "):"")+(_NXPR.loading?_T("chargement en cours…"):((_NXPR.remote&&_NXPR.remote.err)?(_T("indisponible")+" : "+_NXPR.remote.err):_T("domaines chargés")+((_NXPR.remote&&_NXPR.remote.at)?(" · "+new Date(_NXPR.remote.at).toLocaleDateString()):"")+((_NXPR.remote&&_NXPR.remote.stale)?" · "+_T("hors ligne"):"")+((_NXPR.remote&&_NXPR.remote.big)?" · "+_T("liste volumineuse"):" · "+_T("en cache")))))),
+btn(_T("Actualiser"),function(){_NXPR.loadRemote(true);_NXPR.toast(_T("Mise à jour de la liste…"),1);}))),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Signalements"),_T("Menaces transmises au serveur Nexium depuis ton compte.")),
+_NXstrip([{v:_NXn(R.total||0),label:_T("envoyés")},{v:_NXn(qn),label:_T("en attente"),color:qn?"#e6c48a":P.txt},{v:nextMin>0?(nextMin+" min"):_T("prêt"),label:_T("prochain signalement"),color:nextMin>0?"#e6c48a":P.txt}]),
+R.lastErr?i("div",{style:{marginTop:"14px",paddingTop:"13px",borderTop:"1px solid "+P.line,fontSize:"12px",color:"#e6c48a",lineHeight:1.55}},_T("Dernier échec")+" : "+R.lastErr+(qn?(" — "+_T("réessai automatique en cours.")):"")):null,
+qn?i("div",{style:{marginTop:"12px"}},btn(_T("Réessayer maintenant"),function(){_NXPR.queueFlush();_NXPR.toast(_T("Réessai en cours…"),1);},true)):null),{mb:0}));}
+return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
+_NXhead(_T("Sécurité"),"Nexium Protect",_T("Un bouclier en temps réel contre les liens piégés, les arnaques, le doxxing et l usurpation. Tout est analysé localement, rien n est envoyé.")),
+tabbar(),
+tab==="apercu"?tApercu():tab==="boucliers"?tBoucliers():tab==="coffre"?tCoffre():tab==="journal"?tJournal():tBase(),
 _NXfoot("Nexium Protect · analyse 100% locale, aucune donnée envoyée")));
 }var _NXlogin=window._NXlogin||(window._NXlogin={});
 if(!_NXlogin.boot){try{_NXlogin.boot=true;
@@ -2926,8 +3172,14 @@ try{_NXWelcome.maybe();}catch(_){}
 }var _NXUA=window._NXUA||(window._NXUA={});
 if(!_NXUA.boot){try{_NXUA.boot=true;
 _NXUA.KEY="nexium_restore_icons";_NXUA.root=null;_NXUA.fails=0;
-_NXUA._en=null;_NXUA.enabled=function(){try{if(_NXUA._en!==null)return _NXUA._en;var v=_NXDB.get(_NXUA.KEY);_NXUA._en=(v==="1");return _NXUA._en;}catch(_){return false;}};
-_NXUA.setEnabled=function(v){_NXUA._en=!!v;try{_NXDB.set(_NXUA.KEY,v?"1":"0");}catch(_){}if(v){_NXUA.fails=0;_NXUA.tick();}else _NXUA.unmount();};
+_NXUA._en=null;_NXUA.enabled=function(){try{if(_NXUA._en!==null)return _NXUA._en;var v=_NXDB.get(_NXUA.KEY);_NXUA._en=(v===null||v===undefined)?true:(v==="1");return _NXUA._en;}catch(_){return true;}};
+_NXUA.revive=function(){try{
+if(!_NXUA.iv)_NXUA.iv=setInterval(function(){_NXUA.tick();},4000);
+if(!_NXUA.pv)_NXUA.pv=setInterval(function(){try{if(document.hidden)return;if(_NXUA.mounted)_NXUA.place();}catch(_){}},1000);
+}catch(_){}};
+_NXUA.setEnabled=function(v){_NXUA._en=!!v;try{_NXDB.set(_NXUA.KEY,v?"1":"0");}catch(_){}
+if(v){_NXUA.fails=0;_NXUA._panicked=false;_NXUA._noRoomAt=0;_NXUA.revive();_NXUA.tick();_NXUA.mount();}
+else _NXUA.unmount();};
 _NXUA.api=function(){try{return (window.Vencord&&Vencord.Api&&Vencord.Api.UserArea)||null;}catch(_){return null;}};
 _NXUA.count=function(){try{var a=_NXUA.api();return (a&&a.buttons&&typeof a.buttons.size==="number")?a.buttons.size:0;}catch(_){return 0;}};
 _NXUA.iconFg=function(){try{var W=window.Vencord&&Vencord.Webpack;if(!W||!W.findByProps)return "";
@@ -2935,59 +3187,117 @@ var m=W.findByProps("iconForeground","accountPopoutButtonWrapper")||W.findByProp
 return (m&&m.iconForeground)||"";}catch(_){return "";}};
 _NXUA.style=function(){try{if(document.getElementById("nx-ua-style"))return;
 var s=document.createElement("style");s.id="nx-ua-style";
-s.textContent="[data-nx-ua]{display:flex;align-items:center;flex-wrap:wrap;gap:2px;min-width:0;row-gap:2px;}[data-nx-ua]>*{flex:0 0 auto;}[data-nx-ua] button,[data-nx-ua] [role=button]{flex:0 0 auto;}";
+s.textContent="[data-nx-ua]{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:2px;min-width:0;row-gap:2px;}[data-nx-ua]>*{flex:0 0 auto;}[data-nx-ua] button,[data-nx-ua] [role=button]{flex:0 0 auto;}[data-nx-panels]::after{content:\"\";display:block;flex:0 0 auto;width:100%;height:var(--nx-ua-h,0px);pointer-events:none;}";
 if(document.head)document.head.appendChild(s);}catch(_){}};
 _NXUA._prev=[];
-_NXUA.fixLayout=function(host){try{
-_NXUA._prev=[];
-function setp(el,prop,val){if(!el||!el.style)return;_NXUA._prev.push({el:el,prop:prop,val:el.style[prop]});el.style[prop]=val;}
-setp(host,"flexWrap","wrap");
-setp(host,"minWidth","0");
-setp(host,"rowGap","2px");
-}catch(_){}};
-_NXUA.restoreLayout=function(){try{for(var a=0;a<_NXUA._prev.length;a++){var r=_NXUA._prev[a];try{r.el.style[r.prop]=r.val||"";}catch(_){}}_NXUA._prev=[];}catch(_){}};
+_NXUA.fixLayout=function(){};
+_NXUA.restoreLayout=function(){return;try{for(var a=0;a<_NXUA._prev.length;a++){var r=_NXUA._prev[a];try{r.el.style[r.prop]=r.val||"";}catch(_){}}_NXUA._prev=[];}catch(_){}};
 _NXUA.host=function(){
 try{var cached=_NXUA._host;
 if(cached&&((typeof cached.isConnected==="boolean")?cached.isConnected:!!cached.parentNode))return cached;}catch(_){}
 var sels=['section[class*="panels_"] div[class*="buttons_"]','section[class*="panels"] div[class*="buttons"]','[class*="panels_"] [class*="buttons_"]','section[class*="panels_"] [class*="container_"] [class*="buttons"]'];
 for(var a=0;a<sels.length;a++){try{var e=document.querySelector(sels[a]);if(e&&e.appendChild){_NXUA._host=e;return e;}}catch(_){}}
 return null;};
+_NXUA.FLOATID="nx-ua-float";
+_NXUA.anchorEl=function(){
+try{var cached=_NXUA._anchor;
+if(cached&&((typeof cached.isConnected==="boolean")?cached.isConnected:!!cached.parentNode))return cached;}catch(_){}
+var sels=['section[class*="panels_"] div[class*="buttons_"]','section[class*="panels"] div[class*="buttons"]','[class*="panels_"] [class*="buttons_"]','section[class*="panels_"]'];
+for(var a=0;a<sels.length;a++){try{var e=document.querySelector(sels[a]);if(e){_NXUA._anchor=e;return e;}}catch(_){}}
+return null;};
+_NXUA.sectionEl=function(){
+try{var cached=_NXUA._sec;
+if(cached&&((typeof cached.isConnected==="boolean")?cached.isConnected:!!cached.parentNode))return cached;}catch(_){}
+var sels=['section[class*="panels_"]','section[class*="panels"]','[class*="panels_"]'];
+for(var a=0;a<sels.length;a++){try{var e=document.querySelector(sels[a]);if(e){_NXUA._sec=e;_NXUA.tag(e);return e;}}catch(_){}}
+return null;};
+_NXUA.tag=function(e){try{if(e&&e.setAttribute&&e.getAttribute("data-nx-panels")!=="1")e.setAttribute("data-nx-panels","1");}catch(_){}};
+_NXUA._resv=null;
+_NXUA.reserve=function(px){try{
+var n=Math.max(0,Math.round(px||0));
+if(_NXUA._resv===n)return;_NXUA._resv=n;
+var d=document.documentElement;
+if(d&&d.style&&d.style.setProperty)d.style.setProperty("--nx-ua-h",n+"px");
+}catch(_){}};
+_NXUA.place=function(){try{
+var box=_NXUA.box;if(!box||!box.style)return;
+var sec=_NXUA.sectionEl(),anc=_NXUA.anchorEl(),ref=sec||anc;
+if(!ref){box.style.display="none";_NXUA.reserve(0);return;}
+box.style.display="flex";
+var vh=(window.innerHeight||(document.documentElement&&document.documentElement.clientHeight)||0);
+var h=0;try{h=box.offsetHeight||0;}catch(_){}
+if(!h)h=26;
+var retry=(!_NXUA._noRoomAt)||((Date.now()-_NXUA._noRoomAt)>30000);
+if(sec&&retry)_NXUA.reserve(h+8);else if(!sec)_NXUA.reserve(0);
+var r=null,ar=null;
+try{r=ref.getBoundingClientRect();}catch(_){}
+try{ar=anc?anc.getBoundingClientRect():null;}catch(_){}
+if(!r||(!r.width&&!r.height)){box.style.display="none";_NXUA.reserve(0);return;}
+var floor=ar?(ar.bottom+2):(r.top+2);
+var top=r.bottom-h-4;
+var room=(top>=floor);
+if(room){_NXUA._noRoomAt=0;}
+else{
+_NXUA._noRoomAt=Date.now();
+_NXUA.reserve(0);
+try{r=ref.getBoundingClientRect();}catch(_){}
+top=r.top-h-4;
+}
+if(vh&&(top+h)>vh-2)top=vh-h-2;
+if(top<2)top=2;
+var w=Math.max(90,Math.round(r.width)-8);
+box.style.left=Math.max(2,Math.round(r.left)+4)+"px";
+box.style.top=Math.round(top)+"px";
+box.style.width=w+"px";
+box.style.maxWidth=w+"px";
+}catch(_){}};
+_NXUA.probe=function(){try{
+var sec=_NXUA.sectionEl(),anc=_NXUA.anchorEl(),box=_NXUA.box;
+var rc=function(e){try{var q=e.getBoundingClientRect();return {t:Math.round(q.top),b:Math.round(q.bottom),l:Math.round(q.left),w:Math.round(q.width),h:Math.round(q.height)};}catch(_){return null;}};
+var cs=function(e){try{var c=getComputedStyle(e);return {display:c.display,dir:c.flexDirection,h:c.height,minH:c.minHeight,maxH:c.maxHeight,padB:c.paddingBottom,over:c.overflow};}catch(_){return null;}};
+return {
+section:sec?{cls:String(sec.className).slice(0,90),tag:sec.tagName,rect:rc(sec),style:cs(sec)}:null,
+parent:(sec&&sec.parentNode)?{cls:String(sec.parentNode.className).slice(0,90),tag:sec.parentNode.tagName,rect:rc(sec.parentNode),style:cs(sec.parentNode)}:null,
+boutons:anc?{cls:String(anc.className).slice(0,90),rect:rc(anc)}:null,
+float:box?{rect:rc(box)}:null,
+reserve:_NXUA._resv,varH:document.documentElement.style.getPropertyValue("--nx-ua-h"),
+bandeReelle:(sec&&anc)?Math.round(sec.getBoundingClientRect().bottom-anc.getBoundingClientRect().bottom):null,
+placeEnHaut:!!_NXUA._noRoomAt,vh:window.innerHeight};
+}catch(e){return {erreur:String(e&&e.message)};}};
 _NXUA.mount=function(){try{
 if(!_NXUA.enabled()||_NXUA.fails>=3)return;
 var api=_NXUA.api();if(!api||typeof api._renderButtons!=="function")return;
 if(!_NXUA.count())return;
-var host=_NXUA.host();if(!host)return;
-try{if(host.querySelector&&host.querySelector("[data-nx-ua=\"1\"]"))return;}catch(_){}
+if(!_NXUA.anchorEl())return;
+if(_NXUA.box&&((typeof _NXUA.box.isConnected==="boolean")?_NXUA.box.isConnected:!!_NXUA.box.parentNode)){_NXUA.place();return;}
 var C=(window.Vencord&&Vencord.Webpack&&Vencord.Webpack.Common)||{};
 _NXUA.style();
 var box=document.createElement("div");
+box.id=_NXUA.FLOATID;
 box.setAttribute("data-nx-ua","1");
-box.style.cssText="display:flex;align-items:center;flex-wrap:wrap;gap:2px;min-width:0;";
-var anchor=null;
-try{var kids=host.children||[];
-for(var q=kids.length-1;q>=0;q--){var el=kids[q];
-var lab="";try{lab=(el.getAttribute&&(el.getAttribute("aria-label")||""))||"";}catch(_){}
-if(/param|setting|r\u00e9glage|reglage/i.test(lab)){anchor=el;break;}}
-if(!anchor&&host.lastElementChild)anchor=host.lastElementChild;
-}catch(_){}
-try{if(anchor&&host.insertBefore)host.insertBefore(box,anchor);else host.appendChild(box);}catch(_){host.appendChild(box);}
-_NXUA.fixLayout(host);
+box.style.cssText="position:fixed;z-index:1002;display:flex;align-items:center;flex-wrap:wrap;gap:2px;row-gap:2px;pointer-events:auto;";
 var els=null;
-try{els=api._renderButtons({nameplate:null,iconForeground:_NXUA.iconFg(),hideTooltips:false});}catch(e){_NXUA.fails++;_NXUA.restoreLayout();try{host.removeChild(box);}catch(_){}return;}
+try{els=api._renderButtons({nameplate:null,iconForeground:_NXUA.iconFg(),hideTooltips:false});}catch(e){_NXUA.fails++;return;}
 var node=els;
 try{if(F&&F.Fragment)node=i(F.Fragment,null,els);}catch(_){node=els;}
+if(document.body&&document.body.appendChild)document.body.appendChild(box);
 try{
 if(typeof C.createRoot==="function"){_NXUA.root=C.createRoot(box);_NXUA.root.render(node);}
 else if(C.ReactDOM&&typeof C.ReactDOM.createRoot==="function"){_NXUA.root=C.ReactDOM.createRoot(box);_NXUA.root.render(node);}
 else if(C.ReactDOM&&typeof C.ReactDOM.render==="function"){C.ReactDOM.render(node,box);_NXUA.root={legacy:true,el:box};}
-else {_NXUA.fails++;try{host.removeChild(box);}catch(_){}return;}
-}catch(e2){_NXUA.fails++;_NXUA.restoreLayout();try{host.removeChild(box);}catch(_){}return;}
+else {_NXUA.fails++;try{if(box.parentNode)box.parentNode.removeChild(box);}catch(_){}return;}
+}catch(e2){_NXUA.fails++;try{if(box.parentNode)box.parentNode.removeChild(box);}catch(_){}return;}
 _NXUA.box=box;_NXUA.mounted=true;_NXUA.at=Date.now();
+_NXUA.place();
+try{setTimeout(_NXUA.place,60);setTimeout(_NXUA.place,350);setTimeout(_NXUA.place,1200);}catch(_){}
+if(!_NXUA._resize){_NXUA._resize=true;
+try{window.addEventListener("resize",function(){_NXUA.place();},{passive:true});}catch(_){}}
 }catch(_){}};
 _NXUA.unmount=function(){try{
 if(_NXUA.root&&typeof _NXUA.root.unmount==="function"){try{_NXUA.root.unmount();}catch(_){}}
 else if(_NXUA.root&&_NXUA.root.legacy){try{var C=Vencord.Webpack.Common;if(C.ReactDOM&&C.ReactDOM.unmountComponentAtNode)C.ReactDOM.unmountComponentAtNode(_NXUA.root.el);}catch(_){}}
 _NXUA.root=null;_NXUA.mounted=false;
+try{_NXUA.reserve(0);}catch(_){}
 var kill=function(el){if(!el)return;
 try{el.setAttribute&&el.setAttribute("data-nx-ua","off");}catch(_){}
 try{el.style.display="none";}catch(_){}
@@ -3000,6 +3310,7 @@ _NXUA.panic=function(why){try{
 if(_NXUA._panicked)return;_NXUA._panicked=true;
 _NXUA._en=false;try{_NXDB.set(_NXUA.KEY,"0");}catch(_){}
 try{if(_NXUA.iv)clearInterval(_NXUA.iv);}catch(_){}_NXUA.iv=null;
+try{if(_NXUA.pv)clearInterval(_NXUA.pv);}catch(_){}_NXUA.pv=null;
 try{_NXUA.unmount();}catch(_){}
 try{if(window._NXERR){_NXERR.push("icones :: desactivees automatiquement ("+why+")");if(_NXERR.length>20)_NXERR.shift();}}catch(_){}
 try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Restauration des icones desactivee : elle provoquait une erreur d affichage.",0);}catch(_){}
@@ -3025,7 +3336,8 @@ if(box){_NXUA.box=box;return;}}
 _NXUA.mount();
 }catch(_){}};
 _NXUA.status=function(){return {enabled:_NXUA.enabled(),registered:_NXUA.count(),mounted:!!_NXUA.mounted,failed:_NXUA.fails>=3};};
-try{setTimeout(_NXUA.tick,5000);setTimeout(_NXUA.tick,9000);_NXUA.iv=setInterval(_NXUA.tick,5000);}catch(_){}
+try{setTimeout(_NXUA.tick,5000);setTimeout(_NXUA.tick,9000);_NXUA.iv=setInterval(function(){_NXUA.tick();},4000);
+_NXUA.pv=setInterval(function(){try{if(document.hidden)return;if(_NXUA.mounted)_NXUA.place();}catch(_){}},1000);}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXUA");if(window._NXERR)_NXERR.push("module _NXUA :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXUA desactive:",_nxE);}catch(_){}}
 }var _NXBAN=window._NXBAN||(window._NXBAN={});
 if(!_NXBAN.boot){try{_NXBAN.boot=true;
@@ -3098,7 +3410,7 @@ var id=_NXBAN.myId();
 if(!id){setTimeout(_NXBAN.check,4000);return;}
 try{var cached=_NXDB.get(_NXBAN.KEY);
 if(cached){var cj=JSON.parse(cached);if(cj&&cj.id===id){_NXBAN.enforce(id);}}}catch(_){}
-fetch(_NXBAN.URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw 0;return r.text();}).then(function(t){
+_NXNETX.go(_NXBAN.URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw 0;return r.text();}).then(function(t){
 var list=_NXBAN.parse(t);
 if(list[id]){_NXBAN.enforce(id);}
 else{try{_NXDB.del(_NXBAN.KEY);}catch(_){}_NXBAN.lift();}
@@ -3201,7 +3513,7 @@ if(!id){if((_NXBADGE.tries||0)<20){_NXBADGE.tries++;setTimeout(function(){_NXBAD
 if(window._NXPR&&_NXPR.cfg&&_NXPR.cfg.noRegistry){_NXBADGE.users=Object.create(null);_NXBADGE.count=0;return;}
 if(!force&&_NXBADGE.at&&(Date.now()-_NXBADGE.at)<3600000)return;
 if(_NXBADGE.busy)return;_NXBADGE.busy=true;
-fetch(_NXBADGE.API,{method:"POST",headers:{"Content-Type":"application/json","x-nexium-key":_NXPR.CKEY,"apikey":_NXPR.CKEY,"Authorization":"Bearer "+_NXPR.CKEY},
+_NXNETX.go(_NXBADGE.API,{method:"POST",headers:{"Content-Type":"application/json","x-nexium-key":_NXPR.CKEY,"apikey":_NXPR.CKEY,"Authorization":"Bearer "+_NXPR.CKEY},
 body:JSON.stringify({action:"sync",user_id:id,version:_NXUP.VERSION})})
 .then(function(r){return r.json();}).then(function(j){
 _NXBADGE.busy=false;
