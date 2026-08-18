@@ -1225,3 +1225,15 @@
 [2026-Aug-16 19:11:33.669 +02:00][28596: 3648][info ] RtlExitUserProcess hook successful
 [2026-Aug-16 19:11:33.669 +02:00][28596: 3648][info ] Removed 1 old WER discord registry entries
 [2026-Aug-16 19:11:33.669 +02:00][28596: 3648][info ] InitializeWERHandler success
+[2026-Aug-17 11:56:33.583 +02:00][23012:18280][info ] Logging initialized
+[2026-Aug-17 11:56:34.476 +02:00][23012:18280][info ] RtlExitUserProcess hook successful
+[2026-Aug-17 11:56:34.477 +02:00][23012:18280][info ] Removed 1 old WER discord registry entries
+[2026-Aug-17 11:56:34.477 +02:00][23012:18280][info ] InitializeWERHandler success
+[2026-Aug-17 16:18:05.080 +02:00][23012:18280][info ] UninitializeWERHandler success
+[2026-Aug-17 16:18:09.833 +02:00][23012:18280][info ] Logging initialized
+[2026-Aug-17 16:18:10.664 +02:00][23012:18280][info ] Removed 0 old WER discord registry entries
+[2026-Aug-17 16:18:10.664 +02:00][23012:18280][info ] InitializeWERHandler success
+[2026-Aug-18 03:19:19.430 +02:00][ 4388:17776][info ] Logging initialized
+[2026-Aug-18 03:19:20.420 +02:00][ 4388:17776][info ] RtlExitUserProcess hook successful
+[2026-Aug-18 03:19:20.420 +02:00][ 4388:17776][info ] Removed 1 old WER discord registry entries
+[2026-Aug-18 03:19:20.420 +02:00][ 4388:17776][info ] InitializeWERHandler success

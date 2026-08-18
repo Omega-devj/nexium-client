@@ -5,6 +5,7 @@ const DIR = path.join(__dirname, "resources", "equicord");
 const JS = path.join(DIR, "renderer.js");
 const SUM = path.join(DIR, "renderer.js.nxsum");
 const CHECK = process.argv.includes("--check");
+const BUMP = process.argv.includes("--bump");
 
 function nxSum(s) {
   let h = 5381;
@@ -17,7 +18,16 @@ if (!fs.existsSync(JS)) {
   process.exit(2);
 }
 
-const src = fs.readFileSync(JS, "utf8");
+let src = fs.readFileSync(JS, "utf8");
+
+if (BUMP) {
+  const m = src.match(/_NXUP\.VERSION="(\d+)"/);
+  if (!m) { console.error("refus : _NXUP.VERSION introuvable"); process.exit(2); }
+  const next = String(parseInt(m[1], 10) + 1);
+  src = src.replace(m[0], '_NXUP.VERSION="' + next + '"');
+  fs.writeFileSync(JS, src);
+  console.log("version " + m[1] + " -> " + next);
+}
 
 let bad = null;
 if (src.length < 500000) bad = "taille insuffisante (" + src.length + ")";
