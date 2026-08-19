@@ -713,6 +713,161 @@ if(document.body)document.body.appendChild(ov);
 _NXV.RXVERIF=/(verif|verify|verification|captcha|authentif|acces|access|entrer|unlock|debloquer)/i;
 _NXV.RXOAUTH=/(oauth2\/authorize|autoriser l application|authorize the app|connecte ton compte|connect your account)/i;
 _NXV.guildSeen=Object.create(null);
+_NXV.MASKID="nx-share-mask";
+_NXV.MASKSEL={
+dms:'[class*="privateChannels"],[data-list-id="private-channels"]',
+names:'[class*="nameTag"],[class*="username"],[class*="usernameContainer"]',
+members:'[class*="membersWrap"]',
+content:'[id^="message-content-"],[class*="messageContent"]',
+avatars:'[class*="avatar"] img,[class*="wrapper"] > svg foreignObject img'
+};
+_NXV.maskCfg=function(){try{
+var raw=_NXDB.get("nexium_sharemask");var d=raw?JSON.parse(raw):null;
+if(!d||typeof d!=="object")d={};
+if(typeof d.auto!=="boolean")d.auto=true;
+if(typeof d.dms!=="boolean")d.dms=true;
+if(typeof d.names!=="boolean")d.names=true;
+if(typeof d.members!=="boolean")d.members=true;
+if(typeof d.content!=="boolean")d.content=false;
+return d;}catch(_){return {auto:true,dms:true,names:true,members:true,content:false};}};
+_NXV.mcfg=_NXV.maskCfg();
+_NXV.maskSave=function(){try{_NXDB.set("nexium_sharemask",JSON.stringify(_NXV.mcfg));}catch(_){}};
+_NXV.maskCount=function(){try{
+var o={};for(var k in _NXV.MASKSEL){try{o[k]=document.querySelectorAll(_NXV.MASKSEL[k]).length;}catch(_){o[k]=0;}}
+return o;}catch(_){return {};}};
+_NXV.maskCss=function(){try{
+var c=_NXV.mcfg,out=[];
+if(c.dms)out.push(_NXV.MASKSEL.dms+"{filter:blur(9px)!important;}");
+if(c.names)out.push(_NXV.MASKSEL.names+"{filter:blur(5px)!important;}");
+if(c.members)out.push(_NXV.MASKSEL.members+"{display:none!important;}");
+if(c.content)out.push(_NXV.MASKSEL.content+"{filter:blur(5px)!important;}");
+out.push('#'+_NXV.MASKID+'-tag{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:2147483000;'
++'padding:6px 14px;border-radius:99px;background:rgba(11,11,12,.92);border:1px solid #2a2a30;'
++'color:#e6c48a;font:700 11px system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;pointer-events:none;}');
+return out.join("\n");}catch(_){return "";}};
+_NXV.maskOn=function(why){try{
+if(_NXV.maskActive)return;
+_NXV.maskActive=true;
+var el=document.getElementById(_NXV.MASKID);
+if(!el){el=document.createElement("style");el.id=_NXV.MASKID;if(document.head)document.head.appendChild(el);}
+el.textContent=_NXV.maskCss();
+if(!document.getElementById(_NXV.MASKID+"-tag")&&document.body){
+var t=document.createElement("div");t.id=_NXV.MASKID+"-tag";
+t.textContent="Masque de partage actif";
+document.body.appendChild(t);}
+_NXV.log("masque","masque de partage active"+(why?" ("+why+")":""));
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Masque de partage actif : MP floutes, pseudos masques.",1);}catch(_){}
+}catch(_){}};
+_NXV.maskOff=function(){try{
+if(!_NXV.maskActive)return;
+_NXV.maskActive=false;
+var el=document.getElementById(_NXV.MASKID);if(el&&el.parentNode)el.parentNode.removeChild(el);
+var t=document.getElementById(_NXV.MASKID+"-tag");if(t&&t.parentNode)t.parentNode.removeChild(t);
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Masque de partage retire.",1);}catch(_){}
+}catch(_){}};
+_NXV.maskToggle=function(){try{if(_NXV.maskActive)_NXV.maskOff();else _NXV.maskOn("manuel");}catch(_){}};
+_NXV.maskSet=function(k,v){try{_NXV.mcfg[k]=!!v;_NXV.maskSave();
+if(_NXV.maskActive){var el=document.getElementById(_NXV.MASKID);if(el)el.textContent=_NXV.maskCss();}
+if(_NXV.notify)_NXV.notify();}catch(_){}};
+_NXV.EXIFGPS=0x8825;
+_NXV.exifRead=function(buf){try{
+var v=new DataView(buf);
+if(v.byteLength<4)return null;
+if(v.getUint16(0)!==0xFFD8)return {type:"non-jpeg"};
+var off=2,len=v.byteLength;
+while(off<len-4){
+if(v.getUint8(off)!==0xFF){off++;continue;}
+var marker=v.getUint8(off+1);
+if(marker===0xD8||marker===0x01||(marker>=0xD0&&marker<=0xD7)){off+=2;continue;}
+if(marker===0xDA)break;
+var size=v.getUint16(off+2);
+if(marker===0xE1){
+var base=off+4;
+var tag="";for(var a=0;a<4;a++)tag+=String.fromCharCode(v.getUint8(base+a));
+if(tag==="Exif"){
+var t0=base+6;
+var le=v.getUint16(t0)===0x4949;
+var ifd=v.getUint32(t0+4,le);
+var p=t0+ifd;
+if(p+2>len)return {exif:true};
+var n=v.getUint16(p,le);p+=2;
+var out={exif:true,gps:false,marque:"",modele:"",date:""};
+for(var b=0;b<n&&p+12<=len;b++,p+=12){
+var t=v.getUint16(p,le);
+var typ=v.getUint16(p+2,le);
+var cnt=v.getUint32(p+4,le);
+var val=v.getUint32(p+8,le);
+if(t===_NXV.EXIFGPS){out.gps=true;continue;}
+if((t===0x010F||t===0x0110||t===0x0132)&&typ===2&&cnt>0&&cnt<80){
+var sp=(cnt<=4)?(p+8):(t0+val),str="";
+for(var c=0;c<cnt-1&&sp+c<len;c++){var ch=v.getUint8(sp+c);if(ch)str+=String.fromCharCode(ch);}
+str=str.trim();
+if(t===0x010F)out.marque=str;else if(t===0x0110)out.modele=str;else out.date=str;}}
+return out;}}
+off+=2+size;}
+return {exif:false};}catch(_){return null;}};
+_NXV.exifVerdict=function(info,nom){try{
+if(!info)return null;
+if(info.type==="non-jpeg")return null;
+if(!info.exif)return null;
+var why=[];
+if(info.gps)why.push("des coordonnees GPS");
+if(info.marque||info.modele)why.push("le modele de l appareil ("+((info.marque+" "+info.modele).trim())+")");
+if(info.date)why.push("la date de prise de vue");
+if(!why.length)return null;
+return {grave:!!info.gps,pourquoi:why,nom:nom||"cette image"};}catch(_){return null;}};
+_NXV.exifScan=function(file,cb){try{
+if(!file||!file.name||!/\.(jpe?g)$/i.test(file.name)){cb&&cb(null);return;}
+if(typeof FileReader!=="function"){cb&&cb(null);return;}
+var fr=new FileReader();
+fr.onload=function(){try{cb&&cb(_NXV.exifVerdict(_NXV.exifRead(fr.result),file.name));}catch(_){cb&&cb(null);}};
+fr.onerror=function(){cb&&cb(null);};
+fr.readAsArrayBuffer(file.slice(0,Math.min(file.size,262144)));
+}catch(_){cb&&cb(null);}};
+_NXV.uploaderMod=function(){try{
+var C=(window.Vencord&&Vencord.Webpack&&Vencord.Webpack.Common)||{};
+if(C.CloudUploader&&typeof C.CloudUploader.uploadFiles==="function")return C.CloudUploader;
+var W=(window.Vencord&&Vencord.Webpack)||null;
+if(W&&W.findByProps){var m=W.findByProps("uploadFiles");if(m&&typeof m.uploadFiles==="function")return m;}
+return null;}catch(_){return null;}};
+_NXV.exifReady=function(){return !!_NXV.uploaderMod();};
+_NXV.wireUpload=function(){try{
+if(_NXV._upWired)return;
+var M=_NXV.uploaderMod();
+if(!M){if((_NXV._upTry=(_NXV._upTry||0)+1)<20)setTimeout(_NXV.wireUpload,3000);return;}
+if(M.uploadFiles.__nx){_NXV._upWired=true;return;}
+var orig=M.uploadFiles.bind(M);
+var patched=function(payload){try{
+if(_NXV.cfg.selfGuard&&payload&&payload.uploads&&payload.uploads.length){
+for(var a=0;a<payload.uploads.length&&a<6;a++){
+var f=payload.uploads[a]&&(payload.uploads[a].item&&payload.uploads[a].item.file||payload.uploads[a].file);
+if(f)_NXV.exifScan(f,function(v){try{if(!v)return;
+_NXV.log("exif",v.nom+" contient "+v.pourquoi.join(", "));
+if(window._NXPR){_NXPR.logThreat("exif",v.nom+" : "+v.pourquoi[0]);_NXPR.saveStats();}
+_NXV.exifWarn(v);}catch(_){}});}}}catch(_){}
+return orig.apply(M,arguments);};
+patched.__nx=true;M.uploadFiles=patched;_NXV._upWired=true;}catch(_){}};
+_NXV.exifWarn=function(v){try{
+if(!v)return;
+var msg=v.nom+" contient "+v.pourquoi.join(", ")+(v.grave?" — ta position exacte peut en etre deduite.":".");
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast(msg,0);}catch(_){}
+try{if(window._NXAU&&_NXAU.notifSys)_NXAU.notifSys("Nexium — metadonnees d image",msg);}catch(_){}
+}catch(_){}};
+_NXV.officialClaim=function(name){try{
+var n=String(name||"").toLowerCase();
+if(!/(officiel|official|support|staff|hq|verified|verifie)/.test(n))return false;
+for(var a=0;a<_NXPR.BRANDS.length;a++){if(n.indexOf(_NXPR.BRANDS[a])>=0)return true;}
+return false;}catch(_){return false;}};
+_NXV.guildBadge=function(g){try{
+var f=(g&&(g.features||g.guildFeatures))||null;
+if(!f)return "";
+var has=function(x){try{
+if(typeof f.has==="function")return f.has(x);
+if(Array.isArray(f))return f.indexOf(x)>=0;
+return !!f[x];}catch(_){return false;}};
+if(has("VERIFIED"))return "verifie";
+if(has("PARTNERED"))return "partenaire";
+return "";}catch(_){return "";}};
 _NXV.checkGuild=function(gid){try{
 if(!_NXV.cfg.guildGuard||!gid)return;
 if(_NXV.guildSeen[gid])return;_NXV.guildSeen[gid]=1;
@@ -739,6 +894,10 @@ else if(verif>0&&total<=8){risk+=1;why.push("salon de verification present");}
 try{var brand=0;var nm=String(g.name||"").toLowerCase();
 for(var c=0;c<_NXPR.BRANDS.length;c++){if(nm.indexOf(_NXPR.BRANDS[c])>=0){brand=1;break;}}
 if(brand){risk+=2;why.push("nom imitant une marque connue");}
+try{var badge=_NXV.guildBadge(g);
+if(brand&&!badge){risk+=3;why.push("aucun badge officiel malgre un nom de marque");}
+if(_NXV.officialClaim(g.name)&&!badge){risk+=4;why.push("se presente comme officiel sans badge Discord");}
+if(badge){risk-=3;why.push("serveur "+badge+" par Discord");}}catch(_){}
 if(/nitro|giveaway|gratuit|free|airdrop|cadeau|recompense/.test(nm)){risk+=2;why.push("nom oriente arnaque");}}catch(_){}
 if(risk>=4){
 _NXV.log("serveur",(g.name||gid)+" - "+why.slice(0,3).join(", "));
@@ -782,7 +941,7 @@ var base=l.split("-")[0];
 _NXI.lang=(base==="en")?"en":"fr";
 _NXI.locale=l;
 return _NXI.lang;}catch(_){_NXI.lang="fr";return "fr";}};
-_NXI.en={"en veille": "snoozed", "declencheurs": "triggers", "actions": "actions", "modeles": "templates", "compteurs": "counters", "evenements branches": "events hooked", "evenements non branches": "events not hooked", "Memoire": "Memory", "Compteurs": "Counters", "Des valeurs que tes taches font monter, et que d autres taches peuvent tester.": "Values your tasks raise, and that other tasks can test.", "Aucun compteur. Ajoute une tache avec l action « Incrementer un compteur ».": "No counter yet. Add a task with the “Increment a counter” action.", "Carnet": "Notebook", "memo(s) enregistre(s).": "note(s) saved.", "Copier": "Copy", "Vider le carnet ?": "Clear the notebook?", "Retirer ce memo": "Remove this note", "Aucun memo. Utilise l action « Enregistrer un memo » dans une tache.": "No notes yet. Use the “Save a note” action in a task.", "Zero": "Reset", "Retirer": "Remove", "Dupliquer": "Duplicate", "Rechercher une tache…": "Search a task…", "Rechercher un modele…": "Search a template…", "Aucune tache ne correspond.": "No task matches.", "Aucun modele ne correspond.": "No template matches.", "regles pretes a l emploi. Un clic les ajoute, tu peux ensuite les ajuster.": "ready-made rules. One click adds them, then you can adjust them.", "Action": "Action", "Tache visee": "Target task", "Cree d abord une autre tache pour pouvoir l enchainer.": "Create another task first so you can chain to it.", "Cree d abord une autre tache.": "Create another task first.", "Tache a mettre en veille": "Task to snooze", "Minutes de veille": "Snooze minutes", "Nombre": "Number", "Variables : {heure} {date} {tache} {auteur} {contenu} {salon} {serveur} {lien} {compteur:nom}": "Variables: {heure} {date} {tache} {auteur} {contenu} {salon} {serveur} {lien} {compteur:name}", "Pas plus d une fois toutes les (min)": "At most once every (min)", "Maximum par jour": "Maximum per day", "Nom du serveur contient": "Server name contains", "mon serveur": "my server", "Vocal": "Voice", "peu importe": "either way", "en vocal": "in voice", "hors vocal": "out of voice", "Compteur": "Counter", "Nom du compteur": "Counter name", "Seuil": "Threshold", "Pas en ne pas deranger": "Not while on Do Not Disturb", "La tache se tait quand ton statut est ne pas deranger.": "The task stays quiet while your status is Do Not Disturb.", "Pars d un modele pret a l emploi, ou compose ta propre regle : un declencheur, des conditions, une action.": "Start from a ready-made template, or compose your own rule: a trigger, conditions, an action.", "Des regles simples qui travaillent pour toi : un declencheur, des conditions, une action. Tout s execute localement, aucun message n est envoye a ta place.": "Simple rules that work for you: a trigger, conditions, an action. Everything runs locally, and no message is ever sent on your behalf.", "Automatisation": "Automation", "Des regles simples qui travaillent pour toi : un declencheur, une condition, une action. Tout s execute localement, aucun message n est envoye a ta place.": "Simple rules that work for you: a trigger, a condition, an action. Everything runs locally, and no message is ever sent on your behalf.", "Sections de Nexium Auto": "Nexium Auto sections", "Moteur": "Engine", "Actif": "Running", "En pause": "Paused", "Activer le moteur": "Turn the engine on", "tache(s) active(s) sur": "active task(s) out of", "messages branches": "messages hooked", "messages non branches": "messages not hooked", "menaces branchees": "threats hooked", "menaces non branchees": "threats not hooked", "action(s) indisponible(s)": "action(s) unavailable", "toutes les actions disponibles": "all actions available", "Taches": "Tasks", "Modeles": "Templates", "Editeur": "Editor", "Aucune tache pour l instant": "No task yet", "Pars d un modele pret a l emploi, ou compose ta propre regle : un declencheur, une condition, une action.": "Start from a ready-made template, or compose your own rule: a trigger, a condition, an action.", "Voir les modeles": "Browse templates", "Composer une regle": "Compose a rule", "Taches intelligentes": "Smart tasks", "Des regles pretes a l emploi. Un clic les ajoute, tu peux ensuite les ajuster.": "Ready-made rules. One click adds them, then you can adjust them.", "Quand": "When", "Alors": "Then", "Seulement": "Only", "Seulement si": "Only if", "Laisse vide pour ne poser aucune condition.": "Leave empty for no condition at all.", "Tester": "Test", "Editer": "Edit", "Supprimer": "Delete", "Supprimer cette tache ?": "Delete this task?", "Ajouter": "Add", "action indisponible": "action unavailable", "indisponible": "unavailable", "Modifier la tache": "Edit the task", "Un declencheur, des conditions facultatives, une action.": "A trigger, optional conditions, an action.", "Nom": "Name", "Rappel du soir": "Evening reminder", "Heure (HH:MM)": "Time (HH:MM)", "Minutes": "Minutes", "Valeur": "Value", "Texte": "Text", "Nombre de jours": "Number of days", "Statut a appliquer": "Status to apply", "Cette action n est pas disponible sur ce client : elle ne s executera pas.": "This action is not available on this client: it will not run.", "Variables disponibles : {heure}, {tache}, {auteur}.": "Available variables: {heure}, {tache}, {auteur}.", "Jours": "Days", "A partir de": "From", "Jusqu a": "Until", "Messages prives uniquement": "Direct messages only", "Ignore tout ce qui arrive dans un serveur.": "Ignores anything coming from a server.", "Enregistrer": "Save", "Creer la tache": "Create the task", "Annuler": "Cancel", "Journal d execution": "Execution log", "Les dernieres actions declenchees par le moteur.": "The latest actions fired by the engine.", "Aucune execution enregistree pour le moment.": "No execution recorded yet.", "echec": "failed", "Le moteur d automatisation n a pas demarre sur ce client.": "The automation engine did not start on this client.", "Redemarre Discord. Si le probleme persiste, le module _NXAU a ete desactive par une erreur au chargement.": "Restart Discord. If the problem persists, the _NXAU module was disabled by a load-time error.", "Version locale non publiée": "Unpublished local build", "Version locale en avance sur le dépôt": "Local build ahead of the repository", "Ce client tourne une build v": "This client is running build v", " qui n a pas encore été publiée (le dépôt est en v": ", which has not been published yet (the repository is on v", "). Aucune mise à jour ne sera proposée tant que le dépôt n aura pas dépassé cette version.": "). No update will be offered until the repository goes past this version.", "build non publiée": "unpublished build", "Locale": "Local", "Version installée": "Installed version", "Version du dépôt": "Repository version", "Mise à jour dispo": "Update available", "Client à jour": "Client up to date", "Mise à jour disponible": "Update available", "Dépôt injoignable": "Repository unreachable", "Oui": "Yes", "Non": "No", "Aperçu": "Overview", "Boucliers": "Shields", "Coffre-fort": "Vault", "Journal": "Log", "Base": "Database", "Sections de Nexium Protect": "Nexium Protect sections", "Niveau de protection": "Protection level", "Protection maximale": "Maximum protection", "Protection partielle": "Partial protection", "Protection faible": "Weak protection", "protections actives sur": "active protections out of", "Menaces bloquées": "Threats blocked", "Liens sûrs": "Safe links", "Liens analysés": "Links scanned", "Arnaques": "Scams", "Rechercher un bouclier…": "Search a shield…", "Rechercher une protection…": "Search a protection…", "Effacer la recherche": "Clear search", "Aucun bouclier ne correspond à cette recherche.": "No shield matches this search.", "Aucune protection ne correspond à cette recherche.": "No protection matches this search.", "Liens et messages": "Links and messages", "Ce que Nexium inspecte à la réception.": "What Nexium inspects as it arrives.", "Contenus reçus": "Incoming content", "Pièces jointes, aperçus, invitations et messages privés.": "Attachments, embeds, invites and direct messages.", "Analyse avancée": "Advanced analysis", "Contrôles supplémentaires sur la forme des liens et des demandes.": "Extra checks on the shape of links and requests.", "État du coffre-fort": "Vault status", "Ces protections n avertissent pas : elles bloquent.": "These protections do not warn: they block.", "Exfiltrations bloquées": "Exfiltrations blocked", "Sources externes CSS": "External CSS sources", "Intégrité": "Integrity", "Vérifier": "Verify", "Ressources externes dans tes thèmes": "External resources in your themes", "Ton adresse IP est transmise à ces serveurs à chaque démarrage.": "Your IP address is sent to these servers on every start-up.", "Bloquer": "Block", "Autoriser": "Allow", "Le client agit au lieu de prévenir.": "The client acts instead of warning.", "Protections sur ton compte et sur ce que tu envoies.": "Protections on your account and on what you send.", "Ce que Nexium fait quand quelque chose tourne mal.": "What Nexium does when something goes wrong.", "Plugins à surveiller": "Plugins to watch", "Réanalyser": "Re-scan", "risque élevé": "high risk", "à vérifier": "check it", "signal": "signal", "Le coffre-fort n est pas disponible : le module de protection du compte n a pas démarré.": "The vault is unavailable: the account protection module did not start.", "Quarantaine": "Quarantine", "Liens bloqués avant ouverture. Tu peux les ouvrir quand même ou autoriser le domaine.": "Links blocked before opening. You can still open them, or allow the domain.", "Tout vider": "Clear all", "Vider la quarantaine ?": "Clear the quarantine?", "Ouvrir quand même": "Open anyway", "Ouvrir ce lien malgré l alerte ?": "Open this link despite the warning?", "Signaler": "Report", "Retirer": "Remove", "Exporter": "Export", "Vider le journal des menaces ?": "Clear the threat log?", "Journal copié dans le presse-papiers": "Log copied to the clipboard", "Filtrer le journal": "Filter the log", "Filtrer (domaine, type…)": "Filter (domain, type…)", "Aucune menace ne correspond au filtre.": "No threat matches the filter.", "Supprimer cette entrée": "Delete this entry", "bloqué": "blocked", "thème": "theme", "Rien à afficher pour l instant : aucune menace bloquée, aucun domaine autorisé.": "Nothing to show yet: no threat blocked, no domain allowed.", "Vérificateur de lien": "Link checker", "Colle un lien suspect : Nexium l analyse et tente de démasquer sa vraie destination.": "Paste a suspicious link: Nexium scans it and tries to reveal its real destination.", "Lien à analyser": "Link to scan", "Analyser": "Scan", "Analyse…": "Scanning…", "Chargement de la base de menaces en cours… l analyse sera complète dans quelques secondes.": "Loading the threat database… the scan will be complete in a few seconds.", "Le scanner de liens est désactivé. Active-le dans l onglet Boucliers.": "The link scanner is off. Turn it on in the Shields tab.", "Dangereux — logger d IP": "Dangerous — IP logger", "Dangereux — hameçonnage": "Dangerous — phishing", "Dangereux — domaine trompeur": "Dangerous — deceptive domain", "Dangereux": "Dangerous", "Suspect — destination masquée": "Suspicious — hidden destination", "Aucune menace détectée": "No threat detected", "Bloqué": "Blocked", "Protection désactivée": "Protection off", "Domaine": "Domain", "Redirige vers": "Redirects to", "N ouvre pas ce lien. Il peut voler ton adresse IP, te géolocaliser ou dérober ton compte.": "Do not open this link. It can steal your IP address, locate you, or take over your account.", "Ce lien est dangereux mais la protection correspondante est désactivée — active-la dans l onglet Boucliers.": "This link is dangerous but the matching protection is off — turn it on in the Shields tab.", "Conseils de sécurité": "Security tips", "Ne colle jamais de code dans la console Discord — c est le piège numéro un pour voler un compte.": "Never paste code into the Discord console — it is the number one trick for stealing an account.", "Ne scanne jamais un QR code de connexion envoyé par un inconnu.": "Never scan a login QR code sent by a stranger.", "Un « Nitro gratuit » par message privé est toujours une arnaque.": "A “free Nitro” offer in a DM is always a scam.", "Vérifie toujours le domaine exact d un lien avant de te connecter.": "Always check the exact domain of a link before signing in.", "Aucun code à 6 chiffres ne doit jamais être communiqué, à personne.": "A 6-digit code must never be shared with anyone, ever.", "Protect incomplet": "Protect incomplete", "fonction(s) manquante(s) : la protection n est pas complète. Réinstalle ou mets à jour le client.": "missing function(s): protection is incomplete. Reinstall or update the client.", "domaines de confiance": "trusted domains", "chargement en cours…": "loading…", "indisponible": "unavailable", "domaines chargés": "domains loaded", "hors ligne": "offline", "liste volumineuse": "large list", "en cache": "cached", "Actualiser": "Refresh", "Mise à jour de la liste…": "Updating the list…", "Vérification en cours…": "Verification in progress…", "envoyés": "sent", "en attente": "pending", "prêt": "ready", "prochain signalement": "next report", "Dernier échec": "Last failure", "réessai automatique en cours.": "automatic retry in progress.", "Réessayer maintenant": "Retry now", "Réessai en cours…": "Retrying…", "Analyse avancee des messages": "Advanced message analysis", "Cinq controles supplementaires sur ce que tu recois.": "Five extra checks on what you receive.", "Autorisations d'application": "App authorisations", "Analyse les liens d'autorisation OAuth2 et alerte sur les portees dangereuses : ajout de bot, webhook, permissions administrateur.": "Inspects OAuth2 authorisation links and warns about dangerous scopes: adding a bot, webhooks, administrator permissions.", "Schemas d'URI executables": "Executable URI schemes", "Bloque les liens javascript:, vbscript:, file: et data:text/html, qui executent du code au lieu d'ouvrir une page.": "Blocks javascript:, vbscript:, file: and data:text/html links, which run code instead of opening a page.", "Caracteres invisibles et inversion": "Invisible and reversed characters", "Repere les caracteres masques et l'inversion du sens de lecture, qui font afficher autre chose que le vrai lien ou le vrai nom de fichier.": "Spots hidden characters and reading-direction overrides, which make a link or filename display as something other than what it really is.", "Liens vers une adresse IP": "Raw IP address links", "Signale les liens qui pointent vers une adresse IP brute au lieu d'un nom de domaine.": "Flags links pointing at a bare IP address instead of a domain name.", "Demande de code de verification": "Verification code requests", "Alerte quand on te reclame un code a 6 chiffres, un code 2FA ou un code de secours. Ni Discord ni son support ne le demandent jamais.": "Warns when someone asks you for a 6-digit code, a 2FA code or a backup code. Neither Discord nor its support ever ask for these.", "Cette semaine": "This week", "Comparé aux 7 jours précédents.": "Compared with the previous 7 days.", "Tes habitudes": "Your habits", "Lecture automatique, calculée localement.": "Read automatically, computed on your machine.", "Activité sur l'année": "Activity over the year", "Une case par jour sur 12 mois, façon contributions.": "One square per day over 12 months, contribution-graph style.", "Carte de chaleur · 7j × 24h": "Heatmap · 7 days × 24 hours", "Intensité par jour de la semaine et par heure.": "Intensity by weekday and hour.", "Mots les plus utilisés": "Most used words", "Taille proportionnelle à la fréquence. Mots courts et vides exclus.": "Size scales with frequency. Short and filler words excluded.", "Ce qui sort de ta machine": "What leaves your machine", "Transparence complète sur les données transmises.": "Full transparency on the data being sent.", "Journal de connexion": "Connection log", "Mes données Nexium": "My Nexium data", "Contrôle total sur tout ce que Nexium sait de toi, tous modules confondus.": "Full control over everything Nexium knows about you, across all modules.", "Sauvegarde des réglages": "Settings backup", "Copie tous tes réglages Nexium, ou restaure-les sur une autre machine.": "Copy all your Nexium settings, or restore them on another machine.", "Les dernières vérifications et mises à jour vues par le client.": "The most recent checks and updates seen by the client.", "Profil de protection": "Protection profile", "Choisis un réglage global ; tu peux ensuite ajuster chaque bouclier.": "Pick an overall setting, then fine-tune each shield below.", "Protections actives : le client agit au lieu de prévenir.": "Active protections: the client blocks instead of warning.", "Défenses avancées": "Advanced defences", "Protections actives sur ton compte et ce que tu envoies.": "Protections covering your account and what you send.", "Réaction et intégrité": "Response and integrity", "Ce que Nexium fait quand quelque chose tourne mal.": "What Nexium does when something goes wrong.", "Analyse des contenus": "Content inspection", "Ce que Nexium inspecte dans les messages que tu reçois.": "What Nexium inspects in the messages you receive.", "Journal du coffre-fort": "Vault log", "Actions de blocage effectuées.": "Blocking actions carried out.", "Domaines autorisés": "Allowed domains", "Ces domaines ne seront plus signalés.": "These domains will no longer be flagged.", "Signalements": "Reports", "Menaces transmises au serveur Nexium depuis ton compte.": "Threats sent to the Nexium server from your account.", "Base de menaces": "Threat database", "Liste de domaines dangereux mise à jour depuis le dépôt Nexium.": "List of dangerous domains, updated from the Nexium repository.", "Scanner de liens": "Link scanner", "Analyse chaque lien reçu et t'avertit avant l'ouverture d'un site piégé.": "Checks every incoming link and warns you before a trapped site opens.", "Protection anti-doxxing / IP": "Anti-doxxing / IP protection", "Bloque les loggers d'IP (grabify, iplogger…) utilisés pour te géolocaliser.": "Blocks IP loggers (grabify, iplogger and similar) used to locate you.", "Anti-hameçonnage": "Anti-phishing", "Détecte les faux Discord/Steam et les domaines trompeurs (dlscord, punycode…).": "Detects fake Discord and Steam sites, and lookalike domains (dlscord, punycode).", "Alertes anti-arnaque": "Scam alerts", "Repère les messages d'arnaque (faux nitro, dons crypto, cadeaux piégés).": "Spots scam messages: fake Nitro, crypto giveaways, booby-trapped gifts.", "Vigilance comptes suspects": "Suspicious account watch", "Signale les MP venant de comptes très récents (usurpateurs, faux profils).": "Flags direct messages from very new accounts: impersonators and fake profiles.", "Protection console (anti-self-XSS)": "Console protection (anti self-XSS)", "Avertit contre les arnaques « colle ce code dans la console » qui volent ton compte.": "Warns against the \"paste this code in the console\" scam that steals accounts.", "Blocage de l'exfiltration": "Exfiltration blocking", "Analyse des thèmes": "Theme analysis", "Repère les ressources externes chargées par tes thèmes et QuickCSS, qui exposent ton adresse IP.": "Finds external resources loaded by your themes and QuickCSS, which expose your IP address.", "Vérification d'intégrité": "Integrity check", "Compare ton fichier client à la version publiée sur le dépôt officiel pour détecter toute altération locale.": "Compares your client file with the official repository to detect local tampering.", "Chiffrement des données locales": "Local data encryption", "Chiffre tes statistiques, journaux et signalements dans le stockage local.": "Encrypts your stats, logs and reports in local storage.", "Garde-fou avant envoi": "Pre-send safeguard", "Détection de serveur piégé": "Trapped server detection", "Fichiers doublement piégés": "Double-trapped files", "Détecte les archives protégées par mot de passe, celles contenant un exécutable, et les noms utilisant l'inversion de texte.": "Detects password-protected archives, archives containing an executable, and filenames using text reversal.", "Faux cadeaux Nitro": "Fake Nitro gifts", "Vérifie la validité réelle des codes cadeau et repère les faux domaines imitant discord.gift.": "Verifies gift codes for real and spots fake domains imitating discord.gift.", "Surveillance des connexions": "Session monitoring", "Alerte quand une nouvelle session apparaît sur ton compte depuis un autre appareil.": "Alerts you when a new session appears on your account from another device.", "Bloque les domaines signalés par au moins 3 utilisateurs Nexium": "Blocks domains reported by at least 3 Nexium users", "Guide après incident": "Post-incident guide", "Après un blocage, affiche les étapes concrètes à suivre avec accès direct aux réglages Discord.": "After a block, shows the exact steps to take with direct access to Discord settings.", "Audit des plugins": "Plugin audit", "Analyse le code des plugins installés : accès au jeton, envois vers l'extérieur, code obfusqué.": "Scans installed plugin code for token access, outbound requests and obfuscation.", "Surveillance de l'identité": "Identity monitoring", "Alerte si l'e-mail, le téléphone ou la double authentification de ton compte changent.": "Alerts you if your account email, phone number or two-factor setting changes.", "Caméra et partage d'écran": "Camera and screen sharing", "Prévient si la caméra ou le partage d'écran s'active sans que tu aies cliqué.": "Warns you if the camera or screen sharing starts without you clicking.", "Délai avant action irréversible": "Delay before irreversible actions", "Impose un délai d'annulation de 12 secondes avant les actions destructrices.": "Adds a 12-second cancellation window before destructive actions.", "Analyse des fichiers": "File analysis", "Vérifie le contenu réel des pièces jointes : un .exe renommé en .png est détecté.": "Checks what attachments really contain: an .exe renamed to .png is caught.", "Blocage des téléchargements": "Download blocking", "Bloque les liens pointant vers un exécutable, sauf depuis une source de confiance.": "Blocks links pointing to an executable, except from trusted sources.", "Liens masqués trompeurs": "Deceptive masked links", "Détecte quand le texte affiché cache une destination différente.": "Detects when the visible text hides a different destination.", "Aperçus de liens": "Link previews", "Analyse les adresses contenues dans les aperçus (embeds).": "Checks the addresses contained in link previews (embeds).", "Messages modifiés": "Edited messages", "Réanalyse un message édité après envoi : le piège classique.": "Re-checks a message edited after sending: the classic trap.", "Invitations de serveur": "Server invites", "Vérifie l'âge, la taille et le nom des serveurs proposés.": "Checks the age, size and name of the servers being offered.", "Usurpation d'amis": "Friend impersonation", "Alerte si un compte imite le pseudo et l'avatar d'un de tes contacts.": "Alerts you if an account copies a contact's name and avatar.", "Vagues de messages privés": "Direct message waves", "Détecte les campagnes : même message envoyé par plusieurs comptes.": "Detects campaigns: the same message sent by several accounts.", "Arnaque au QR code": "QR code scam", "Avertit quand on te demande de scanner un QR code de connexion.": "Warns you when someone asks you to scan a login QR code.", "Liens dans les statuts": "Links in statuses", "Analyse les liens présents dans les statuts personnalisés.": "Checks links found in custom statuses.", "Surveillance du presse-papiers": "Clipboard monitoring", "Prévient si un jeton ou un webhook se retrouve dans ton presse-papiers.": "Warns you if a token or webhook ends up in your clipboard.", "Requêtes bloquées": "Blocked requests", "Le détail des requêtes de télémétrie réellement bloquées, avec l'heure et le domaine.": "Details of the most recent telemetry requests actually blocked.", "Télémétrie interceptée": "Telemetry monitoring", "Connexions et reconnexions au serveur Discord depuis le démarrage.": "Gateway session events observed since startup.", "Données stockées": "Stored keys", "Chaque module enregistre ses données séparément. Tu peux en supprimer une sans toucher aux autres.": "Each module manages its own storage key.", "Réparation": "Repair", "À utiliser si le client se comporte mal, même sans mise à jour récente.": "If the client misbehaves after an update.", "Journal des mises à jour": "Client log", "Détection intelligente": "Smart detection (no list needed)", "Coffre-fort du compte": "Vault", "Base communautaire partagée": "Community database", "Développeur C++ / Lua / Luau": "C++ / Lua / Luau developer", "Contributeur — communication & visibilité": "Contributor — outreach & visibility", "Contributeur — invitations & diffusion": "Contributor — invites & outreach", "Support technique": "Technical support", "pseudo": "username", "Un souci technique ? Écris-lui en message privé sur Discord.": "Having a technical problem? Send him a direct message on Discord.", "Partenariat Nexium": "Nexium partnership", "Ton serveur, devant 6 500 personnes": "Your server, in front of 6,500 people", "Nexium est installé sur plus de 6 500 machines. L'emplacement sponsorisé s'affiche dans le client lui-même, à chaque ouverture des paramètres — pas dans un flux qu'on fait défiler.": "Nexium runs on more than 6,500 machines. The sponsored slot appears inside the client itself, every time settings are opened — not in a feed people scroll past.", "utilisateurs du client": "client users", "le voient, sans exception": "see it, without exception", "affiché en permanence": "on screen at all times", "seul serveur à la fois": "server at a time, ever", "Une audience captive": "A captive audience", "Ce ne sont pas des passants : ce sont des utilisateurs qui ouvrent le client tous les jours.": "These aren't passers-by: they're users who open the client every single day.", "Zéro concurrence": "Zero competition", "Un seul emplacement existe. Pas de rotation, pas de bannière voisine, pas de partage d'attention.": "Only one slot exists. No rotation, no neighbouring banner, no divided attention.", "L'emplacement, en ce moment même": "The slot, right now", "Carte en direct : nom, description, nombre de membres et bouton Rejoindre. C'est exactement ce que verront les 6 500 utilisateurs — avec ton serveur à la place de celui-ci.": "Live card: name, description, member count and a Join button. This is exactly what 6,500 users will see — with your server in this spot.", "Choisis ta formule": "Pick your plan", "Le plus demandé": "Most popular", "Réserver cette place": "Book this slot", "Nous contacter": "Get in touch", "Découverte": "Trial", "/ semaine": "/ week", "Tester sans risque": "Try it risk-free", "Une semaine complète pour mesurer ce que ça t'apporte, sans engagement.": "A full week to measure what it brings you, no commitment.", "7 jours d'affichage continu": "7 days of continuous display", "Carte d'invitation en direct": "Live invite card", "Bouton Rejoindre intégré": "Built-in Join button", "Bilan des arrivées à la fin": "Arrivals report at the end", "Standard": "Standard", "/ mois": "/ month", "La formule qui convertit": "The plan that converts", "Un mois entier devant toute la communauté. Le temps que ton serveur s'installe dans les habitudes.": "A full month in front of the whole community. Long enough for your server to stick.", "30 jours d'affichage continu": "30 days of continuous display", "Mise en avant renforcée dans le client": "Enhanced placement inside the client", "Annonce dédiée sur le serveur Nexium": "Dedicated announcement on the Nexium server", "Ton logo dans la page d'accueil du client": "Your logo on the client home page", "Bilan détaillé chaque semaine": "Detailed weekly report", "Exclusif": "Exclusive", "/ trimestre": "/ quarter", "Le trimestre réservé": "The reserved quarter", "Trois mois verrouillés à ton nom. Personne d'autre ne peut prendre la place.": "Three months locked to your name. Nobody else can take the slot.", "90 jours, emplacement réservé": "90 days, slot reserved", "Économie de 15 € sur le tarif mensuel": "Save €15 versus the monthly rate", "Bannière personnalisée de ton choix": "Custom banner of your choosing", "Mention permanente dans les crédits": "Permanent mention in the credits", "Priorité sur toute future formule": "Priority on any future plan", "Contact direct avec l'équipe": "Direct line to the team", "Pas de budget ?": "No budget?", "Amène 100 nouveaux utilisateurs au client et l'emplacement est à toi gratuitement pendant un mois. Parles-en, c'est tout.": "Bring 100 new users to the client and the slot is yours free for a month. Just spread the word.", "Réserver la place": "Book the slot", "Un message privé suffit. Dis-nous quel serveur et quelle formule, on s'occupe du reste — mise en ligne dans la journée.": "One direct message is enough. Tell us which server and which plan, we handle the rest — live the same day.", "Écrire à 5dj0": "Message 5dj0", "Pseudo copié !": "Username copied!", "Pseudo copié : 5dj0": "Username copied: 5dj0", "clique pour copier le pseudo": "click to copy the username", "colle-le dans la recherche Discord": "paste it into Discord search", "Nexium — projet communautaire indépendant": "Nexium — independent community project", "Apparence": "Appearance", "Installe des thèmes de la communauté, ou choisis simplement une couleur de fond ci-dessous. Les deux se combinent sans conflit.": "Install community themes, or simply pick a background colour below. The two work together without conflict.", "Attention : ": "Warning: ", "de tes thèmes chargent des ressources externes qui exposent ton adresse IP. Détail dans Nexium Protect.": "of your themes load external resources that expose your IP address. Details in Nexium Protect.", "Couleur des paramètres": "Settings colour", "Change le fond des pages de paramètres. Les textes s'adaptent automatiquement pour rester lisibles.": "Changes the settings pages background. Text colours adapt automatically to stay readable.", "Couleur personnalisée": "Custom colour", "Rétablir": "Reset", "Aperçu": "Preview", "Titre de section": "Section heading", "Texte de description, lisible quelle que soit la couleur choisie.": "Description text, readable whatever colour you pick.", "Bouton": "Button", "Secondaire": "Secondary", "Contraste": "Contrast", "Nouvelle version": "New version", "Bienvenue": "Welcome", "Nexium a été mis à jour": "Nexium has been updated", "Nexium est installé": "Nexium is installed", "Voici ce qui a changé depuis la v": "Here is what changed since v", "Voici ce que le client apporte.": "Here is what the client brings.", "Quatre places, pas une de plus": "Four slots, not one more", "L'espace est volontairement limité. Aucune rotation, aucune surcharge : ton serveur reste visible.": "Space is deliberately limited. No rotation, no clutter: your server stays visible.", "Les emplacements, en ce moment même": "The slots, right now", "occupées": "taken", "place(s) encore libre(s)": "slot(s) still free", "complet, liste d'attente": "full, waiting list", "Chargement des emplacements…": "Loading slots…", "Place disponible": "Slot available", "Réserve-la maintenant, elle est libre": "Book it now, it is free", "Réserver": "Book", "Réserver une place": "Book a slot", "Réserver dès qu'une place se libère": "Book as soon as a slot frees up", "Réserver ta place": "Book your slot", "Entrer sur la liste d'attente": "Join the waiting list", "Les quatre places sont prises. Écris-nous : tu seras contacté en priorité dès qu'une se libère.": "All four slots are taken. Message us: you will be contacted first when one frees up.", "Cartes en direct : nom, membres, personnes connectées et bouton Rejoindre. C'est exactement ce que verront les 6 500 utilisateurs.": "Live cards: name, members, people online and a Join button. This is exactly what 6,500 users will see.", "Invitation expirée": "Invite expired", "Chargement…": "Loading…", "membres": "members", "en ligne": "online", "Rejoindre": "Join"};
+_NXI.en={"Masque de partage d ecran": "Screen-share mask", "Avant de partager ton ecran : floute les messages prives et masque les pseudos.": "Before you share your screen: blurs direct messages and hides usernames.", "Activer le masque": "Turn the mask on", "Retirer le masque": "Turn the mask off", "actif": "on", "Activer automatiquement au partage d ecran": "Turn on automatically when sharing", "Se declenche quand Discord demande le partage, se retire a la fin.": "Triggers when Discord asks to share, and lifts at the end.", "Flouter les messages prives": "Blur direct messages", "La colonne de gauche devient illisible.": "The left column becomes unreadable.", "Masquer les pseudos": "Hide usernames", "Les noms affiches sont floutes.": "Displayed names are blurred.", "Cacher la liste des membres": "Hide the member list", "La colonne de droite disparait.": "The right column disappears.", "Flouter le contenu des messages": "Blur message content", "Radical : plus rien n est lisible a l ecran.": "Drastic: nothing on screen stays readable.", "Reperes dans ta fenetre": "Found in your window", "zone MP": "DM area", "pseudos": "usernames", "liste membres": "member list", "Bilan de securite": "Security recap", "Une carte partageable de ce que Nexium a arrete.": "A shareable card of what Nexium stopped.", "Telecharger le bilan": "Download the recap", "Apercu du bilan de securite": "Security recap preview", "Indisponible sur ce client.": "Unavailable on this client.", "Me le rappeler": "Remind me", "Annuler": "Cancel", "Ce soir": "Tonight", "Demain": "Tomorrow", "A une date precise": "At a given time", "Une seule fois, puis la tache s efface.": "Once, then the task removes itself.", "Le bac a sable recupere la page et l inspecte sans rien executer : aucun script, aucune image, aucun cadre. Ton adresse IP sera visible du site.": "The sandbox fetches the page and inspects it without running anything: no scripts, no images, no frames. Your IP address will be visible to the site.", "Inspecter en bac a sable": "Inspect in the sandbox", "Inspection…": "Inspecting…", "Effacer l inspection": "Clear the inspection", "Effacer": "Clear", "Page dangereuse": "Dangerous page", "Page suspecte": "Suspicious page", "Rien d alarmant dans la page": "Nothing alarming in the page", "formulaires": "forms", "mot de passe": "password", "oui": "yes", "non": "no", "champs caches": "hidden fields", "scripts tiers": "third-party scripts", "cadres": "frames", "Le formulaire envoie vers": "The form submits to", "Scripts charges depuis": "Scripts loaded from", "Focus": "Focus", "Mode concentration": "Focus mode", "Concentration": "Focus", "Pause": "Break", "Masque ce qui distrait, coupe les notifications et minute tes sessions.": "Hides what distracts you, silences notifications and times your sessions.", "Demarrer une session": "Start a session", "Arreter": "Stop", "cycle": "cycle", "min aujourd hui": "min today", "Rythme": "Rhythm", "Cycles de travail et de pause, facon pomodoro.": "Work and break cycles, pomodoro style.", "Travail (min)": "Work (min)", "Pause (min)": "Break (min)", "Cycles": "Cycles", "Ce qui est masque pendant la session": "Hidden during the session", "Uniquement de l affichage : rien n est modifie sur ton compte.": "Display only: nothing is changed on your account.", "Masquer les pastilles de notification": "Hide notification badges", "Les compteurs rouges qui attirent l oeil.": "The red counters that catch your eye.", "Masquer les images et les videos": "Hide images and videos", "Les apercus dans les messages ne sont plus charges a l ecran.": "Message previews are no longer shown.", "Masquer la liste des membres": "Hide the member list", "Recupere de la largeur et enleve une distraction.": "Frees up width and removes a distraction.", "Masquer les serveurs": "Hide servers", "Ne garde que ceux que tu autorises ci-dessous.": "Keeps only the ones you allow below.", "Ne pas deranger pendant la session": "Do Not Disturb during the session", "Ton statut repasse en ligne a la fin.": "Your status returns to online at the end.", "Couper les messages Nexium": "Silence Nexium messages", "Aucun bandeau Nexium pendant que tu travailles.": "No Nexium banner while you work.", "Serveurs autorises": "Allowed servers", "Ceux-la restent visibles, les autres disparaissent.": "These stay visible, the rest disappear.", "autorise(s)": "allowed", "Liste des serveurs indisponible sur ce client.": "Server list unavailable on this client.", "Verification": "Check", "Ce que les selecteurs trouvent reellement dans ta fenetre Discord.": "What the selectors actually find in your Discord window.", "serveurs": "servers", "pastilles": "badges", "medias": "media", "liste membres": "member list", "Un zero signifie que Discord a change ses noms de classes : l option correspondante n aura aucun effet.": "A zero means Discord changed its class names: the matching option will have no effect.", "Sessions": "Sessions", "Historique local.": "Local history.", "Le mode concentration n est pas disponible : le module n a pas demarre.": "Focus mode is unavailable: the module did not start.", "Retrospective": "Recap", "Une carte de ton activite, generee sur ta machine. Rien n est envoye.": "A card of your activity, generated on your machine. Nothing is sent.", "Ce mois-ci": "This month", "30 derniers jours": "Last 30 days", "Cette annee": "This year", "Depuis le debut": "All time", "messages": "messages", "jours actifs": "active days", "min en vocal": "min in voice", "jours d affilee": "day streak", "Telecharger l image": "Download the image", "Copier l image": "Copy the image", "Carte copiee : colle-la dans un salon.": "Card copied: paste it into a channel.", "Apercu de la carte retrospective": "Recap card preview", "Apercu indisponible sur ce client.": "Preview unavailable on this client.", "La retrospective n est pas disponible : le module n a pas demarre.": "The recap is unavailable: the module did not start.", "en veille": "snoozed", "declencheurs": "triggers", "actions": "actions", "modeles": "templates", "compteurs": "counters", "evenements branches": "events hooked", "evenements non branches": "events not hooked", "Memoire": "Memory", "Compteurs": "Counters", "Des valeurs que tes taches font monter, et que d autres taches peuvent tester.": "Values your tasks raise, and that other tasks can test.", "Aucun compteur. Ajoute une tache avec l action « Incrementer un compteur ».": "No counter yet. Add a task with the “Increment a counter” action.", "Carnet": "Notebook", "memo(s) enregistre(s).": "note(s) saved.", "Copier": "Copy", "Vider le carnet ?": "Clear the notebook?", "Retirer ce memo": "Remove this note", "Aucun memo. Utilise l action « Enregistrer un memo » dans une tache.": "No notes yet. Use the “Save a note” action in a task.", "Zero": "Reset", "Retirer": "Remove", "Dupliquer": "Duplicate", "Rechercher une tache…": "Search a task…", "Rechercher un modele…": "Search a template…", "Aucune tache ne correspond.": "No task matches.", "Aucun modele ne correspond.": "No template matches.", "regles pretes a l emploi. Un clic les ajoute, tu peux ensuite les ajuster.": "ready-made rules. One click adds them, then you can adjust them.", "Action": "Action", "Tache visee": "Target task", "Cree d abord une autre tache pour pouvoir l enchainer.": "Create another task first so you can chain to it.", "Cree d abord une autre tache.": "Create another task first.", "Tache a mettre en veille": "Task to snooze", "Minutes de veille": "Snooze minutes", "Nombre": "Number", "Variables : {heure} {date} {tache} {auteur} {contenu} {salon} {serveur} {lien} {compteur:nom}": "Variables: {heure} {date} {tache} {auteur} {contenu} {salon} {serveur} {lien} {compteur:name}", "Pas plus d une fois toutes les (min)": "At most once every (min)", "Maximum par jour": "Maximum per day", "Nom du serveur contient": "Server name contains", "mon serveur": "my server", "Vocal": "Voice", "peu importe": "either way", "en vocal": "in voice", "hors vocal": "out of voice", "Compteur": "Counter", "Nom du compteur": "Counter name", "Seuil": "Threshold", "Pas en ne pas deranger": "Not while on Do Not Disturb", "La tache se tait quand ton statut est ne pas deranger.": "The task stays quiet while your status is Do Not Disturb.", "Pars d un modele pret a l emploi, ou compose ta propre regle : un declencheur, des conditions, une action.": "Start from a ready-made template, or compose your own rule: a trigger, conditions, an action.", "Des regles simples qui travaillent pour toi : un declencheur, des conditions, une action. Tout s execute localement, aucun message n est envoye a ta place.": "Simple rules that work for you: a trigger, conditions, an action. Everything runs locally, and no message is ever sent on your behalf.", "Automatisation": "Automation", "Des regles simples qui travaillent pour toi : un declencheur, une condition, une action. Tout s execute localement, aucun message n est envoye a ta place.": "Simple rules that work for you: a trigger, a condition, an action. Everything runs locally, and no message is ever sent on your behalf.", "Sections de Nexium Auto": "Nexium Auto sections", "Moteur": "Engine", "Actif": "Running", "En pause": "Paused", "Activer le moteur": "Turn the engine on", "tache(s) active(s) sur": "active task(s) out of", "messages branches": "messages hooked", "messages non branches": "messages not hooked", "menaces branchees": "threats hooked", "menaces non branchees": "threats not hooked", "action(s) indisponible(s)": "action(s) unavailable", "toutes les actions disponibles": "all actions available", "Taches": "Tasks", "Modeles": "Templates", "Editeur": "Editor", "Aucune tache pour l instant": "No task yet", "Pars d un modele pret a l emploi, ou compose ta propre regle : un declencheur, une condition, une action.": "Start from a ready-made template, or compose your own rule: a trigger, a condition, an action.", "Voir les modeles": "Browse templates", "Composer une regle": "Compose a rule", "Taches intelligentes": "Smart tasks", "Des regles pretes a l emploi. Un clic les ajoute, tu peux ensuite les ajuster.": "Ready-made rules. One click adds them, then you can adjust them.", "Quand": "When", "Alors": "Then", "Seulement": "Only", "Seulement si": "Only if", "Laisse vide pour ne poser aucune condition.": "Leave empty for no condition at all.", "Tester": "Test", "Editer": "Edit", "Supprimer": "Delete", "Supprimer cette tache ?": "Delete this task?", "Ajouter": "Add", "action indisponible": "action unavailable", "indisponible": "unavailable", "Modifier la tache": "Edit the task", "Un declencheur, des conditions facultatives, une action.": "A trigger, optional conditions, an action.", "Nom": "Name", "Rappel du soir": "Evening reminder", "Heure (HH:MM)": "Time (HH:MM)", "Minutes": "Minutes", "Valeur": "Value", "Texte": "Text", "Nombre de jours": "Number of days", "Statut a appliquer": "Status to apply", "Cette action n est pas disponible sur ce client : elle ne s executera pas.": "This action is not available on this client: it will not run.", "Variables disponibles : {heure}, {tache}, {auteur}.": "Available variables: {heure}, {tache}, {auteur}.", "Jours": "Days", "A partir de": "From", "Jusqu a": "Until", "Messages prives uniquement": "Direct messages only", "Ignore tout ce qui arrive dans un serveur.": "Ignores anything coming from a server.", "Enregistrer": "Save", "Creer la tache": "Create the task", "Annuler": "Cancel", "Journal d execution": "Execution log", "Les dernieres actions declenchees par le moteur.": "The latest actions fired by the engine.", "Aucune execution enregistree pour le moment.": "No execution recorded yet.", "echec": "failed", "Le moteur d automatisation n a pas demarre sur ce client.": "The automation engine did not start on this client.", "Redemarre Discord. Si le probleme persiste, le module _NXAU a ete desactive par une erreur au chargement.": "Restart Discord. If the problem persists, the _NXAU module was disabled by a load-time error.", "Version locale non publiée": "Unpublished local build", "Version locale en avance sur le dépôt": "Local build ahead of the repository", "Ce client tourne une build v": "This client is running build v", " qui n a pas encore été publiée (le dépôt est en v": ", which has not been published yet (the repository is on v", "). Aucune mise à jour ne sera proposée tant que le dépôt n aura pas dépassé cette version.": "). No update will be offered until the repository goes past this version.", "build non publiée": "unpublished build", "Locale": "Local", "Version installée": "Installed version", "Version du dépôt": "Repository version", "Mise à jour dispo": "Update available", "Client à jour": "Client up to date", "Mise à jour disponible": "Update available", "Dépôt injoignable": "Repository unreachable", "Oui": "Yes", "Non": "No", "Aperçu": "Overview", "Boucliers": "Shields", "Coffre-fort": "Vault", "Journal": "Log", "Base": "Database", "Sections de Nexium Protect": "Nexium Protect sections", "Niveau de protection": "Protection level", "Protection maximale": "Maximum protection", "Protection partielle": "Partial protection", "Protection faible": "Weak protection", "protections actives sur": "active protections out of", "Menaces bloquées": "Threats blocked", "Liens sûrs": "Safe links", "Liens analysés": "Links scanned", "Arnaques": "Scams", "Rechercher un bouclier…": "Search a shield…", "Rechercher une protection…": "Search a protection…", "Effacer la recherche": "Clear search", "Aucun bouclier ne correspond à cette recherche.": "No shield matches this search.", "Aucune protection ne correspond à cette recherche.": "No protection matches this search.", "Liens et messages": "Links and messages", "Ce que Nexium inspecte à la réception.": "What Nexium inspects as it arrives.", "Contenus reçus": "Incoming content", "Pièces jointes, aperçus, invitations et messages privés.": "Attachments, embeds, invites and direct messages.", "Analyse avancée": "Advanced analysis", "Contrôles supplémentaires sur la forme des liens et des demandes.": "Extra checks on the shape of links and requests.", "État du coffre-fort": "Vault status", "Ces protections n avertissent pas : elles bloquent.": "These protections do not warn: they block.", "Exfiltrations bloquées": "Exfiltrations blocked", "Sources externes CSS": "External CSS sources", "Intégrité": "Integrity", "Vérifier": "Verify", "Ressources externes dans tes thèmes": "External resources in your themes", "Ton adresse IP est transmise à ces serveurs à chaque démarrage.": "Your IP address is sent to these servers on every start-up.", "Bloquer": "Block", "Autoriser": "Allow", "Le client agit au lieu de prévenir.": "The client acts instead of warning.", "Protections sur ton compte et sur ce que tu envoies.": "Protections on your account and on what you send.", "Ce que Nexium fait quand quelque chose tourne mal.": "What Nexium does when something goes wrong.", "Plugins à surveiller": "Plugins to watch", "Réanalyser": "Re-scan", "risque élevé": "high risk", "à vérifier": "check it", "signal": "signal", "Le coffre-fort n est pas disponible : le module de protection du compte n a pas démarré.": "The vault is unavailable: the account protection module did not start.", "Quarantaine": "Quarantine", "Liens bloqués avant ouverture. Tu peux les ouvrir quand même ou autoriser le domaine.": "Links blocked before opening. You can still open them, or allow the domain.", "Tout vider": "Clear all", "Vider la quarantaine ?": "Clear the quarantine?", "Ouvrir quand même": "Open anyway", "Ouvrir ce lien malgré l alerte ?": "Open this link despite the warning?", "Signaler": "Report", "Retirer": "Remove", "Exporter": "Export", "Vider le journal des menaces ?": "Clear the threat log?", "Journal copié dans le presse-papiers": "Log copied to the clipboard", "Filtrer le journal": "Filter the log", "Filtrer (domaine, type…)": "Filter (domain, type…)", "Aucune menace ne correspond au filtre.": "No threat matches the filter.", "Supprimer cette entrée": "Delete this entry", "bloqué": "blocked", "thème": "theme", "Rien à afficher pour l instant : aucune menace bloquée, aucun domaine autorisé.": "Nothing to show yet: no threat blocked, no domain allowed.", "Vérificateur de lien": "Link checker", "Colle un lien suspect : Nexium l analyse et tente de démasquer sa vraie destination.": "Paste a suspicious link: Nexium scans it and tries to reveal its real destination.", "Lien à analyser": "Link to scan", "Analyser": "Scan", "Analyse…": "Scanning…", "Chargement de la base de menaces en cours… l analyse sera complète dans quelques secondes.": "Loading the threat database… the scan will be complete in a few seconds.", "Le scanner de liens est désactivé. Active-le dans l onglet Boucliers.": "The link scanner is off. Turn it on in the Shields tab.", "Dangereux — logger d IP": "Dangerous — IP logger", "Dangereux — hameçonnage": "Dangerous — phishing", "Dangereux — domaine trompeur": "Dangerous — deceptive domain", "Dangereux": "Dangerous", "Suspect — destination masquée": "Suspicious — hidden destination", "Aucune menace détectée": "No threat detected", "Bloqué": "Blocked", "Protection désactivée": "Protection off", "Domaine": "Domain", "Redirige vers": "Redirects to", "N ouvre pas ce lien. Il peut voler ton adresse IP, te géolocaliser ou dérober ton compte.": "Do not open this link. It can steal your IP address, locate you, or take over your account.", "Ce lien est dangereux mais la protection correspondante est désactivée — active-la dans l onglet Boucliers.": "This link is dangerous but the matching protection is off — turn it on in the Shields tab.", "Conseils de sécurité": "Security tips", "Ne colle jamais de code dans la console Discord — c est le piège numéro un pour voler un compte.": "Never paste code into the Discord console — it is the number one trick for stealing an account.", "Ne scanne jamais un QR code de connexion envoyé par un inconnu.": "Never scan a login QR code sent by a stranger.", "Un « Nitro gratuit » par message privé est toujours une arnaque.": "A “free Nitro” offer in a DM is always a scam.", "Vérifie toujours le domaine exact d un lien avant de te connecter.": "Always check the exact domain of a link before signing in.", "Aucun code à 6 chiffres ne doit jamais être communiqué, à personne.": "A 6-digit code must never be shared with anyone, ever.", "Protect incomplet": "Protect incomplete", "fonction(s) manquante(s) : la protection n est pas complète. Réinstalle ou mets à jour le client.": "missing function(s): protection is incomplete. Reinstall or update the client.", "domaines de confiance": "trusted domains", "chargement en cours…": "loading…", "indisponible": "unavailable", "domaines chargés": "domains loaded", "hors ligne": "offline", "liste volumineuse": "large list", "en cache": "cached", "Actualiser": "Refresh", "Mise à jour de la liste…": "Updating the list…", "Vérification en cours…": "Verification in progress…", "envoyés": "sent", "en attente": "pending", "prêt": "ready", "prochain signalement": "next report", "Dernier échec": "Last failure", "réessai automatique en cours.": "automatic retry in progress.", "Réessayer maintenant": "Retry now", "Réessai en cours…": "Retrying…", "Analyse avancee des messages": "Advanced message analysis", "Cinq controles supplementaires sur ce que tu recois.": "Five extra checks on what you receive.", "Autorisations d'application": "App authorisations", "Analyse les liens d'autorisation OAuth2 et alerte sur les portees dangereuses : ajout de bot, webhook, permissions administrateur.": "Inspects OAuth2 authorisation links and warns about dangerous scopes: adding a bot, webhooks, administrator permissions.", "Schemas d'URI executables": "Executable URI schemes", "Bloque les liens javascript:, vbscript:, file: et data:text/html, qui executent du code au lieu d'ouvrir une page.": "Blocks javascript:, vbscript:, file: and data:text/html links, which run code instead of opening a page.", "Caracteres invisibles et inversion": "Invisible and reversed characters", "Repere les caracteres masques et l'inversion du sens de lecture, qui font afficher autre chose que le vrai lien ou le vrai nom de fichier.": "Spots hidden characters and reading-direction overrides, which make a link or filename display as something other than what it really is.", "Liens vers une adresse IP": "Raw IP address links", "Signale les liens qui pointent vers une adresse IP brute au lieu d'un nom de domaine.": "Flags links pointing at a bare IP address instead of a domain name.", "Demande de code de verification": "Verification code requests", "Alerte quand on te reclame un code a 6 chiffres, un code 2FA ou un code de secours. Ni Discord ni son support ne le demandent jamais.": "Warns when someone asks you for a 6-digit code, a 2FA code or a backup code. Neither Discord nor its support ever ask for these.", "Cette semaine": "This week", "Comparé aux 7 jours précédents.": "Compared with the previous 7 days.", "Tes habitudes": "Your habits", "Lecture automatique, calculée localement.": "Read automatically, computed on your machine.", "Activité sur l'année": "Activity over the year", "Une case par jour sur 12 mois, façon contributions.": "One square per day over 12 months, contribution-graph style.", "Carte de chaleur · 7j × 24h": "Heatmap · 7 days × 24 hours", "Intensité par jour de la semaine et par heure.": "Intensity by weekday and hour.", "Mots les plus utilisés": "Most used words", "Taille proportionnelle à la fréquence. Mots courts et vides exclus.": "Size scales with frequency. Short and filler words excluded.", "Ce qui sort de ta machine": "What leaves your machine", "Transparence complète sur les données transmises.": "Full transparency on the data being sent.", "Journal de connexion": "Connection log", "Mes données Nexium": "My Nexium data", "Contrôle total sur tout ce que Nexium sait de toi, tous modules confondus.": "Full control over everything Nexium knows about you, across all modules.", "Sauvegarde des réglages": "Settings backup", "Copie tous tes réglages Nexium, ou restaure-les sur une autre machine.": "Copy all your Nexium settings, or restore them on another machine.", "Les dernières vérifications et mises à jour vues par le client.": "The most recent checks and updates seen by the client.", "Profil de protection": "Protection profile", "Choisis un réglage global ; tu peux ensuite ajuster chaque bouclier.": "Pick an overall setting, then fine-tune each shield below.", "Protections actives : le client agit au lieu de prévenir.": "Active protections: the client blocks instead of warning.", "Défenses avancées": "Advanced defences", "Protections actives sur ton compte et ce que tu envoies.": "Protections covering your account and what you send.", "Réaction et intégrité": "Response and integrity", "Ce que Nexium fait quand quelque chose tourne mal.": "What Nexium does when something goes wrong.", "Analyse des contenus": "Content inspection", "Ce que Nexium inspecte dans les messages que tu reçois.": "What Nexium inspects in the messages you receive.", "Journal du coffre-fort": "Vault log", "Actions de blocage effectuées.": "Blocking actions carried out.", "Domaines autorisés": "Allowed domains", "Ces domaines ne seront plus signalés.": "These domains will no longer be flagged.", "Signalements": "Reports", "Menaces transmises au serveur Nexium depuis ton compte.": "Threats sent to the Nexium server from your account.", "Base de menaces": "Threat database", "Liste de domaines dangereux mise à jour depuis le dépôt Nexium.": "List of dangerous domains, updated from the Nexium repository.", "Scanner de liens": "Link scanner", "Analyse chaque lien reçu et t'avertit avant l'ouverture d'un site piégé.": "Checks every incoming link and warns you before a trapped site opens.", "Protection anti-doxxing / IP": "Anti-doxxing / IP protection", "Bloque les loggers d'IP (grabify, iplogger…) utilisés pour te géolocaliser.": "Blocks IP loggers (grabify, iplogger and similar) used to locate you.", "Anti-hameçonnage": "Anti-phishing", "Détecte les faux Discord/Steam et les domaines trompeurs (dlscord, punycode…).": "Detects fake Discord and Steam sites, and lookalike domains (dlscord, punycode).", "Alertes anti-arnaque": "Scam alerts", "Repère les messages d'arnaque (faux nitro, dons crypto, cadeaux piégés).": "Spots scam messages: fake Nitro, crypto giveaways, booby-trapped gifts.", "Vigilance comptes suspects": "Suspicious account watch", "Signale les MP venant de comptes très récents (usurpateurs, faux profils).": "Flags direct messages from very new accounts: impersonators and fake profiles.", "Protection console (anti-self-XSS)": "Console protection (anti self-XSS)", "Avertit contre les arnaques « colle ce code dans la console » qui volent ton compte.": "Warns against the \"paste this code in the console\" scam that steals accounts.", "Blocage de l'exfiltration": "Exfiltration blocking", "Analyse des thèmes": "Theme analysis", "Repère les ressources externes chargées par tes thèmes et QuickCSS, qui exposent ton adresse IP.": "Finds external resources loaded by your themes and QuickCSS, which expose your IP address.", "Vérification d'intégrité": "Integrity check", "Compare ton fichier client à la version publiée sur le dépôt officiel pour détecter toute altération locale.": "Compares your client file with the official repository to detect local tampering.", "Chiffrement des données locales": "Local data encryption", "Chiffre tes statistiques, journaux et signalements dans le stockage local.": "Encrypts your stats, logs and reports in local storage.", "Garde-fou avant envoi": "Pre-send safeguard", "Détection de serveur piégé": "Trapped server detection", "Fichiers doublement piégés": "Double-trapped files", "Détecte les archives protégées par mot de passe, celles contenant un exécutable, et les noms utilisant l'inversion de texte.": "Detects password-protected archives, archives containing an executable, and filenames using text reversal.", "Faux cadeaux Nitro": "Fake Nitro gifts", "Vérifie la validité réelle des codes cadeau et repère les faux domaines imitant discord.gift.": "Verifies gift codes for real and spots fake domains imitating discord.gift.", "Surveillance des connexions": "Session monitoring", "Alerte quand une nouvelle session apparaît sur ton compte depuis un autre appareil.": "Alerts you when a new session appears on your account from another device.", "Bloque les domaines signalés par au moins 3 utilisateurs Nexium": "Blocks domains reported by at least 3 Nexium users", "Guide après incident": "Post-incident guide", "Après un blocage, affiche les étapes concrètes à suivre avec accès direct aux réglages Discord.": "After a block, shows the exact steps to take with direct access to Discord settings.", "Audit des plugins": "Plugin audit", "Analyse le code des plugins installés : accès au jeton, envois vers l'extérieur, code obfusqué.": "Scans installed plugin code for token access, outbound requests and obfuscation.", "Surveillance de l'identité": "Identity monitoring", "Alerte si l'e-mail, le téléphone ou la double authentification de ton compte changent.": "Alerts you if your account email, phone number or two-factor setting changes.", "Caméra et partage d'écran": "Camera and screen sharing", "Prévient si la caméra ou le partage d'écran s'active sans que tu aies cliqué.": "Warns you if the camera or screen sharing starts without you clicking.", "Délai avant action irréversible": "Delay before irreversible actions", "Impose un délai d'annulation de 12 secondes avant les actions destructrices.": "Adds a 12-second cancellation window before destructive actions.", "Analyse des fichiers": "File analysis", "Vérifie le contenu réel des pièces jointes : un .exe renommé en .png est détecté.": "Checks what attachments really contain: an .exe renamed to .png is caught.", "Blocage des téléchargements": "Download blocking", "Bloque les liens pointant vers un exécutable, sauf depuis une source de confiance.": "Blocks links pointing to an executable, except from trusted sources.", "Liens masqués trompeurs": "Deceptive masked links", "Détecte quand le texte affiché cache une destination différente.": "Detects when the visible text hides a different destination.", "Aperçus de liens": "Link previews", "Analyse les adresses contenues dans les aperçus (embeds).": "Checks the addresses contained in link previews (embeds).", "Messages modifiés": "Edited messages", "Réanalyse un message édité après envoi : le piège classique.": "Re-checks a message edited after sending: the classic trap.", "Invitations de serveur": "Server invites", "Vérifie l'âge, la taille et le nom des serveurs proposés.": "Checks the age, size and name of the servers being offered.", "Usurpation d'amis": "Friend impersonation", "Alerte si un compte imite le pseudo et l'avatar d'un de tes contacts.": "Alerts you if an account copies a contact's name and avatar.", "Vagues de messages privés": "Direct message waves", "Détecte les campagnes : même message envoyé par plusieurs comptes.": "Detects campaigns: the same message sent by several accounts.", "Arnaque au QR code": "QR code scam", "Avertit quand on te demande de scanner un QR code de connexion.": "Warns you when someone asks you to scan a login QR code.", "Liens dans les statuts": "Links in statuses", "Analyse les liens présents dans les statuts personnalisés.": "Checks links found in custom statuses.", "Surveillance du presse-papiers": "Clipboard monitoring", "Prévient si un jeton ou un webhook se retrouve dans ton presse-papiers.": "Warns you if a token or webhook ends up in your clipboard.", "Requêtes bloquées": "Blocked requests", "Le détail des requêtes de télémétrie réellement bloquées, avec l'heure et le domaine.": "Details of the most recent telemetry requests actually blocked.", "Télémétrie interceptée": "Telemetry monitoring", "Connexions et reconnexions au serveur Discord depuis le démarrage.": "Gateway session events observed since startup.", "Données stockées": "Stored keys", "Chaque module enregistre ses données séparément. Tu peux en supprimer une sans toucher aux autres.": "Each module manages its own storage key.", "Réparation": "Repair", "À utiliser si le client se comporte mal, même sans mise à jour récente.": "If the client misbehaves after an update.", "Journal des mises à jour": "Client log", "Détection intelligente": "Smart detection (no list needed)", "Coffre-fort du compte": "Vault", "Base communautaire partagée": "Community database", "Développeur C++ / Lua / Luau": "C++ / Lua / Luau developer", "Contributeur — communication & visibilité": "Contributor — outreach & visibility", "Contributeur — invitations & diffusion": "Contributor — invites & outreach", "Support technique": "Technical support", "pseudo": "username", "Un souci technique ? Écris-lui en message privé sur Discord.": "Having a technical problem? Send him a direct message on Discord.", "Partenariat Nexium": "Nexium partnership", "Ton serveur, devant 6 500 personnes": "Your server, in front of 6,500 people", "Nexium est installé sur plus de 6 500 machines. L'emplacement sponsorisé s'affiche dans le client lui-même, à chaque ouverture des paramètres — pas dans un flux qu'on fait défiler.": "Nexium runs on more than 6,500 machines. The sponsored slot appears inside the client itself, every time settings are opened — not in a feed people scroll past.", "utilisateurs du client": "client users", "le voient, sans exception": "see it, without exception", "affiché en permanence": "on screen at all times", "seul serveur à la fois": "server at a time, ever", "Une audience captive": "A captive audience", "Ce ne sont pas des passants : ce sont des utilisateurs qui ouvrent le client tous les jours.": "These aren't passers-by: they're users who open the client every single day.", "Zéro concurrence": "Zero competition", "Un seul emplacement existe. Pas de rotation, pas de bannière voisine, pas de partage d'attention.": "Only one slot exists. No rotation, no neighbouring banner, no divided attention.", "L'emplacement, en ce moment même": "The slot, right now", "Carte en direct : nom, description, nombre de membres et bouton Rejoindre. C'est exactement ce que verront les 6 500 utilisateurs — avec ton serveur à la place de celui-ci.": "Live card: name, description, member count and a Join button. This is exactly what 6,500 users will see — with your server in this spot.", "Choisis ta formule": "Pick your plan", "Le plus demandé": "Most popular", "Réserver cette place": "Book this slot", "Nous contacter": "Get in touch", "Découverte": "Trial", "/ semaine": "/ week", "Tester sans risque": "Try it risk-free", "Une semaine complète pour mesurer ce que ça t'apporte, sans engagement.": "A full week to measure what it brings you, no commitment.", "7 jours d'affichage continu": "7 days of continuous display", "Carte d'invitation en direct": "Live invite card", "Bouton Rejoindre intégré": "Built-in Join button", "Bilan des arrivées à la fin": "Arrivals report at the end", "Standard": "Standard", "/ mois": "/ month", "La formule qui convertit": "The plan that converts", "Un mois entier devant toute la communauté. Le temps que ton serveur s'installe dans les habitudes.": "A full month in front of the whole community. Long enough for your server to stick.", "30 jours d'affichage continu": "30 days of continuous display", "Mise en avant renforcée dans le client": "Enhanced placement inside the client", "Annonce dédiée sur le serveur Nexium": "Dedicated announcement on the Nexium server", "Ton logo dans la page d'accueil du client": "Your logo on the client home page", "Bilan détaillé chaque semaine": "Detailed weekly report", "Exclusif": "Exclusive", "/ trimestre": "/ quarter", "Le trimestre réservé": "The reserved quarter", "Trois mois verrouillés à ton nom. Personne d'autre ne peut prendre la place.": "Three months locked to your name. Nobody else can take the slot.", "90 jours, emplacement réservé": "90 days, slot reserved", "Économie de 15 € sur le tarif mensuel": "Save €15 versus the monthly rate", "Bannière personnalisée de ton choix": "Custom banner of your choosing", "Mention permanente dans les crédits": "Permanent mention in the credits", "Priorité sur toute future formule": "Priority on any future plan", "Contact direct avec l'équipe": "Direct line to the team", "Pas de budget ?": "No budget?", "Amène 100 nouveaux utilisateurs au client et l'emplacement est à toi gratuitement pendant un mois. Parles-en, c'est tout.": "Bring 100 new users to the client and the slot is yours free for a month. Just spread the word.", "Réserver la place": "Book the slot", "Un message privé suffit. Dis-nous quel serveur et quelle formule, on s'occupe du reste — mise en ligne dans la journée.": "One direct message is enough. Tell us which server and which plan, we handle the rest — live the same day.", "Écrire à 5dj0": "Message 5dj0", "Pseudo copié !": "Username copied!", "Pseudo copié : 5dj0": "Username copied: 5dj0", "clique pour copier le pseudo": "click to copy the username", "colle-le dans la recherche Discord": "paste it into Discord search", "Nexium — projet communautaire indépendant": "Nexium — independent community project", "Apparence": "Appearance", "Installe des thèmes de la communauté, ou choisis simplement une couleur de fond ci-dessous. Les deux se combinent sans conflit.": "Install community themes, or simply pick a background colour below. The two work together without conflict.", "Attention : ": "Warning: ", "de tes thèmes chargent des ressources externes qui exposent ton adresse IP. Détail dans Nexium Protect.": "of your themes load external resources that expose your IP address. Details in Nexium Protect.", "Couleur des paramètres": "Settings colour", "Change le fond des pages de paramètres. Les textes s'adaptent automatiquement pour rester lisibles.": "Changes the settings pages background. Text colours adapt automatically to stay readable.", "Couleur personnalisée": "Custom colour", "Rétablir": "Reset", "Aperçu": "Preview", "Titre de section": "Section heading", "Texte de description, lisible quelle que soit la couleur choisie.": "Description text, readable whatever colour you pick.", "Bouton": "Button", "Secondaire": "Secondary", "Contraste": "Contrast", "Nouvelle version": "New version", "Bienvenue": "Welcome", "Nexium a été mis à jour": "Nexium has been updated", "Nexium est installé": "Nexium is installed", "Voici ce qui a changé depuis la v": "Here is what changed since v", "Voici ce que le client apporte.": "Here is what the client brings.", "Quatre places, pas une de plus": "Four slots, not one more", "L'espace est volontairement limité. Aucune rotation, aucune surcharge : ton serveur reste visible.": "Space is deliberately limited. No rotation, no clutter: your server stays visible.", "Les emplacements, en ce moment même": "The slots, right now", "occupées": "taken", "place(s) encore libre(s)": "slot(s) still free", "complet, liste d'attente": "full, waiting list", "Chargement des emplacements…": "Loading slots…", "Place disponible": "Slot available", "Réserve-la maintenant, elle est libre": "Book it now, it is free", "Réserver": "Book", "Réserver une place": "Book a slot", "Réserver dès qu'une place se libère": "Book as soon as a slot frees up", "Réserver ta place": "Book your slot", "Entrer sur la liste d'attente": "Join the waiting list", "Les quatre places sont prises. Écris-nous : tu seras contacté en priorité dès qu'une se libère.": "All four slots are taken. Message us: you will be contacted first when one frees up.", "Cartes en direct : nom, membres, personnes connectées et bouton Rejoindre. C'est exactement ce que verront les 6 500 utilisateurs.": "Live cards: name, members, people online and a Join button. This is exactly what 6,500 users will see.", "Invitation expirée": "Invite expired", "Chargement…": "Loading…", "membres": "members", "en ligne": "online", "Rejoindre": "Join"};
 _NXI.t=function(s){try{
 if(_NXI.lang!=="en")return s;
 var v=_NXI.en[s];
@@ -1025,10 +1184,305 @@ _NXS.wire();
 }
 
 var NexiumStatsIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:18,height:18},i("path",{d:"M4 13h3v7H4v-7zm6.5-6h3v13h-3V7zM17 10h3v10h-3V10z"}));};
+var _NXRT=window._NXRT||(window._NXRT={});
+if(!_NXRT.boot){try{_NXRT.boot=true;
+_NXRT.W=1080;_NXRT.H=1350;
+_NXRT.PERIODS=[["mois","Ce mois-ci"],["j30","30 derniers jours"],["annee","Cette annee"],["tout","Depuis le debut"]];
+_NXRT.dayKey=function(t){var d=new Date(t);var m=d.getMonth()+1,j=d.getDate();return d.getFullYear()+"-"+(m<10?"0"+m:m)+"-"+(j<10?"0"+j:j);};
+_NXRT.range=function(kind){try{
+var now=new Date(),from,label;
+if(kind==="mois"){from=new Date(now.getFullYear(),now.getMonth(),1);
+label=["janvier","fevrier","mars","avril","mai","juin","juillet","aout","septembre","octobre","novembre","decembre"][now.getMonth()]+" "+now.getFullYear();}
+else if(kind==="annee"){from=new Date(now.getFullYear(),0,1);label="annee "+now.getFullYear();}
+else if(kind==="tout"){from=new Date(2015,0,1);label="depuis le debut";}
+else{from=new Date(now.getTime()-29*86400000);label="30 derniers jours";}
+return {from:_NXRT.dayKey(from),to:_NXRT.dayKey(now),label:label};}catch(_){return {from:"0000-00-00",to:"9999-99-99",label:""};}};
+_NXRT.sumRange=function(map,r){try{
+var t=0,n=0,best=null,bestV=0;
+for(var k in map){if(k<r.from||k>r.to)continue;
+var v=map[k]||0;t+=v;if(v>0)n++;
+if(v>bestV){bestV=v;best=k;}}
+return {total:t,days:n,bestDay:best,bestVal:bestV};}catch(_){return {total:0,days:0,bestDay:null,bestVal:0};}};
+_NXRT.top=function(map,n){try{
+var ks=Object.keys(map||{});
+ks.sort(function(a,b){return (map[b]||0)-(map[a]||0);});
+return ks.slice(0,n||5).map(function(k){return {k:k,v:map[k]||0};});}catch(_){return [];}};
+_NXRT.streak=function(map,r){try{
+var d=new Date(),n=0;
+for(var a=0;a<400;a++){
+var key=_NXRT.dayKey(d.getTime()-a*86400000);
+if(key<r.from)break;
+if((map[key]||0)>0)n++;else if(a>0)break;}
+return n;}catch(_){return 0;}};
+_NXRT.compute=function(kind){try{
+var S=window._NXS;if(!S||!S.data)return null;
+var d=S.data,r=_NXRT.range(kind);
+var msg=_NXRT.sumRange(d.daily||{},r);
+var chars=_NXRT.sumRange(d.dailyChars||{},r);
+var voice=_NXRT.sumRange(d.voiceDaily||{},r);
+var given=_NXRT.sumRange(d.givenDaily||{},r);
+var recv=_NXRT.sumRange(d.recvDaily||{},r);
+var heat=(d.heat&&d.heat.length===7)?d.heat:null;
+var peak={h:0,v:0};
+if(heat){for(var a=0;a<7;a++)for(var b=0;b<24;b++){if(heat[a][b]>peak.v){peak={h:b,v:heat[a][b],d:a};}}}
+return {
+kind:kind,label:r.label,
+messages:msg.total,jours:msg.days,
+bestDay:msg.bestDay,bestVal:msg.bestVal,
+chars:chars.total,
+voiceMin:Math.round(voice.total/60),
+given:given.total,recv:recv.total,
+mots:_NXRT.top(d.words,5),
+emojis:_NXRT.top(d.emojis,5),
+heat:heat,peak:peak,
+serie:_NXRT.streak(d.daily||{},r),
+moyenne:msg.days?Math.round(msg.total/msg.days):0
+};}catch(_){return null;}};
+_NXRT.fmt=function(v){try{
+v=v||0;
+if(v>=1000000)return (v/1000000).toFixed(1).replace(/\.0$/,"")+"M";
+if(v>=1000)return (v/1000).toFixed(1).replace(/\.0$/,"")+"k";
+return String(v);}catch(_){return "0";}};
+_NXRT.dayName=function(k){try{
+if(!k)return "";
+var p=k.split("-");var d=new Date(+p[0],+p[1]-1,+p[2]);
+var j=["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"][d.getDay()];
+return j+" "+(+p[2])+"/"+(+p[1]);}catch(_){return k||"";}};
+_NXRT.F=function(w,size){return w+" "+size+'px "Segoe UI", system-ui, -apple-system, sans-serif';};
+_NXRT.num=function(v){try{
+v=Math.round(v||0);
+var t=String(v),out="",n=0;
+for(var a=t.length-1;a>=0;a--){out=t.charAt(a)+out;n++;if(n%3===0&&a>0)out="\u202f"+out;}
+return out;}catch(_){return String(v||0);}};
+_NXRT.draw=function(kind){try{
+var st=_NXRT.compute(kind);if(!st)return null;
+var W=_NXRT.W,H=_NXRT.H,M=88;
+var c=document.createElement("canvas");c.width=W;c.height=H;
+var g=c.getContext("2d");if(!g)return null;
+var TXT="#f4f4f5",SUB="#8a8a92",DIM="#5b5b63",LINE="#1c1c20";
+g.fillStyle="#0a0a0b";g.fillRect(0,0,W,H);
+try{var grd=g.createRadialGradient(W*0.85,-80,0,W*0.85,-80,760);
+grd.addColorStop(0,"rgba(255,255,255,.055)");grd.addColorStop(1,"rgba(255,255,255,0)");
+g.fillStyle=grd;g.fillRect(0,0,W,H);}catch(_){}
+var y=0;
+var rule=function(gap){y+=gap;g.fillStyle=LINE;g.fillRect(M,y,W-M*2,1);y+=gap;};
+g.textBaseline="alphabetic";
+y=118;
+g.fillStyle=DIM;g.font=_NXRT.F(800,21);
+try{g.letterSpacing="7px";}catch(_){}
+g.fillText("NEXIUM",M,y);
+try{g.letterSpacing="0px";}catch(_){}
+y+=76;
+g.fillStyle=TXT;g.font=_NXRT.F(800,64);
+g.fillText("R\u00e9trospective",M,y);
+y+=44;
+g.fillStyle=SUB;g.font=_NXRT.F(500,28);
+g.fillText(st.label,M,y);
+rule(30);
+y+=118;
+g.fillStyle=TXT;g.font=_NXRT.F(800,132);
+var head=_NXRT.num(st.messages);
+g.fillText(head,M,y);
+var wHead=g.measureText(head).width;
+g.fillStyle=SUB;g.font=_NXRT.F(600,28);
+g.fillText("messages envoy\u00e9s",M+wHead+20,y-6);
+y+=42;
+g.fillStyle=DIM;g.font=_NXRT.F(500,25);
+g.fillText(st.jours+" jours actifs  \u00b7  "+st.moyenne+" par jour en moyenne",M,y);
+rule(28);
+var cells=[
+[_NXRT.fmt(st.chars),"caract\u00e8res"],
+[_NXRT.fmt(st.voiceMin)+" min","en vocal"],
+[_NXRT.num(st.given),"r\u00e9actions donn\u00e9es"],
+[_NXRT.num(st.recv),"r\u00e9actions re\u00e7ues"]
+];
+var cw=(W-M*2)/2,top=y+56;
+for(var a=0;a<cells.length;a++){
+var cx=M+(a%2)*cw,cy=top+Math.floor(a/2)*112;
+g.fillStyle=TXT;g.font=_NXRT.F(800,52);g.fillText(cells[a][0],cx,cy);
+g.fillStyle=DIM;g.font=_NXRT.F(500,24);g.fillText(cells[a][1],cx,cy+34);}
+y=top+112+40;
+rule(26);
+if(st.heat){
+y+=34;
+g.fillStyle=DIM;g.font=_NXRT.F(700,21);
+g.fillText("TES HABITUDES  \u00b7  7 JOURS \u00d7 24 HEURES",M,y);
+y+=18;
+var gw=(W-M*2),cwid=gw/24,chh=12,gapv=4;
+for(var d2=0;d2<7;d2++)for(var h=0;h<24;h++){
+var v=st.heat[d2][h]||0;
+var alpha=st.peak.v?Math.min(1,v/st.peak.v):0;
+g.fillStyle="rgba(244,244,245,"+(0.05+alpha*0.9).toFixed(3)+")";
+g.fillRect(M+h*cwid+1,y+d2*(chh+gapv),cwid-2,chh);}
+y+=7*(chh+gapv)+26;
+g.fillStyle=DIM;g.font=_NXRT.F(500,21);
+g.fillText("pic d\u2019activit\u00e9 vers "+st.peak.h+"h",M,y);
+rule(24);}
+y+=34;
+g.fillStyle=DIM;g.font=_NXRT.F(700,21);
+g.fillText("MOTS LES PLUS UTILIS\u00c9S",M,y);
+g.fillText("EMOJIS",M+(W-M*2)/2,y);
+g.font=_NXRT.F(600,25);
+for(var b=0;b<5;b++){
+var ly=y+40+b*33;
+var mot=st.mots[b],emo=st.emojis[b];
+g.fillStyle=mot?TXT:LINE;
+g.fillText(mot?(String(mot.k).slice(0,18)+"   "+_NXRT.num(mot.v)):"\u2014",M,ly);
+g.fillStyle=emo?TXT:LINE;
+g.fillText(emo?(":"+String(emo.k).slice(0,16)+":   "+_NXRT.num(emo.v)):"\u2014",M+(W-M*2)/2,ly);}
+y=y+40+4*33;
+var pied="nexium client";
+if(st.bestDay)pied+="   \u00b7   meilleur jour : "+_NXRT.dayName(st.bestDay)+" ("+_NXRT.num(st.bestVal)+")";
+if(st.serie>1)pied+="   \u00b7   s\u00e9rie de "+st.serie+" jours";
+var py=H-52;
+g.fillStyle=LINE;g.fillRect(M,py-34,W-M*2,1);
+g.fillStyle=DIM;g.font=_NXRT.F(500,21);
+g.fillText(pied,M,py);
+_NXRT.lastY=y;_NXRT.footY=py-34;
+return c;}catch(_){return null;}};
+_NXRT.dataUrl=function(kind){try{
+var c=_NXRT.draw(kind);if(!c)return null;
+return c.toDataURL("image/png");}catch(_){return null;}};
+_NXRT.canCopy=function(){try{
+return !!(window.DiscordNative&&DiscordNative.clipboard&&typeof DiscordNative.clipboard.copyImage==="function");}catch(_){return false;}};
+_NXRT.copy=function(kind){try{
+if(!_NXRT.canCopy())return false;
+var c=_NXRT.draw(kind);if(!c)return false;
+var url=c.toDataURL("image/png");
+var b64=url.split(",")[1];
+var bin=atob(b64),n=bin.length,arr=new Uint8Array(n);
+for(var a=0;a<n;a++)arr[a]=bin.charCodeAt(a);
+DiscordNative.clipboard.copyImage(arr,"nexium-retro.png");
+return true;}catch(_){return false;}};
+_NXRT.download=function(kind){try{
+var c=_NXRT.draw(kind);if(!c)return false;
+if(c.toBlob){c.toBlob(function(blob){try{
+var url=URL.createObjectURL(blob);
+var a=document.createElement("a");a.href=url;a.download="nexium-retro-"+(kind||"mois")+".png";
+if(document.body)document.body.appendChild(a);a.click();
+setTimeout(function(){try{if(a.parentNode)a.parentNode.removeChild(a);URL.revokeObjectURL(url);}catch(_){}},150);}catch(_){}},"image/png");
+return true;}
+var u=c.toDataURL("image/png");
+var a2=document.createElement("a");a2.href=u;a2.download="nexium-retro.png";
+if(document.body)document.body.appendChild(a2);a2.click();
+setTimeout(function(){try{if(a2.parentNode)a2.parentNode.removeChild(a2);}catch(_){}},150);
+return true;}catch(_){return false;}};
+_NXRT.secCompute=function(kind){try{
+var st=(window._NXPR&&_NXPR.stats)||null;
+if(!st)return null;
+var r=_NXRT.range(kind);
+var par={},total=0;
+var L=st.recent||[];
+for(var a=0;a<L.length;a++){var e=L[a];
+if(!e||!e.t)continue;
+var k=_NXRT.dayKey(e.t);
+if(k<r.from||k>r.to)continue;
+total++;par[e.k]=(par[e.k]||0)+1;}
+var V=window._NXV;
+var coffre=(V&&V.stats&&V.stats.blocked)||0;
+var top=_NXRT.top(par,5);
+return {label:r.label,
+bloquees:st.blocked||0,analyses:st.scanned||0,arnaques:st.scams||0,surs:st.safe||0,
+exfil:coffre,periode:total,types:top,
+base:(_NXPR.remote&&_NXPR.remote.n)||0};}catch(_){return null;}};
+_NXRT.kindFr=function(k){
+return k==="grabber"?"loggers d’IP":k==="phish"?"hameçonnage":k==="punycode"?"domaines trompeurs":
+k==="scam"?"arnaques":k==="oauth"?"autorisations":k==="scheme"?"schemas executables":
+k==="bidi"?"textes trompeurs":k==="rawip"?"adresses IP brutes":k==="code"?"demandes de code":
+k==="download"?"téléchargements":k==="short"?"liens raccourcis":k==="exif"?"métadonnées":
+k==="guild"?"serveurs piégés":k==="sandbox"?"pages inspectées":k;};
+_NXRT.drawSecurity=function(kind){try{
+var st=_NXRT.secCompute(kind);if(!st)return null;
+var W=_NXRT.W,H=_NXRT.H,M=88;
+var c=document.createElement("canvas");c.width=W;c.height=H;
+var g=c.getContext("2d");if(!g)return null;
+var TXT="#f4f4f5",SUB="#8a8a92",DIM="#5b5b63",LINE="#1c1c20";
+g.fillStyle="#0a0a0b";g.fillRect(0,0,W,H);
+try{var grd=g.createRadialGradient(W*0.85,-80,0,W*0.85,-80,760);
+grd.addColorStop(0,"rgba(255,255,255,.055)");grd.addColorStop(1,"rgba(255,255,255,0)");
+g.fillStyle=grd;g.fillRect(0,0,W,H);}catch(_){}
+var y=118;
+var rule=function(gap){y+=gap;g.fillStyle=LINE;g.fillRect(M,y,W-M*2,1);y+=gap;};
+g.textBaseline="alphabetic";
+g.fillStyle=DIM;g.font=_NXRT.F(800,21);
+try{g.letterSpacing="7px";}catch(_){}
+g.fillText("NEXIUM PROTECT",M,y);
+try{g.letterSpacing="0px";}catch(_){}
+y+=76;
+g.fillStyle=TXT;g.font=_NXRT.F(800,64);
+g.fillText("Bilan de s\u00e9curit\u00e9",M,y);
+y+=44;
+g.fillStyle=SUB;g.font=_NXRT.F(500,28);
+g.fillText(st.label,M,y);
+rule(30);
+y+=118;
+g.fillStyle=TXT;g.font=_NXRT.F(800,132);
+var head=_NXRT.num(st.bloquees);
+g.fillText(head,M,y);
+var wHead=g.measureText(head).width;
+g.fillStyle=SUB;g.font=_NXRT.F(600,28);
+g.fillText("menaces bloqu\u00e9es",M+wHead+20,y-6);
+y+=42;
+g.fillStyle=DIM;g.font=_NXRT.F(500,25);
+g.fillText(_NXRT.num(st.analyses)+" liens analys\u00e9s  \u00b7  "+_NXRT.num(st.surs)+" confirm\u00e9s s\u00fbrs",M,y);
+rule(28);
+var cells=[
+[_NXRT.num(st.arnaques),"arnaques rep\u00e9r\u00e9es"],
+[_NXRT.num(st.exfil),"exfiltrations bloqu\u00e9es"],
+[_NXRT.fmt(st.base),"domaines surveill\u00e9s"],
+[_NXRT.num(st.periode),"alertes sur la p\u00e9riode"]
+];
+var cw=(W-M*2)/2,top=y+56;
+for(var a=0;a<cells.length;a++){
+var cx=M+(a%2)*cw,cy=top+Math.floor(a/2)*112;
+g.fillStyle=TXT;g.font=_NXRT.F(800,52);g.fillText(cells[a][0],cx,cy);
+g.fillStyle=DIM;g.font=_NXRT.F(500,24);g.fillText(cells[a][1],cx,cy+34);}
+y=top+112+40;
+rule(26);
+y+=34;
+g.fillStyle=DIM;g.font=_NXRT.F(700,21);
+g.fillText("CE QUI A \u00c9T\u00c9 ARR\u00caT\u00c9",M,y);
+y+=16;
+var maxV=st.types.length?st.types[0].v:0;
+for(var b=0;b<5;b++){
+var it=st.types[b];
+var ly=y+34+b*46;
+g.fillStyle=it?SUB:LINE;g.font=_NXRT.F(600,24);
+g.fillText(it?_NXRT.kindFr(it.k):"\u2014",M,ly);
+if(it&&maxV>0){
+var bw=(W-M*2-260);
+g.fillStyle="#1c1c20";g.fillRect(M+260,ly-14,bw,10);
+g.fillStyle="#e6c48a";g.fillRect(M+260,ly-14,Math.max(4,bw*(it.v/maxV)),10);
+g.fillStyle=TXT;g.font=_NXRT.F(700,22);
+g.fillText(String(it.v),M+260+bw+14,ly);}}
+y=y+34+4*46;
+var py=H-52;
+g.fillStyle=LINE;g.fillRect(M,py-34,W-M*2,1);
+g.fillStyle=DIM;g.font=_NXRT.F(500,21);
+g.fillText("nexium client  \u00b7  analyse 100% locale, aucune donn\u00e9e envoy\u00e9e",M,py);
+_NXRT.lastY=y;_NXRT.footY=py-34;
+return c;}catch(_){return null;}};
+_NXRT.secDownload=function(kind){try{
+var c=_NXRT.drawSecurity(kind);if(!c)return false;
+if(c.toBlob){c.toBlob(function(blob){try{
+var url=URL.createObjectURL(blob);
+var a=document.createElement("a");a.href=url;a.download="nexium-securite-"+(kind||"mois")+".png";
+if(document.body)document.body.appendChild(a);a.click();
+setTimeout(function(){try{if(a.parentNode)a.parentNode.removeChild(a);URL.revokeObjectURL(url);}catch(_){}},150);}catch(_){}},"image/png");
+return true;}
+return false;}catch(_){return false;}};
+_NXRT.secDataUrl=function(kind){try{
+var c=_NXRT.drawSecurity(kind);return c?c.toDataURL("image/png"):null;}catch(_){return null;}};
+_NXRT.status=function(){try{
+var st=_NXRT.compute("mois");
+return {pret:!!st,periodes:_NXRT.PERIODS.length,copieImage:_NXRT.canCopy(),messages:st?st.messages:0};}catch(_){return {pret:false};}};
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXRT");if(window._NXERR)_NXERR.push("module _NXRT :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXRT desactive:",_nxE);}catch(_){}}
+}
 function NexiumStatsComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 var tabState=F.useState("overview");var tab=tabState[0],setTab=tabState[1];
 var perState=F.useState(30);var per=perState[0],setPer=perState[1];
+var rtState=F.useState("mois");var rtPer=rtState[0],setRtPer=rtState[1];
 F.useEffect(function(){var _r=_NXS.rev;var id=setInterval(function(){if((typeof document==="undefined"||!document.hidden)&&_r!==_NXS.rev){_r=_NXS.rev;force();}},4000);return function(){clearInterval(id);};},[]);
 var P=_NXpal,data=_NXS.data;
 var dayLbl=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
@@ -1089,10 +1543,41 @@ var wordsTab=i("div",null,
 _NXcard(_NXstrip([{v:_NXn(data.links),label:"Liens"},{v:_NXn(data.attach),label:"Fichiers"},{v:_NXn(data.mentions),label:"Mentions"},{v:_NXn(wkeys.length),label:"Mots uniques"}]),{pad:"20px 18px",mb:10}),
 _NXcard(i("div",null,_NXch(_T("Mots les plus utilisés"),_T("Taille proportionnelle à la fréquence. Mots courts et vides exclus.")),words.length?i("div",{style:{display:"flex",flexWrap:"wrap",gap:"8px"}},words.map(function(w,k){var sc=wmax>0?0.5+0.5*(w.v/wmax):1;return i("div",{key:k,style:{padding:"6px 13px",borderRadius:"99px",background:P.inset,border:"1px solid "+P.line,fontSize:(13*sc+5)+"px",color:k<3?P.txt:P.sub,fontWeight:k<3?"700":"500"}},w.w,i("span",{style:{fontFamily:_NXf.mono,color:P.faint,marginLeft:"7px",fontSize:"10px"}},w.v));})):i("div",{style:{fontSize:"12px",color:P.dim}},"Aucun mot enregistré."))),
 _NXcard(i("div",null,_NXch("Émojis perso favoris"),emos.length?i("div",null,emos.map(function(em,k){return _NXrank(k+1,":"+em.w+":",em.v,emax,0,k);})):i("div",{style:{fontSize:"12px",color:P.dim}},"Aucun émoji personnalisé utilisé.")),{mb:0}));
-var content=tab==="overview"?overview:tab==="activity"?activity:tab==="servers"?servers:wordsTab;
+var retro=(function(){
+var RT=window._NXRT;
+if(!RT)return _NXcard(i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},_T("La retrospective n est pas disponible : le module n a pas demarre.")),{mb:0});
+var st=RT.compute(rtPer);
+var img=null;try{img=RT.dataUrl(rtPer);}catch(_){}
+return i("div",null,
+_NXcard(i("div",null,_NXch(_T("Retrospective"),_T("Une carte de ton activite, generee sur ta machine. Rien n est envoye.")),
+i("div",{style:{display:"flex",flexWrap:"wrap",gap:"6px",marginBottom:"14px"}},RT.PERIODS.map(function(p){
+var on=rtPer===p[0];
+return i("div",{key:p[0],className:"nx-fx",role:"button","aria-label":p[1],"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){setRtPer(p[0]);},
+style:{padding:"8px 13px",borderRadius:"10px",cursor:"pointer",fontSize:"12px",fontWeight:"600",
+background:on?P.inset:"transparent",border:"1px solid "+(on?P.sub:P.line),color:on?P.txt:P.sub}},p[1]);})),
+st?i("div",{style:{display:"flex",gap:"18px",flexWrap:"wrap",marginBottom:"14px"}},
+i("div",null,i("div",{style:{fontFamily:_NXf.disp,fontSize:"24px",fontWeight:"800",color:P.txt}},RT.fmt(st.messages)),
+i("div",{style:{fontSize:"11px",color:P.dim}},_T("messages"))),
+i("div",null,i("div",{style:{fontFamily:_NXf.disp,fontSize:"24px",fontWeight:"800",color:P.txt}},st.jours),
+i("div",{style:{fontSize:"11px",color:P.dim}},_T("jours actifs"))),
+i("div",null,i("div",{style:{fontFamily:_NXf.disp,fontSize:"24px",fontWeight:"800",color:P.txt}},RT.fmt(st.voiceMin)),
+i("div",{style:{fontSize:"11px",color:P.dim}},_T("min en vocal"))),
+i("div",null,i("div",{style:{fontFamily:_NXf.disp,fontSize:"24px",fontWeight:"800",color:P.txt}},st.serie),
+i("div",{style:{fontSize:"11px",color:P.dim}},_T("jours d affilee")))):null,
+img?i("img",{src:img,alt:_T("Apercu de la carte retrospective"),style:{width:"100%",display:"block",borderRadius:"14px",border:"1px solid "+P.line}}):
+i("div",{style:{fontSize:"12.5px",color:P.dim,padding:"18px 0"}},_T("Apercu indisponible sur ce client.")),
+i("div",{style:{display:"flex",gap:"7px",flexWrap:"wrap",marginTop:"14px"}},
+i("div",{className:"nx-fx",role:"button","aria-label":_T("Telecharger l image"),tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){RT.download(rtPer);},
+style:{padding:"11px 20px",borderRadius:"10px",background:P.acc,color:"#0a0a0a",fontSize:"12.5px",fontWeight:"800",cursor:"pointer"}},_T("Telecharger l image")),
+RT.canCopy()?i("div",{className:"nx-fx",role:"button","aria-label":_T("Copier l image"),tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){if(RT.copy(rtPer)&&window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Carte copiee : colle-la dans un salon."),1);},
+style:{padding:"11px 20px",borderRadius:"10px",border:"1px solid "+P.line,color:P.sub,fontSize:"12.5px",fontWeight:"700",cursor:"pointer"}},_T("Copier l image")):null)),{mb:0}));})();
+var content=tab==="overview"?overview:tab==="activity"?activity:tab==="servers"?servers:tab==="retro"?retro:wordsTab;
 return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
 _NXhead("Analytique locale","Nexium Stats","Métriques écoutées en temps réel via les events Discord, calculées et stockées sur ton client. Aucune donnée ne quitte ta machine."),
-_NXtabs([{id:"overview",label:"Vue d'ensemble"},{id:"activity",label:"Activité"},{id:"servers",label:"Serveurs"},{id:"words",label:"Mots"}],tab,setTab),
+_NXtabs([{id:"overview",label:"Vue d'ensemble"},{id:"activity",label:"Activité"},{id:"servers",label:"Serveurs"},{id:"words",label:"Mots"},{id:"retro",label:"Rétro"}],tab,setTab),
 content,
 i("div",{style:{display:"flex",gap:"10px",marginTop:"16px"}},_NXbtn("Rafraîchir",function(){force();}),_NXbtn("Exporter (.json)",function(){_NXS.download();}),_NXbtn("Réinitialiser",function(){if(window.confirm("Réinitialiser toutes les statistiques Nexium ?")){_NXS.reset();force();}},"danger")),
 _NXfoot("localStorage[nexium_stats_v1] · depuis le "+_NXS.dayKey(data.first))));
@@ -1327,7 +1812,7 @@ i("div",{style:{display:"flex",gap:"10px",marginTop:"4px"}},_NXbtn("Rafraîchir"
 _NXfoot("localStorage · clés nexium_*")));
 }var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="136";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="138";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -2540,7 +3025,67 @@ _NXPR.scanBidi(content);
 _NXPR.scanRawIp(content);
 _NXPR.scanCode(content,isDM);
 }catch(_){}};
-_NXPR.CRITICAL=["classify","scanText","scanMasked","scanInvites","scanEmbeds","scanAttachments","scanSecrets","verifyFile","deepFile","matchSig","warnAccount","checkImpostor","checkWave","consoleWarn","onPaste","onMsg","onMsgUpdate","onClickCapture","report","loadRemote","parseList","buildIndex","heuristic","applyProfile","oauthInfo","scanOAuth","scanScheme","scanBidi","isRawIp","scanRawIp","scanCode","scanExtra","rawHost","mixedScript"];
+_NXPR.SBXBRANDS=[["discord",/discord|nitro|dsc\b/i],["steam",/steam|csgo|cs2/i],["roblox",/roblox|robux/i],["epic",/epic\s*games|fortnite|vbucks/i],["crypto",/wallet|seed\s*phrase|metamask|binance|ledger/i]];
+_NXPR.sbxHost=function(u){try{
+var t=String(u||"").replace(/^[a-z]+:\/\//i,"").split(/[\/?#]/)[0];
+var at=t.indexOf("@");if(at>=0)t=t.slice(at+1);
+return t.toLowerCase();}catch(_){return "";}};
+_NXPR.sbxAnalyse=function(html,finalUrl,baseUrl){try{
+var out={host:_NXPR.sbxHost(finalUrl||baseUrl),finalUrl:finalUrl||baseUrl,redirige:false,
+titre:"",desc:"",texte:"",formulaires:0,motDePasse:false,champsCaches:0,
+destinations:[],scripts:[],iframes:0,metaRefresh:null,marques:[],alertes:[],score:0};
+out.redirige=!!(finalUrl&&baseUrl&&_NXPR.sbxHost(finalUrl)!==_NXPR.sbxHost(baseUrl));
+var doc=null;
+try{doc=new DOMParser().parseFromString(String(html||""),"text/html");}catch(_){}
+if(!doc)return out;
+try{out.titre=String((doc.title||"")).trim().slice(0,140);}catch(_){}
+try{var md=doc.querySelector('meta[name="description"],meta[property="og:description"]');
+if(md)out.desc=String(md.getAttribute("content")||"").trim().slice(0,220);}catch(_){}
+try{var mr=doc.querySelector('meta[http-equiv]');
+if(mr&&/refresh/i.test(mr.getAttribute("http-equiv")||"")){out.metaRefresh=String(mr.getAttribute("content")||"").slice(0,160);}}catch(_){}
+try{var body=doc.body?String(doc.body.textContent||""):"";
+out.texte=body.replace(/\s+/g," ").trim().slice(0,600);}catch(_){}
+try{var forms=doc.querySelectorAll("form");out.formulaires=forms.length;
+for(var a=0;a<forms.length&&a<12;a++){
+var act=forms[a].getAttribute("action")||"";
+if(act&&/^https?:\/\//i.test(act)){var h=_NXPR.sbxHost(act);if(h&&out.destinations.indexOf(h)<0)out.destinations.push(h);}}}catch(_){}
+try{out.motDePasse=!!doc.querySelector('input[type="password"]');}catch(_){}
+try{out.champsCaches=doc.querySelectorAll('input[type="hidden"]').length;}catch(_){}
+try{var sc=doc.querySelectorAll("script[src]");
+for(var b=0;b<sc.length&&b<40;b++){var s2=sc[b].getAttribute("src")||"";
+if(/^https?:\/\//i.test(s2)){var h2=_NXPR.sbxHost(s2);if(h2&&h2!==out.host&&out.scripts.indexOf(h2)<0)out.scripts.push(h2);}}}catch(_){}
+try{out.iframes=doc.querySelectorAll("iframe").length;}catch(_){}
+var blob=(out.titre+" "+out.desc+" "+out.texte).toLowerCase();
+for(var c=0;c<_NXPR.SBXBRANDS.length;c++){if(_NXPR.SBXBRANDS[c][1].test(blob))out.marques.push(_NXPR.SBXBRANDS[c][0]);}
+var officiel=false;try{officiel=_NXPR.isOfficial&&_NXPR.isOfficial(out.host);}catch(_){}
+if(out.motDePasse){out.score+=4;out.alertes.push("la page demande un mot de passe");}
+if(out.motDePasse&&out.marques.length&&!officiel){out.score+=4;out.alertes.push("elle imite "+out.marques[0]+" sans en etre le domaine officiel");}
+if(out.destinations.length){
+for(var d=0;d<out.destinations.length;d++){
+if(out.destinations[d]!==out.host){out.score+=3;out.alertes.push("le formulaire envoie vers "+out.destinations[d]);break;}}}
+if(out.redirige){out.score+=1;out.alertes.push("redirection vers "+out.host);}
+if(out.metaRefresh){out.score+=2;out.alertes.push("redirection automatique programmee");}
+if(out.champsCaches>=6){out.score+=1;out.alertes.push(out.champsCaches+" champs caches");}
+if(out.scripts.length>=6){out.score+=1;out.alertes.push(out.scripts.length+" domaines de scripts externes");}
+if(out.iframes>=3){out.score+=1;out.alertes.push(out.iframes+" cadres imbriques");}
+out.verdict=out.score>=6?"danger":out.score>=3?"suspect":"neutre";
+return out;}catch(_){return {host:"",alertes:[],score:0,verdict:"neutre",scripts:[],destinations:[],marques:[]};}};
+_NXPR.sandbox=function(url,cb){try{
+if(!url||!/^https?:\/\//i.test(url)){cb&&cb({erreur:"adresse invalide"});return;}
+_NXNETX.go(url,{method:"GET",redirect:"follow",mode:"cors",cache:"no-store",headers:{"Accept":"text/html"}},14000)
+.then(function(r){
+if(!r)throw 0;
+var fin=(r.url||url);
+var ct="";try{ct=(r.headers&&r.headers.get&&r.headers.get("content-type"))||"";}catch(_){}
+if(ct&&ct.indexOf("text/html")<0&&ct.indexOf("text/plain")<0){
+cb&&cb({erreur:"la reponse n est pas une page web ("+ct.split(";")[0]+")",host:_NXPR.sbxHost(fin),finalUrl:fin});return null;}
+return r.text().then(function(t){
+var res=_NXPR.sbxAnalyse(String(t||"").slice(0,400000),fin,url);
+try{_NXPR.logThreat("sandbox",res.host+" : "+(res.alertes[0]||res.verdict));}catch(_){}
+cb&&cb(res);return null;});})
+.catch(function(){cb&&cb({erreur:"page injoignable ou lecture refusee par le site",host:_NXPR.sbxHost(url),finalUrl:url});});
+}catch(_){cb&&cb({erreur:"analyse impossible"});}};
+_NXPR.CRITICAL=["classify","scanText","scanMasked","scanInvites","scanEmbeds","scanAttachments","scanSecrets","verifyFile","deepFile","matchSig","warnAccount","checkImpostor","checkWave","consoleWarn","onPaste","onMsg","onMsgUpdate","onClickCapture","report","loadRemote","parseList","buildIndex","heuristic","applyProfile","oauthInfo","scanOAuth","scanScheme","scanBidi","isRawIp","scanRawIp","scanCode","scanExtra","rawHost","mixedScript","sandbox","sbxAnalyse","sbxHost"];
 _NXPR.selfCheck=function(final){try{
 var miss=[];
 for(var a=0;a<_NXPR.CRITICAL.length;a++){var f=_NXPR.CRITICAL[a];
@@ -2600,6 +3145,58 @@ card.appendChild(cancel);ov.appendChild(card);
 ov.onclick=function(e){if(e.target===ov&&ov.parentNode)ov.parentNode.removeChild(ov);};
 if(document.body)document.body.appendChild(ov);
 }catch(_){}};
+try{_NXV.wireUpload();}catch(_){}
+_NXV.remindPrompt=function(msg){try{
+if(document.getElementById("nx-remind-modal"))return;
+var P=_NXpal;
+var ov=document.createElement("div");ov.id="nx-remind-modal";
+ov.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);";
+var card=document.createElement("div");
+card.style.cssText="width:400px;max-width:calc(100vw - 40px);background:"+P.panel+";border:1px solid "+P.line+";border-radius:20px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.55);";
+var who="";try{who=(msg&&msg.author&&(msg.author.global_name||msg.author.username))||"";}catch(_){}
+var apercu="";try{apercu=String((msg&&msg.content)||"").slice(0,90);}catch(_){}
+var esc=function(x){return String(x||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+card.innerHTML='<div style="font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:'+P.faint+';margin-bottom:6px;">Nexium Auto</div>'
++'<div style="font-size:19px;font-weight:800;color:'+P.txt+';letter-spacing:-.02em;margin-bottom:10px;">Me le rappeler</div>'
++(who?('<div style="font-size:12px;color:'+P.dim+';margin-bottom:4px;">message de '+esc(who)+'</div>'):"")
++(apercu?('<div style="font-size:12px;color:'+P.sub+';line-height:1.55;margin-bottom:16px;">'+esc(apercu)+'</div>'):'<div style="height:8px;"></div>');
+var row=document.createElement("div");
+row.style.cssText="display:flex;gap:7px;flex-wrap:wrap;";
+var mk=function(label,mins){
+var b=document.createElement("div");
+b.className="nx-fx";b.setAttribute("role","button");b.setAttribute("aria-label",label);b.setAttribute("tabindex","0");
+b.style.cssText="padding:9px 14px;border-radius:10px;border:1px solid "+P.line+";color:"+P.sub+";font-size:12px;font-weight:700;cursor:pointer;";
+b.textContent=label;
+b.onclick=function(){try{_NXV.remindMake(msg,mins,who,apercu);}catch(_){}try{if(ov.parentNode)ov.parentNode.removeChild(ov);}catch(_){}};
+return b;};
+row.appendChild(mk("10 min",10));row.appendChild(mk("1 h",60));row.appendChild(mk("2 h",120));
+row.appendChild(mk("Ce soir",-1));row.appendChild(mk("Demain",-2));
+card.appendChild(row);
+var cancel=document.createElement("div");
+cancel.className="nx-fx";cancel.setAttribute("role","button");cancel.setAttribute("aria-label","Annuler");cancel.setAttribute("tabindex","0");
+cancel.style.cssText="margin-top:14px;text-align:center;padding:9px;border-radius:10px;color:"+P.faint+";font-size:12px;cursor:pointer;";
+cancel.textContent="Annuler";
+cancel.onclick=function(){try{if(ov.parentNode)ov.parentNode.removeChild(ov);}catch(_){}};
+card.appendChild(cancel);
+ov.appendChild(card);
+ov.onclick=function(e){if(e.target===ov&&ov.parentNode)ov.parentNode.removeChild(ov);};
+if(document.body)document.body.appendChild(ov);
+}catch(_){}};
+_NXV.remindWhen=function(mins){try{
+var d=new Date();
+if(mins===-1){d.setHours(20,0,0,0);if(d.getTime()<=Date.now())d.setTime(Date.now()+3600000);return d.getTime();}
+if(mins===-2){d.setDate(d.getDate()+1);d.setHours(9,0,0,0);return d.getTime();}
+return Date.now()+Math.max(1,mins)*60000;}catch(_){return Date.now()+3600000;}};
+_NXV.remindMake=function(msg,mins,who,apercu){try{
+if(!window._NXAU||!_NXAU.add){try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Le moteur d automatisation n est pas disponible.",0);}catch(_){}return;}
+var at=_NXV.remindWhen(mins);
+var nom="Rappel"+(who?" — "+who:"");
+var texte=(who?(who+" : "):"")+(apercu||"message mis de cote");
+var t=_NXAU.add({name:nom,trig:{k:"once",v:String(at)},act:{k:"notify",v:texte},cond:{}});
+if(t){
+try{_NXAU.jot(nom,"rappel programme pour "+new Date(at).toLocaleString());}catch(_){}
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Rappel programme : "+new Date(at).toLocaleTimeString().slice(0,5)+".",1);}catch(_){}}
+}catch(_){}};
 _NXV.wireCtx=function(){try{
 if(_NXV.ctxWired)return;
 var API=(window.Vencord&&Vencord.Api&&Vencord.Api.ContextMenu)||null;
@@ -2612,8 +3209,10 @@ if(!props||!props.message)return;
 var msg=props.message;
 var has=false;
 try{has=_NXV.extractUrls(msg.content).length>0||(msg.embeds&&msg.embeds.length)||(msg.attachments&&msg.attachments.length);}catch(_){}
-if(!has)return;
 children.push(i(Menu.MenuSeparator,{key:"nx-sep"}));
+try{children.push(i(Menu.MenuItem,{key:"nx-remind",id:"nx-remind",label:"Me le rappeler",
+action:function(){try{_NXV.remindPrompt(msg);}catch(_){}}}));}catch(_){}
+if(!has)return;
 children.push(i(Menu.MenuItem,{
 key:"nx-report",id:"nx-report",
 label:"Signaler un lien a Nexium",
@@ -2764,7 +3363,12 @@ return og(c);};
 pg.__nx=true;md.getUserMedia=pg;}
 if(md&&md.getDisplayMedia&&!md.getDisplayMedia.__nx){
 var od=md.getDisplayMedia.bind(md);
-var pd=function(c){try{if(_NXV.cfg.mediaGuard)_NXV.checkMedia("le partage d ecran");}catch(_){}return od(c);};
+var pd=function(c){try{if(_NXV.cfg.mediaGuard)_NXV.checkMedia("le partage d ecran");}catch(_){}
+try{if(_NXV.mcfg&&_NXV.mcfg.auto)_NXV.maskOn("partage d ecran detecte");}catch(_){}
+try{var p2=od(c);if(p2&&p2.then)return p2.then(function(st){try{
+if(st&&st.getTracks)st.getTracks().forEach(function(tr){try{tr.addEventListener("ended",function(){try{if(_NXV.mcfg&&_NXV.mcfg.auto)_NXV.maskOff();}catch(_){}});}catch(_){}});
+}catch(_){}return st;},function(e){try{if(_NXV.mcfg&&_NXV.mcfg.auto)_NXV.maskOff();}catch(_){}throw e;});return p2;}catch(_){}
+return od(c);};
 pd.__nx=true;md.getDisplayMedia=pd;}
 }catch(_){}}catch(_){}};
 
@@ -2881,6 +3485,147 @@ FX.subscribe("GUILD_CREATE",function(e){try{var g=e&&e.guild;if(g&&g.id&&window.
 FX.subscribe("SESSIONS_REPLACE",function(e){try{if(window._NXV)_NXV.onSessions(e);}catch(_){}});}catch(_){}}catch(_){}};
 _NXPR.wire();
 }
+var _NXFO=window._NXFO||(window._NXFO={});
+if(!_NXFO.boot){try{_NXFO.boot=true;
+_NXFO.KEY="nexium_focus_v1";
+_NXFO.STYLEID="nx-focus-style";
+_NXFO.listeners=[];
+_NXFO.notify=function(){for(var a=0;a<_NXFO.listeners.length;a++){try{_NXFO.listeners[a]();}catch(_){}}};
+_NXFO.SEL={
+guilds:'[data-list-item-id^="guildsnav___"]',
+guildBar:'nav[class*="guilds"]',
+badges:'[class*="numberBadge"],[class*="lowerBadge"],[class*="unreadMentionsBar"],[class*="mentionsBadge"]',
+media:'[class*="imageWrapper"],[class*="embedMedia"],[class*="imageContainer"],[class*="videoWrapper"]',
+members:'[class*="membersWrap"]'
+};
+_NXFO.load=function(){var d;try{var raw=_NXDB.get(_NXFO.KEY);d=raw?JSON.parse(raw):null;}catch(_){d=null;}
+if(!d||typeof d!=="object")d={};
+if(typeof d.travail!=="number")d.travail=25;
+if(typeof d.pause!=="number")d.pause=5;
+if(typeof d.cycles!=="number")d.cycles=4;
+if(typeof d.hideGuilds!=="boolean")d.hideGuilds=false;
+if(!Array.isArray(d.allow))d.allow=[];
+if(typeof d.hideBadges!=="boolean")d.hideBadges=true;
+if(typeof d.hideMedia!=="boolean")d.hideMedia=false;
+if(typeof d.hideMembers!=="boolean")d.hideMembers=false;
+if(typeof d.dnd!=="boolean")d.dnd=true;
+if(typeof d.quiet!=="boolean")d.quiet=true;
+if(!Array.isArray(d.log))d.log=[];
+return d;};
+_NXFO.cfg=_NXFO.load();
+_NXFO.save=function(){try{_NXDB.set(_NXFO.KEY,JSON.stringify(_NXFO.cfg));}catch(_){}};
+_NXFO.state={on:false,phase:"travail",until:0,cycle:0,startedAt:0};
+_NXFO.count=function(sel){try{
+if(!document.querySelectorAll)return 0;
+return document.querySelectorAll(sel).length;}catch(_){return 0;}};
+_NXFO.probe=function(){try{
+return {serveurs:_NXFO.count(_NXFO.SEL.guilds),pastilles:_NXFO.count(_NXFO.SEL.badges),
+medias:_NXFO.count(_NXFO.SEL.media),membres:_NXFO.count(_NXFO.SEL.members)};}catch(_){return {};}};
+_NXFO.css=function(){try{
+var c=_NXFO.cfg,out=[];
+if(c.hideGuilds){
+out.push(_NXFO.SEL.guilds+"{display:none!important;}");
+for(var a=0;a<c.allow.length;a++){
+var id=String(c.allow[a]).replace(/[^0-9]/g,"");
+if(id)out.push('[data-list-item-id="guildsnav___'+id+'"]{display:flex!important;}');}}
+if(c.hideBadges)out.push(_NXFO.SEL.badges+"{display:none!important;}");
+if(c.hideMedia)out.push(_NXFO.SEL.media+"{display:none!important;}");
+if(c.hideMembers)out.push(_NXFO.SEL.members+"{display:none!important;}");
+return out.join("\n");}catch(_){return "";}};
+_NXFO.apply=function(){try{
+var el=document.getElementById(_NXFO.STYLEID);
+if(!_NXFO.state.on){if(el&&el.parentNode)el.parentNode.removeChild(el);return;}
+if(!el){el=document.createElement("style");el.id=_NXFO.STYLEID;if(document.head)document.head.appendChild(el);}
+el.textContent=_NXFO.css();}catch(_){}};
+_NXFO.mmss=function(ms){try{
+var s=Math.max(0,Math.round(ms/1000));
+var m=Math.floor(s/60),r=s%60;
+return m+":"+(r<10?"0"+r:r);}catch(_){return "0:00";}};
+_NXFO.left=function(){try{return _NXFO.state.on?Math.max(0,_NXFO.state.until-Date.now()):0;}catch(_){return 0;}};
+_NXFO.jot=function(m){try{
+_NXFO.cfg.log.unshift({t:Date.now(),m:String(m||"").slice(0,90)});
+if(_NXFO.cfg.log.length>40)_NXFO.cfg.log=_NXFO.cfg.log.slice(0,40);
+_NXFO.save();}catch(_){}};
+_NXFO.say=function(titre,corps){try{
+if(window._NXAU&&_NXAU.notifSys)_NXAU.notifSys(titre,corps);
+else if(typeof Notification==="function"&&Notification.permission==="granted")new Notification(titre,{body:corps});}catch(_){}
+try{if(!_NXFO.cfg.quiet&&window._NXPR&&_NXPR.toast)_NXPR.toast(corps,1);}catch(_){}};
+_NXFO.setStatus=function(v){try{
+if(window._NXAU&&_NXAU.setStatus)return _NXAU.setStatus(v);}catch(_){}return false;};
+_NXFO.start=function(){try{
+if(_NXFO.state.on)return;
+_NXFO.state={on:true,phase:"travail",until:Date.now()+_NXFO.cfg.travail*60000,cycle:1,startedAt:Date.now()};
+_NXFO.apply();
+if(_NXFO.cfg.dnd){_NXFO._prevStatus="online";_NXFO.setStatus("dnd");}
+if(_NXFO.cfg.quiet)_NXFO.muteToasts(true);
+_NXFO.jot("session demarree ("+_NXFO.cfg.travail+" min)");
+_NXFO.say("Nexium Focus","Session demarree : "+_NXFO.cfg.travail+" minutes de travail.");
+_NXFO.tickOn();
+_NXFO.notify();}catch(_){}};
+_NXFO.stop=function(manuel){try{
+if(!_NXFO.state.on)return;
+var mn=Math.round((Date.now()-_NXFO.state.startedAt)/60000);
+_NXFO.state.on=false;
+_NXFO.apply();
+_NXFO.tickOff();
+if(_NXFO.cfg.dnd)_NXFO.setStatus("online");
+if(_NXFO.cfg.quiet)_NXFO.muteToasts(false);
+_NXFO.jot((manuel?"session arretee":"session terminee")+" apres "+mn+" min");
+_NXFO.say("Nexium Focus",manuel?"Session arretee.":"Session terminee. "+mn+" minutes concentrees.");
+_NXFO.notify();}catch(_){}};
+_NXFO.muteToasts=function(on){try{
+if(!window._NXPR)return;
+if(on){if(!_NXFO._toast){_NXFO._toast=_NXPR.toast;_NXPR.toast=function(){};}}
+else{if(_NXFO._toast){_NXPR.toast=_NXFO._toast;_NXFO._toast=null;}}}catch(_){}};
+_NXFO.phaseEnd=function(){try{
+var s=_NXFO.state;
+if(s.phase==="travail"){
+if(s.cycle>=_NXFO.cfg.cycles){_NXFO.stop(false);return;}
+s.phase="pause";s.until=Date.now()+_NXFO.cfg.pause*60000;
+_NXFO.say("Nexium Focus","Pause : "+_NXFO.cfg.pause+" minutes.");
+_NXFO.jot("pause "+_NXFO.cfg.pause+" min");}
+else{s.cycle++;s.phase="travail";s.until=Date.now()+_NXFO.cfg.travail*60000;
+_NXFO.say("Nexium Focus","Retour au travail : cycle "+s.cycle+" sur "+_NXFO.cfg.cycles+".");
+_NXFO.jot("cycle "+s.cycle);}
+_NXFO.notify();}catch(_){}};
+_NXFO.tickOn=function(){try{
+if(_NXFO.iv)return;
+_NXFO.iv=setInterval(function(){try{
+if(!_NXFO.state.on){_NXFO.tickOff();return;}
+if(_NXFO.left()<=0){_NXFO.phaseEnd();return;}
+_NXFO.notify();}catch(_){}},1000);}catch(_){}};
+_NXFO.tickOff=function(){try{if(_NXFO.iv)clearInterval(_NXFO.iv);}catch(_){}_NXFO.iv=null;};
+_NXFO.set=function(k,v){try{_NXFO.cfg[k]=v;_NXFO.save();if(_NXFO.state.on)_NXFO.apply();_NXFO.notify();}catch(_){}};
+_NXFO.addGuild=function(id){try{
+var s=String(id||"").replace(/[^0-9]/g,"");
+if(!s)return;
+if(_NXFO.cfg.allow.indexOf(s)<0)_NXFO.cfg.allow.push(s);
+_NXFO.save();if(_NXFO.state.on)_NXFO.apply();_NXFO.notify();}catch(_){}};
+_NXFO.delGuild=function(id){try{
+_NXFO.cfg.allow=_NXFO.cfg.allow.filter(function(x){return x!==id;});
+_NXFO.save();if(_NXFO.state.on)_NXFO.apply();_NXFO.notify();}catch(_){}};
+_NXFO.myGuilds=function(){try{
+var GS=_NXcommon().store("GuildStore");
+var all=GS&&GS.getGuilds&&GS.getGuilds();
+if(!all)return [];
+var out=[];
+for(var k in all){out.push({id:k,name:(all[k]&&all[k].name)||k});}
+out.sort(function(a,b){return String(a.name).localeCompare(String(b.name));});
+return out.slice(0,60);}catch(_){return [];}};
+_NXFO.todayMin=function(){try{
+var d=new Date(),k=d.toDateString(),t=0;
+for(var a=0;a<_NXFO.cfg.log.length;a++){var e=_NXFO.cfg.log[a];
+if(new Date(e.t).toDateString()!==k)continue;
+var m=String(e.m).match(/apres (\d+) min/);
+if(m)t+=parseInt(m[1],10)||0;}
+return t;}catch(_){return 0;}};
+_NXFO.status=function(){try{
+return {actif:_NXFO.state.on,phase:_NXFO.state.phase,restant:_NXFO.mmss(_NXFO.left()),
+cycle:_NXFO.state.cycle,cycles:_NXFO.cfg.cycles,minutesDuJour:_NXFO.todayMin(),
+cibles:_NXFO.probe(),serveursAutorises:_NXFO.cfg.allow.length};}catch(_){return {};}};
+try{window.addEventListener("beforeunload",function(){try{if(_NXFO.state.on)_NXFO.stop(true);}catch(_){}});}catch(_){}
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXFO");if(window._NXERR)_NXERR.push("module _NXFO :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXFO desactive:",_nxE);}catch(_){}}
+}
 var _NXAU=window._NXAU||(window._NXAU={});
 if(!_NXAU.boot){try{_NXAU.boot=true;
 _NXAU.KEY="nexium_auto_v1";
@@ -2919,6 +3664,7 @@ _NXAU.TRIG=[
 {k:"time",g:"Temps",n:"A une heure fixe",d:"Chaque jour a l heure choisie.",arg:"time",ph:"08:30"},
 {k:"every",g:"Temps",n:"Toutes les N minutes",d:"Repete a intervalle regulier tant que le client tourne.",arg:"num",ph:"60"},
 {k:"boot",g:"Temps",n:"Au demarrage du client",d:"Une seule fois, peu apres le lancement."},
+{k:"once",g:"Temps",n:"A une date precise",d:"Une seule fois, puis la tache s efface.",arg:"num",ph:"horodatage"},
 {k:"firstOfDay",g:"Temps",n:"Premier lancement du jour",d:"La premiere fois que tu ouvres Discord dans la journee."},
 {k:"dm",g:"Messages",n:"Message prive recu",d:"Quand quelqu un t ecrit en prive."},
 {k:"mention",g:"Messages",n:"Quand on te mentionne",d:"Ton compte est mentionne dans un message."},
@@ -3290,6 +4036,14 @@ if(!(m>0))return false;
 if(_NXAU.idleMin()<m){t._idled=false;return false;}
 if(t._idled)return false;
 t._idled=true;return true;}catch(_){return false;}};
+_NXAU.dueOnce=function(t){try{
+var at=parseInt((t.trig&&t.trig.v)||"0",10);
+if(!(at>0))return false;
+if(Date.now()<at)return false;
+if(t._fired)return false;
+t._fired=true;
+setTimeout(function(){try{_NXAU.remove(t.id);}catch(_){}},1500);
+return true;}catch(_){return false;}};
 _NXAU.dueStat=function(t){try{
 var n=parseInt((t.trig&&t.trig.v)||"0",10);
 if(!(n>0))return false;
@@ -3318,6 +4072,7 @@ if(k==="time")due=_NXAU.dueTime(t,now);
 else if(k==="every")due=_NXAU.dueEvery(t,now);
 else if(k==="idle")due=_NXAU.dueIdle(t);
 else if(k==="stat")due=_NXAU.dueStat(t);
+else if(k==="once")due=_NXAU.dueOnce(t);
 if(!due)continue;
 if(!_NXAU.allow(t))continue;
 _NXAU.run(t,{});}
@@ -3465,7 +4220,9 @@ var _q0=F.useState("");var q=_q0[0];var setQ=_q0[1];
 F.useEffect(function(){
 if(!window._NXAU)return;
 _NXAU.listeners.push(force);
-return function(){try{_NXAU.listeners=_NXAU.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
+try{if(window._NXFO)_NXFO.listeners.push(force);}catch(_){}
+return function(){try{_NXAU.listeners=_NXAU.listeners.filter(function(f){return f!==force;});}catch(_){}
+try{if(window._NXFO)_NXFO.listeners=_NXFO.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
 var P=_NXpal;
 var A=window._NXAU||null;
 function pill(txt,tone){return i("span",{style:{display:"inline-block",fontSize:"9.5px",fontWeight:"800",letterSpacing:".08em",textTransform:"uppercase",padding:"3px 8px",borderRadius:"99px",border:"1px solid "+(tone||P.line),color:tone||P.dim,whiteSpace:"nowrap"}},txt);}
@@ -3548,7 +4305,7 @@ if(!A)return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
 _NXhead(_T("Automatisation"),"Nexium Auto",_T("Le moteur d automatisation n a pas demarre sur ce client.")),
 _NXcard(i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6}},_T("Redemarre Discord. Si le probleme persiste, le module _NXAU a ete desactive par une erreur au chargement.")),{mb:0})));
 var st=A.status();
-var TABS=[["taches","Taches"],["modeles","Modeles"],["editeur","Editeur"],["memoire","Memoire"],["journal","Journal"]];
+var TABS=[["taches","Taches"],["modeles","Modeles"],["editeur","Editeur"],["focus","Focus"],["memoire","Memoire"],["journal","Journal"]];
 function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Auto"),style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto"}},
 TABS.map(function(t){var on=tab===t[0];
 return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
@@ -3717,6 +4474,74 @@ i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0
 i("div",{style:{flex:1,minWidth:0,fontSize:"12px",color:P.sub,lineHeight:1.6,wordBreak:"break-word"}},n.m),
 i("div",{className:"nx-fx",role:"button","aria-label":_T("Retirer ce memo"),tabIndex:0,onKeyDown:_NXkey,onClick:function(){A.delNote(k);force();},style:{flexShrink:0,color:P.faint,cursor:"pointer",padding:"2px 5px",lineHeight:1}},"×"));}):
 i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},_T("Aucun memo. Utilise l action « Enregistrer un memo » dans une tache."))),{mb:0}));}
+function tFocus(){
+var O=window._NXFO;
+if(!O)return _NXcard(i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},_T("Le mode concentration n est pas disponible : le module n a pas demarre.")),{mb:0});
+var fs=O.status(),c=O.cfg;
+function num(lab,key,ph){return i("div",{style:{flex:1,minWidth:"110px"}},
+label(lab),
+i("input",{value:String(c[key]),onChange:function(e){var v=parseInt(e.target.value,10);O.set(key,(v>0&&v<600)?v:c[key]);},
+placeholder:ph,spellCheck:false,"aria-label":lab,
+style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,borderRadius:"10px",padding:"10px 12px",color:P.txt,fontSize:"12.5px",fontFamily:_NXf.mono,outline:"none"}}));}
+function opt(lab,desc,key){var on=!!c[key];
+return i("div",{className:"nx-fx",role:"button","aria-label":lab,"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){O.set(key,!c[key]);},
+style:{display:"flex",alignItems:"center",gap:"12px",padding:"13px 0",borderBottom:"1px solid "+P.line,cursor:"pointer"}},
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13px",fontWeight:"600",color:on?P.txt:P.sub}},lab),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"3px",lineHeight:1.5}},desc)),
+sw(on));}
+var guilds=c.hideGuilds?O.myGuilds():[];
+return i("div",null,
+i("div",{style:{border:"1px solid "+(fs.actif?P.sub:P.line),borderRadius:"20px",background:P.panel,padding:"24px",marginBottom:"14px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"10px"}},
+fs.actif?(fs.phase==="pause"?_T("Pause"):_T("Concentration")):_T("Mode concentration")),
+fs.actif?i("div",null,
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"58px",fontWeight:"800",color:P.txt,letterSpacing:"-.04em",lineHeight:1}},fs.restant),
+i("div",{style:{fontSize:"12px",color:P.dim,marginTop:"8px"}},_T("cycle")+" "+fs.cycle+" / "+fs.cycles)):
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6}},
+_T("Masque ce qui distrait, coupe les notifications et minute tes sessions.")),
+i("div",{style:{marginTop:"18px",display:"flex",gap:"7px",flexWrap:"wrap"}},
+fs.actif?btn(_T("Arreter"),function(){O.stop(true);force();},true):btn(_T("Demarrer une session"),function(){O.start();force();},true),
+i("div",{style:{flex:1}}),
+i("span",{style:{fontSize:"11px",color:P.faint,alignSelf:"center"}},fs.minutesDuJour+" "+_T("min aujourd hui")))),
+_NXcard(i("div",null,_NXch(_T("Rythme"),_T("Cycles de travail et de pause, facon pomodoro.")),
+i("div",{style:{display:"flex",gap:"10px",flexWrap:"wrap"}},
+num(_T("Travail (min)"),"travail","25"),
+num(_T("Pause (min)"),"pause","5"),
+num(_T("Cycles"),"cycles","4"))),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Ce qui est masque pendant la session"),_T("Uniquement de l affichage : rien n est modifie sur ton compte.")),
+opt(_T("Masquer les pastilles de notification"),_T("Les compteurs rouges qui attirent l oeil."),"hideBadges"),
+opt(_T("Masquer les images et les videos"),_T("Les apercus dans les messages ne sont plus charges a l ecran."),"hideMedia"),
+opt(_T("Masquer la liste des membres"),_T("Recupere de la largeur et enleve une distraction."),"hideMembers"),
+opt(_T("Masquer les serveurs"),_T("Ne garde que ceux que tu autorises ci-dessous."),"hideGuilds"),
+opt(_T("Ne pas deranger pendant la session"),_T("Ton statut repasse en ligne a la fin."),"dnd"),
+opt(_T("Couper les messages Nexium"),_T("Aucun bandeau Nexium pendant que tu travailles."),"quiet")),{mb:12}),
+c.hideGuilds?_NXcard(i("div",null,_NXch(_T("Serveurs autorises"),_T("Ceux-la restent visibles, les autres disparaissent."),
+c.allow.length?i("span",{style:{fontSize:"11px",color:P.faint}},c.allow.length+" "+_T("autorise(s)")):null),
+c.allow.length?i("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px",marginBottom:"12px"}},c.allow.map(function(id){
+var nm=id;for(var a=0;a<guilds.length;a++)if(guilds[a].id===id)nm=guilds[a].name;
+return i("div",{key:id,style:{display:"flex",alignItems:"center",gap:"8px",padding:"6px 10px",background:P.inset,border:"1px solid "+P.line,borderRadius:"99px"}},
+i("span",{style:{fontSize:"11px",color:P.sub}},nm),
+i("span",{className:"nx-fx",role:"button","aria-label":_T("Retirer")+" "+nm,tabIndex:0,onKeyDown:_NXkey,onClick:function(){O.delGuild(id);force();},
+style:{cursor:"pointer",color:P.faint,fontSize:"13px",lineHeight:1}},"\u00d7"));})):null,
+guilds.length?i("div",{style:{display:"flex",flexWrap:"wrap",gap:"6px"}},guilds.filter(function(g2){return c.allow.indexOf(g2.id)<0;}).slice(0,24).map(function(g2){
+return chip(g2.name.slice(0,22),false,function(){O.addGuild(g2.id);force();});})):
+i("div",{style:{fontSize:"12px",color:P.dim}},_T("Liste des serveurs indisponible sur ce client."))),{mb:12}):null,
+_NXcard(i("div",null,_NXch(_T("Verification"),_T("Ce que les selecteurs trouvent reellement dans ta fenetre Discord.")),
+i("div",{style:{display:"flex",gap:"18px",flexWrap:"wrap"}},
+[[_T("serveurs"),fs.cibles.serveurs],[_T("pastilles"),fs.cibles.pastilles],[_T("medias"),fs.cibles.medias],[_T("liste membres"),fs.cibles.membres]].map(function(x,k){
+return i("div",{key:k},
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"20px",fontWeight:"800",color:x[1]?P.txt:"#e6c48a"}},x[1]),
+i("div",{style:{fontSize:"11px",color:P.dim}},x[0]));})),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"12px",lineHeight:1.6}},
+_T("Un zero signifie que Discord a change ses noms de classes : l option correspondante n aura aucun effet."))),{mb:12}),
+(c.log&&c.log.length)?_NXcard(i("div",null,_NXch(_T("Sessions"),_T("Historique local.")),
+c.log.slice(0,12).map(function(e,k,arr){
+var d=new Date(e.t);
+return i("div",{key:k,style:{display:"flex",gap:"11px",padding:"10px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0}},("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)),
+i("span",{style:{flex:1,minWidth:0,fontSize:"11.5px",color:P.sub}},e.m));})),{mb:0}):null);}
 function tJournal(){
 var L=A.data.log||[];
 if(!L.length)return _NXcard(i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},_T("Aucune execution enregistree pour le moment.")),{mb:0});
@@ -3734,7 +4559,7 @@ return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
 _NXhead(_T("Automatisation"),"Nexium Auto",_T("Des regles simples qui travaillent pour toi : un declencheur, des conditions, une action. Tout s execute localement, aucun message n est envoye a ta place.")),
 head(),
 tabbar(),
-tab==="taches"?tTaches():tab==="modeles"?tModeles():tab==="editeur"?tEditeur():tab==="memoire"?tMemoire():tJournal(),
+tab==="taches"?tTaches():tab==="modeles"?tModeles():tab==="editeur"?tEditeur():tab==="focus"?tFocus():tab==="memoire"?tMemoire():tJournal(),
 _NXfoot("Nexium Auto · execution locale, aucun envoi automatique de message")));
 }
 var NexiumProtectIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20},i("path",{d:"M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1.06 13.54L7.4 11l1.41-1.41 2.12 2.12 4.24-4.24 1.42 1.41-5.65 5.65z"}));};
@@ -3746,6 +4571,8 @@ var _cq=F.useState("");var q=_cq[0];var setQ=_cq[1];
 var _cf=F.useState("");var flt=_cf[0];var setFlt=_cf[1];
 var _cs=F.useState(null);var res=_cs[0];var setRes=_cs[1];
 var _cb=F.useState(false);var busy=_cb[0];var setBusy=_cb[1];
+var _sx=F.useState(null);var sbx=_sx[0];var setSbx=_sx[1];
+var _sb=F.useState(false);var sbxBusy=_sb[0];var setSbxBusy=_sb[1];
 F.useEffect(function(){_NXPR.listeners.push(force);try{if(window._NXV)_NXV.listeners.push(force);}catch(_){}return function(){_NXPR.listeners=_NXPR.listeners.filter(function(f){return f!==force;});};},[]);
 var P=_NXpal;var cfg=_NXPR.cfg;var st=_NXPR.stats;var V=window._NXV||null;
 function tog(k){return function(){cfg[k]=!cfg[k];_NXPR.saveCfg();force();};}
@@ -3850,6 +4677,41 @@ i("div",{style:{display:"flex",gap:"8px"}},
 i("input",{value:chk,onChange:function(e){setChk(e.target.value);},placeholder:"https://…",spellCheck:false,"aria-label":_T("Lien à analyser"),style:{flex:1,minWidth:0,background:P.inset,border:"1px solid "+P.line,borderRadius:"11px",padding:"11px 13px",color:P.txt,fontSize:"13px",fontFamily:_NXf.mono,outline:"none"}}),
 i("div",{className:"nx-fx",role:"button","aria-label":_T("Analyser"),tabIndex:0,onKeyDown:_NXkey,onClick:function(){var u=(chk||"").trim();if(!u||busy)return;if(!/^https?:\/\//.test(u))u="https://"+u;setBusy(true);setRes(null);_NXPR.deepScan(u,function(r){setBusy(false);setRes(r);force();});},style:{flexShrink:0,padding:"11px 20px",borderRadius:"11px",background:P.acc,color:"#0a0a0a",fontSize:"12.5px",fontWeight:"800",cursor:busy?"default":"pointer",opacity:busy?.6:1}},busy?_T("Analyse…"):_T("Analyser"))),
 (_NXPR.loading&&!res)?i("div",{style:{marginTop:"13px",fontSize:"12px",color:P.dim,lineHeight:1.55}},_T("Chargement de la base de menaces en cours… l analyse sera complète dans quelques secondes.")):null,
+res?i("div",{style:{marginTop:"14px",paddingTop:"14px",borderTop:"1px solid "+P.line}},
+i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.6,marginBottom:"10px"}},
+_T("Le bac a sable recupere la page et l inspecte sans rien executer : aucun script, aucune image, aucun cadre. Ton adresse IP sera visible du site.")),
+i("div",{style:{display:"flex",gap:"7px",flexWrap:"wrap"}},
+i("div",{className:"nx-fx",role:"button","aria-label":_T("Inspecter en bac a sable"),tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){var u=(res&&res.resolved)||(chk||"").trim();if(!u||sbxBusy)return;if(!/^https?:\/\//.test(u))u="https://"+u;
+setSbxBusy(true);setSbx(null);_NXPR.sandbox(u,function(r){setSbxBusy(false);setSbx(r);force();});},
+style:{padding:"9px 16px",borderRadius:"10px",border:"1px solid "+P.line,color:P.sub,fontSize:"12px",fontWeight:"700",cursor:sbxBusy?"default":"pointer",opacity:sbxBusy?.6:1}},
+sbxBusy?_T("Inspection\u2026"):_T("Inspecter en bac a sable")),
+sbx?i("div",{className:"nx-fx",role:"button","aria-label":_T("Effacer l inspection"),tabIndex:0,onKeyDown:_NXkey,onClick:function(){setSbx(null);},
+style:{padding:"9px 14px",borderRadius:"10px",color:P.faint,fontSize:"12px",cursor:"pointer"}},_T("Effacer")):null),
+sbx?(sbx.erreur?i("div",{style:{marginTop:"12px",fontSize:"12.5px",color:"#e6c48a",lineHeight:1.6}},sbx.erreur):
+i("div",{style:{marginTop:"14px"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap",marginBottom:"10px"}},
+i("div",{style:{fontSize:"14px",fontWeight:"800",color:sbx.verdict==="danger"?"#e79a9a":sbx.verdict==="suspect"?"#e6c48a":P.txt}},
+sbx.verdict==="danger"?_T("Page dangereuse"):sbx.verdict==="suspect"?_T("Page suspecte"):_T("Rien d alarmant dans la page")),
+pill(sbx.host,P.line)),
+sbx.titre?i("div",{style:{fontSize:"13px",color:P.txt,fontWeight:"600",marginBottom:"4px"}},sbx.titre):null,
+sbx.desc?i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.55,marginBottom:"10px"}},sbx.desc):null,
+sbx.alertes&&sbx.alertes.length?i("div",{style:{marginBottom:"10px"}},sbx.alertes.slice(0,6).map(function(al,k){
+return i("div",{key:k,style:{display:"flex",gap:"9px",padding:"3px 0"}},
+i("div",{style:{width:"4px",height:"4px",borderRadius:"50%",background:"#e6c48a",marginTop:"8px",flexShrink:0}}),
+i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.55}},al));})):null,
+i("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap",marginBottom:"10px"}},
+[[_T("formulaires"),sbx.formulaires],[_T("mot de passe"),sbx.motDePasse?_T("oui"):_T("non")],
+[_T("champs caches"),sbx.champsCaches],[_T("scripts tiers"),(sbx.scripts||[]).length],[_T("cadres"),sbx.iframes]].map(function(x,k){
+return i("div",{key:k},
+i("div",{style:{fontSize:"15px",fontWeight:"800",color:P.txt}},x[1]),
+i("div",{style:{fontSize:"10.5px",color:P.dim}},x[0]));})),
+(sbx.destinations&&sbx.destinations.length)?i("div",{style:{fontSize:"11.5px",color:P.sub,fontFamily:_NXf.mono,marginBottom:"6px",wordBreak:"break-all"}},
+_T("Le formulaire envoie vers")+" : "+sbx.destinations.join(", ")):null,
+(sbx.scripts&&sbx.scripts.length)?i("div",{style:{fontSize:"11px",color:P.dim,fontFamily:_NXf.mono,marginBottom:"8px",wordBreak:"break-all"}},
+_T("Scripts charges depuis")+" : "+sbx.scripts.slice(0,6).join(", ")):null,
+sbx.texte?i("div",{style:{marginTop:"8px",padding:"11px 12px",background:P.inset,border:"1px solid "+P.line,borderRadius:"10px",
+fontSize:"11.5px",color:P.sub,lineHeight:1.6,maxHeight:"150px",overflow:"auto",whiteSpace:"pre-wrap"}},sbx.texte):null)):null):null,
 res?(res.verdict==="off"?i("div",{style:{marginTop:"13px",fontSize:"12.5px",color:P.sub,lineHeight:1.55}},_T("Le scanner de liens est désactivé. Active-le dans l onglet Boucliers.")):i("div",{style:{marginTop:"14px",paddingTop:"14px",borderTop:"1px solid "+P.line}},
 i("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},
 i("div",{style:{fontSize:"15px",fontWeight:"800",color:res.verdict==="danger"?"#e79a9a":res.verdict==="warn"?"#e6c48a":P.txt,letterSpacing:"-.01em"}},res.verdict==="danger"?(res.kind==="grabber"?_T("Dangereux — logger d IP"):res.kind==="phish"?_T("Dangereux — hameçonnage"):res.kind==="punycode"?_T("Dangereux — domaine trompeur"):_T("Dangereux")):res.verdict==="warn"?_T("Suspect — destination masquée"):_T("Aucune menace détectée")),
@@ -3857,6 +4719,43 @@ res.verdict==="danger"?pill(res.blocked?_T("Bloqué"):_T("Protection désactivé
 res.host?i("div",{style:{fontSize:"11.5px",color:P.sub,marginTop:"9px",fontFamily:_NXf.mono,wordBreak:"break-all"}},_T("Domaine")+" : "+res.host):null,
 res.resolved?i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"4px",fontFamily:_NXf.mono,wordBreak:"break-all"}},_T("Redirige vers")+" : "+res.resolved):null,
 res.verdict==="danger"?i("div",{style:{fontSize:"12px",color:P.sub,marginTop:"10px",lineHeight:1.55}},res.blocked?_T("N ouvre pas ce lien. Il peut voler ton adresse IP, te géolocaliser ou dérober ton compte."):_T("Ce lien est dangereux mais la protection correspondante est désactivée — active-la dans l onglet Boucliers.")):null)):null),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Masque de partage d ecran"),_T("Avant de partager ton ecran : floute les messages prives et masque les pseudos.")),
+(function(){var V2=window._NXV;
+if(!V2||!V2.maskToggle)return i("div",{style:{fontSize:"12.5px",color:P.dim}},_T("Indisponible sur ce client."));
+var cnt=V2.maskCount();
+return i("div",null,
+i("div",{style:{display:"flex",alignItems:"center",gap:"12px",marginBottom:"14px",flexWrap:"wrap"}},
+i("div",{className:"nx-fx",role:"button","aria-label":V2.maskActive?_T("Retirer le masque"):_T("Activer le masque"),tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){V2.maskToggle();force();},
+style:{padding:"11px 20px",borderRadius:"10px",background:V2.maskActive?P.acc:"transparent",border:"1px solid "+(V2.maskActive?P.acc:P.line),
+color:V2.maskActive?"#0a0a0a":P.sub,fontSize:"12.5px",fontWeight:"800",cursor:"pointer"}},
+V2.maskActive?_T("Retirer le masque"):_T("Activer le masque")),
+V2.maskActive?pill(_T("actif"),"#e6c48a"):null),
+[["auto",_T("Activer automatiquement au partage d ecran"),_T("Se declenche quand Discord demande le partage, se retire a la fin.")],
+["dms",_T("Flouter les messages prives"),_T("La colonne de gauche devient illisible.")],
+["names",_T("Masquer les pseudos"),_T("Les noms affiches sont floutes.")],
+["members",_T("Cacher la liste des membres"),_T("La colonne de droite disparait.")],
+["content",_T("Flouter le contenu des messages"),_T("Radical : plus rien n est lisible a l ecran.")]].map(function(o,k,arr){
+var on=!!(V2.mcfg&&V2.mcfg[o[0]]);
+return i("div",{key:o[0],className:"nx-fx",role:"button","aria-label":o[1],"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){V2.maskSet(o[0],!on);force();},
+style:{display:"flex",alignItems:"center",gap:"12px",padding:"12px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line,cursor:"pointer"}},
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13px",fontWeight:"600",color:on?P.txt:P.sub}},o[1]),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"3px",lineHeight:1.5}},o[2])),
+sw(on));}),
+i("div",{style:{marginTop:"12px",fontSize:"11px",color:P.faint,lineHeight:1.6}},
+_T("Reperes dans ta fenetre")+" : "+cnt.dms+" "+_T("zone MP")+" · "+cnt.names+" "+_T("pseudos")+" · "+cnt.members+" "+_T("liste membres")));})()),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Bilan de securite"),_T("Une carte partageable de ce que Nexium a arrete.")),
+(function(){var RT=window._NXRT;
+if(!RT||!RT.drawSecurity)return i("div",{style:{fontSize:"12.5px",color:P.dim}},_T("Indisponible sur ce client."));
+var im=null;try{im=RT.secDataUrl("mois");}catch(_){}
+return i("div",null,
+im?i("img",{src:im,alt:_T("Apercu du bilan de securite"),style:{width:"100%",display:"block",borderRadius:"14px",border:"1px solid "+P.line,marginBottom:"12px"}}):null,
+i("div",{style:{display:"flex",gap:"7px",flexWrap:"wrap"}},
+i("div",{className:"nx-fx",role:"button","aria-label":_T("Telecharger le bilan"),tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){RT.secDownload("mois");},
+style:{padding:"11px 20px",borderRadius:"10px",background:P.acc,color:"#0a0a0a",fontSize:"12.5px",fontWeight:"800",cursor:"pointer"}},_T("Telecharger le bilan"))));})()),{mb:12}),
 _NXcard(i("div",null,_NXch(_T("Conseils de sécurité")),
 ["Ne colle jamais de code dans la console Discord — c est le piège numéro un pour voler un compte.","Ne scanne jamais un QR code de connexion envoyé par un inconnu.","Un « Nitro gratuit » par message privé est toujours une arnaque.","Vérifie toujours le domaine exact d un lien avant de te connecter.","Aucun code à 6 chiffres ne doit jamais être communiqué, à personne."].map(function(t,k,arr){
 return i("div",{key:k,style:{display:"flex",gap:"11px",alignItems:"flex-start",padding:"10px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},

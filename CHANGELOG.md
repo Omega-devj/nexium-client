@@ -1,5 +1,76 @@
 # Nexium Client — Notes de version
 
+## v138 — Partage, metadonnees et rappels
+
+### Masque de partage d ecran
+
+- Dans Nexium Protect, onglet Apercu
+- Un bouton avant de partager : les messages prives sont floutes, les pseudos masques, la liste des membres cachee
+- S active tout seul quand Discord demande le partage d ecran, et se retire quand le partage s arrete
+- Chaque element est activable separement, dont un mode radical qui floute aussi le contenu des messages
+- Un bandeau discret rappelle en haut de l ecran que le masque est actif
+- Indique combien d elements chaque selecteur trouve reellement dans ta fenetre
+
+### Metadonnees des images envoyees
+
+- Complete le garde-fou avant envoi qui verifiait deja le texte : il verifie maintenant aussi tes images
+- Previent quand une photo JPEG contient des coordonnees GPS, le modele de ton appareil ou la date de prise de vue
+- Lecture locale des 256 premiers kilo-octets du fichier, aucun envoi
+- Si le module d envoi de Discord n est pas accessible, la protection se declare indisponible au lieu d echouer en silence
+
+### Faux serveurs officiels
+
+- Complete l analyse de serveur existante, qui reperait deja les noms imitant une marque
+- Confronte desormais le nom au badge de verification reel de Discord
+- Un serveur qui porte un nom de marque sans badge, ou qui se presente comme officiel sans en avoir un, est signale
+- A l inverse, un serveur reellement verifie ou partenaire voit son score de risque baisser
+
+### Bilan de securite partageable
+
+- Carte image facon Retrospective, cote Protect : menaces bloquees, liens analyses, arnaques reperees, exfiltrations, domaines surveilles
+- Classement de ce qui a ete arrete, par type
+- Genere et telecharge localement
+
+### Rappel sur un message
+
+- Clic droit sur un message puis Me le rappeler
+- Choix rapide : 10 minutes, 1 heure, 2 heures, ce soir, demain
+- Cree une tache Nexium Auto qui se declenche une fois puis s efface toute seule
+- Nouveau declencheur A une date precise, utilisable aussi dans l editeur de taches
+- Nexium Auto compte desormais 21 declencheurs et 22 actions
+
+---
+
+## v137 — Retrospective, concentration et bac a sable
+
+### Retrospective partageable
+
+- Nouvel onglet Retro dans Nexium Stats
+- Genere une carte image de ton activite : messages, caracteres, temps vocal, reactions, habitudes sur 7 jours et 24 heures, mots et emojis les plus utilises
+- Quatre periodes au choix : ce mois-ci, 30 derniers jours, cette annee, depuis le debut
+- Apercu avant export, telechargement en PNG, copie directe dans le presse-papiers quand le client le permet
+- Tout est calcule et dessine sur ta machine, rien n est envoye
+
+### Mode concentration
+
+- Nouvel onglet Focus dans Nexium Auto
+- Sessions minutees facon pomodoro : duree de travail, duree de pause, nombre de cycles
+- Masque pendant la session : pastilles de notification, images et videos, liste des membres, serveurs non autorises
+- Passe ton statut en ne pas deranger et coupe les messages Nexium pendant que tu travailles
+- Liste blanche de serveurs : ne garde que ceux dont tu as besoin
+- Un bloc de verification indique combien d elements chaque option trouve reellement, pour reperer tout de suite si Discord a change ses noms de classes
+- Historique des sessions et total concentre du jour
+
+### Bac a sable de liens
+
+- Depuis le verificateur de lien de Nexium Protect
+- Recupere la page et l inspecte sans rien executer : aucun script lance, aucune image chargee, aucun cadre affiche
+- Signale ce qui compte vraiment : champ de mot de passe, domaine vers lequel le formulaire envoie, marque imitee, redirection automatique, champs caches, scripts tiers
+- Affiche le titre, la description et le texte visible de la page pour juger sans la visiter
+- Ton adresse IP reste visible du site : c est annonce clairement avant de lancer l inspection
+
+---
+
 ## v136 — Automatisation et bannissement
 
 ### Nexium Auto s'agrandit
