@@ -32,7 +32,7 @@ if (BUMP) {
 let bad = null;
 if (src.length < 500000) bad = "taille insuffisante (" + src.length + ")";
 else if (!/_NXUP\.VERSION="\d+"/.test(src)) bad = "numero de version absent";
-else if ((src.match(/registrar:"NanoCord"/g) || []).length < 10) bad = "marqueurs internes manquants";
+else if ((src.match(/registrar:"Nexium Client"/g) || []).length < 10) bad = "marqueurs internes manquants";
 else if (src.indexOf("_NXUP.checkRaw") < 0 || src.indexOf("_NXPR.scanUrl") < 0) bad = "modules Nexium absents";
 if (bad) {
   console.error("refus : le fichier ne passerait pas validRenderer() — " + bad);

@@ -1,5 +1,85 @@
 # Nexium Client — Notes de version
 
+## v145 — Ecran de premier lancement
+
+### Le client se presente enfin
+
+- Au tout premier demarrage, Nexium affichait le journal des versions : un changelog brut, illisible pour qui decouvre le client
+- Il ouvre maintenant un accueil en quatre volets, ferme d un clic et rejouable a volonte
+
+### Ce que raconte l accueil
+
+- Discord, repris en main : ce que Nexium est, en trois phrases
+- Ton client, ton allure : le fond, l accent et la signature se choisissent la, et la fenetre change derriere en direct
+- Ce qui est arrete avant toi : liens pieges, faux serveurs, jeton colle par erreur, metadonnees des photos, masque de partage
+- Rien ne part d ici : hotes contactes affiches et mesures, donnees calculees en local, aucune analytique
+- Les deux derniers volets ouvrent directement Nexium Protect et Nexium Reseau
+
+### Details
+
+- La carte reprend les couleurs du theme choisi : le changement se voit sur l accueil lui-meme
+- Si le theme est coupe, le volet apparence le dit au lieu d afficher des reglages morts
+- Un bouton Revoir l ecran d accueil est ajoute dans Nexium Donnees
+- La mise a jour d une version a l autre continue d afficher le journal des versions, comme avant
+
+---
+
+## v144 — Signature Nexium et badges etrangers
+
+### Les badges d autres clients disparaissent
+
+- Les badges donateur et contributeur de Vencord et d Equicord ne sont plus affiches nulle part
+- Ni sur les profils, ni en chat, ni dans l editeur de disposition des badges
+- Le client ne va plus chercher la liste des donateurs sur badges.vencord.dev au demarrage ni toutes les trente minutes
+- Un hote sortant de moins, visible dans Nexium Reseau
+- Les badges Discord d origine, eux, restent intacts
+
+### Trois niveaux de signature visuelle
+
+- Le reglage Apparence Nexium remplace le trait de signature par une intensite a trois crans
+- Discrete : couleurs, typographie et coins seulement
+- Affirmee : filet d accent en haut de la fenetre, indicateur de serveur en trait fin, separateurs reduits a un filet
+- Affirmee, suite : lisere d accent sur les messages et les mentions, filet au-dessus de la saisie, categories en capitales espacees
+- Totale : ajoute le sigle NEXIUM dans la barre de titre et un filigrane discret au fond de la fenetre
+- Anneau de focus et selection de texte passent a l accent choisi
+- Les reglages d avant sont repris automatiquement
+
+### Ces retouches se signalent quand Discord change
+
+- Chaque couche structurelle compte les elements qu elle vise reellement
+- Les reglages nomment les cibles introuvables au lieu de laisser croire que tout va bien
+
+---
+
+## v143 — Identite visuelle et menage
+
+### Apparence Nexium
+
+- Nouveau reglage dans Nexium Donnees : le client habille desormais Discord a ses propres couleurs
+- Trois fonds au choix : Encre, Graphite et Papier, ce dernier en clair
+- Quatre accents : Ivoire, Cendre, Braise, ou aucun pour garder celui de Discord
+- Trois typographies : celle d origine, une grotesque, ou une editoriale a empattements pour les titres
+- Trois familles de coins : arrondis, doux ou nets
+- Un trait de signature d un pixel tout en haut de la fenetre, et un mode images sobres qui desature les bannieres
+- Le theme passe par les variables de couleur de Discord, pas par des noms de classes : il survit aux mises a jour du client
+- Une sonde verifie que les variables ont bien pris et le dit dans les reglages au lieu d echouer en silence
+- Actif par defaut ; le decocher rend a Discord son apparence d origine a l identique
+
+### Le client ne se presente plus sous un autre nom
+
+- Toutes les mentions visibles d Equicord, NanoCord, Vencord, Vesktop et Equibop deviennent Nexium Client
+- Les onglets, la palette de commandes, les informations de version et le presse-papier de debogage portent le nom du client
+- Les greffons internes sont renommes Nexium, avec reprise automatique de leurs reglages existants
+- Les liens de version et de depot pointent desormais vers le depot Nexium
+
+### Barre de serveurs en haut
+
+- Fonctionnalite retiree : reglage, module et traductions
+- Le rendu reposait sur des suppositions de noms de classes Discord et n a jamais tenu
+- La liste des serveurs retrouve la colonne de gauche d origine
+
+---
+
 ## v138 — Partage, metadonnees et rappels
 
 ### Masque de partage d ecran
