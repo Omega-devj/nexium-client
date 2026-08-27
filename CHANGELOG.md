@@ -1,5 +1,118 @@
 # Nexium Client — Notes de version
 
+## v150 — Nexium NEW Gen
+
+### Onze protections qui n existaient pas
+
+- Gardien des webhooks : un envoi par webhook Discord passe par discord.com, donc rien ne le filtrait
+- Pare-feu sortant : aucune donnee ne part vers un serveur inconnu sans ton accord, en trois postures
+- Anti-balise invisible : image d un pixel, WebSocket et flux permanent sont coupes
+- Gardien du DOM : scripts, cadres et formulaires injectes sont retires avant de servir
+- Anti-charge utile : le code qu un theme ou un greffon veut executer est lu avant, et refuse s il vole
+- Caracteres invisibles : un message peut en cacher des dizaines pour dissimuler un lien ou te marquer
+- Adresses de portefeuille : signalees a la reception, et detournement du presse-papiers detecte
+- Liens prives d inconnus : un lien recu d un compte hors de tes amis demande confirmation
+- Fuite de webhook : tu es prevenu avant de coller l adresse complete d un webhook
+- Vagues coordonnees : trois comptes recents qui postent le meme message, c est une campagne
+- Noms de fichiers truques : double extension et sens de lecture inverse
+
+### L anti-exfiltration reconnait le jeton meme deguise
+
+- Encode en URL, en base64, inverse, recompose sans ses points, ou coupe en deux
+- L adresse de la requete est enfin inspectee : un jeton en parametre sortait sans un bruit
+- Corps binaires, formulaires et parametres d URL couverts
+- Mots de passe et cles d API rejoignent la liste des secrets surveilles
+- supabase.co n est plus autorise en entier : seul le projet Nexium l est
+- Le jeton ne reste plus pose sur une variable globale
+
+### Failles corrigees
+
+- La chaine de mise a jour n avait jamais fonctionne : le controle exigeait dix marqueurs qui n ont jamais existe qu en deux exemplaires
+- Un domaine de la base de menaces echappait au blocage s il etait servi sur un port inhabituel
+- Autoriser un domaine autorisait aussi tout domaine qui le contenait
+- Le lanceur sait desormais se mettre a jour lui-meme, avec retour arriere automatique
+- Le journal des requetes bloquees de Nexium Privacy ne s est jamais rempli : un compteur ecrasait la liste
+
+### Vie privee : vingt-quatre reglages et des heures discretes
+
+- Onze familles de requetes reconnues et blocables, dont tests A/B, detection de jeux, contacts, affinites, recommandations et sondage vocal
+- Frappe silencieuse, accuses de lecture, inactivite et partage de l activite en cours
+- En-tetes de suivi retires, empreinte materielle normalisee, serveurs STUN etrangers ecartes
+- Noms de fichiers anonymises a l envoi, liens copies nettoyes, traces purgees a la fermeture
+- Trois profils d ensemble, et des heures discretes qui basculent toutes seules
+- Un bilan de la semaine et un journal complet de ce qui a ete arrete
+
+### Onze pages refaites
+
+- Un accueil qui devient un vrai tableau de bord, avec acces direct a tout le client
+- Protect : anneau de protection, vitrines des nouveautes, journal des sorties
+- Privacy : jauge segmentee, barre de flux, histogramme des vingt-quatre heures
+- Reseau : trace de latence, inventaire des hotes contactes, routes les plus lentes, mesure a la demande
+- Stats : calendrier de constance, rythme de journee, objectifs, export CSV
+- Donnees : inspecteur de contenu, sauvegardes automatiques, tableau de sante
+- Music : disque qui tourne, forme d onde, playlist cherchable, minuterie, touches media du clavier
+- Theme : apercu en direct, cinq ambiances pretes
+- Team, Sponsor et journal des versions entierement redessines
+- Icones revues : Privacy ne porte plus le meme bouclier que Protect
+
+### Performances
+
+- Classification des requetes : une seule expression au lieu de douze, 1,6 fois plus rapide
+- 162 400 recherches dans les stores de Discord remplacees par deux
+- Les tableaux de reglages ne sont plus reconstruits a chaque rendu
+- Les ecritures sur disque attendent un temps mort
+- Un panneau complet se redessine en moins d une milliseconde
+
+---
+
+## v146 — Cinq gardes de sortie et un Protect refait
+
+### Cinq protections inedites
+
+- Gardien des webhooks : un envoi par webhook Discord passe par discord.com, donc aucune protection ne le filtrait. Il est desormais arrete, et le webhook peut etre approuve au cas par cas
+- Pare-feu sortant : les serveurs hors Discord et hors Nexium ne recoivent plus rien sans ton accord
+- Trois postures au choix, Guide par defaut : la lecture passe, ce qui emporte des donnees est arrete
+- Anti-balise invisible : une image d un pixel, un WebSocket ou un flux permanent suffisaient a faire sortir un jeton sans aucune requete visible. Les trois voies sont coupees
+- Gardien du DOM : scripts, cadres et formulaires inseres dans la fenetre depuis l exterieur sont retires avant de servir. Tes themes, eux, sont seulement signales, jamais casses
+- Anti-charge utile : le code qu un theme, un greffon ou un script injecte veut faire executer est lu avant, et refuse quand il lit ton jeton pour le faire sortir
+
+### L anti-exfiltration reconnait le jeton meme deguise
+
+- Le jeton est repere encode en URL, en base64, inverse, recompose sans ses points, et jusqu a un fragment de vingt-six caracteres
+- L adresse de la requete est enfin inspectee : jusqu ici seuls le corps et les en-tetes l etaient, un jeton en parametre d URL sortait sans un bruit
+- Les corps binaires, les FormData et les URLSearchParams sont couverts
+- Les mots de passe et les cles d API rejoignent la liste des secrets surveilles
+- supabase.co n est plus autorise en entier : seul le projet Nexium l est. N importe qui pouvait ouvrir un projet gratuit et s en servir comme sortie
+- Le jeton ne reste plus pose sur une variable globale : il vit dans une fermeture, quinze secondes, et il est oublie des que la fenetre passe en arriere-plan
+
+### Deux contournements corriges
+
+- Un domaine de la base de menaces echappait au blocage s il etait servi sur un port inhabituel : grabify.link:8443 passait, grabify.link non. Les adresses IP brutes avec port aussi
+- Autoriser un domaine autorisait aussi tout domaine qui le contenait : approuver exemple.fr ouvrait la porte a exemple.fr.piege.tld
+
+### Nexium Protect a une nouvelle interface
+
+- L en-tete devient un anneau de protection qui se remplit a l ouverture, avec un halo qui respire et des compteurs qui s animent quand un chiffre bouge
+- Les cinq nouveautes ont leur vitrine en tete d Apercu, avec leur compteur de blocages et la posture du pare-feu
+- Les onglets ont un soulignement qui glisse, et Journal porte une pastille quand la quarantaine n est pas vide
+- Les cartes arrivent en cascade au changement d onglet
+- Nouveau volet Journal : sorties arretees, hotes inconnus rencontres, hotes approuves
+- Le niveau de protection compte desormais 28 protections au lieu de 23
+
+### Sous le capot
+
+- Les tableaux de boucliers ne sont plus reconstruits a chaque rendu : un panneau complet se redessine en moins d une milliseconde
+- Les evenements de blocage sont amortis avant de redessiner l interface, une rafale ne fait plus clignoter la page
+- Les gardes coutent trente nanosecondes sur un avatar Discord et moins d une microseconde sur une requete
+- Le composant se desabonne enfin de Nexium Coffre-fort en se fermant
+- Toutes les animations respectent le reglage de mouvement et le mode reduit du systeme
+
+### Correction d affichage
+
+- Dans la modale de lien bloque, l encadre qui montre l adresse avait perdu son fond, sa bordure et sa police : une concatenation avalee par des apostrophes. Une longue adresse debordait de la carte
+
+---
+
 ## v145 — Ecran de premier lancement
 
 ### Le client se presente enfin

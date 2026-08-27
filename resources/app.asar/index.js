@@ -9,6 +9,15 @@ const STATE = path.join(equicordDir, ".nexium-update.json");
 const LOG = path.join(equicordDir, ".nexium-update.log");
 const DEV = path.join(equicordDir, ".nexium-dev");
 const RAW = "https://raw.githubusercontent.com/Omega-devj/nexium-client/refs/heads/main/resources/equicord/";
+const RAW_APP = "https://raw.githubusercontent.com/Omega-devj/nexium-client/refs/heads/main/resources/app.asar/";
+
+// Version de CE fichier. A incrementer des qu'on le modifie : c'est ce qui declenche
+// son remplacement chez les utilisateurs. Jusqu'a la v146 il ne se mettait jamais a jour,
+// et une erreur ici obligeait a reinstaller tout le parc a la main.
+const NEXIUM_INDEX_V = 2;
+const IDX = __filename;
+const IDXBAK = IDX + ".bak";
+const IDXPEND = IDX + ".pending";
 
 function loadState() { try { return JSON.parse(fs.readFileSync(STATE, "utf8")) || {}; } catch (_) { return {}; } }
 function saveState(s) { try { fs.writeFileSync(STATE, JSON.stringify(s)); } catch (_) {} }
@@ -31,22 +40,87 @@ function validRenderer(t) {
     try {
         if (typeof t !== "string" || t.length < 500000) return "taille insuffisante";
         if (versionOfText(t) == null) return "numéro de version absent";
-        var reg = (t.match(/registrar:"NanoCord"/g) || []).length;
-        if (reg < 10) return "marqueurs internes manquants (" + reg + ")";
+        // Marqueur structurel : un bundle Nexium complet declare une trentaine de modules _NX.
+        // (L'ancien controle comptait registrar:"NanoCord" et exigeait 10 occurrences alors que
+        //  le fichier n'en a jamais contenu que 2 : aucune mise a jour n'a jamais pu s'appliquer.)
+        var mods = (t.match(/var _NX[A-Za-z]+=window\._NX[A-Za-z]+\|\|/g) || []).length;
+        if (mods < 20) return "modules Nexium incomplets (" + mods + ")";
         if (t.indexOf("_NXUP.checkRaw") < 0 || t.indexOf("_NXPR.scanUrl") < 0) return "modules Nexium absents";
+        if (t.indexOf("_NXV.checkOut") < 0 || t.indexOf("_NXGD.bloque") < 0) return "gardes de sortie absents";
         var tail = t.slice(-400);
         if (tail.indexOf(";") < 0 && tail.indexOf("}") < 0 && tail.indexOf(")") < 0) return "fin de fichier suspecte";
         return null;
     } catch (e) { return "validation impossible"; }
 }
 
+const TRYING = path.join(equicordDir, ".nexium-index-trying");
+
+// Le lanceur ne s'accepte lui-meme que s'il est syntaxiquement valide et structurellement
+// complet. new Function() compile sans executer : une coquille est donc attrapee ici,
+// avant l'ecriture, et ne peut pas empecher le client de demarrer.
+function indexVersionOf(t) { try { var m = String(t).match(/NEXIUM_INDEX_V\s*=\s*(\d+)/); return m ? parseInt(m[1], 10) : null; } catch (_) { return null; } }
+function validIndex(t) {
+    try {
+        if (typeof t !== "string" || t.length < 4000 || t.length > 200000) return "taille inattendue";
+        if (indexVersionOf(t) == null) return "version du lanceur absente";
+        if (t.indexOf("loadPatcher") < 0 || t.indexOf("validRenderer") < 0 || t.indexOf("syncUpdate") < 0) return "structure inattendue";
+        if (t.indexOf("NEXIUM_INDEX_V") < 0) return "marqueur absent";
+        try { new Function(t); } catch (e) { return "syntaxe invalide : " + (e && e.message); }
+        return null;
+    } catch (e) { return "validation impossible"; }
+}
+
 let state = loadState();
+
+// Premier demarrage sur un nouveau lanceur : on pose un drapeau que le chien de garde
+// relira si le chargement du patcher n'aboutit pas. On ne l'efface qu'une fois le patcher
+// charge : un lanceur qui echoue avant ce point declenche un retour arriere au demarrage suivant.
+function bootPatcher() {
+    var premierRun = (state.indexV !== NEXIUM_INDEX_V);
+    if (premierRun) { try { fs.writeFileSync(TRYING, String(NEXIUM_INDEX_V)); } catch (_) {} }
+    loadPatcher();
+    if (premierRun) {
+        try { fs.unlinkSync(TRYING); } catch (_) {}
+        state.indexV = NEXIUM_INDEX_V;
+        if (state.indexBlocked != null && NEXIUM_INDEX_V > state.indexBlocked) delete state.indexBlocked;
+        saveState(state);
+    }
+}
 
 function loadPatcher() {
     if (fs.existsSync(patcherJs)) { require(patcherJs); }
     else if (fs.existsSync(desktopAsar)) { require(desktopAsar); }
     else { throw new Error("NanoCord mod missing. Re-run pnpm repair:portable."); }
 }
+
+// 0aa) Chien de garde du lanceur : si le demarrage precedent s'est arrete avant que le patcher
+// soit charge, le drapeau est encore la et on revient a la version precedente du lanceur.
+(function watchdogIndex() {
+    try {
+        if (!fs.existsSync(TRYING)) return;
+        try { fs.unlinkSync(TRYING); } catch (_) {}
+        if (!fs.existsSync(IDXBAK)) { log("lanceur : demarrage precedent incomplet, aucune sauvegarde disponible"); return; }
+        var b = null; try { b = fs.readFileSync(IDXBAK, "utf8"); } catch (_) {}
+        var why = validIndex(b);
+        if (why) { log("lanceur : sauvegarde invalide (" + why + "), version actuelle conservee"); return; }
+        fs.writeFileSync(IDX + ".newtmp", b); fs.renameSync(IDX + ".newtmp", IDX);
+        state.indexV = indexVersionOf(b); state.indexBlocked = NEXIUM_INDEX_V; saveState(state);
+        log("lanceur : demarrage precedent incomplet -> retour a la version " + state.indexV);
+    } catch (e) { log("watchdog lanceur: " + (e && e.message)); }
+})();
+
+// 0ab) Applique un lanceur telecharge au demarrage precedent. Prend effet au prochain lancement.
+(function applyPendingIndex() {
+    try {
+        if (!fs.existsSync(IDXPEND)) return;
+        var t = null; try { t = fs.readFileSync(IDXPEND, "utf8"); } catch (_) {}
+        var why = validIndex(t);
+        if (why) { try { fs.unlinkSync(IDXPEND); } catch (_) {} log("lanceur en attente refuse : " + why); return; }
+        try { fs.copyFileSync(IDX, IDXBAK); } catch (_) {}
+        fs.renameSync(IDXPEND, IDX);
+        log("lanceur mis a jour vers la version " + indexVersionOf(t) + " -> actif au prochain demarrage");
+    } catch (e) { log("applyPendingIndex: " + (e && e.message)); }
+})();
 
 // 0a) Manual recovery: create resources/equicord/.nexium-restore to roll back to the previous version.
 (function restoreIfAsked() {
@@ -88,16 +162,17 @@ function loadPatcher() {
 // DEV MODE: create resources/equicord/.nexium-dev to freeze the local renderer for testing.
 if (fs.existsSync(DEV)) {
     log("MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.");
-    loadPatcher();
+    bootPatcher();
     return;
 }
 
 // Synchronous download (curl → PowerShell). Returns text or null.
-function syncDownload(name) {
+function syncDownload(name) { return syncDownloadFrom(RAW, name); }
+function syncDownloadFrom(base, name) {
     try {
         var cp = require("child_process");
         var tmp = path.join(equicordDir, name + ".sync.tmp");
-        var url = RAW + name + "?nx=" + Date.now();
+        var url = base + name + "?nx=" + Date.now();
         try { if (fs.existsSync(tmp)) fs.unlinkSync(tmp); } catch (_) {}
         var ok = false;
         try {
@@ -234,6 +309,23 @@ var NX_REPAIR = false;
                 }
             }
         }
+        // Lanceur : on ne remplace que vers une version strictement superieure, jamais vers
+        // une version deja rejetee par le chien de garde.
+        try {
+            var itxt = syncDownloadFrom(RAW_APP, "index.js");
+            if (itxt != null) {
+                var iw = validIndex(itxt);
+                var iv = indexVersionOf(itxt);
+                if (iw) log("lanceur distant refuse : " + iw);
+                else if (iv == null || iv <= NEXIUM_INDEX_V) { /* deja a jour */ }
+                else if (state.indexBlocked != null && iv === state.indexBlocked) log("lanceur v" + iv + " ignore (bloque apres restauration)");
+                else {
+                    fs.writeFileSync(IDXPEND + ".tmp", itxt); fs.renameSync(IDXPEND + ".tmp", IDXPEND);
+                    log("lanceur v" + iv + " telecharge -> applique au prochain demarrage");
+                }
+            }
+        } catch (e) { log("telechargement lanceur: " + (e && e.message)); }
+
         // CSS
         try {
             var ctxt = syncDownload("renderer.css");
@@ -250,4 +342,4 @@ var NX_REPAIR = false;
     } catch (e) { log("syncUpdate exception: " + (e && e.message)); }
 })();
 
-loadPatcher();
+bootPatcher();

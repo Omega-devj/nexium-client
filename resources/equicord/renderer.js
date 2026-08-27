@@ -81,7 +81,41 @@ _NXDB.fail=null;_NXDB.set=function(k,v){try{_NXDB.ls.setItem(k,v);if(_NXDB.fail)
 _NXDB.del=function(k){try{_NXDB.ls.removeItem(k);}catch(_){}};
 _NXDB.keys=function(){var out=[];try{if(_NXDB.ls._m)return Object.keys(_NXDB.ls._m);var n=_NXDB.ls.length||0;for(var a=0;a<n;a++){var k=_NXDB.ls.key(a);if(k)out.push(k);}}catch(_){}return out;};
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXDB");if(window._NXERR)_NXERR.push("module _NXDB :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXDB desactive:",_nxE);}catch(_){}}
-}var _NXNETX=window._NXNETX||(window._NXNETX={});
+}var _NXPERF=window._NXPERF||(window._NXPERF={});
+_NXPERF.repos=_NXPERF.repos||function(fn){try{
+if(typeof requestIdleCallback==="function"){requestIdleCallback(fn,{timeout:4000});return;}
+setTimeout(fn,120);}catch(_){try{fn();}catch(__){}}};
+if(!_NXPERF.boot){try{_NXPERF.boot=true;
+_NXPERF.n=0;_NXPERF.us=0;_NXPERF.pics=0;_NXPERF.parts={};
+_NXPERF.ECH=31;
+_NXPERF.now=(function(){
+try{if(typeof performance!=="undefined"&&performance.now)return function(){return performance.now();};}catch(_){}
+return function(){return Date.now();};})();
+_NXPERF.mesure=function(nom,fn){try{
+_NXPERF.n++;
+if((_NXPERF.n&_NXPERF.ECH)!==0)return fn();
+var t0=_NXPERF.now();
+var r=fn();
+var d=(_NXPERF.now()-t0)*1000;
+_NXPERF.us+=d;
+if(d>2000)_NXPERF.pics++;
+var p=_NXPERF.parts[nom]||(_NXPERF.parts[nom]={n:0,us:0});
+p.n++;p.us+=d;
+return r;}catch(e){return fn();}};
+_NXPERF.rapport=function(){try{
+var ech=Math.floor(_NXPERF.n/(_NXPERF.ECH+1))||1;
+var out=[];
+for(var k in _NXPERF.parts){var p=_NXPERF.parts[k];
+out.push({nom:k,moy:p.n?(p.us/p.n):0,n:p.n});}
+out.sort(function(x,y){return y.moy-x.moy;});
+return {appels:_NXPERF.n,echantillons:ech,
+moyenneUs:ech?(_NXPERF.us/ech):0,
+totalMs:_NXPERF.us/1000,
+pics:_NXPERF.pics,parts:out};}catch(_){return {appels:0,echantillons:0,moyenneUs:0,totalMs:0,pics:0,parts:[]};}};
+_NXPERF.reset=function(){try{_NXPERF.n=0;_NXPERF.us=0;_NXPERF.pics=0;_NXPERF.parts={};}catch(_){}};
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXPERF");}catch(_){}}
+}
+var _NXNETX=window._NXNETX||(window._NXNETX={});
 if(!_NXNETX.boot){try{_NXNETX.boot=true;
 _NXNETX.MS=15000;
 _NXNETX.timeouts=0;
@@ -117,17 +151,61 @@ if(!_NXM.boot){
 _NXM.boot=true;_NXM.KEY="nexium_music_v1";
 _NXM.SRC="https://raw.githubusercontent.com/Omega-devj/music-client-nexium/refs/heads/main/music.txt";
 _NXM.remoteBusy=false;_NXM.remoteErr=false;_NXM.remoteLoaded=false;
-_NXM.cfg=(function(){var d;try{var raw=_NXDB.get(_NXM.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};if(!Array.isArray(d.tracks))d.tracks=[];d.tracks=d.tracks.filter(function(t){return t&&t.url;});if(typeof d.vol!=="number"||d.vol<0||d.vol>1)d.vol=0.7;if(typeof d.shuffle!=="boolean")d.shuffle=false;if(typeof d.repeat!=="boolean")d.repeat=false;if(typeof d.popup!=="boolean")d.popup=true;if(typeof d.idx!=="number"||d.idx<0)d.idx=0;if(typeof d.px!=="number")d.px=null;if(typeof d.py!=="number")d.py=null;return d;})();
+_NXM.cfg=(function(){var d;try{var raw=_NXDB.get(_NXM.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};if(!Array.isArray(d.tracks))d.tracks=[];d.tracks=d.tracks.filter(function(t){return t&&t.url;});if(typeof d.vol!=="number"||d.vol<0||d.vol>1)d.vol=0.7;if(typeof d.shuffle!=="boolean")d.shuffle=false;if(typeof d.repeat!=="boolean")d.repeat=false;if(typeof d.popup!=="boolean")d.popup=true;if(typeof d.idx!=="number"||d.idx<0)d.idx=0;if(typeof d.px!=="number")d.px=null;if(typeof d.py!=="number")d.py=null;if(typeof d.reprise!=="boolean")d.reprise=true;if(typeof d.pos!=="number"||d.pos<0)d.pos=0;if(typeof d.compact!=="boolean")d.compact=false;if(typeof d.opacite!=="number"||d.opacite<0.3||d.opacite>1)d.opacite=1;if(typeof d.medias!=="boolean")d.medias=true;return d;})();
 _NXM.save=function(){_NXDB.set(_NXM.KEY,JSON.stringify(_NXM.cfg));};
 _NXM.save();
 _NXM.parse=function(txt){var out=[];var seen={};var lines=String(txt||"").split(/\r?\n/);for(var a=0;a<lines.length;a++){var l=lines[a].trim();if(!l||l.charAt(0)==="#")continue;var title="",url="";var sep=l.indexOf("|");if(sep<0)sep=l.indexOf(";");if(sep>=0){title=l.slice(0,sep).trim();url=l.slice(sep+1).trim();}else{url=l;}if(!/^https?:\/\//.test(url))continue;if(seen[url])continue;seen[url]=1;if(!title){try{var fn=url.split("/").pop().split("?")[0];title=decodeURIComponent(fn)||("Piste "+(out.length+1));}catch(_){title="Piste "+(out.length+1);}}out.push({title:title,url:url});}return out;};
 _NXM.loadRemote=function(){if(_NXM.remoteBusy)return;_NXM.remoteBusy=true;_NXM.remoteErr=false;_NXM.notify&&_NXM.notify();try{_NXNETX.go(_NXM.SRC+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.text();}).then(function(t){var list=_NXM.parse(t);_NXM.remoteBusy=false;_NXM.remoteLoaded=true;_NXM.remoteEmpty=(!list||!list.length);_NXM.cfg.tracks=list;if(_NXM.idx>=list.length)_NXM.idx=Math.max(0,list.length-1);_NXM.cfg.idx=_NXM.idx;_NXM.save();_NXM.notify&&_NXM.notify();}).catch(function(){_NXM.remoteBusy=false;_NXM.remoteErr=true;_NXM.notify&&_NXM.notify();});}catch(_){_NXM.remoteBusy=false;_NXM.remoteErr=true;_NXM.notify&&_NXM.notify();}};
 _NXM.audio=null;_NXM.idx=Math.min(_NXM.cfg.idx,Math.max(0,_NXM.cfg.tracks.length-1));_NXM.playing=false;_NXM.progress=0;_NXM.dur=0;_NXM.listeners=[];_NXM.fails=0;_NXM.err={};_NXM.remain=false;
-_NXM.notify=function(){if(_NXM._nt)return;_NXM._nt=setTimeout(function(){_NXM._nt=null;for(var a=0;a<_NXM.listeners.length;a++){try{_NXM.listeners[a]();}catch(_){}}},250);};
-_NXM.get=function(){if(_NXM.audio)return _NXM.audio;var a=new Audio();a.volume=_NXM.cfg.vol;a.addEventListener("timeupdate",function(){_NXM.progress=a.currentTime;_NXM.notify();});a.addEventListener("durationchange",function(){_NXM.dur=a.duration||0;_NXM.notify();});a.addEventListener("ended",function(){_NXM.next(true);});a.addEventListener("play",function(){_NXM.playing=true;_NXM.fails=0;delete _NXM.err[_NXM.idx];_NXM.notify();});a.addEventListener("pause",function(){_NXM.playing=false;_NXM.notify();});a.addEventListener("error",function(){_NXM.err[_NXM.idx]=true;_NXM.fails++;_NXM.playing=false;if(_NXM.fails<_NXM.cfg.tracks.length){_NXM.next(false);}else{_NXM.notify();}});_NXM.audio=a;return a;};
-_NXM.load=function(idx){var t=_NXM.cfg.tracks[idx];if(!t)return;_NXM.idx=idx;_NXM.cfg.idx=idx;_NXM.save();var a=_NXM.get();a.src=t.url;a.play().catch(function(){});_NXM.appear();_NXM.notify();};
+_NXM.notify=function(){if(_NXM._nt)return;
+_NXM._nt=setTimeout(function(){_NXM._nt=null;
+var cache=false;try{cache=(typeof document!=="undefined"&&document.hidden);}catch(_){}
+for(var a=0;a<_NXM.listeners.length;a++){try{
+var f=_NXM.listeners[a];
+if(cache&&f!==_NXM.renderUI)continue;
+f();}catch(_){}}},250);};
+_NXM.get=function(){if(_NXM.audio)return _NXM.audio;var a=new Audio();a.volume=_NXM.cfg.vol;a.addEventListener("timeupdate",function(){_NXM.progress=a.currentTime;
+if((_NXM._tp=(_NXM._tp||0)+1)%20===0)_NXM.memoPos();
+_NXM.notify();});a.addEventListener("durationchange",function(){_NXM.dur=a.duration||0;_NXM.notify();});a.addEventListener("ended",function(){_NXM.next(true);});a.addEventListener("play",function(){_NXM.playing=true;_NXM.fails=0;delete _NXM.err[_NXM.idx];_NXM.mediaSession();_NXM.notify();});a.addEventListener("pause",function(){_NXM.playing=false;_NXM.memoPos();try{if(navigator.mediaSession)navigator.mediaSession.playbackState="paused";}catch(_){}_NXM.notify();});a.addEventListener("error",function(){
+_NXM.err[_NXM.idx]=true;_NXM.fails++;_NXM.playing=false;
+if(_NXM.fails<_NXM.cfg.tracks.length){_NXM.load(_NXM.prochaineVivante(_NXM.idx));}
+else{_NXM.notify();}});_NXM.audio=a;return a;};
+_NXM.load=function(idx,reprendre){var t=_NXM.cfg.tracks[idx];if(!t)return;
+var memePiste=(idx===_NXM.idx);
+_NXM.idx=idx;_NXM.cfg.idx=idx;
+if(!memePiste)_NXM.cfg.pos=0;
+_NXM.save();
+var a=_NXM.get();a.src=t.url;
+if(reprendre&&_NXM.cfg.reprise&&_NXM.cfg.pos>0){
+var p=_NXM.cfg.pos;
+var poser=function(){try{a.currentTime=p;}catch(_){}a.removeEventListener("loadedmetadata",poser);};
+a.addEventListener("loadedmetadata",poser);}
+a.play().catch(function(){});
+_NXM.appear();_NXM.mediaSession();_NXM.notify();};
 _NXM.toggle=function(){if(!_NXM.cfg.tracks.length)return;var a=_NXM.get();if(!a.src){_NXM.load(_NXM.idx);return;}if(a.paused)a.play().catch(function(){});else a.pause();_NXM.appear();};
-_NXM.next=function(auto){var n=_NXM.cfg.tracks.length;if(!n)return;if(auto&&_NXM.cfg.repeat){_NXM.load(_NXM.idx);return;}var ni;if(_NXM.cfg.shuffle&&n>1){do{ni=Math.floor(Math.random()*n);}while(ni===_NXM.idx);}else ni=(_NXM.idx+1)%n;_NXM.load(ni);};
+_NXM.sac=[];
+_NXM.tirer=function(){try{
+var n=_NXM.cfg.tracks.length;
+if(n<2)return 0;
+var dispo=[];
+for(var a=0;a<_NXM.sac.length;a++){var v=_NXM.sac[a];
+if(v!==_NXM.idx&&!_NXM.err[v]&&v<n)dispo.push(v);}
+if(!dispo.length){
+_NXM.sac=[];
+for(var b=0;b<n;b++)if(b!==_NXM.idx&&!_NXM.err[b])_NXM.sac.push(b);
+if(!_NXM.sac.length){for(var c=0;c<n;c++)if(c!==_NXM.idx)_NXM.sac.push(c);}
+dispo=_NXM.sac.slice(0);}
+var k=Math.floor(Math.random()*dispo.length);
+var choix=dispo[k];
+_NXM.sac=_NXM.sac.filter(function(x){return x!==choix;});
+return choix;}catch(_){return (_NXM.idx+1)%Math.max(1,_NXM.cfg.tracks.length);}};
+_NXM.prochaineVivante=function(dep){try{
+var n=_NXM.cfg.tracks.length;
+for(var a=1;a<=n;a++){var k=(dep+a)%n;if(!_NXM.err[k])return k;}
+return (dep+1)%n;}catch(_){return 0;}};
+_NXM.next=function(auto){var n=_NXM.cfg.tracks.length;if(!n)return;
+if(auto&&_NXM.cfg.repeat){_NXM.load(_NXM.idx);return;}
+var ni;if(_NXM.cfg.shuffle&&n>1){ni=_NXM.tirer();}else ni=(_NXM.idx+1)%n;_NXM.load(ni);};
 _NXM.prev=function(){var n=_NXM.cfg.tracks.length;if(!n)return;var a=_NXM.get();if(a.currentTime>3){a.currentTime=0;return;}_NXM.load((_NXM.idx-1+n)%n);};
 _NXM.seek=function(frac){var a=_NXM.get();if(_NXM.dur)a.currentTime=Math.max(0,Math.min(1,frac))*_NXM.dur;};
 _NXM.setVol=function(v){v=Math.max(0,Math.min(1,v));_NXM.cfg.vol=v;if(_NXM.audio)_NXM.audio.volume=v;_NXM.save();_NXM.notify();};
@@ -139,7 +217,8 @@ _NXM.clampPos=function(x,y){var W=window.innerWidth||1280,H=window.innerHeight||
 _NXM.setPos=function(x,y){if(!_NXM.ui)return;var p=_NXM.clampPos(x,y);_NXM.ui.w.style.left=p[0]+"px";_NXM.ui.w.style.top=p[1]+"px";_NXM.ui.w.style.right="auto";_NXM.ui.w.style.bottom="auto";_NXM.cfg.px=p[0];_NXM.cfg.py=p[1];_NXM.save();};
 _NXM.resetPos=function(){if(!_NXM.ui)return;_NXM.ui.w.style.left="auto";_NXM.ui.w.style.top="auto";_NXM.ui.w.style.right="20px";_NXM.ui.w.style.bottom="20px";_NXM.cfg.px=null;_NXM.cfg.py=null;_NXM.save();};
 _NXM.buildUI=function(){try{if(typeof document==="undefined"||!document.body)return;if(_NXM.ui&&document.getElementById("nx-miniplayer"))return;var disp=(window._NXf&&_NXf.disp)||"system-ui,sans-serif";var mono=(window._NXf&&_NXf.mono)||"monospace";
-var w=document.createElement("div");w.id="nx-miniplayer";w.style.cssText="position:fixed;right:20px;bottom:20px;width:268px;z-index:99999;background:rgba(11,11,12,.93);-webkit-backdrop-filter:blur(20px) saturate(140%);backdrop-filter:blur(20px) saturate(140%);border:1px solid #232328;border-radius:16px;padding:13px 14px 12px;box-shadow:0 20px 56px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05);font-family:"+disp+";color:#f4f4f5;box-sizing:border-box;display:none;";w.style.display="none";
+var w=document.createElement("div");w.id="nx-miniplayer";w.style.cssText="position:fixed;right:20px;bottom:20px;width:"+(_NXM.cfg.compact?208:268)+"px;z-index:99999;background:rgba(11,11,12,.93);-webkit-backdrop-filter:blur(20px) saturate(140%);backdrop-filter:blur(20px) saturate(140%);border:1px solid #232328;border-radius:16px;padding:13px 14px 12px;box-shadow:0 20px 56px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05);font-family:"+disp+";color:#f4f4f5;box-sizing:border-box;display:none;";w.style.display="none";
+try{w.style.opacity=String(_NXM.cfg.opacite);}catch(_){}
 var head=document.createElement("div");head.style.cssText="display:flex;align-items:center;gap:11px;margin-bottom:11px;cursor:grab;";
 var disc=document.createElement("div");disc.style.cssText="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#1a1a1c,#0d0d0e);border:1px solid #232328;display:flex;align-items:center;justify-content:center;color:#8a8a92;flex-shrink:0;transition:color .2s;";disc.innerHTML=_NXM.svg(_NXM.SVG.note,18);
 var meta=document.createElement("div");meta.style.cssText="flex:1;min-width:0;";
@@ -169,7 +248,10 @@ vbar.appendChild(vfill);
 vbar.onclick=function(e){var r=vbar.getBoundingClientRect();_NXM.setVol((e.clientX-r.left)/r.width);_NXM.renderUI();};
 var vpct=document.createElement("div");vpct.style.cssText="font-family:"+mono+";font-size:9px;color:#5b5b63;width:30px;text-align:right;flex-shrink:0;letter-spacing:.04em;";
 row2.appendChild(bShuf);row2.appendChild(bRep);row2.appendChild(vbar);row2.appendChild(vpct);
-w.appendChild(head);w.appendChild(bar);w.appendChild(time);w.appendChild(ctr);w.appendChild(row2);
+w.appendChild(head);w.appendChild(bar);
+if(!_NXM.cfg.compact)w.appendChild(time);
+w.appendChild(ctr);
+if(!_NXM.cfg.compact)w.appendChild(row2);
 document.body.appendChild(w);
 w.addEventListener("wheel",function(e){try{e.preventDefault();e.stopPropagation();_NXM.setVol(_NXM.cfg.vol+(e.deltaY<0?0.05:-0.05));_NXM.renderUI();}catch(_){}},{passive:false});
 head.addEventListener("dblclick",function(){_NXM.resetPos();});
@@ -179,13 +261,52 @@ if(typeof _NXM.cfg.px==="number"&&typeof _NXM.cfg.py==="number")_NXM.setPos(_NXM
 _NXM.renderUI();
 if(_NXM.listeners.indexOf(_NXM.renderUI)<0)_NXM.listeners.push(_NXM.renderUI);}catch(_){}};
 _NXM.renderUI=function(){try{var u=_NXM.ui;if(!u)return;var cur=_NXM.cfg.tracks[_NXM.idx]||{title:"—"};u.ttl.textContent=cur.title;u.sub.textContent=(_NXM.err[_NXM.idx]?"SOURCE INJOIGNABLE":(_NXM.playing?"LECTURE":"PAUSE"))+" · "+(_NXM.idx+1)+"/"+_NXM.cfg.tracks.length;u.bPlay.innerHTML=_NXM.svg(_NXM.playing?_NXM.SVG.pause:_NXM.SVG.play,20);u.disc.style.color=_NXM.playing?_NXpal.acc:_NXpal.sub;var pct=_NXM.dur>0?Math.min(100,_NXM.progress/_NXM.dur*100):0;u.fill.style.width=pct+"%";u.t1.textContent=_NXM.fmt(_NXM.progress);u.t2.textContent=(_NXM.remain&&_NXM.dur>0?"-"+_NXM.fmt(Math.max(0,_NXM.dur-_NXM.progress)):_NXM.fmt(_NXM.dur));u.bShuf.style.color=_NXM.cfg.shuffle?_NXpal.acc:_NXpal.dim;u.bRep.style.color=_NXM.cfg.repeat?_NXpal.acc:_NXpal.dim;u.vfill.style.width=(_NXM.cfg.vol*100)+"%";u.vpct.textContent=Math.round(_NXM.cfg.vol*100)+"%";}catch(_){}};
+_NXM.mediaSession=function(){try{
+if(!_NXM.cfg.medias)return;
+if(typeof navigator==="undefined"||!navigator.mediaSession)return;
+var t=_NXM.cfg.tracks[_NXM.idx];
+if(!t)return;
+try{if(window.MediaMetadata)navigator.mediaSession.metadata=new MediaMetadata({
+title:String(t.title||"Nexium"),artist:"Nexium Music",album:"Nexium Client"});}catch(_){}
+try{navigator.mediaSession.playbackState=_NXM.playing?"playing":"paused";}catch(_){}
+if(_NXM._ms)return;_NXM._ms=true;
+var pose=function(k,fn){try{navigator.mediaSession.setActionHandler(k,fn);}catch(_){}};
+pose("play",function(){_NXM.toggle();});
+pose("pause",function(){_NXM.toggle();});
+pose("previoustrack",function(){_NXM.prev();});
+pose("nexttrack",function(){_NXM.next();});
+pose("seekbackward",function(){try{var a=_NXM.get();a.currentTime=Math.max(0,a.currentTime-10);}catch(_){}});
+pose("seekforward",function(){try{var a=_NXM.get();a.currentTime=Math.min(_NXM.dur||0,a.currentTime+10);}catch(_){}});
+}catch(_){}};
+_NXM.MINUTERIES=[5,15,30,60];
+_NXM.dodo=null;
+_NXM.minuterie=function(min){try{
+if(_NXM._dt){clearTimeout(_NXM._dt);_NXM._dt=null;}
+if(!min){_NXM.dodo=null;_NXM.notify();return;}
+_NXM.dodo=Date.now()+min*60000;
+_NXM._dt=setTimeout(function(){
+_NXM._dt=null;_NXM.dodo=null;
+try{var a=_NXM.get();if(!a.paused)a.pause();}catch(_){}
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Minuterie ecoulee : lecture arretee.",1);}catch(_){}
+_NXM.notify();},min*60000);
+_NXM.notify();}catch(_){}};
+_NXM.dodoRestant=function(){try{
+if(!_NXM.dodo)return 0;
+return Math.max(0,Math.round((_NXM.dodo-Date.now())/1000));}catch(_){return 0;}};
+_NXM.memoPos=function(){try{
+if(!_NXM.cfg.reprise)return;
+var a=_NXM.audio;
+if(!a||!a.currentTime)return;
+_NXM.cfg.pos=Math.floor(a.currentTime);
+_NXM.save();}catch(_){}};
 _NXM.showUI=function(){_NXM.buildUI();if(_NXM.ui)_NXM.ui.w.style.display="block";};
 _NXM.hideUI=function(){if(_NXM.ui)_NXM.ui.w.style.display="none";};
 _NXM.appear=function(){if(_NXM.cfg.popup!==false){_NXM.buildUI();_NXM.showUI();}};
 _NXM.setPopup=function(on){_NXM.cfg.popup=!!on;_NXM.save();if(on){_NXM.buildUI();_NXM.showUI();}else{_NXM.hideUI();}_NXM.notify();};
 setTimeout(function(){_NXM.loadRemote();},3000);
+try{window.addEventListener("beforeunload",function(){try{_NXM.memoPos();}catch(_){}});}catch(_){}
 }
-var NexiumMusicIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20},i("path",{d:"M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"}));};
+var NexiumMusicIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20,"aria-hidden":"true"},i("path",{d:"M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18a3 3 0 1 0 3 3V8h3V6h-5z"}));};
 var _NXBoundary=null;
 try{if(typeof F!=="undefined"&&F&&F.Component){
 _NXBoundary=function(p){F.Component.call(this,p);this.state={err:false,msg:""};};
@@ -210,35 +331,290 @@ return this.props?this.props.children:null;}catch(_){return null;}};
 var _NXsafe=function(Comp,nm){try{if(!_NXBoundary||typeof Comp!=="function")return Comp;return function(p){try{return i(_NXBoundary,{nm:nm},i(Comp,p));}catch(_){return null;}};}catch(_){return Comp;}};
 function NexiumMusicComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
-var inp=F.useRef({t:"",u:""});
-F.useEffect(function(){_NXM.listeners.push(force);try{if(!_NXM.remoteLoaded&&!_NXM.remoteBusy)_NXM.loadRemote();}catch(_){}_NXM.loadRemote();return function(){_NXM.listeners=_NXM.listeners.filter(function(f){return f!==force;});};},[]);
+var _t0=F.useState("lecteur");var tab=_t0[0];var setTab=_t0[1];
+var _q0=F.useState("");var q=_q0[0];var setQ=_q0[1];
+F.useEffect(function(){
+var vivant=true;
+var maj=function(){if(vivant)force();};
+_NXM.listeners.push(maj);
+try{if(!_NXM.remoteLoaded&&!_NXM.remoteBusy)_NXM.loadRemote();}catch(_){}
+return function(){vivant=false;
+try{_NXM.listeners=_NXM.listeners.filter(function(f){return f!==maj;});}catch(_){}};},[]);
+var monte=_NXmounted(F);
 var P=_NXpal,cfg=_NXM.cfg;
-var cur=cfg.tracks[_NXM.idx]||{title:"—",url:""};
+var pistes=cfg.tracks||[];
+var cur=pistes[_NXM.idx]||{title:"\u2014",url:""};
 var pct=_NXM.dur>0?Math.min(100,_NXM.progress/_NXM.dur*100):0;
-function ico(d,sz){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:sz||20,height:sz||20},i("path",{d:d}));}
-var S=_NXM.SVG;
-function tbtn(d,onClick,active,big){return i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:onClick,style:{width:big?"52px":"40px",height:big?"52px":"40px",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",flexShrink:0,background:big?P.acc:"transparent",color:big?_NXpal.ink:(active?P.acc:P.sub),border:big?"none":"1px solid "+(active?P.acc:"transparent"),transition:"all .15s"}},ico(d,big?24:19));}
-return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
-_NXhead("Lecteur local","Nexium Music","Lecture audio en streaming direct depuis des URLs. Playlist, volume, position du mini-lecteur : tout est sauvegardé localement."),
-(function(){var st=null;
-if(_NXM.remoteBusy&&!_NXM.remoteLoaded)st={t:"Chargement de la playlist…",d:"Récupération depuis le dépôt Nexium.",c:P.sub};
-else if(_NXM.remoteErr)st={t:"Playlist injoignable",d:"Impossible de récupérer la playlist depuis le dépôt. Vérifie ta connexion, puis clique sur « Recharger ».",c:_NXpal.dangerSoft};
-else if(_NXM.remoteLoaded&&(!cfg.tracks||!cfg.tracks.length))st={t:"Playlist vide",d:"Le fichier music.txt du dépôt ne contient aucune piste. Ajoute des lignes « Titre | url » puis clique sur « Recharger ».",c:_NXpal.warn};
-if(!st)return null;
-return _NXcard(i("div",null,i("div",{style:{fontSize:"14px",fontWeight:"800",color:st.c,marginBottom:"5px"}},st.t),i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.55}},st.d)),{mb:12});})(),
-
+var mort=!!_NXM.err[_NXM.idx];
+var acc=mort?_NXpal.danger:(_NXM.playing?P.txt:P.sub);
+function empreinte(t){
+var h=5381,x=String(t||"");
+for(var a2=0;a2<x.length;a2++)h=(((h<<5)+h)^x.charCodeAt(a2))|0;
+var out=[],v=h>>>0;
+for(var b2=0;b2<56;b2++){
+v=(v*1103515245+12345)>>>0;
+out.push(0.18+((v>>>16)%100)/100*0.82);}
+return out;}
+function onde(){
+var W=empreinte(cur.title);
+return i("div",{className:"nx-fx",role:"slider","aria-label":_T("Position dans la piste"),
+"aria-valuemin":0,"aria-valuemax":100,"aria-valuenow":Math.round(pct),
+tabIndex:0,onKeyDown:function(e){try{
+if(e.key==="ArrowRight"){e.preventDefault();_NXM.seek(Math.min(1,pct/100+0.05));}
+if(e.key==="ArrowLeft"){e.preventDefault();_NXM.seek(Math.max(0,pct/100-0.05));}}catch(_){}},
+onClick:function(e){try{var r=e.currentTarget.getBoundingClientRect();_NXM.seek((e.clientX-r.left)/r.width);}catch(_){}},
+style:{display:"flex",alignItems:"center",gap:"2px",height:"46px",cursor:"pointer",padding:"2px 0"}},
+W.map(function(v,k){
+var joue=(k/W.length*100)<=pct;
+return i("div",{key:k,style:{flex:1,minWidth:0,borderRadius:"99px",
+height:Math.round(v*42)+"px",
+background:joue?acc:P.line,
+opacity:monte?1:0,
+transition:"background-color .25s ease,opacity .4s ease",
+transitionDelay:monte?"0ms":(k*6)+"ms"}});}));}
+function disque(){
+return i("div",{style:{position:"relative",width:"104px",height:"104px",flexShrink:0}},
+i("div",{"data-nx-spin":"1","data-nx-halt":_NXM.playing?null:"1",
+style:{width:"104px",height:"104px",borderRadius:"50%",
+background:"conic-gradient(from 0deg,"+P.raise+","+P.panel+" 25%,"+P.raise+" 50%,"+P.panel+" 75%,"+P.raise+")",
+border:"1px solid "+P.hair,display:"flex",alignItems:"center",justifyContent:"center",
+boxShadow:"inset 0 0 22px rgba(0,0,0,.55)"}},
+i("div",{style:{width:"78px",height:"78px",borderRadius:"50%",border:"1px solid "+P.line,
+display:"flex",alignItems:"center",justifyContent:"center"}},
+i("div",{style:{width:"34px",height:"34px",borderRadius:"50%",
+background:"linear-gradient(150deg,"+P.raise+","+P.inset+")",
+border:"1px solid "+P.edge,display:"flex",alignItems:"center",justifyContent:"center",
+color:acc}},
+i("svg",{viewBox:"0 0 24 24",width:15,height:15,fill:"currentColor","aria-hidden":"true"},
+i("path",{d:_NXM.SVG.note}))))),
+_NXM.playing?i("div",{"data-nx-eq":"1","aria-hidden":"true",
+style:{position:"absolute",right:"-2px",bottom:"2px",display:"flex",alignItems:"flex-end",
+gap:"2px",height:"16px",padding:"4px 6px",borderRadius:"99px",
+background:P.panel,border:"1px solid "+P.hair}},
+i("i",{style:{width:"2px",height:"12px",background:P.txt,display:"block",borderRadius:"2px"}}),
+i("i",{style:{width:"2px",height:"12px",background:P.txt,display:"block",borderRadius:"2px"}}),
+i("i",{style:{width:"2px",height:"12px",background:P.txt,display:"block",borderRadius:"2px"}}),
+i("i",{style:{width:"2px",height:"12px",background:P.txt,display:"block",borderRadius:"2px"}})):null);}
+function bouton(d,onClick,gros,actif,label){
+return i("div",{className:"nx-fx",role:"button","aria-label":label,"aria-pressed":actif===undefined?null:(actif?"true":"false"),
+tabIndex:0,onKeyDown:_NXkey,onClick:onClick,
+style:{width:gros?"54px":"40px",height:gros?"54px":"40px",borderRadius:"50%",flexShrink:0,
+display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",
+background:gros?P.txt:"transparent",
+border:gros?"none":"1px solid "+(actif?P.sub:"transparent"),
+color:gros?_NXpal.ink:(actif?P.txt:P.dim)}},
+i("svg",{viewBox:"0 0 24 24",width:gros?24:19,height:gros?24:19,fill:"currentColor","aria-hidden":"true"},
+i("path",{d:d})));}
+var TABS=[["lecteur","Lecteur"],["playlist","Playlist"],["reglages","Réglages"]];
+function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Music"),
+style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
+TABS.map(function(t){var on=tab===t[0];
+return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+"aria-label":_T(t[1]),onClick:function(){if(tab!==t[0]){setTab(t[0]);setQ("");}},
+style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",
+letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
+_T(t[1]),
+i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",
+borderRadius:"2px",background:P.txt,transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
+transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function etat(){
+if(_NXM.remoteBusy&&!_NXM.remoteLoaded)
+return {t:_T("Chargement de la playlist…"),d:_T("Recuperation depuis le depot Nexium."),c:P.sub};
+if(_NXM.remoteErr)
+return {t:_T("Playlist injoignable"),d:_T("Impossible de recuperer la playlist. Verifie ta connexion, puis recharge."),c:_NXpal.warn};
+if(_NXM.remoteLoaded&&!pistes.length)
+return {t:_T("Playlist vide"),d:_T("Le fichier du depot ne contient aucune piste."),c:P.sub};
+return null;}
+function tLecteur(){
+var E=etat();
+var dodo=_NXM.dodoRestant();
+return i("div",null,
+E?_NXcard(i("div",null,
+i("div",{style:{fontSize:"14px",fontWeight:"800",color:E.c,marginBottom:"5px"}},E.t),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6,marginBottom:E.c===_NXpal.warn?"13px":"0"}},E.d),
+E.c===_NXpal.warn?_NXbtn(_T("Recharger"),function(){_NXM.remoteLoaded=false;_NXM.loadRemote();force();}):null),{mb:12}):null,
+i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
+borderRadius:"22px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",padding:"26px 24px",marginBottom:"14px"}},
+_NXM.playing?i("div",{"data-nx-breathe":"1","aria-hidden":"true",
+style:{position:"absolute",left:"-60px",top:"-80px",width:"240px",height:"240px",borderRadius:"50%",
+background:"radial-gradient(circle,"+P.txt+"14,transparent 70%)",pointerEvents:"none"}}):null,
+i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"22px",flexWrap:"wrap",marginBottom:"20px"}},
+disque(),
+i("div",{style:{flex:1,minWidth:"170px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",
+color:mort?_NXpal.danger:P.faint,marginBottom:"9px"}},
+mort?_T("Source injoignable"):(_NXM.playing?_T("Lecture en cours"):_T("En pause"))),
+i("div",{key:"t"+_NXM.idx,"data-nx-pop":"1",
+style:{fontFamily:_NXf.disp,fontSize:"25px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.035em",lineHeight:1.18,marginBottom:"9px",wordBreak:"break-word"}},cur.title),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},
+pistes.length?((_NXM.idx+1)+" / "+pistes.length):_T("aucune piste")),
+dodo?i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginTop:"10px"}},
+i("span",{"data-nx-dot":"1",style:{width:"6px",height:"6px",borderRadius:"50%",background:_NXpal.warn}}),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.sub}},
+_T("arret dans")+" "+Math.floor(dodo/60)+":"+("0"+(dodo%60)).slice(-2))):null)),
+i("div",{style:{position:"relative"}},onde()),
+i("div",{style:{display:"flex",justifyContent:"space-between",fontFamily:_NXf.mono,
+fontSize:"10.5px",color:P.dim,marginTop:"4px",marginBottom:"18px"}},
+i("span",null,_NXM.fmt(_NXM.progress)),
+i("span",null,_NXM.fmt(_NXM.dur))),
+i("div",{style:{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",gap:"12px"}},
+bouton(_NXM.SVG.shuf,function(){_NXM.setFlag("shuffle");force();},false,cfg.shuffle,_T("Lecture aleatoire")),
+bouton(_NXM.SVG.prev,function(){_NXM.prev();},false,undefined,_T("Piste precedente")),
+bouton(_NXM.playing?_NXM.SVG.pause:_NXM.SVG.play,function(){_NXM.toggle();force();},true,undefined,
+_NXM.playing?_T("Pause"):_T("Lecture")),
+bouton(_NXM.SVG.next,function(){_NXM.next();},false,undefined,_T("Piste suivante")),
+bouton(_NXM.SVG.rep,function(){_NXM.setFlag("repeat");force();},false,cfg.repeat,_T("Repeter la piste"))),
+i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"12px",marginTop:"20px",
+paddingTop:"18px",borderTop:"1px solid "+P.line}},
+i("svg",{viewBox:"0 0 24 24",width:16,height:16,fill:"currentColor","aria-hidden":"true",
+style:{color:P.dim,flexShrink:0}},
+i("path",{d:cfg.vol===0?"M3.63 3.63a.996.996 0 0 0 0 1.41L7.29 8.7 7 9H3v6h4l5 5v-6.59l4.18 4.18c-.65.49-1.38.88-2.18 1.11v2.06a8.94 8.94 0 0 0 3.61-1.75l2.05 2.05a.996.996 0 1 0 1.41-1.41L5.05 3.63a.996.996 0 0 0-1.42 0zM19 12c0 .82-.15 1.61-.41 2.34l1.53 1.53c.56-1.17.88-2.48.88-3.87 0-3.83-2.4-7.11-5.78-8.4-.59-.23-1.22.23-1.22.86v.19c0 .38.25.71.61.85C17.18 6.54 19 9.06 19 12zm-8.71-6.29-.17.17L12 7.76V6.41c0-.89-1.08-1.33-1.71-.7zM16.5 12A4.5 4.5 0 0 0 14 7.97v1.79l2.48 2.48c.01-.08.02-.16.02-.24z":"M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"})),
+i("div",{className:"nx-fx",role:"slider","aria-label":_T("Volume"),"aria-valuemin":0,"aria-valuemax":100,
+"aria-valuenow":Math.round(cfg.vol*100),tabIndex:0,
+onKeyDown:function(e){try{
+if(e.key==="ArrowRight"){e.preventDefault();_NXM.setVol(cfg.vol+0.05);force();}
+if(e.key==="ArrowLeft"){e.preventDefault();_NXM.setVol(cfg.vol-0.05);force();}}catch(_){}},
+onClick:function(e){try{var r=e.currentTarget.getBoundingClientRect();_NXM.setVol((e.clientX-r.left)/r.width);force();}catch(_){}},
+style:{flex:1,minWidth:0,height:"22px",display:"flex",alignItems:"center",cursor:"pointer"}},
+i("div",{style:{width:"100%",height:"4px",borderRadius:"99px",background:P.line,overflow:"hidden"}},
+i("div",{style:{height:"100%",borderRadius:"99px",background:P.sub,
+width:(monte?(cfg.vol*100):0)+"%",transition:"width .3s cubic-bezier(.22,.8,.28,1)"}}))),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.dim,width:"34px",
+textAlign:"right",flexShrink:0}},Math.round(cfg.vol*100)+"%"))),
 _NXcard(i("div",null,
-i("div",{style:{display:"flex",alignItems:"center",gap:"16px",marginBottom:"18px"}},i("div",{style:{width:"58px",height:"58px",borderRadius:"14px",background:"linear-gradient(135deg,#1a1a1c,#0d0d0e)",border:"1px solid "+P.line,display:"flex",alignItems:"center",justifyContent:"center",color:_NXM.playing?P.acc:P.sub,flexShrink:0}},i(NexiumMusicIcon,null)),i("div",{style:{flex:1,minWidth:0}},i("div",{style:{fontFamily:_NXf.disp,fontSize:"17px",fontWeight:"700",color:P.txt,letterSpacing:"-.01em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},cur.title),i("div",{style:{fontSize:"11px",fontFamily:_NXf.mono,color:_NXM.err[_NXM.idx]?_NXpal.dangerSoft:P.dim,marginTop:"4px"}},_NXM.err[_NXM.idx]?"SOURCE INJOIGNABLE":(_NXM.playing?"LECTURE EN COURS":"EN PAUSE")," · piste ",(_NXM.idx+1)+"/"+cfg.tracks.length))),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(e){var b=e.currentTarget.getBoundingClientRect();_NXM.seek((e.clientX-b.left)/b.width);},style:{height:"6px",background:_NXpal.line,borderRadius:"99px",overflow:"hidden",cursor:"pointer",marginBottom:"6px"}},i("div",{style:{height:"100%",width:pct+"%",background:"linear-gradient(90deg,#5a5a60,#e8e8ea)",borderRadius:"99px",transition:"width .25s linear"}})),
-i("div",{style:{display:"flex",justifyContent:"space-between",fontFamily:_NXf.mono,fontSize:"10px",color:P.dim,marginBottom:"16px"}},i("span",null,_NXM.fmt(_NXM.progress)),i("span",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXM.remain=!_NXM.remain;force();},style:{cursor:"pointer"}},_NXM.remain&&_NXM.dur>0?"-"+_NXM.fmt(Math.max(0,_NXM.dur-_NXM.progress)):_NXM.fmt(_NXM.dur))),
-i("div",{style:{display:"flex",alignItems:"center",justifyContent:"center",gap:"14px"}},tbtn(S.shuf,function(){_NXM.setFlag("shuffle");},cfg.shuffle),tbtn(S.prev,function(){_NXM.prev();}),tbtn(_NXM.playing?S.pause:S.play,function(){_NXM.toggle();},false,true),tbtn(S.next,function(){_NXM.next();}),tbtn(S.rep,function(){_NXM.setFlag("repeat");},cfg.repeat)),
-i("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginTop:"16px"}},i("span",{style:{fontSize:"13px",color:P.dim}},"🔈"),i("input",{type:"range",min:0,max:1,step:0.01,value:cfg.vol,onChange:function(e){_NXM.setVol(Number(e.target.value));},style:{flex:1,accentColor:_NXpal.acc,cursor:"pointer"}}),i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.dim,width:"34px",textAlign:"right"}},Math.round(cfg.vol*100)+"%")))),
-_NXcard(i("div",null,i("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",gap:"14px"}},i("div",null,i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt}},"Mini-lecteur flottant"),i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"4px",lineHeight:"1.5",maxWidth:"380px"}},"Fenêtre de contrôle visible partout dans Discord. Glisse l'en-tête pour la déplacer (position mémorisée), double-clic pour la redocker, molette ou barre dédiée pour le volume, aléatoire et boucle intégrés.")),i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXM.setPopup(!(cfg.popup!==false));force();},style:{width:"46px",height:"26px",borderRadius:"99px",background:cfg.popup!==false?P.acc:_NXpal.hair,position:"relative",cursor:"pointer",flexShrink:0,transition:"background .2s"}},i("div",{style:{position:"absolute",top:"3px",left:cfg.popup!==false?"23px":"3px",width:"20px",height:"20px",borderRadius:"50%",background:cfg.popup!==false?_NXpal.ink:_NXpal.soft,transition:"left .2s"}})))),{mb:10}),
-_NXcard(i("div",null,_NXch("Playlist",null,i("div",{style:{display:"flex",alignItems:"center",gap:"12px"}},i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},cfg.tracks.length+" piste"+(cfg.tracks.length>1?"s":"")),i("span",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXM.loadRemote();},style:{fontSize:"11px",color:P.faint,cursor:_NXM.remoteBusy?"default":"pointer",border:"1px solid "+P.line,borderRadius:"7px",padding:"3px 9px"}},_NXM.remoteBusy?"…":"Recharger"))),
-cfg.tracks.length?i("div",null,cfg.tracks.map(function(t,k){var on=k===_NXM.idx;return i("div",{key:k,onClick:function(){_NXM.load(k);},style:{display:"flex",alignItems:"center",gap:"11px",padding:"11px 13px",background:on?P.inset:"transparent",border:"1px solid "+(on?P.line:"transparent"),borderRadius:"10px",marginBottom:"4px",cursor:"pointer"}},i("div",{style:{width:"30px",height:"30px",borderRadius:"8px",background:P.inset,border:"1px solid "+P.hair,display:"flex",alignItems:"center",justifyContent:"center",color:on&&_NXM.playing?P.acc:P.faint,flexShrink:0,fontSize:"11px",fontFamily:_NXf.mono}},on&&_NXM.playing?"▶":(k+1)),i("div",{style:{flex:1,minWidth:0}},i("div",{style:{fontSize:"13px",fontWeight:on?"700":"500",color:_NXM.err[k]?_NXpal.dangerSoft:(on?P.txt:P.sub),overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},t.title+(_NXM.err[k]?" — erreur":"")),i("div",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},t.url)));})):i("div",{style:{fontSize:"13px",color:P.dim,padding:"20px 4px",textAlign:"center",lineHeight:"1.6"}},_NXM.remoteBusy?"Chargement de la playlist…":(_NXM.remoteErr?"Impossible de charger la playlist depuis le dépôt.":"Aucune piste. Ajoute des liens dans music.txt sur le dépôt.")),
-i("div",{style:{fontSize:"11px",color:P.faint,marginTop:"12px",paddingTop:"12px",borderTop:"1px solid "+P.hair,lineHeight:"1.6"}},"La playlist est gérée depuis le dépôt GitHub. Une ligne par piste : ",i("span",{style:{fontFamily:_NXf.mono,color:P.dim}},"Titre | https://…"),"  ou juste l'URL.")),{mb:0}),
-_NXfoot("nexium_music_v1 · lecture directe, aucune donnée envoyée")));
+_NXch(_T("Mini-lecteur"),_T("Une fenetre flottante qui reste par-dessus Discord, deplacable a la souris.")),
+i("div",{style:{display:"flex",alignItems:"center",gap:"12px",flexWrap:"wrap"}},
+_NXbtn(cfg.popup?_T("Masquer le mini-lecteur"):_T("Afficher le mini-lecteur"),
+function(){_NXM.setPopup(!cfg.popup);force();},true),
+_NXbtn(_T("Recentrer"),function(){try{_NXM.resetPos();}catch(_){}}))),{mb:0}));}
+function tPlaylist(){
+var v=(q||"").trim().toLowerCase();
+var L=pistes.map(function(t,k){return {t:t,k:k};});
+if(v)L=L.filter(function(o){return String(o.t.title||"").toLowerCase().indexOf(v)>=0;});
+return i("div",null,
+i("div",{style:{position:"relative",marginBottom:"12px"}},
+i("input",{value:q,onChange:function(e){setQ(e.target.value);},placeholder:_T("Chercher une piste…"),
+spellCheck:false,"aria-label":_T("Chercher une piste"),
+style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,borderRadius:"11px",
+padding:"11px 13px",color:P.txt,fontSize:"12.5px",outline:"none",fontFamily:"inherit"}}),
+q?i("div",{className:"nx-fx",role:"button","aria-label":_T("Effacer"),tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){setQ("");},
+style:{position:"absolute",right:"11px",top:"10px",color:P.faint,fontSize:"14px",cursor:"pointer",lineHeight:1}},"\u00d7"):null),
+_NXcard(i("div",null,
+_NXch(_T("Playlist"),_T("Gérée depuis le dépôt Nexium : elle se met à jour toute seule."),
+i("div",{style:{display:"flex",alignItems:"center",gap:"11px"}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},L.length+"/"+pistes.length),
+_NXbtn(_NXM.remoteBusy?_T("…"):_T("Recharger"),function(){
+if(_NXM.remoteBusy)return;_NXM.remoteLoaded=false;_NXM.loadRemote();force();}))),
+L.length?i("div",{style:{maxHeight:"460px",overflowY:"auto",margin:"0 -2px",padding:"0 2px"}},
+L.map(function(o,rang){
+var on=o.k===_NXM.idx;
+var ko=!!_NXM.err[o.k];
+return i("div",{key:o.k,className:"nx-fx",role:"button","aria-label":o.t.title,
+"aria-current":on?"true":null,tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){_NXM.load(o.k);force();},
+style:{display:"flex",alignItems:"center",gap:"13px",padding:"11px 12px",cursor:"pointer",
+borderRadius:"11px",marginBottom:"3px",
+background:on?P.inset:"transparent",
+border:"1px solid "+(on?P.edge:"transparent")}},
+i("div",{style:{width:"20px",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}},
+(on&&_NXM.playing)?i("div",{"data-nx-eq":"1","aria-hidden":"true",
+style:{display:"flex",alignItems:"flex-end",gap:"1.5px",height:"13px"}},
+i("i",{style:{width:"2px",height:"13px",background:P.txt,display:"block",borderRadius:"2px"}}),
+i("i",{style:{width:"2px",height:"13px",background:P.txt,display:"block",borderRadius:"2px"}}),
+i("i",{style:{width:"2px",height:"13px",background:P.txt,display:"block",borderRadius:"2px"}}))
+:i("span",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",
+color:ko?_NXpal.danger:(on?P.txt:P.faint)}},ko?"\u00d7":("0"+(o.k+1)).slice(-2))),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13px",fontWeight:on?"700":"500",
+color:ko?P.faint:(on?P.txt:P.sub),
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",
+textDecoration:ko?"line-through":"none"}},o.t.title),
+ko?i("div",{style:{fontSize:"10.5px",color:_NXpal.danger,marginTop:"3px"}},
+_T("source injoignable")):null),
+on?i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.dim,flexShrink:0}},
+_NXM.fmt(_NXM.progress)+" / "+_NXM.fmt(_NXM.dur)):null);}))
+:i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},
+q?_T("Aucune piste ne correspond a cette recherche."):_T("La playlist est vide pour l instant."))),{mb:0}));}
+function tReglages(){
+var dodo=_NXM.dodoRestant();
+function bascule(lab,desc,on,onClick,last){
+return i("div",{className:"nx-fx",role:"button","aria-label":lab,"aria-pressed":on?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,onClick:onClick,
+style:{display:"flex",alignItems:"flex-start",gap:"13px",padding:"13px 0",cursor:"pointer",
+borderBottom:last?"none":"1px solid "+P.line}},
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13.5px",fontWeight:"600",color:on?P.txt:P.sub}},lab),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"4px",lineHeight:1.55}},desc)),
+i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{width:"38px",height:"22px",borderRadius:"11px",flexShrink:0,
+marginTop:"1px",background:on?P.txt:"transparent",border:"1px solid "+(on?P.txt:P.faint)}},
+i("div",{style:{width:"14px",height:"14px",borderRadius:"50%",margin:"3px",
+background:on?_NXpal.ink:P.faint,transform:on?"translateX(16px)":"none"}})));}
+return i("div",null,
+_NXcard(i("div",null,
+_NXch(_T("Minuterie d arrêt"),_T("La lecture s arrete toute seule au bout du temps choisi.")),
+dodo?i("div",{style:{display:"flex",alignItems:"baseline",gap:"10px",marginBottom:"13px"}},
+i("span",{style:{fontFamily:_NXf.disp,fontSize:"28px",fontWeight:"800",color:_NXpal.warn,
+letterSpacing:"-.035em",fontVariantNumeric:"tabular-nums"}},
+Math.floor(dodo/60)+":"+("0"+(dodo%60)).slice(-2)),
+i("span",{style:{fontSize:"12px",color:P.dim}},_T("avant l arret"))):null,
+i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap"}},
+_NXM.MINUTERIES.map(function(m){
+var on=dodo>0&&Math.abs(dodo-m*60)<90;
+return i("div",{key:m,className:"nx-fx",role:"button","aria-label":m+" "+_T("minutes"),
+"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){_NXM.minuterie(m);force();},
+style:{padding:"9px 15px",borderRadius:"10px",cursor:"pointer",fontFamily:_NXf.mono,fontSize:"11.5px",
+background:on?P.inset:"transparent",border:"1px solid "+(on?P.txt:P.line),
+color:on?P.txt:P.sub}},m+" min");}),
+dodo?i("div",{className:"nx-fx",role:"button","aria-label":_T("Annuler la minuterie"),tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){_NXM.minuterie(0);force();},
+style:{padding:"9px 15px",borderRadius:"10px",cursor:"pointer",fontSize:"11.5px",
+border:"1px solid "+P.line,color:P.dim}},_T("Annuler")):null)),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Lecture")),
+bascule(_T("Reprendre ou je m etais arrete"),
+_T("La position dans la piste est retenue, meme apres avoir ferme Discord."),
+cfg.reprise,function(){_NXM.setFlag("reprise");force();}),
+bascule(_T("Touches media du clavier"),
+_T("Les touches lecture, pause et piste suivante du clavier pilotent Nexium Music, et la piste s affiche dans le panneau du systeme."),
+cfg.medias,function(){_NXM.setFlag("medias");try{_NXM.mediaSession();}catch(_){}force();}),
+bascule(_T("Lecture aleatoire"),_T("Chaque piste passe une fois avant qu une autre ne repasse."),
+cfg.shuffle,function(){_NXM.setFlag("shuffle");force();}),
+bascule(_T("Repeter la piste"),_T("La piste en cours recommence indefiniment."),
+cfg.repeat,function(){_NXM.setFlag("repeat");force();},true)),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Mini-lecteur"),_T("Sa taille et sa discretion.")),
+bascule(_T("Afficher le mini-lecteur"),_T("La fenetre flottante apparait des qu une piste demarre."),
+cfg.popup,function(){_NXM.setPopup(!cfg.popup);force();}),
+bascule(_T("Mode compact"),_T("Reduit la fenetre a l essentiel : titre, lecture, suivant."),
+cfg.compact,function(){_NXM.setFlag("compact");try{if(_NXM.ui&&_NXM.ui.w){_NXM.ui=null;
+var el=document.getElementById("nx-miniplayer");if(el&&el.parentNode)el.parentNode.removeChild(el);
+if(cfg.popup){_NXM.buildUI();_NXM.showUI();}}}catch(_){}force();},true),
+i("div",{style:{paddingTop:"15px"}},
+i("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"9px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:".09em",textTransform:"uppercase",color:P.dim}},
+_T("Opacite de la fenetre")),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.sub}},Math.round(cfg.opacite*100)+"%")),
+i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap"}},
+[0.5,0.7,0.85,1].map(function(o){
+var on=Math.abs(cfg.opacite-o)<0.02;
+return i("div",{key:o,className:"nx-fx",role:"button","aria-label":Math.round(o*100)+"%",
+"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){cfg.opacite=o;_NXM.save();
+try{if(_NXM.ui&&_NXM.ui.w)_NXM.ui.w.style.opacity=String(o);}catch(_){}force();},
+style:{padding:"8px 14px",borderRadius:"10px",cursor:"pointer",fontFamily:_NXf.mono,fontSize:"11.5px",
+background:on?P.inset:"transparent",border:"1px solid "+(on?P.txt:P.line),
+color:on?P.txt:P.sub}},Math.round(o*100)+"%");})))),{mb:12}),
+_NXcard(i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.65}},
+_T("La lecture se fait en flux direct depuis les adresses de la playlist. Rien n est televerse, rien n est envoye : le volume, la position et tes choix restent sur cette machine.")),{mb:0}));}
+return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
+_NXhead(_T("Lecteur"),"Nexium Music",_T("Un lecteur audio integre au client : playlist partagee, mini-lecteur flottant, touches media du clavier. Tout se joue en local.")),
+tabbar(),
+i("div",{key:tab,"data-nx-panel":"1"},
+tab==="lecteur"?tLecteur():tab==="playlist"?tPlaylist():tReglages()),
+_NXfoot("Nexium Music · lecture directe, aucune donnée envoyée")));
 }
+
 var _NXcommon=function(){var V=window.Vencord||{},WP=V.Webpack||{},C=WP.Common||{};if(_NXcommon._c&&_NXcommon._wp===WP)return _NXcommon._c;var sc={};var o={WP:WP,C:C,store:function(n){try{if(sc[n]!==undefined)return sc[n];var s=C[n]||(WP.findStore&&WP.findStore(n))||null;if(s)sc[n]=s;return s;}catch(_){return null;}}};_NXcommon._wp=WP;_NXcommon._c=o;return o;};
 var _NXguildOf=function(cid){try{if(!cid)return null;var CS=_NXcommon().store("ChannelStore");var ch=CS&&CS.getChannel&&CS.getChannel(cid);return ch&&ch.guild_id?ch.guild_id:null;}catch(_){return null;}};
 var _NXguildName=function(gid){try{if(!gid)return"Inconnu";var GS=_NXcommon().store("GuildStore");var g=GS&&GS.getGuild&&GS.getGuild(gid);return g&&g.name?g.name:"Serveur "+String(gid).slice(0,6);}catch(_){return"Serveur";}};
@@ -285,6 +661,33 @@ _NXMO.CSS=[
 '.nx-anim [data-nx-skel]::after{content:"";position:absolute;inset:0;transform:translate3d(-100%,0,0);'
 +'background:linear-gradient(90deg,transparent,rgba(255,255,255,.045),transparent);animation:nx-sheen 1.5s linear infinite}',
 '.nx-anim [data-nx-dot]{animation:nx-pulse 2.4s ease-in-out infinite}',
+'@keyframes nx-breathe{0%,100%{opacity:.34}50%{opacity:.9}}',
+'@keyframes nx-shine{0%{background-position:0% 50%}100%{background-position:200% 50%}}',
+'@keyframes nx-pop{from{opacity:0;transform:translate3d(0,4px,0) scale(.94)}to{opacity:1;transform:none}}',
+'@keyframes nx-swipe{from{opacity:0;transform:translate3d(0,6px,0)}to{opacity:1;transform:none}}',
+'.nx-anim [data-nx-pop]{animation:nx-pop .3s cubic-bezier(.22,.8,.28,1) both;will-change:transform,opacity}',
+'.nx-anim [data-nx-breathe]{animation:nx-breathe 3.6s ease-in-out infinite;will-change:opacity}',
+'.nx-anim [data-nx-shine]{background-size:220% 100%;animation:nx-shine 3.4s linear infinite}',
+'.nx-anim [data-nx-panel]{animation:nx-swipe .26s cubic-bezier(.22,.8,.28,1) both}',
+'.nx-anim [data-nx-ring]{transition:stroke-dashoffset .9s cubic-bezier(.22,.8,.28,1),stroke .3s ease}',
+'.nx-anim [data-nx-panel] > * > *{animation:nx-rise .36s cubic-bezier(.22,.8,.28,1) both}',
+'.nx-anim [data-nx-panel] > * > *:nth-child(1){animation-delay:.01s}',
+'.nx-anim [data-nx-panel] > * > *:nth-child(2){animation-delay:.05s}',
+'.nx-anim [data-nx-panel] > * > *:nth-child(3){animation-delay:.09s}',
+'.nx-anim [data-nx-panel] > * > *:nth-child(4){animation-delay:.13s}',
+'.nx-anim [data-nx-panel] > * > *:nth-child(5){animation-delay:.17s}',
+'.nx-anim [data-nx-panel] > * > *:nth-child(6){animation-delay:.21s}',
+'.nx-anim [data-nx-panel] > * > *:nth-child(n+7){animation-delay:.25s}',
+'.nx-anim [data-nx-tile]{transition:transform .22s cubic-bezier(.22,.8,.28,1),border-color .22s ease,background-color .22s ease}',
+'.nx-anim [data-nx-tile]:hover{transform:translate3d(0,-3px,0)}',
+'@keyframes nx-spin{to{transform:rotate(360deg)}}',
+'@keyframes nx-eq{0%,100%{transform:scaleY(.28)}50%{transform:scaleY(1)}}',
+'.nx-anim [data-nx-spin]{animation:nx-spin 9s linear infinite;will-change:transform}',
+'[data-nx-spin][data-nx-halt]{animation-play-state:paused}',
+'.nx-anim [data-nx-eq] > i{animation:nx-eq .9s ease-in-out infinite;transform-origin:bottom center}',
+'.nx-anim [data-nx-eq] > i:nth-child(2){animation-delay:.18s}',
+'.nx-anim [data-nx-eq] > i:nth-child(3){animation-delay:.36s}',
+'.nx-anim [data-nx-eq] > i:nth-child(4){animation-delay:.54s}',
 '[data-nx-rise],[data-nx-fade]{animation:none}',
 '@media (prefers-reduced-motion: reduce){.nx-anim *{animation:none!important;transition:none!important}}'
 ].join("\n");
@@ -424,49 +827,107 @@ _NXV.stats.log.unshift({k:kind,d:String(detail||"").slice(0,160),t:Date.now()});
 if(_NXV.stats.log.length>40)_NXV.stats.log=_NXV.stats.log.slice(0,40);
 _NXV.saveStats();_NXV.notify();}catch(_){}};
 
-_NXV.SAFE=/(^|\.)(discord\.com|discordapp\.com|discordapp\.net|discord\.gg|discord\.media|discord\.dev|discordstatus\.com|githubusercontent\.com|github\.com|supabase\.co)$/i;
+_NXV.SAFE=/(^|\.)(discord\.com|discordapp\.com|discordapp\.net|discord\.gg|discord\.media|discord\.dev|discordstatus\.com|githubusercontent\.com|github\.com|emcoqnvxriyrchmfpunq\.supabase\.co)$/i;
 _NXV.hostOf=function(u){try{var h=new URL(String(u),"https://discord.com").hostname.toLowerCase();return h.replace(/^www\./,"");}catch(_){return "";}};
 _NXV.isSafeHost=function(h){try{return _NXV.SAFE.test(h||"");}catch(_){return false;}};
 
-_NXV.token=function(){try{
-if(_NXV._tk&&(Date.now()-_NXV._tkAt)<60000)return _NXV._tk;
-var t=null;
+_NXV.token=(function(){var _c=null,_at=0;
+var lire=function(){var t=null;
 try{var W=window.Vencord&&Vencord.Webpack;
 var m=W&&W.findByProps&&W.findByProps("getToken");
 if(m&&typeof m.getToken==="function")t=m.getToken();}catch(_){}
 if(!t){try{var raw=window.localStorage&&window.localStorage.getItem("token");if(raw)t=String(raw).replace(/^"|"$/g,"");}catch(_){}}
-_NXV._tk=(t&&String(t).length>20)?String(t):null;_NXV._tkAt=Date.now();
-return _NXV._tk;}catch(_){return null;}};
+return (t&&String(t).length>20)?String(t):null;};
+var fn=function(){try{
+var now=Date.now();
+if(_c&&(now-_at)<15000)return _c;
+_c=lire();_at=now;
+return _c;}catch(_){return null;}};
+fn.oublier=function(){try{_c=null;_at=0;}catch(_){}};
+return fn;})();
+_NXV.forgetToken=function(){try{if(_NXV.token&&_NXV.token.oublier)_NXV.token.oublier();}catch(_){}};
+try{document.addEventListener("visibilitychange",function(){try{if(document.hidden)_NXV.forgetToken();}catch(_){}});}catch(_){}
+try{setInterval(function(){try{if(document.hidden)_NXV.forgetToken();}catch(_){}},60000);}catch(_){}
 
 _NXV.RXTK=/(mfa\.[\w-]{20,})|([\w-]{23,28}\.[\w-]{6}\.[\w-]{27,38})/;
 _NXV.RXPWD=/("password"\s*:\s*"[^"]{6,})|(&password=)|("new_password")/i;
+_NXV.RXKEY=/(sk_live_[A-Za-z0-9]{20,})|(xox[baprs]-[\w-]{12,})|(gh[pousr]_[A-Za-z0-9]{30,})|(AIza[\w-]{30,})/;
+_NXV.findSecret=(function(){var _s=null,_at=0;
+var bati=function(){var out=[];
+var t=null;try{t=_NXV.token();}catch(_){}
+if(t&&t.length>20){
+out.push([t,"jeton de session"]);
+try{var e=encodeURIComponent(t);if(e!==t)out.push([e,"jeton encode en URL"]);}catch(_){}
+try{if(window.btoa){var b=btoa(t).replace(/=+$/,"");if(b.length>20)out.push([b,"jeton encode en base64"]);}}catch(_){}
+try{var r=t.split("").reverse().join("");out.push([r,"jeton inverse"]);}catch(_){}
+try{var np=t.replace(/[.\-_]/g,"");if(np!==t&&np.length>20)out.push([np,"jeton recompose"]);}catch(_){}
+if(t.length>=40){out.push([t.slice(0,26),"fragment de jeton"]);out.push([t.slice(-26),"fragment de jeton"]);}}
+try{var ck=document.cookie;if(ck&&ck.length>30)out.push([ck.slice(0,40),"cookies de session"]);}catch(_){}
+return out;};
+var fn=function(hay){try{
+if(!hay)return null;
+var h=String(hay);
+if(h.length<20)return null;
+if(h.length>60000)h=h.slice(0,60000);
+var now=Date.now();
+if(!_s||(now-_at)>15000){_s=bati();_at=now;}
+for(var a=0;a<_s.length;a++){var sg=_s[a];if(sg[0]&&h.indexOf(sg[0])>=0)return sg[1];}
+if(_NXV.RXTK.test(h))return "jeton Discord";
+if(_NXV.RXPWD.test(h))return "mot de passe";
+if(_NXV.RXKEY.test(h))return "cle d API";
+return null;}catch(_){return null;}};
+fn.oublier=function(){try{_s=null;_at=0;}catch(_){}};
+return fn;})();
 _NXV.scanPayload=function(body){try{
 if(!body)return null;
 var s="";
 if(typeof body==="string")s=body;
-else if(typeof FormData!=="undefined"&&body instanceof FormData){try{var p=[];body.forEach(function(v,k){p.push(k+"="+String(v).slice(0,200));});s=p.join("&");}catch(_){}}
+else if(typeof FormData!=="undefined"&&body instanceof FormData){try{var p=[];body.forEach(function(v,k){p.push(String(k)+"="+String(v).slice(0,400));});s=p.join("&");}catch(_){}}
+else if(typeof URLSearchParams!=="undefined"&&body instanceof URLSearchParams){try{s=body.toString();}catch(_){s="";}}
+else if(typeof Blob!=="undefined"&&body instanceof Blob)return null;
+else if(body&&body.buffer&&typeof body.byteLength==="number"){try{
+var u8=new Uint8Array(body.buffer||body);
+var lim=u8.length<8192?u8.length:8192;var cs=[];
+for(var q=0;q<lim;q++)cs.push(String.fromCharCode(u8[q]));
+s=cs.join("");}catch(_){s="";}}
 else if(body&&typeof body==="object"){try{s=JSON.stringify(body);}catch(_){s="";}}
 if(!s)return null;
-s=s.slice(0,20000);
-var tk=_NXV.token();
-if(tk&&s.indexOf(tk)>=0)return "jeton de session";
-if(_NXV.RXTK.test(s))return "jeton Discord";
-if(_NXV.RXPWD.test(s))return "mot de passe";
-try{if(document.cookie&&document.cookie.length>20&&s.indexOf(document.cookie.slice(0,40))>=0)return "cookies de session";}catch(_){}
-return null;}catch(_){return null;}};
+return _NXV.findSecret(s.slice(0,60000));}catch(_){return null;}};
 
 _NXV.headerLeak=function(init){try{
 if(!init||!init.headers)return null;
-var tk=_NXV.token();if(!tk)return null;
 var h=init.headers;var vals=[];
-try{if(typeof Headers!=="undefined"&&h instanceof Headers){h.forEach(function(v){vals.push(String(v));});}
-else if(Array.isArray(h)){for(var a=0;a<h.length;a++)vals.push(String(h[a][1]));}
-else{for(var k in h)vals.push(String(h[k]));}}catch(_){}
-for(var b=0;b<vals.length;b++){if(vals[b].indexOf(tk)>=0)return "jeton dans les en-tetes";}
+try{if(typeof Headers!=="undefined"&&h instanceof Headers){h.forEach(function(v,k){vals.push(String(k)+": "+String(v));});}
+else if(Array.isArray(h)){for(var a=0;a<h.length;a++)vals.push(String(h[a][0])+": "+String(h[a][1]));}
+else{for(var k in h)vals.push(String(k)+": "+String(h[k]));}}catch(_){}
+for(var b=0;b<vals.length;b++){if(_NXV.findSecret(vals[b]))return "jeton dans les en-tetes";}
+return null;}catch(_){return null;}};
+
+_NXV.urlLeak=function(u){try{
+var s=String(u||"");
+if(s.length<48)return null;
+var i1=s.indexOf("?"),i2=s.indexOf("#");
+var cut=i1<0?i2:(i2<0?i1:(i1<i2?i1:i2));
+if(cut<0)cut=s.indexOf("/",9);
+if(cut<0)return null;
+var tail=s.slice(cut);
+if(tail.length<24)return null;
+var w=_NXV.findSecret(tail);
+if(w)return w+" dans l adresse";
+var d=null;try{d=decodeURIComponent(tail);}catch(_){d=null;}
+if(d&&d!==tail){w=_NXV.findSecret(d);if(w)return w+" dans l adresse";}
+try{var brut=tail.replace(/^[\/?#]+/,"");
+if(brut.length>=40&&brut.length<9000&&/^[A-Za-z0-9+\/=_-]+$/.test(brut)&&window.atob){
+var dec=atob(brut.replace(/-/g,"+").replace(/_/g,"/"));
+w=_NXV.findSecret(dec);
+if(w)return w+" encode dans l adresse";}}catch(_){}
 return null;}catch(_){return null;}};
 
 _NXV.deny=function(host,what,where){try{
 _NXV.stats.blocked=(_NXV.stats.blocked||0)+1;
+try{if(!Array.isArray(_NXV.stats.exfil))_NXV.stats.exfil=[];
+_NXV.stats.exfil.unshift({h:String(host||"").slice(0,90),w:String(what||"").slice(0,60),o:String(where||"").slice(0,20),t:Date.now()});
+if(_NXV.stats.exfil.length>30)_NXV.stats.exfil=_NXV.stats.exfil.slice(0,30);}catch(_){}
 _NXV.log("exfil",what+" vers "+host+(where?(" ("+where+")"):""));
 _NXV.saveStats();
 if(!_NXV._lastAlert||(Date.now()-_NXV._lastAlert)>8000){_NXV._lastAlert=Date.now();
@@ -475,11 +936,13 @@ try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("BLOQUE : une tentative d envoi de 
 try{if(window._NXPR){_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat("exfil",what+" vers "+host);_NXPR.saveStats();}}catch(_){}
 }catch(_){}};
 
+_NXV.inspectOut=function(url,init){try{
+return _NXV.urlLeak(url)||_NXV.headerLeak(init)||_NXV.scanPayload(init&&init.body);}catch(_){return null;}};
 _NXV.checkOut=function(url,init,where){try{
 if(!_NXV.cfg.blockExfil)return false;
 var h=_NXV.hostOf(url);
 if(!h||_NXV.isSafeHost(h))return false;
-var what=_NXV.headerLeak(init)||_NXV.scanPayload(init&&init.body);
+var what=_NXV.inspectOut(url,init);
 if(!what)return false;
 _NXV.deny(h,what,where);
 return true;}catch(_){return false;}};
@@ -1217,6 +1680,27 @@ var _NXtoggle=function(on,onClick,danger){return i("div",{className:"nx-fx",role
 var _NXico=function(path){return i("div",{style:{width:"32px",height:"32px",borderRadius:"9px",background:_NXpal.inset,border:"1px solid "+_NXpal.line,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:_NXpal.sub}},i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:16,height:16},i("path",{d:path})));};
 var _NXctrl=function(iconPath,label,desc,on,onClick,danger,last){return i("div",{style:{display:"flex",alignItems:"center",gap:"14px",padding:"15px 0",borderBottom:last?"none":"1px solid "+_NXpal.line}},_NXico(iconPath),i("div",{style:{flex:1}},i("div",{style:{fontSize:"14px",fontWeight:"600",color:_NXpal.txt}},label),i("div",{style:{fontSize:"12px",color:_NXpal.sub,marginTop:"3px",lineHeight:1.45}},desc)),_NXtoggle(on,onClick,danger));};
 var _NXbtn=function(label,onClick,tone){var c=tone==="danger"?{bg:"linear-gradient(160deg,#1a0d0d,#120909)",bd:"#2c1414",fg:_NXpal.dangerSoft}:{bg:"linear-gradient(160deg,#151517,#0e0e10)",bd:_NXpal.line,fg:_NXpal.pale};return i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:onClick,style:{flex:1,textAlign:"center",padding:"12px",borderRadius:"12px",background:c.bg,border:"1px solid "+c.bd,color:c.fg,fontSize:"12px",fontWeight:"700",cursor:"pointer",letterSpacing:".01em",boxShadow:"0 1px 0 rgba(255,255,255,.04) inset"}},label);};
+var _NXmounted=function(F){var st=F.useState(false);
+F.useEffect(function(){var t=setTimeout(function(){st[1](true);},40);return function(){try{clearTimeout(t);}catch(_){}};},[]);
+return st[0];};
+var _NXring=function(pct,col,size,gros,petit){
+var p=pct<0?0:(pct>100?100:pct);
+var r=size/2-5;
+var c=2*Math.PI*r;
+var off=c*(1-p/100);
+return i("div",{style:{position:"relative",width:size+"px",height:size+"px",flexShrink:0}},
+i("svg",{width:size,height:size,viewBox:"0 0 "+size+" "+size,style:{transform:"rotate(-90deg)",display:"block"},"aria-hidden":"true"},
+i("circle",{cx:size/2,cy:size/2,r:r,fill:"none",stroke:_NXpal.line,"stroke-width":"4"}),
+i("circle",{"data-nx-ring":"1",cx:size/2,cy:size/2,r:r,fill:"none",stroke:col,"stroke-width":"4","stroke-linecap":"round",
+"stroke-dasharray":c.toFixed(1),"stroke-dashoffset":off.toFixed(1)})),
+i("div",{style:{position:"absolute",left:0,top:0,right:0,bottom:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}},
+i("div",{style:{fontFamily:_NXf.disp,fontSize:Math.round(size*0.27)+"px",fontWeight:"800",color:col,letterSpacing:"-.045em",lineHeight:1}},gros),
+petit?i("div",{style:{fontSize:"8.5px",color:_NXpal.faint,marginTop:"4px",letterSpacing:".12em",textTransform:"uppercase",fontWeight:"800"}},petit):null));};
+var _NXneuf=function(){return i("span",{"data-nx-shine":"1",style:{display:"inline-block",fontSize:"8.5px",fontWeight:"900",letterSpacing:".13em",
+textTransform:"uppercase",padding:"3px 7px",borderRadius:"99px",color:_NXpal.ink,verticalAlign:"middle",
+background:"linear-gradient(100deg,"+_NXpal.acc+","+_NXpal.mid+","+_NXpal.acc+")"}},"Nouveau");};
+var _NXbigNum=function(v,col){return i("div",{key:"n"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"25px",fontWeight:"800",
+color:col||_NXpal.txt,letterSpacing:"-.04em",lineHeight:1}},v);};
 var _NXfoot=function(t){return i("div",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:_NXpal.faint,textAlign:"center",marginTop:"20px",letterSpacing:".02em"}},t);};var _NXS=window._NXS||(window._NXS={});
 if(!_NXS.boot){
 _NXS.boot=true;
@@ -1224,7 +1708,7 @@ _NXS.KEY="nexium_stats_v1";
 _NXS.me=null;
 _NXS.STOP={"avec":1,"dans":1,"pour":1,"mais":1,"plus":1,"tout":1,"tous":1,"cette":1,"comme":1,"sans":1,"sont":1,"fait":1,"être":1,"cela":1,"votre":1,"vous":1,"nous":1,"elle":1,"leur":1,"donc":1,"alors":1,"aussi":1,"même":1,"très":1,"déjà":1,"encore":1,"quand":1,"parce":1,"chaque":1,"peut":1,"faire":1,"oui":1,"non":1,"ouais":1,"that":1,"this":1,"with":1,"have":1,"from":1,"your":1,"what":1,"when":1,"will":1,"would":1,"there":1,"their":1,"about":1,"which":1,"because":1,"could":1,"should":1,"think":1,"https":1,"http":1,"com":1};
 _NXS.mkHeat=function(){var h=[];for(var a=0;a<7;a++){var r=[];for(var b=0;b<24;b++)r.push(0);h.push(r);}return h;};
-_NXS.load=function(){var d;try{var raw=_NXDB.get(_NXS.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};if(!d.daily)d.daily={};if(!d.dailyChars)d.dailyChars={};if(!d.guilds)d.guilds={};if(!d.channels)d.channels={};if(!d.heat||d.heat.length!==7)d.heat=_NXS.mkHeat();if(typeof d.given!=="number")d.given=0;if(typeof d.received!=="number")d.received=0;if(typeof d.session!=="number")d.session=0;if(!d.words)d.words={};if(!d.emojis)d.emojis={};if(typeof d.attach!=="number")d.attach=0;if(typeof d.links!=="number")d.links=0;if(typeof d.mentions!=="number")d.mentions=0;if(typeof d.totalChars!=="number")d.totalChars=0;if(typeof d.msgCount!=="number"){var mc=0;for(var kk in d.daily)mc+=d.daily[kk];d.msgCount=mc;}if(typeof d.voice!=="number")d.voice=0;if(!d.voiceDaily)d.voiceDaily={};if(!d.voiceGuilds)d.voiceGuilds={};if(!d.givenDaily)d.givenDaily={};if(!d.recvDaily)d.recvDaily={};if(typeof d.first!=="number")d.first=Date.now();return d;};
+_NXS.load=function(){var d;try{var raw=_NXDB.get(_NXS.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};if(!d.daily)d.daily={};if(!d.dailyChars)d.dailyChars={};if(!d.guilds)d.guilds={};if(!d.channels)d.channels={};if(!d.heat||d.heat.length!==7)d.heat=_NXS.mkHeat();if(typeof d.given!=="number")d.given=0;if(typeof d.received!=="number")d.received=0;if(typeof d.session!=="number")d.session=0;if(!d.words)d.words={};if(!d.emojis)d.emojis={};if(typeof d.attach!=="number")d.attach=0;if(typeof d.links!=="number")d.links=0;if(typeof d.mentions!=="number")d.mentions=0;if(typeof d.totalChars!=="number")d.totalChars=0;if(typeof d.msgCount!=="number"){var mc=0;for(var kk in d.daily)mc+=d.daily[kk];d.msgCount=mc;}if(typeof d.voice!=="number")d.voice=0;if(!d.voiceDaily)d.voiceDaily={};if(!d.voiceGuilds)d.voiceGuilds={};if(!d.givenDaily)d.givenDaily={};if(!d.recvDaily)d.recvDaily={};if(typeof d.first!=="number")d.first=Date.now();if(typeof d.dm!=="number")d.dm=0;if(typeof d.srv!=="number")d.srv=0;if(typeof d.edited!=="number")d.edited=0;if(typeof d.deleted!=="number")d.deleted=0;if(typeof d.voiceMax!=="number")d.voiceMax=0;if(typeof d.replies!=="number")d.replies=0;if(!d.dmDaily)d.dmDaily={};if(!d.rythme)d.rythme={};if(!d.objectifs||typeof d.objectifs!=="object")d.objectifs={msgJour:0,vocalMin:0};return d;};
 _NXS.data=_NXS.load();
 _NXS.merge=function(mine){try{var raw=_NXDB.get(_NXS.KEY);if(!raw)return mine;var other=JSON.parse(raw);if(!other||typeof other!=="object")return mine;var wipedAt=parseInt(_NXDB.get(_NXS.KEY+"_wipe")||"0",10)||0;if(wipedAt&&(!other._at||other._at<wipedAt))return mine;
 var NUM=["given","received","session","attach","links","mentions","totalChars","msgCount","voice"];
@@ -1234,18 +1718,89 @@ for(var b=0;b<MAPS.length;b++){var m=MAPS[b];if(other[m]&&typeof other[m]==="obj
 if(other.heat&&other.heat.length===7&&mine.heat&&mine.heat.length===7){for(var d=0;d<7;d++)for(var h=0;h<24;h++){if(other.heat[d][h]>mine.heat[d][h])mine.heat[d][h]=other.heat[d][h];}}
 if(typeof other.first==="number"&&other.first<mine.first)mine.first=other.first;}catch(_){}return mine;};
 _NXS.save=function(){try{_NXS.data=_NXS.merge(_NXS.data);_NXS.data._at=Date.now();_NXDB.set(_NXS.KEY,JSON.stringify(_NXS.data));}catch(_){}};
-_NXS.scheduleSave=function(){_NXS.rev=(_NXS.rev||0)+1;if(_NXS.st)return;_NXS.st=setTimeout(function(){_NXS.st=null;_NXS.save();},4000);};
+_NXS.scheduleSave=function(){_NXS.rev=(_NXS.rev||0)+1;if(_NXS.st)return;_NXS.st=setTimeout(function(){_NXS.st=null;_NXPERF.repos(function(){try{_NXS.save();}catch(_){}});},4000);};
 _NXS.reset=function(){try{_NXDB.del(_NXS.KEY);}catch(_){}_NXS.data=_NXS.load();_NXS.save();};
 _NXS.getMe=function(){if(_NXS.me)return _NXS.me;try{var US=_NXcommon().store("UserStore");var u=US&&US.getCurrentUser&&US.getCurrentUser();if(u&&u.id)_NXS.me=u.id;}catch(_){}return _NXS.me;};
 _NXS.dayKey=function(t){var d=new Date(t);var m=d.getMonth()+1,dd=d.getDate();return d.getFullYear()+"-"+(m<10?"0"+m:m)+"-"+(dd<10?"0"+dd:dd);};
 _NXS.countWords=function(txt){try{if(!txt)return;var parts=String(txt).toLowerCase().split(/[^0-9a-zà-ÿ]+/);for(var k=0;k<parts.length;k++){var w=parts[k];if(!w||w.length<4)continue;if(_NXS.STOP[w])continue;if(/^\d+$/.test(w))continue;_NXS.data.words[w]=(_NXS.data.words[w]||0)+1;}}catch(_){}};
 _NXS.prune=function(){try{var dk=Object.keys(_NXS.data.daily);if(dk.length>400){dk.sort();var cut=dk.length-380;for(var a=0;a<cut;a++){delete _NXS.data.daily[dk[a]];delete _NXS.data.dailyChars[dk[a]];delete _NXS.data.voiceDaily[dk[a]];delete _NXS.data.givenDaily[dk[a]];delete _NXS.data.recvDaily[dk[a]];}}function topTrim(obj,keepN,cap){var ks=Object.keys(obj);if(ks.length>cap){ks.sort(function(x,y){return obj[y]-obj[x];});for(var b=keepN;b<ks.length;b++)delete obj[ks[b]];}}topTrim(_NXS.data.words,230,470);topTrim(_NXS.data.voiceGuilds,40,90);topTrim(_NXS.data.emojis,60,140);topTrim(_NXS.data.channels,40,90);topTrim(_NXS.data.guilds,60,140);}catch(_){}};
 _NXS.maybePrune=function(){var n=Date.now();if(!_NXS._pt||n-_NXS._pt>180000){_NXS._pt=n;_NXS.prune();}};
-_NXS.onMsg=function(e){try{var m=e&&e.message;if(!m)return;var me=_NXS.getMe();if(!me||!m.author||m.author.id!==me)return;var t=m.timestamp?new Date(m.timestamp).getTime():Date.now();var dk=_NXS.dayKey(t);_NXS.data.daily[dk]=(_NXS.data.daily[dk]||0)+1;_NXS.data.msgCount++;var content=m.content||"";var len=content.length;_NXS.data.totalChars+=len;_NXS.data.dailyChars[dk]=(_NXS.data.dailyChars[dk]||0)+len;var d=new Date(t);var wd=(d.getDay()+6)%7;_NXS.data.heat[wd][d.getHours()]++;var cid=m.channel_id||e.channelId;var gid=_NXguildOf(cid);if(gid)_NXS.data.guilds[gid]=(_NXS.data.guilds[gid]||0)+1;if(cid)_NXS.data.channels[cid]=(_NXS.data.channels[cid]||0)+1;if(m.attachments&&m.attachments.length)_NXS.data.attach+=m.attachments.length;var lk=content.match(/https?:\/\/\S+/g);if(lk)_NXS.data.links+=lk.length;var mn=content.match(/<@!?\d+>/g);if(mn)_NXS.data.mentions+=mn.length;var ce=content.match(/<a?:\w+:\d+>/g);if(ce)for(var x=0;x<ce.length;x++){var nm=ce[x].replace(/<a?:(\w+):\d+>/,"$1");_NXS.data.emojis[nm]=(_NXS.data.emojis[nm]||0)+1;}_NXS.countWords(content);_NXS.maybePrune();_NXS.scheduleSave();}catch(_){}};
+_NXS.onMsg=function(e){try{var m=e&&e.message;if(!m)return;var me=_NXS.getMe();if(!me||!m.author||m.author.id!==me)return;var t=m.timestamp?new Date(m.timestamp).getTime():Date.now();var dk=_NXS.dayKey(t);_NXS.data.daily[dk]=(_NXS.data.daily[dk]||0)+1;_NXS.data.msgCount++;var content=m.content||"";var len=content.length;_NXS.data.totalChars+=len;_NXS.data.dailyChars[dk]=(_NXS.data.dailyChars[dk]||0)+len;var d=new Date(t);var wd=(d.getDay()+6)%7;_NXS.data.heat[wd][d.getHours()]++;var cid=m.channel_id||e.channelId;var gid=_NXguildOf(cid);if(gid){_NXS.data.guilds[gid]=(_NXS.data.guilds[gid]||0)+1;_NXS.data.srv++;}else{_NXS.data.dm++;_NXS.data.dmDaily[dk]=(_NXS.data.dmDaily[dk]||0)+1;}if(cid)_NXS.data.channels[cid]=(_NXS.data.channels[cid]||0)+1;try{if(m.message_reference&&m.message_reference.message_id)_NXS.data.replies++;}catch(_){}try{var mins=d.getHours()*60+d.getMinutes();var ry=_NXS.data.rythme[dk];if(!ry){_NXS.data.rythme[dk]={a:mins,b:mins};}else{if(mins<ry.a)ry.a=mins;if(mins>ry.b)ry.b=mins;}}catch(_){}if(m.attachments&&m.attachments.length)_NXS.data.attach+=m.attachments.length;var lk=content.match(/https?:\/\/\S+/g);if(lk)_NXS.data.links+=lk.length;var mn=content.match(/<@!?\d+>/g);if(mn)_NXS.data.mentions+=mn.length;var ce=content.match(/<a?:\w+:\d+>/g);if(ce)for(var x=0;x<ce.length;x++){var nm=ce[x].replace(/<a?:(\w+):\d+>/,"$1");_NXS.data.emojis[nm]=(_NXS.data.emojis[nm]||0)+1;}_NXS.countWords(content);_NXS.maybePrune();_NXS.scheduleSave();}catch(_){}};
 _NXS.onReact=function(e){try{var me=_NXS.getMe();if(!me)return;var uid=e&&e.userId;var aid=e&&e.messageAuthorId;var dk=_NXS.dayKey(Date.now());if(uid===me){_NXS.data.given++;_NXS.data.givenDaily[dk]=(_NXS.data.givenDaily[dk]||0)+1;}if(aid&&aid===me&&uid!==me){_NXS.data.received++;_NXS.data.recvDaily[dk]=(_NXS.data.recvDaily[dk]||0)+1;}_NXS.scheduleSave();}catch(_){}};
-_NXS.onVoice=function(e){try{var me=_NXS.getMe();if(!me||!e)return;var arr=e.voiceStates||(e.voiceState?[e.voiceState]:null);if(!arr)return;for(var k=0;k<arr.length;k++){var s=arr[k];if(!s||s.userId!==me)continue;var ch=s.channelId||null;if(ch&&!_NXS.vsess){_NXS.vsess={t:Date.now(),g:s.guildId||null};}else if(!ch&&_NXS.vsess){_NXS.creditVoice();_NXS.vsess=null;}else if(ch&&_NXS.vsess&&(s.guildId||null)!==_NXS.vsess.g){_NXS.creditVoice();_NXS.vsess={t:Date.now(),g:s.guildId||null};}}}catch(_){}};
-_NXS.creditVoice=function(){try{if(!_NXS.vsess)return;var now=Date.now();var sec=Math.floor((now-_NXS.vsess.t)/1000);if(sec<=0)return;_NXS.data.voice+=sec;var dk=_NXS.dayKey(now);_NXS.data.voiceDaily[dk]=(_NXS.data.voiceDaily[dk]||0)+sec;if(_NXS.vsess.g)_NXS.data.voiceGuilds[_NXS.vsess.g]=(_NXS.data.voiceGuilds[_NXS.vsess.g]||0)+sec;_NXS.vsess.t=now;_NXS.scheduleSave();}catch(_){}};
-_NXS.wire=function(){try{var C=_NXcommon();var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));if(!FX||!FX.subscribe){_NXS.tries=(_NXS.tries||0)+1;if(_NXS.tries<25)setTimeout(_NXS.wire,1500);return;}FX.subscribe("MESSAGE_CREATE",_NXS.onMsg);FX.subscribe("MESSAGE_REACTION_ADD",_NXS.onReact);FX.subscribe("VOICE_STATE_UPDATE",_NXS.onVoice);FX.subscribe("VOICE_STATE_UPDATES",_NXS.onVoice);}catch(_){}};
+_NXS.onVoice=function(e){try{var me=_NXS.getMe();if(!me||!e)return;var arr=e.voiceStates||(e.voiceState?[e.voiceState]:null);if(!arr)return;for(var k=0;k<arr.length;k++){var s=arr[k];if(!s||s.userId!==me)continue;var ch=s.channelId||null;if(ch&&!_NXS.vsess){_NXS.vsess={t:Date.now(),d:Date.now(),g:s.guildId||null};}else if(!ch&&_NXS.vsess){_NXS.creditVoice();_NXS.vsess=null;}else if(ch&&_NXS.vsess&&(s.guildId||null)!==_NXS.vsess.g){_NXS.creditVoice();_NXS.vsess={t:Date.now(),d:Date.now(),g:s.guildId||null};}}}catch(_){}};
+_NXS.onEdit=function(e){try{
+var m=e&&e.message;if(!m||!m.author)return;
+var me=_NXS.getMe();if(!me||m.author.id!==me)return;
+if(!m.edited_timestamp)return;
+_NXS.data.edited++;_NXS.scheduleSave();}catch(_){}};
+_NXS.onDelete=function(e){try{
+if(!e||!e.id)return;
+var me=_NXS.getMe();if(!me)return;
+var MS=_NXcommon().store("MessageStore");
+var m=MS&&MS.getMessage&&MS.getMessage(e.channelId,e.id);
+if(!m||!m.author||m.author.id!==me)return;
+_NXS.data.deleted++;_NXS.scheduleSave();}catch(_){}};
+_NXS.pauseMax=function(){try{
+var ks=Object.keys(_NXS.data.daily||{}).filter(function(k){return _NXS.data.daily[k]>0;}).sort();
+if(ks.length<2)return 0;
+var max=0;
+for(var a=1;a<ks.length;a++){
+var d1=new Date(ks[a-1]+"T00:00:00"),d2=new Date(ks[a]+"T00:00:00");
+var j=Math.round((d2-d1)/86400000)-1;
+if(j>max)max=j;}
+return max;}catch(_){return 0;}};
+_NXS.rythmeMoyen=function(){try{
+var R2=_NXS.data.rythme||{},n=0,sa=0,sb=0;
+for(var k in R2){var e=R2[k];
+if(!e||typeof e.a!=="number")continue;
+sa+=e.a;sb+=e.b;n++;}
+if(!n)return null;
+return {debut:Math.round(sa/n),fin:Math.round(sb/n),jours:n};}catch(_){return null;}};
+_NXS.hhmm=function(min){try{
+var h=Math.floor(min/60),m=Math.round(min%60);
+return (h<10?"0":"")+h+"h"+(m<10?"0":"")+m;}catch(_){return "--";}};
+_NXS.setObjectif=function(k,v){try{
+_NXS.data.objectifs[k]=Math.max(0,parseInt(v,10)||0);
+_NXS.saveNow();_NXS.rev=(_NXS.rev||0)+1;}catch(_){}};
+_NXS.objectifJour=function(){try{
+var o=_NXS.data.objectifs||{};
+var dk=_NXS.dayKey(Date.now());
+var msg=_NXS.data.daily[dk]||0;
+var voc=Math.round((_NXS.data.voiceDaily[dk]||0)/60);
+return {msg:msg,msgCible:o.msgJour||0,
+vocal:voc,vocalCible:o.vocalMin||0,
+msgPct:o.msgJour?Math.min(100,Math.round(msg/o.msgJour*100)):0,
+vocalPct:o.vocalMin?Math.min(100,Math.round(voc/o.vocalMin*100)):0};}catch(_){return {msg:0,msgCible:0,vocal:0,vocalCible:0,msgPct:0,vocalPct:0};}};
+_NXS.exportCsv=function(){try{
+var L=["jour;messages;caracteres;vocal_secondes;messages_prives;reactions_donnees;reactions_recues;premiere_activite;derniere_activite"];
+var vus={},k;
+for(k in (_NXS.data.daily||{}))vus[k]=1;
+for(k in (_NXS.data.voiceDaily||{}))vus[k]=1;
+var ks=Object.keys(vus).sort();
+for(var a=0;a<ks.length;a++){var j=ks[a];
+var ry=(_NXS.data.rythme||{})[j];
+L.push(j+";"+((_NXS.data.daily||{})[j]||0)
++";"+((_NXS.data.dailyChars||{})[j]||0)
++";"+((_NXS.data.voiceDaily||{})[j]||0)
++";"+((_NXS.data.dmDaily||{})[j]||0)
++";"+((_NXS.data.givenDaily||{})[j]||0)
++";"+((_NXS.data.recvDaily||{})[j]||0)
++";"+(ry?_NXS.hhmm(ry.a):"")
++";"+(ry?_NXS.hhmm(ry.b):""));}
+var txt=L.join("\n");
+try{if(typeof Blob!=="undefined"&&typeof URL!=="undefined"&&URL.createObjectURL){
+var b=new Blob([txt],{type:"text/csv;charset=utf-8"});
+var u=URL.createObjectURL(b);
+var el=document.createElement("a");
+el.href=u;el.download="nexium-statistiques.csv";
+document.body.appendChild(el);el.click();
+setTimeout(function(){try{document.body.removeChild(el);URL.revokeObjectURL(u);}catch(_){}},1500);
+return true;}}catch(_){}
+try{DiscordNative.clipboard.copy(txt);}catch(_){}
+return false;}catch(_){return false;}};
+_NXS.creditVoice=function(){try{if(!_NXS.vsess)return;var now=Date.now();var sec=Math.floor((now-_NXS.vsess.t)/1000);if(sec<=0)return;
+try{var tot=Math.floor((now-(_NXS.vsess.d||_NXS.vsess.t))/1000);if(tot>_NXS.data.voiceMax)_NXS.data.voiceMax=tot;}catch(_){}_NXS.data.voice+=sec;var dk=_NXS.dayKey(now);_NXS.data.voiceDaily[dk]=(_NXS.data.voiceDaily[dk]||0)+sec;if(_NXS.vsess.g)_NXS.data.voiceGuilds[_NXS.vsess.g]=(_NXS.data.voiceGuilds[_NXS.vsess.g]||0)+sec;_NXS.vsess.t=now;_NXS.scheduleSave();}catch(_){}};
+_NXS.wire=function(){try{var C=_NXcommon();var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));if(!FX||!FX.subscribe){_NXS.tries=(_NXS.tries||0)+1;if(_NXS.tries<25)setTimeout(_NXS.wire,1500);return;}FX.subscribe("MESSAGE_CREATE",_NXS.onMsg);FX.subscribe("MESSAGE_REACTION_ADD",_NXS.onReact);FX.subscribe("MESSAGE_UPDATE",_NXS.onEdit);FX.subscribe("MESSAGE_DELETE",_NXS.onDelete);FX.subscribe("VOICE_STATE_UPDATE",_NXS.onVoice);FX.subscribe("VOICE_STATE_UPDATES",_NXS.onVoice);}catch(_){}};
 _NXS.download=function(){try{var blob=new Blob([JSON.stringify(_NXS.data,null,2)],{type:"application/json"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="nexium-stats.json";document.body.appendChild(a);a.click();setTimeout(function(){try{document.body.removeChild(a);URL.revokeObjectURL(url);}catch(_){}},120);}catch(_){}};
 _NXS.beat=setInterval(function(){if(_NXS.eco)return;_NXS.data.session+=15;if(_NXS.vsess)_NXS.creditVoice();_NXS._bt=(_NXS._bt||0)+1;if(_NXS._bt%4===0)_NXS.scheduleSave();},15000);
 _NXS.saveNow=function(){try{_NXS.rev=(_NXS.rev||0)+1;if(_NXS.st){clearTimeout(_NXS.st);_NXS.st=null;}if(_NXS.vsess)_NXS.creditVoice();_NXS.save();}catch(_){}};
@@ -1255,7 +1810,7 @@ try{window.addEventListener("beforeunload",function(){_NXS.save();});}catch(_){}
 _NXS.wire();
 }
 
-var NexiumStatsIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:18,height:18},i("path",{d:"M4 13h3v7H4v-7zm6.5-6h3v13h-3V7zM17 10h3v10h-3V10z"}));};
+var NexiumStatsIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:18,height:18,"aria-hidden":"true"},i("path",{d:"M3.5 18.5l6-6 4 4L22 6.92 20.59 5.5l-7.09 8.09-4-4L2 16.5l1.5 2z"}));};
 var _NXRT=window._NXRT||(window._NXRT={});
 if(!_NXRT.boot){try{_NXRT.boot=true;
 _NXRT.W=1080;_NXRT.H=1350;
@@ -1562,125 +2117,377 @@ return {pret:!!st,periodes:_NXRT.PERIODS.length,copieImage:_NXRT.canCopy(),messa
 }
 function NexiumStatsComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
-var tabState=F.useState("overview");var tab=tabState[0],setTab=tabState[1];
-var perState=F.useState(30);var per=perState[0],setPer=perState[1];
-var rtState=F.useState("mois");var rtPer=rtState[0],setRtPer=rtState[1];
-F.useEffect(function(){var _r=_NXS.rev;var id=setInterval(function(){if((typeof document==="undefined"||!document.hidden)&&_r!==_NXS.rev){_r=_NXS.rev;force();}},4000);return function(){clearInterval(id);};},[]);
+var _t0=F.useState("apercu");var tab=_t0[0];var setTab=_t0[1];
+var _p0=F.useState(30);var per=_p0[0];var setPer=_p0[1];
+F.useEffect(function(){
+var vivant=true,r=_NXS.rev;
+var id=setInterval(function(){try{
+if((typeof document==="undefined"||!document.hidden)&&r!==_NXS.rev){r=_NXS.rev;if(vivant)force();}}catch(_){}},4000);
+return function(){vivant=false;try{clearInterval(id);}catch(_){}};},[]);
+var monte=_NXmounted(F);
 var P=_NXpal,data=_NXS.data;
-var dayLbl=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
-var dayShort=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
-function fmtDur(s){s=Math.floor(s||0);var h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h>0?h+"h "+m+"m":m+"m";}
-function buildDays(n){var out=[],mx=0,now=new Date();for(var a=n-1;a>=0;a--){var dt=new Date(now.getFullYear(),now.getMonth(),now.getDate()-a);var key=_NXS.dayKey(dt.getTime());var v=data.daily[key]||0;if(v>mx)mx=v;out.push({v:v,title:key+" · "+v+" messages",key:key});}return{items:out,max:mx};}
-function sumRange(obj,off,days){var s=0,d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-off);for(var n=0;n<days;n++){s+=obj[_NXS.dayKey(d.getTime())]||0;d.setDate(d.getDate()-1);}return s;}
-function dlt(tw,lw){if(lw>0)return Math.round((tw-lw)/lw*100);return tw>0?100:0;}
+var JOURS=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+var JOURSL=["Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi","Dimanche"];
+function duree(sec){sec=Math.floor(sec||0);
+var h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60);
+if(h>=24){var j=Math.floor(h/24);return j+" j "+(h%24)+" h";}
+return h>0?(h+" h "+m+" min"):(m+" min");}
+function somme(obj,dep,n){var t=0,d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-dep);
+for(var a=0;a<n;a++){t+=(obj&&obj[_NXS.dayKey(d.getTime())])||0;d.setDate(d.getDate()-1);}return t;}
+function delta(a2,b2){if(b2>0)return Math.round((a2-b2)/b2*100);return a2>0?100:0;}
+function jours(n){var out=[],mx=0,now=new Date();
+for(var a=n-1;a>=0;a--){
+var dt=new Date(now.getFullYear(),now.getMonth(),now.getDate()-a);
+var k=_NXS.dayKey(dt.getTime());
+var v=(data.daily&&data.daily[k])||0;
+if(v>mx)mx=v;
+out.push({k:k,d:dt,v:v});}
+return {L:out,max:mx||1};}
 var total=data.msgCount||0;
-var activeDays=0;for(var dd in data.daily)if(data.daily[dd]>0)activeDays++;
-var avgDay=activeDays>0?Math.round(total/activeDays):0;
-function curStreak(){var s=0,d=new Date();if((data.daily[_NXS.dayKey(d.getTime())]||0)===0)d.setDate(d.getDate()-1);while((data.daily[_NXS.dayKey(d.getTime())]||0)>0){s++;d.setDate(d.getDate()-1);if(s>800)break;}return s;}
-var streak=curStreak();
-var hourTot=[];for(var hh=0;hh<24;hh++)hourTot.push(0);var daySum=[0,0,0,0,0,0,0];var grand=0,evening=0;
-for(var r=0;r<7;r++)for(var c=0;c<24;c++){var v=data.heat[r][c];hourTot[c]+=v;daySum[r]+=v;grand+=v;if(c>=18&&c<=23)evening+=v;}
-var peakHour=0;for(var z=1;z<24;z++)if(hourTot[z]>hourTot[peakHour])peakHour=z;
-var hourMax=hourTot[peakHour]||0;
-var peakDay=0;for(var z2=1;z2<7;z2++)if(daySum[z2]>daySum[peakDay])peakDay=z2;
-var avgLen=total>0?Math.round(data.totalChars/total):0;
-var evePct=grand>0?Math.round(evening/grand*100):0;
-var mTw=sumRange(data.daily,0,7),mLw=sumRange(data.daily,7,7);
-var rTw=sumRange(data.givenDaily,0,7)+sumRange(data.recvDaily,0,7),rLw=sumRange(data.givenDaily,7,7)+sumRange(data.recvDaily,7,7);
-var vTw=sumRange(data.voiceDaily,0,7),vLw=sumRange(data.voiceDaily,7,7);
-var totGuild=0;var gentries=Object.keys(data.guilds).map(function(g){totGuild+=data.guilds[g];return{id:g,v:data.guilds[g]};}).sort(function(x,y){return y.v-x.v;}).slice(0,6);
-var gmax=gentries.length?gentries[0].v:0;
-var totChan=0;var centries=Object.keys(data.channels).map(function(g){totChan+=data.channels[g];return{id:g,v:data.channels[g]};}).sort(function(x,y){return y.v-x.v;}).slice(0,6);
-var cmax=centries.length?centries[0].v:0;
-var ventries=Object.keys(data.voiceGuilds).map(function(g){return{id:g,v:data.voiceGuilds[g]};}).sort(function(x,y){return y.v-x.v;}).slice(0,6);
-var vmax=ventries.length?ventries[0].v:0;
-var wkeys=Object.keys(data.words);var words=wkeys.map(function(w){return{w:w,v:data.words[w]};}).sort(function(x,y){return y.v-x.v;}).slice(0,20);
-var wmax=words.length?words[0].v:0;
-var emos=Object.keys(data.emojis).map(function(w){return{w:w,v:data.emojis[w]};}).sort(function(x,y){return y.v-x.v;}).slice(0,6);
-var emax=emos.length?emos[0].v:0;
-function heatColor(v,mx){if(!mx||v<=0)return _NXpal.panel;var rr=v/mx;return rr<0.2?_NXpal.line:rr<0.45?_NXpal.faint:rr<0.7?_NXpal.soft:rr<0.88?_NXpal.mid:_NXpal.acc;}
-var hmax=0;for(var r2=0;r2<7;r2++)for(var c2=0;c2<24;c2++)if(data.heat[r2][c2]>hmax)hmax=data.heat[r2][c2];
-var empty=total===0;
-function deltaCard(label,val,d){var up=d>=0;return i("div",{style:{background:P.inset,border:"1px solid "+P.line,borderRadius:"12px",padding:"15px"}},i("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:".09em",color:P.dim,textTransform:"uppercase"}},label),i("div",{style:{fontFamily:_NXf.mono,fontSize:"21px",fontWeight:"600",color:P.txt,marginTop:"9px"}},val),i("div",{style:{fontSize:"11px",marginTop:"6px",fontWeight:"600",color:up?_NXpal.okSoft:_NXpal.dangerSoft}},(up?"▲ +":"▼ ")+d+"% ",i("span",{style:{color:P.dim,fontWeight:"400"}},"vs sem. -1")));}
-var d30=buildDays(30);
-var overview=i("div",null,
-_NXcard(_NXstrip([{v:_NXn(total),label:"Messages"},{v:_NXn(avgDay),label:"Moy./jour"},{v:streak>0?_NXn(streak):"0",label:"Série",color:streak>0?P.acc:P.dim,sub:streak>0?(streak>1?"jours":"jour"):null},{v:fmtDur(data.session),label:"Session"}]),{pad:"20px 18px",mb:10}),
-_NXcard(i("div",null,_NXch(_T("Cette semaine"),_T("Comparé aux 7 jours précédents.")),i("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px"}},deltaCard("Messages",_NXn(mTw),dlt(mTw,mLw)),deltaCard("Réactions",_NXn(rTw),dlt(rTw,rLw)),deltaCard("Vocal",fmtDur(vTw),dlt(vTw,vLw))))),
-_NXcard(i("div",null,_NXch("Tendance · 30 jours",null,i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},"pic "+d30.max+"/j")),_NXbars(d30.items,d30.max,96),_NXaxis([d30.items[0].key.slice(5),d30.items[15].key.slice(5),d30.items[29].key.slice(5)]))),
-_NXcard(i("div",null,_NXch(_T("Tes habitudes"),_T("Lecture automatique, calculée localement.")),empty?i("div",{style:{fontSize:"12px",color:P.dim}},"Envoie quelques messages pour générer tes premières analyses."):i("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}},_NXinsight("Heure de pointe",peakHour+"h – "+((peakHour+1)%24)+"h",hourMax+" messages cumulés"),_NXinsight("Jour le plus actif",dayLbl[peakDay],daySum[peakDay]+" messages"),_NXinsight("Longueur moyenne",avgLen+" car.","par message"),_NXinsight("Activité du soir",evePct+"%","entre 18h et 23h")))),
-_NXcard(i("div",null,_NXch("Engagement"),_NXstrip([{v:_NXn(data.received),label:"Réac. reçues"},{v:_NXn(data.given),label:"Réac. données"},{v:fmtDur(data.voice),label:"Temps vocal"},{v:_NXn(data.totalChars),label:"Caractères"}])),{mb:0}));
-var dn=buildDays(per);
-var end=new Date();end.setHours(0,0,0,0);var start=new Date(end.getTime()-364*86400000);var sw=(start.getDay()+6)%7;start.setDate(start.getDate()-sw);var weeks=[],ymax=0,cur2=new Date(start);
-while(cur2<=end){var col=[];for(var dr=0;dr<7;dr++){var key=_NXS.dayKey(cur2.getTime());var fut=cur2>end;var vv=fut?-1:(data.daily[key]||0);if(vv>ymax)ymax=vv;col.push({v:vv,key:key});cur2.setDate(cur2.getDate()+1);}weeks.push(col);}
-var activity=i("div",null,
-_NXcard(i("div",null,_NXch("Messages par jour",null,i("div",{style:{display:"flex",gap:"5px"}},[7,30,90].map(function(n,k){return i("div",{key:k},_NXpill(n+"j",per===n,function(){setPer(n);}));}))),_NXbars(dn.items,dn.max,124),_NXaxis([dn.items[0].key.slice(5),dn.items[Math.floor(dn.items.length/2)].key.slice(5),dn.items[dn.items.length-1].key.slice(5)]))),
-_NXcard(i("div",null,_NXch(_T("Activité sur l'année"),_T("Une case par jour sur 12 mois, façon contributions.")),i("div",{style:{overflowX:"auto",paddingBottom:"4px"}},i("div",{style:{display:"flex",gap:"3px",minWidth:"min-content"}},weeks.map(function(col,wi){return i("div",{key:wi,style:{display:"flex",flexDirection:"column",gap:"3px"}},col.map(function(cell,ci){return i("div",{key:ci,title:cell.v>=0?cell.key+" · "+cell.v+" msg":"",style:{width:"9px",height:"9px",borderRadius:"2px",background:cell.v<0?"transparent":heatColor(cell.v,ymax)}});}));}))),i("div",{style:{display:"flex",alignItems:"center",justifyContent:"flex-end",gap:"6px",marginTop:"12px",fontSize:"10px",color:P.dim}},i("span",null,"Moins"),[_NXpal.line,_NXpal.faint,_NXpal.soft,_NXpal.mid,_NXpal.acc].map(function(co,k){return i("div",{key:k,style:{width:"10px",height:"10px",borderRadius:"2px",background:co}});}),i("span",null,"Plus")))),
-_NXcard(i("div",null,_NXch("Répartition par heure","Quand tu écris le plus, tous jours confondus.",i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},"pic "+peakHour+"h")),_NXbars(hourTot.map(function(v,h){return{v:v,title:h+"h · "+v+" messages",hi:h===peakHour};}),hourMax,88),_NXaxis(["0h","6h","12h","18h","23h"]))),
-_NXcard(i("div",null,_NXch(_T("Carte de chaleur · 7j × 24h"),_T("Intensité par jour de la semaine et par heure.")),i("div",{style:{display:"flex",gap:"8px"}},i("div",{style:{display:"flex",flexDirection:"column",gap:"3px",paddingTop:"16px"}},dayShort.map(function(l,k){return i("div",{key:k,style:{height:"15px",fontFamily:_NXf.mono,fontSize:"9px",color:P.dim,lineHeight:"15px"}},l);})),i("div",{style:{flex:1}},_NXaxis(["0h","6h","12h","18h","23h"]),i("div",{style:{display:"flex",flexDirection:"column",gap:"3px",marginTop:"3px"}},data.heat.map(function(row,ri){return i("div",{key:ri,style:{display:"flex",gap:"3px"}},row.map(function(v,ci){return i("div",{key:ci,title:dayShort[ri]+" "+ci+"h · "+v,style:{flex:1,height:"15px",borderRadius:"3px",background:heatColor(v,hmax)}});}));}))))),{mb:0}));
-var servers=i("div",null,
-_NXcard(i("div",null,_NXch("Serveurs les plus actifs",null,i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},Object.keys(data.guilds).length+" total")),gentries.length?i("div",null,gentries.map(function(g,k){return _NXrank(k+1,_NXguildName(g.id),g.v,gmax,totGuild,k);})):i("div",{style:{fontSize:"12px",color:P.dim}},"Aucun serveur enregistré."))),
-_NXcard(i("div",null,_NXch("Salons les plus actifs",null,i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},Object.keys(data.channels).length+" total")),centries.length?i("div",null,centries.map(function(g,k){return _NXrank(k+1,_NXchanName(g.id),g.v,cmax,totChan,k);})):i("div",{style:{fontSize:"12px",color:P.dim}},"Aucun salon enregistré."))),
-_NXcard(i("div",null,_NXch("Temps vocal par serveur"),ventries.length?i("div",null,ventries.map(function(g,k){var pct=vmax>0?Math.max(3,g.v/vmax*100):0;return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"15px",padding:"12px 0",borderTop:k>0?"1px solid "+P.line:"none"}},i("div",{style:{fontFamily:_NXf.mono,fontSize:"12px",color:P.faint,width:"18px",flexShrink:0}},(k+1<10?"0":"")+(k+1)),i("div",{style:{flex:1,minWidth:0}},i("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"7px",gap:"10px"}},i("span",{style:{fontSize:"13px",color:P.txt,fontWeight:"600",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},_NXguildName(g.id)),i("span",{style:{fontFamily:_NXf.mono,fontSize:"12px",color:P.sub,flexShrink:0}},fmtDur(g.v))),i("div",{style:{height:"4px",background:_NXpal.line,borderRadius:"99px",overflow:"hidden"}},i("div",{style:{height:"100%",width:pct+"%",background:"linear-gradient(90deg,#42424a,#e8e8ea)",borderRadius:"99px"}}))));})):i("div",{style:{fontSize:"12px",color:P.dim}},"Aucun temps vocal enregistré. Rejoins un salon vocal pour démarrer le suivi.")),{mb:0}));
-var wordsTab=i("div",null,
-_NXcard(_NXstrip([{v:_NXn(data.links),label:"Liens"},{v:_NXn(data.attach),label:"Fichiers"},{v:_NXn(data.mentions),label:"Mentions"},{v:_NXn(wkeys.length),label:"Mots uniques"}]),{pad:"20px 18px",mb:10}),
-_NXcard(i("div",null,_NXch(_T("Mots les plus utilisés"),_T("Taille proportionnelle à la fréquence. Mots courts et vides exclus.")),words.length?i("div",{style:{display:"flex",flexWrap:"wrap",gap:"8px"}},words.map(function(w,k){var sc=wmax>0?0.5+0.5*(w.v/wmax):1;return i("div",{key:k,style:{padding:"6px 13px",borderRadius:"99px",background:P.inset,border:"1px solid "+P.line,fontSize:(13*sc+5)+"px",color:k<3?P.txt:P.sub,fontWeight:k<3?"700":"500"}},w.w,i("span",{style:{fontFamily:_NXf.mono,color:P.faint,marginLeft:"7px",fontSize:"10px"}},w.v));})):i("div",{style:{fontSize:"12px",color:P.dim}},"Aucun mot enregistré."))),
-_NXcard(i("div",null,_NXch("Émojis perso favoris"),emos.length?i("div",null,emos.map(function(em,k){return _NXrank(k+1,":"+em.w+":",em.v,emax,0,k);})):i("div",{style:{fontSize:"12px",color:P.dim}},"Aucun émoji personnalisé utilisé.")),{mb:0}));
-var retro=function(){
-var RT=window._NXRT;
-if(!RT)return _NXcard(i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},_T("La retrospective n est pas disponible : le module n a pas demarre.")),{mb:0});
-var st=RT.compute(rtPer);
-var img=null;try{img=RT.dataUrl(rtPer);}catch(_){}
+var actifs=0;for(var dd in (data.daily||{}))if(data.daily[dd]>0)actifs++;
+var moyJour=actifs>0?Math.round(total/actifs):0;
+function serie(){var n=0,d=new Date();
+if(((data.daily||{})[_NXS.dayKey(d.getTime())]||0)===0)d.setDate(d.getDate()-1);
+while(((data.daily||{})[_NXS.dayKey(d.getTime())]||0)>0){n++;d.setDate(d.getDate()-1);if(n>3650)break;}
+return n;}
+var strie=serie();
+var heures=[],parJour=[0,0,0,0,0,0,0],grand=0,soir=0;
+for(var h2=0;h2<24;h2++)heures.push(0);
+try{for(var r2=0;r2<7;r2++)for(var c2=0;c2<24;c2++){
+var v2=data.heat[r2][c2];heures[c2]+=v2;parJour[r2]+=v2;grand+=v2;
+if(c2>=18&&c2<=23)soir+=v2;}}catch(_){}
+var picH=0;for(var z=1;z<24;z++)if(heures[z]>heures[picH])picH=z;
+var picJ=0;for(var z2=1;z2<7;z2++)if(parJour[z2]>parJour[picJ])picJ=z2;
+var longMoy=total>0?Math.round((data.totalChars||0)/total):0;
+var mS=somme(data.daily,0,7),mP=somme(data.daily,7,7);
+var vS=somme(data.voiceDaily,0,7),vP=somme(data.voiceDaily,7,7);
+var rS=somme(data.givenDaily,0,7)+somme(data.recvDaily,0,7);
+var rP=somme(data.givenDaily,7,7)+somme(data.recvDaily,7,7);
+var ry=_NXS.rythmeMoyen();
+var pause=_NXS.pauseMax();
+var obj=_NXS.objectifJour();
+function classement(obj2,nom,n){
+var out=[],t=0;
+for(var k in (obj2||{})){t+=obj2[k];out.push({id:k,v:obj2[k]});}
+out.sort(function(x,y){return y.v-x.v;});
+return {L:out.slice(0,n||8),max:out.length?out[0].v:1,total:t};}
+var G=classement(data.guilds,"g",8);
+var C=classement(data.channels,"c",8);
+var V=classement(data.voiceGuilds,"v",6);
+var W=classement(data.words,"w",18);
+var E=classement(data.emojis,"e",10);
+function grand2(v,lab,sub,c){return i("div",{style:{flex:1,minWidth:"104px"}},
+i("div",{key:"g"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"27px",fontWeight:"800",
+color:c||P.txt,letterSpacing:"-.04em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
+i("div",{style:{fontSize:"11px",color:P.sub,marginTop:"6px",fontWeight:"600"}},lab),
+sub?i("div",{style:{fontSize:"10px",color:P.faint,marginTop:"2px"}},sub):null);}
+function fleche(d){
+if(!d)return i("span",{style:{fontSize:"11px",color:P.faint}},"=");
+var up=d>0;
+return i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",fontWeight:"700",
+color:up?_NXpal.ok:_NXpal.warn}},(up?"\u2191":"\u2193")+" "+Math.abs(d)+"%");}
+function barre(pct,c){return i("div",{"data-nx-bar":"1",style:{height:"4px",borderRadius:"99px",
+background:P.line,overflow:"hidden"}},
+i("div",{style:{height:"100%",borderRadius:"99px",background:c||P.mid,
+transform:"scaleX("+(monte?Math.max(0,Math.min(1,pct)):0)+")",transformOrigin:"left center"}}));}
+var TABS=[["apercu","Aperçu"],["rythme","Rythme"],["classements","Classements"],["objectifs","Objectifs"]];
+function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Stats"),
+style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
+TABS.map(function(t){var on=tab===t[0];
+return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+"aria-label":_T(t[1]),onClick:function(){if(tab!==t[0])setTab(t[0]);},
+style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",
+letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
+_T(t[1]),
+i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",
+borderRadius:"2px",background:P.txt,transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
+transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function calendrier(){
+var J=jours(91);
+var sem=[],cur=[];
+for(var a=0;a<J.L.length;a++){
+cur.push(J.L[a]);
+if(cur.length===7){sem.push(cur);cur=[];}}
+if(cur.length)sem.push(cur);
 return i("div",null,
-_NXcard(i("div",null,_NXch(_T("Retrospective"),_T("Une carte de ton activite, generee sur ta machine. Rien n est envoye.")),
-i("div",{style:{display:"flex",flexWrap:"wrap",gap:"6px",marginBottom:"14px"}},RT.PERIODS.map(function(p){
-var on=rtPer===p[0];
-return i("div",{key:p[0],className:"nx-fx",role:"button","aria-label":p[1],"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
-onClick:function(){setRtPer(p[0]);},
-style:{padding:"8px 13px",borderRadius:"10px",cursor:"pointer",fontSize:"12px",fontWeight:"600",
-background:on?P.inset:"transparent",border:"1px solid "+(on?P.sub:P.line),color:on?P.txt:P.sub}},p[1]);})),
-st?i("div",{style:{display:"flex",gap:"18px",flexWrap:"wrap",marginBottom:"14px"}},
-i("div",null,i("div",{style:{fontFamily:_NXf.disp,fontSize:"24px",fontWeight:"800",color:P.txt}},RT.fmt(st.messages)),
-i("div",{style:{fontSize:"11px",color:P.dim}},_T("messages"))),
-i("div",null,i("div",{style:{fontFamily:_NXf.disp,fontSize:"24px",fontWeight:"800",color:P.txt}},st.jours),
-i("div",{style:{fontSize:"11px",color:P.dim}},_T("jours actifs"))),
-i("div",null,i("div",{style:{fontFamily:_NXf.disp,fontSize:"24px",fontWeight:"800",color:P.txt}},RT.fmt(st.voiceMin)),
-i("div",{style:{fontSize:"11px",color:P.dim}},_T("min en vocal"))),
-i("div",null,i("div",{style:{fontFamily:_NXf.disp,fontSize:"24px",fontWeight:"800",color:P.txt}},st.serie),
-i("div",{style:{fontSize:"11px",color:P.dim}},_T("jours d affilee")))):null,
-img?i("img",{src:img,alt:_T("Apercu de la carte retrospective"),style:{width:"100%",display:"block",borderRadius:"14px",border:"1px solid "+P.line}}):
-i("div",{style:{fontSize:"12.5px",color:P.dim,padding:"18px 0"}},_T("Apercu indisponible sur ce client.")),
-i("div",{style:{display:"flex",gap:"7px",flexWrap:"wrap",marginTop:"14px"}},
-i("div",{className:"nx-fx",role:"button","aria-label":_T("Telecharger l image"),tabIndex:0,onKeyDown:_NXkey,
-onClick:function(){RT.download(rtPer);},
-style:{padding:"11px 20px",borderRadius:"10px",background:P.acc,color:_NXpal.ink,fontSize:"12.5px",fontWeight:"800",cursor:"pointer"}},_T("Telecharger l image")),
-RT.canCopy()?i("div",{className:"nx-fx",role:"button","aria-label":_T("Copier l image"),tabIndex:0,onKeyDown:_NXkey,
-onClick:function(){if(RT.copy(rtPer)&&window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Carte copiee : colle-la dans un salon."),1);},
-style:{padding:"11px 20px",borderRadius:"10px",border:"1px solid "+P.line,color:P.sub,fontSize:"12.5px",fontWeight:"700",cursor:"pointer"}},_T("Copier l image")):null)),{mb:0}));};
-var content=tab==="overview"?overview:tab==="activity"?activity:tab==="servers"?servers:tab==="retro"?retro():wordsTab;
-return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
-_NXhead("Analytique locale","Nexium Stats","Métriques écoutées en temps réel via les events Discord, calculées et stockées sur ton client. Aucune donnée ne quitte ta machine."),
-_NXtabs([{id:"overview",label:"Vue d'ensemble"},{id:"activity",label:"Activité"},{id:"servers",label:"Serveurs"},{id:"words",label:"Mots"},{id:"retro",label:"Rétro"}],tab,setTab),
-content,
-i("div",{style:{display:"flex",gap:"10px",marginTop:"16px"}},_NXbtn("Rafraîchir",function(){force();}),_NXbtn("Exporter (.json)",function(){_NXS.download();}),_NXbtn("Réinitialiser",function(){if(window.confirm("Réinitialiser toutes les statistiques Nexium ?")){_NXS.reset();force();}},"danger")),
+i("div",{style:{display:"flex",gap:"3px",overflowX:"auto",paddingBottom:"4px"}},
+sem.map(function(w,k){
+return i("div",{key:k,style:{display:"flex",flexDirection:"column",gap:"3px",flexShrink:0}},
+w.map(function(d,k2){
+var lvl=d.v===0?0:(d.v<=J.max*0.25?1:d.v<=J.max*0.5?2:d.v<=J.max*0.75?3:4);
+var bg=[P.line,P.faint,P.mute,P.soft,P.txt][lvl];
+return i("div",{key:k2,
+title:d.k+" · "+d.v+" "+_T("messages"),
+style:{width:"11px",height:"11px",borderRadius:"3px",background:bg,
+opacity:monte?1:0,transition:"opacity .3s ease,background-color .3s ease",
+transitionDelay:((k*7+k2)*4)+"ms"}});}));})),
+i("div",{style:{display:"flex",alignItems:"center",gap:"6px",marginTop:"9px",
+fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint}},
+i("span",null,_T("moins")),
+[P.line,P.faint,P.mute,P.soft,P.txt].map(function(c,k){
+return i("span",{key:k,style:{width:"9px",height:"9px",borderRadius:"2px",background:c}});}),
+i("span",null,_T("plus")),
+i("span",{style:{marginLeft:"auto"}},_T("91 derniers jours"))));}
+function tApercu(){
+var J=jours(per);
+return i("div",null,
+i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
+borderRadius:"22px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",padding:"25px 24px",marginBottom:"14px"}},
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"14px",flexWrap:"wrap",marginBottom:"6px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint}},_T("Messages envoyes")),
+strie>0?i("div",{style:{display:"flex",alignItems:"center",gap:"6px",marginLeft:"auto"}},
+i("span",{"data-nx-dot":"1",style:{width:"6px",height:"6px",borderRadius:"50%",background:_NXpal.ok}}),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.sub}},
+strie+" "+_T(strie>1?"jours d affilee":"jour"))):null),
+i("div",{key:"t"+total,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"46px",fontWeight:"800",
+color:P.txt,letterSpacing:"-.05em",lineHeight:1,fontVariantNumeric:"tabular-nums",marginBottom:"14px"}},_NXn(total)),
+i("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap",paddingTop:"17px",borderTop:"1px solid "+P.line}},
+grand2(_NXn(mS),_T("Cette semaine"),null,P.txt),
+grand2(_NXn(moyJour),_T("Par jour actif")),
+grand2(_NXn(actifs),_T("Jours actifs")),
+grand2(duree(data.voice||0),_T("En vocal"))),
+i("div",{style:{display:"flex",gap:"20px",flexWrap:"wrap",marginTop:"15px",paddingTop:"14px",borderTop:"1px solid "+P.line}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px"}},
+i("span",{style:{fontSize:"11px",color:P.dim}},_T("Messages")),fleche(delta(mS,mP))),
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px"}},
+i("span",{style:{fontSize:"11px",color:P.dim}},_T("Vocal")),fleche(delta(vS,vP))),
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px"}},
+i("span",{style:{fontSize:"11px",color:P.dim}},_T("Reactions")),fleche(delta(rS,rP))))),
+_NXcard(i("div",null,
+_NXch(_T("Activité quotidienne"),null,
+i("div",{style:{display:"flex",gap:"5px"}},[7,30,90].map(function(n){
+var on=per===n;
+return i("div",{key:n,className:"nx-fx",role:"button","aria-label":n+" "+_T("jours"),
+"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,onClick:function(){setPer(n);},
+style:{padding:"5px 11px",borderRadius:"8px",cursor:"pointer",fontFamily:_NXf.mono,fontSize:"10.5px",
+background:on?P.inset:"transparent",border:"1px solid "+(on?P.sub:P.line),color:on?P.txt:P.dim}},n+"j");}))),
+i("div",{style:{display:"flex",alignItems:"flex-end",gap:J.L.length>40?"1px":"3px",height:"92px"}},
+J.L.map(function(d,k){
+var ht=d.v?Math.max(3,Math.round(d.v/J.max*90)):2;
+return i("div",{key:k,title:d.k+" · "+d.v,
+style:{flex:1,minWidth:0,height:ht+"px",borderRadius:"2px",
+background:d.v?P.mid:P.line,
+transition:"height .5s cubic-bezier(.22,.8,.28,1)",transitionDelay:(k*4)+"ms"}});})),
+i("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"8px",
+fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint}},
+i("span",null,"-"+per+" j"),i("span",null,_T("aujourd hui")))),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Constance"),_T("Chaque case est un jour. Plus elle est claire, plus tu as ecrit.")),calendrier()),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Ce que tu ecris")),
+i("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap"}},
+grand2(_NXn(data.totalChars||0),_T("Caracteres")),
+grand2(_NXn(longMoy),_T("Par message"),_T("en moyenne")),
+grand2(_NXn(data.links||0),_T("Liens")),
+grand2(_NXn(data.attach||0),_T("Fichiers")),
+grand2(_NXn(data.mentions||0),_T("Mentions")),
+grand2(_NXn(data.replies||0),_T("Reponses")))),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Ou tu parles"),_T("Repartition entre messages prives et serveurs.")),
+(function(){
+var dm=data.dm||0,sv=data.srv||0,t=dm+sv;
+if(!t)return i("div",{style:{fontSize:"12.5px",color:P.dim}},_T("Pas encore assez de messages pour trancher."));
+return i("div",null,
+i("div",{style:{display:"flex",height:"10px",borderRadius:"99px",overflow:"hidden",background:P.line,marginBottom:"12px"}},
+i("div",{style:{width:(monte?(sv/t*100):0)+"%",background:P.mid,transition:"width .7s cubic-bezier(.22,.8,.28,1)"}}),
+i("div",{style:{width:(monte?(dm/t*100):0)+"%",background:P.soft,transition:"width .7s cubic-bezier(.22,.8,.28,1)"}})),
+i("div",{style:{display:"flex",gap:"20px",flexWrap:"wrap"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px"}},
+i("span",{style:{width:"8px",height:"8px",borderRadius:"2px",background:P.mid}}),
+i("span",{style:{fontSize:"12px",color:P.sub}},_T("Serveurs")+" "+_NXn(sv)+" ("+Math.round(sv/t*100)+"%)")),
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px"}},
+i("span",{style:{width:"8px",height:"8px",borderRadius:"2px",background:P.soft}}),
+i("span",{style:{fontSize:"12px",color:P.sub}},_T("Prives")+" "+_NXn(dm)+" ("+Math.round(dm/t*100)+"%)"))));})()),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Habitudes"),_T("Ce que les compteurs disent de ta facon d ecrire.")),
+i("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap"}},
+grand2(_NXn(data.edited||0),_T("Messages modifies")),
+grand2(_NXn(data.deleted||0),_T("Messages supprimes")),
+grand2(duree(data.voiceMax||0),_T("Plus longue session"),_T("en vocal")),
+grand2(pause?(pause+" j"):"0 j",_T("Plus longue pause"),_T("sans ecrire")))),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Exporter"),_T("Tes donnees t appartiennent : elles sortent d ici quand tu le demandes.")),
+i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
+_NXbtn(_T("Exporter en CSV"),function(){
+var ok=_NXS.exportCsv();
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast(ok?_T("Fichier CSV telecharge."):_T("Copie dans le presse-papiers."),1);}catch(_){}}),
+(window._NXRT&&_NXRT.download)?_NXbtn(_T("Carte retro (image)"),function(){try{_NXRT.download("mois");}catch(_){}}):null,
+_NXbtn(_T("Tout effacer"),function(){
+if(window.confirm(_T("Effacer toutes les statistiques ? Cette action est definitive.")))
+{try{_NXS.reset();force();}catch(_){}}}))),{mb:0}));}
+function tRythme(){
+var hmax=1;for(var a=0;a<24;a++)if(heures[a]>hmax)hmax=heures[a];
+var jmax=1;for(var b2=0;b2<7;b2++)if(parJour[b2]>jmax)jmax=parJour[b2];
+var cmax=1;
+try{for(var r3=0;r3<7;r3++)for(var c3=0;c3<24;c3++)if(data.heat[r3][c3]>cmax)cmax=data.heat[r3][c3];}catch(_){}
+return i("div",null,
+ry?_NXcard(i("div",null,
+_NXch(_T("Ta journée type"),_T("Moyenne du premier et du dernier message, sur "+ry.jours+" jours.")),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"16px",flexWrap:"wrap",marginBottom:"16px"}},
+i("div",null,
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"26px",fontWeight:"800",color:P.txt,letterSpacing:"-.035em"}},_NXS.hhmm(ry.debut)),
+i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"4px"}},_T("premier message"))),
+i("div",{style:{flex:1,minWidth:"60px",height:"1px",background:P.line}}),
+i("div",{style:{textAlign:"right"}},
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"26px",fontWeight:"800",color:P.txt,letterSpacing:"-.035em"}},_NXS.hhmm(ry.fin)),
+i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"4px"}},_T("dernier message")))),
+i("div",{style:{position:"relative",height:"8px",borderRadius:"99px",background:P.line,overflow:"hidden"}},
+i("div",{style:{position:"absolute",left:(ry.debut/1440*100)+"%",
+width:(monte?((ry.fin-ry.debut)/1440*100):0)+"%",top:0,bottom:0,background:P.mid,borderRadius:"99px",
+transition:"width .7s cubic-bezier(.22,.8,.28,1)"}})),
+i("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"7px",
+fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint}},
+i("span",null,"00h"),i("span",null,"06h"),i("span",null,"12h"),i("span",null,"18h"),i("span",null,"24h")),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"12px",lineHeight:1.55}},
+_T("Amplitude moyenne")+" : "+_NXS.hhmm(ry.fin-ry.debut)+" "+_T("entre le premier et le dernier message de la journee."))),{mb:12}):null,
+_NXcard(i("div",null,
+_NXch(_T("Heure par heure"),_T("Ton pic est a ")+picH+_T(" h.")),
+i("div",{style:{display:"flex",alignItems:"flex-end",gap:"3px",height:"78px"}},
+heures.map(function(v,k){
+var ht=v?Math.max(3,Math.round(v/hmax*76)):2;
+return i("div",{key:k,title:k+"h · "+v+" "+_T("messages"),
+style:{flex:1,minWidth:0,height:ht+"px",borderRadius:"2px",
+background:k===picH?P.txt:(v?P.mid:P.line),
+transition:"height .5s cubic-bezier(.22,.8,.28,1)",transitionDelay:(k*12)+"ms"}});})),
+i("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"8px",
+fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint}},
+i("span",null,"0h"),i("span",null,"6h"),i("span",null,"12h"),i("span",null,"18h"),i("span",null,"23h"))),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Jour par jour"),_T("Ton jour le plus bavard est le ")+JOURSL[picJ]+"."),
+JOURS.map(function(j,k){
+var v=parJour[k];
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"12px",padding:"7px 0"}},
+i("span",{style:{width:"34px",flexShrink:0,fontSize:"11.5px",color:k===picJ?P.txt:P.dim,fontWeight:k===picJ?"700":"400"}},j),
+i("div",{style:{flex:1,minWidth:0}},barre(v/jmax,k===picJ?P.txt:P.mid)),
+i("span",{style:{width:"48px",textAlign:"right",flexShrink:0,fontFamily:_NXf.mono,fontSize:"11px",
+color:P.sub,fontVariantNumeric:"tabular-nums"}},_NXn(v)));})),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Carte de la semaine"),_T("Sept jours, vingt-quatre heures. Plus c est clair, plus tu ecris.")),
+i("div",{style:{overflowX:"auto"}},
+i("div",{style:{minWidth:"420px"}},
+JOURS.map(function(j,r4){
+return i("div",{key:r4,style:{display:"flex",alignItems:"center",gap:"6px",marginBottom:"3px"}},
+i("span",{style:{width:"30px",flexShrink:0,fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint}},j),
+i("div",{style:{display:"flex",gap:"2px",flex:1}},
+(function(){var out=[];
+for(var c4=0;c4<24;c4++){
+var v=0;try{v=data.heat[r4][c4];}catch(_){}
+var lvl=v===0?0:(v<=cmax*0.25?1:v<=cmax*0.5?2:v<=cmax*0.75?3:4);
+out.push(i("div",{key:c4,title:JOURSL[r4]+" "+c4+"h · "+v,
+style:{flex:1,height:"13px",borderRadius:"2px",
+background:[P.line,P.faint,P.mute,P.soft,P.txt][lvl],
+opacity:monte?1:0,transition:"opacity .3s ease",transitionDelay:((r4*24+c4)*3)+"ms"}}));}
+return out;})()));}),
+i("div",{style:{display:"flex",gap:"2px",marginTop:"5px",paddingLeft:"36px"}},
+(function(){var out=[];
+for(var c5=0;c5<24;c5++)out.push(i("div",{key:c5,style:{flex:1,textAlign:"center",
+fontFamily:_NXf.mono,fontSize:"8px",color:P.faint}},(c5%6===0)?c5:""));
+return out;})())))),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Repartition")),
+i("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap"}},
+grand2(grand?Math.round(soir/grand*100)+"%":"0%",_T("Le soir"),_T("18h - 23h")),
+grand2(picH+" h",_T("Heure de pointe")),
+grand2(JOURS[picJ],_T("Jour favori")),
+grand2(_NXn(grand),_T("Messages situes")))),{mb:0}));}
+function tClassements(){
+function liste(titre,desc,C2,nom,fmt){
+if(!C2.L.length)return null;
+return _NXcard(i("div",null,_NXch(_T(titre),desc?_T(desc):null),
+C2.L.map(function(o,k){
+return i("div",{key:o.id,style:{display:"flex",alignItems:"center",gap:"12px",padding:"9px 0"}},
+i("span",{style:{width:"18px",flexShrink:0,fontFamily:_NXf.mono,fontSize:"10px",
+color:k<3?P.txt:P.faint}},("0"+(k+1)).slice(-2)),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"12.5px",color:P.sub,marginBottom:"5px",
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},nom(o.id)),
+barre(o.v/C2.max,k===0?P.txt:P.mid)),
+i("span",{style:{width:"64px",textAlign:"right",flexShrink:0,fontFamily:_NXf.mono,fontSize:"11px",
+color:P.sub,fontVariantNumeric:"tabular-nums"}},fmt?fmt(o.v):_NXn(o.v)));})),{mb:12});}
+return i("div",null,
+liste("Serveurs","La ou tu ecris le plus.",G,function(id){return _NXguildName(id);}),
+liste("Salons","Tes salons de predilection.",C,function(id){return _NXchanName(id);}),
+liste("Vocal","Le temps passe en vocal, par serveur.",V,function(id){return _NXguildName(id);},duree),
+E.L.length?_NXcard(i("div",null,_NXch(_T("Emojis"),_T("Ceux que tu places le plus souvent.")),
+i("div",{style:{display:"flex",flexWrap:"wrap",gap:"8px"}},
+E.L.map(function(o){
+return i("div",{key:o.id,style:{display:"flex",alignItems:"center",gap:"7px",padding:"7px 11px",
+background:P.inset,border:"1px solid "+P.line,borderRadius:"99px"}},
+i("span",{style:{fontSize:"11.5px",color:P.sub}},":"+o.id+":"),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.txt}},o.v));}))),{mb:12}):null,
+W.L.length?_NXcard(i("div",null,_NXch(_T("Mots"),_T("Les mots qui reviennent le plus dans tes messages.")),
+i("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px"}},
+W.L.map(function(o,k){
+var t=Math.max(11,Math.min(20,11+Math.round(o.v/W.max*9)));
+return i("div",{key:o.id,title:o.v+" "+_T("fois"),
+style:{fontSize:t+"px",fontWeight:k<3?"800":"500",
+color:k<3?P.txt:(k<8?P.sub:P.dim),letterSpacing:"-.01em"}},o.id);}))),{mb:0}):null,
+(!G.L.length&&!C.L.length&&!W.L.length)?_NXcard(i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},
+_T("Rien a classer pour l instant. Ecris quelques messages et reviens.")),{mb:0}):null);}
+function tObjectifs(){
+function cible(titre,desc,val,cur,pct,cle,unite,options){
+return _NXcard(i("div",null,
+_NXch(_T(titre),_T(desc)),
+val>0?i("div",null,
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"9px",marginBottom:"11px"}},
+i("span",{style:{fontFamily:_NXf.disp,fontSize:"28px",fontWeight:"800",
+color:pct>=100?_NXpal.ok:P.txt,letterSpacing:"-.035em",fontVariantNumeric:"tabular-nums"}},cur),
+i("span",{style:{fontSize:"13px",color:P.dim}},"/ "+val+" "+_T(unite)),
+i("span",{style:{marginLeft:"auto",fontFamily:_NXf.mono,fontSize:"12px",
+color:pct>=100?_NXpal.ok:P.sub}},pct+"%")),
+i("div",{style:{height:"8px",borderRadius:"99px",background:P.line,overflow:"hidden",marginBottom:"13px"}},
+i("div",{style:{height:"100%",borderRadius:"99px",
+background:pct>=100?_NXpal.ok:P.mid,
+width:(monte?Math.min(100,pct):0)+"%",
+transition:"width .7s cubic-bezier(.22,.8,.28,1)"}}))):
+i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6,marginBottom:"13px"}},
+_T("Aucun objectif fixe. Choisis une valeur ci-dessous pour suivre ta journee.")),
+i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap"}},
+options.map(function(v){
+var on=val===v;
+return i("div",{key:v,className:"nx-fx",role:"button","aria-label":v+" "+_T(unite),
+"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){_NXS.setObjectif(cle,on?0:v);force();},
+style:{padding:"8px 14px",borderRadius:"10px",cursor:"pointer",fontFamily:_NXf.mono,fontSize:"11.5px",
+background:on?P.inset:"transparent",border:"1px solid "+(on?P.txt:P.line),
+color:on?P.txt:P.sub}},v===0?_T("aucun"):(v+""));}))),{mb:12});}
+return i("div",null,
+_NXcard(i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.65}},
+_T("Les objectifs sont une jauge, pas une contrainte : rien n est envoye, rien n est publie, et personne d autre ne les voit. Ils se remettent a zero chaque jour.")),{mb:12}),
+cible("Messages par jour","Combien de messages tu vises aujourd hui.",obj.msgCible,obj.msg,obj.msgPct,"msgJour","messages",[10,25,50,100,200]),
+cible("Minutes de vocal par jour","Le temps que tu veux passer en vocal.",obj.vocalCible,obj.vocal,obj.vocalPct,"vocalMin","minutes",[15,30,60,120,240]),
+_NXcard(i("div",null,_NXch(_T("Aujourd hui"),_T("Ce qui est deja compte pour la journee en cours.")),
+i("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap"}},
+grand2(_NXn(obj.msg),_T("Messages")),
+grand2(obj.vocal+" min",_T("Vocal")),
+grand2(_NXn(somme(data.dailyChars,0,1)),_T("Caracteres")),
+grand2(_NXn(somme(data.dmDaily,0,1)),_T("En prive")))),{mb:0}));}
+return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
+_NXhead(_T("Statistiques"),"Nexium Stats",_T("Tout est compte sur cette machine, a partir de ce que ton client voit passer. Rien n est envoye, rien n est partage, et tu peux tout effacer en un clic.")),
+tabbar(),
+i("div",{key:tab,"data-nx-panel":"1"},
+tab==="apercu"?tApercu():tab==="rythme"?tRythme():tab==="classements"?tClassements():tObjectifs()),
+_NXfoot("Nexium Stats · calcul local, aucune donnée envoyée")));
 
-_NXfoot("localStorage[nexium_stats_v1] · depuis le "+_NXS.dayKey(data.first))));
 }var _NXP=window._NXP||(window._NXP={});
 if(!_NXP.boot){try{
 _NXP.boot=true;
 _NXP.KEY="nexium_privacy_v1";_NXP.SKEY="nexium_privacy_stats_v1";
-_NXP.cfg=(function(){var d;try{var raw=_NXDB.get(_NXP.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};if(typeof d.blockTel!=="boolean")d.blockTel=false;if(typeof d.blockSentry!=="boolean")d.blockSentry=false;if(typeof d.silentTyping!=="boolean")d.silentTyping=false;if(typeof d.noAck!=="boolean")d.noAck=false;if(typeof d.blockHarvest!=="boolean")d.blockHarvest=false;if(typeof d.stripTracking!=="boolean")d.stripTracking=false;if(typeof d.blockAnalytics!=="boolean")d.blockAnalytics=false;if(typeof d.blockErrors!=="boolean")d.blockErrors=false;if(typeof d.blockPromotions!=="boolean")d.blockPromotions=false;if(!d.quiet||typeof d.quiet!=="object")d.quiet={};return d;})();
+_NXP.cfg=(function(){var d;try{var raw=_NXDB.get(_NXP.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};if(typeof d.blockTel!=="boolean")d.blockTel=false;if(typeof d.blockSentry!=="boolean")d.blockSentry=false;if(typeof d.silentTyping!=="boolean")d.silentTyping=false;if(typeof d.noAck!=="boolean")d.noAck=false;if(typeof d.blockHarvest!=="boolean")d.blockHarvest=false;if(typeof d.stripTracking!=="boolean")d.stripTracking=false;if(typeof d.blockAnalytics!=="boolean")d.blockAnalytics=false;if(typeof d.blockErrors!=="boolean")d.blockErrors=false;if(typeof d.blockPromotions!=="boolean")d.blockPromotions=false;if(typeof d.noExperiments!=="boolean")d.noExperiments=false;if(typeof d.noDetectables!=="boolean")d.noDetectables=false;if(typeof d.noContacts!=="boolean")d.noContacts=false;if(typeof d.noAffinities!=="boolean")d.noAffinities=false;if(typeof d.noPresenceIdle!=="boolean")d.noPresenceIdle=false;if(typeof d.stripHeaders!=="boolean")d.stripHeaders=false;if(typeof d.stripFilenames!=="boolean")d.stripFilenames=false;if(typeof d.spoofHardware!=="boolean")d.spoofHardware=false;if(typeof d.blockStun!=="boolean")d.blockStun=false;if(typeof d.cleanClipboard!=="boolean")d.cleanClipboard=false;if(typeof d.purgeOnQuit!=="boolean")d.purgeOnQuit=false;if(typeof d.noGuildEvents!=="boolean")d.noGuildEvents=false;if(typeof d.noRecommendations!=="boolean")d.noRecommendations=false;if(typeof d.noVoiceProbe!=="boolean")d.noVoiceProbe=false;if(typeof d.noActivityShare!=="boolean")d.noActivityShare=false;if(typeof d.quietOn!=="boolean")d.quietOn=false;if(typeof d.quietDebut!=="number")d.quietDebut=22;if(typeof d.quietFin!=="number")d.quietFin=8;if(!d.quiet||typeof d.quiet!=="object")d.quiet={};return d;})();
 _NXP.saveCfg=function(){_NXDB.set(_NXP.KEY,JSON.stringify(_NXP.cfg));};
 _NXP.stats=(function(){var d;try{var raw=_NXDB.get(_NXP.SKEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};if(typeof d.seen!=="number")d.seen=0;if(typeof d.blocked!=="number")d.blocked=0;if(typeof d.science!=="number")d.science=0;if(typeof d.track!=="number")d.track=0;if(typeof d.sentry!=="number")d.sentry=0;if(typeof d.harvest!=="number")d.harvest=0;if(typeof d.flux!=="number")d.flux=0;if(!d.hours||typeof d.hours!=="object")d.hours={};if(typeof d.first!=="number")d.first=Date.now();return d;})();
 _NXP.saveStatsNow=function(){try{if(_NXP.sst){clearTimeout(_NXP.sst);_NXP.sst=null;}_NXDB.set(_NXP.SKEY,JSON.stringify(_NXP.stats));}catch(_){}};
-_NXP.saveStats=function(){if(_NXP.sst)return;_NXP.sst=setTimeout(function(){_NXP.sst=null;_NXDB.set(_NXP.SKEY,JSON.stringify(_NXP.stats));},3000);};
-_NXP.resetStats=function(){_NXDB.del(_NXP.SKEY);_NXP.stats={seen:0,blocked:0,science:0,track:0,sentry:0,flux:0,hours:{},first:Date.now()};_NXP.seen=0;_NXP.blocked=0;_NXP.log=[];_NXP.rev=(_NXP.rev||0)+1;_NXP.saveStatsNow();};
-_NXP.seen=0;_NXP.blocked=0;_NXP.log=[];_NXP.listeners=[];
+_NXP.saveStats=function(){if(_NXP.sst)return;_NXP.sst=setTimeout(function(){_NXP.sst=null;_NXPERF.repos(function(){try{_NXDB.set(_NXP.SKEY,JSON.stringify(_NXP.stats));}catch(_){}});},3000);};
+_NXP.resetStats=function(){_NXDB.del(_NXP.SKEY);_NXP.stats={seen:0,blocked:0,science:0,track:0,sentry:0,flux:0,hours:{},first:Date.now()};_NXP.seen=0;_NXP.nBlocked=0;_NXP.log=[];_NXP.blocked=[];_NXP.rev=(_NXP.rev||0)+1;_NXP.saveStatsNow();};
+_NXP.seen=0;_NXP.nBlocked=0;_NXP.log=[];_NXP.listeners=[];
 _NXP.pad=function(n){return n<10?"0"+n:""+n;};
 _NXP.hourKey=function(){var d=new Date();return d.getFullYear()+"-"+_NXP.pad(d.getMonth()+1)+"-"+_NXP.pad(d.getDate())+"-"+_NXP.pad(d.getHours());};
 _NXP.notify=function(){for(var a=0;a<_NXP.listeners.length;a++){try{_NXP.listeners[a]();}catch(_){}}};
 _NXP.tnotify=function(){if(_NXP.nt)return;_NXP.nt=setTimeout(function(){_NXP.nt=null;_NXP.notify();},900);};
 _NXP.pruneHours=function(){try{var ks=Object.keys(_NXP.stats.hours);if(ks.length>72){ks.sort();for(var a=0;a<ks.length-48;a++)delete _NXP.stats.hours[ks[a]];}}catch(_){}};
-_NXP.classify=function(u){if(/\/harvest\b/.test(u))return"harvest";if(/\/(analytics|guilds\/\d+\/analytics)\b/.test(u))return"analytics";if(/\/(errors|error-reporting|crash)\b/.test(u))return"errors";if(/\/(quests|outbound-promotions|promotions|billing\/country-code)\b/.test(u))return"promotions";if(/\/api\/v\d+\/science\b/.test(u)||/\/api\/v\d+\/metrics\b/.test(u))return"science";if(/\/api\/v\d+\/track\b/.test(u))return"track";if(/sentry\.io/i.test(u)||/\/api\/\d+\/envelope\b/.test(u))return"sentry";return null;};
+_NXP.RXKIND=/\/(harvest|analytics|errors|error-reporting|crash|quests|outbound-promotions|promotions|science|metrics|track|envelope|experiments|detectable|contacts|friend-suggestions|affinities|scheduled-events|onboarding-responses|country-code|discoverable-guilds|guild-recommendations|member-verification|regions)\b/;
+_NXP.MAPKIND={harvest:"harvest",analytics:"analytics",errors:"errors","error-reporting":"errors",crash:"errors","discoverable-guilds":"recommendations","guild-recommendations":"recommendations","member-verification":"recommendations",regions:"voiceprobe",quests:"promotions","outbound-promotions":"promotions",promotions:"promotions","country-code":"promotions",science:"science",metrics:"science",track:"track",envelope:"sentry",experiments:"experiments",detectable:"detectables",contacts:"contacts","friend-suggestions":"contacts",affinities:"affinities","scheduled-events":"guildevents","onboarding-responses":"guildevents"};
+_NXP.memoKind=null;_NXP.memoN=0;
+_NXP.classify=function(u){try{
+var v=String(u);
+if(v.indexOf("sentry.io")>=0)return "sentry";
+var m=_NXP.RXKIND.exec(v);
+if(!m)return null;
+return _NXP.MAPKIND[m[1]]||null;}catch(_){return null;}};
 _NXP.typingCh=function(u){var m=u.match(/\/channels\/(\d+)\/typing\b/);return m?m[1]:null;};
 _NXP.ackCh=function(u){var m=u.match(/\/channels\/(\d+)\/messages\/\d+\/ack\b/);return m?m[1]:null;};
 _NXP.currentGuild=function(){try{var SG=_NXcommon().store("SelectedGuildStore");var gid=SG&&SG.getGuildId&&SG.getGuildId();return gid||null;}catch(_){return null;}};
@@ -1689,18 +2496,172 @@ _NXP.logBlocked=function(kind,url){try{
 var h="";try{h=new URL(url).host;}catch(_){h=String(url||"").slice(0,60);}
 _NXP.blocked.unshift({k:kind,h:h,t:Date.now()});
 if(_NXP.blocked.length>40)_NXP.blocked=_NXP.blocked.slice(0,40);}catch(_){}};
-_NXP.mark=function(kind,blk){_NXP.rev=(_NXP.rev||0)+1;_NXP.seen++;_NXP.stats.seen++;_NXP.stats[kind]=(_NXP.stats[kind]||0)+1;var hk=_NXP.hourKey();var hb=_NXP.stats.hours[hk]||(_NXP.stats.hours[hk]={seen:0,blocked:0});hb.seen++;if(blk){_NXP.blocked++;_NXP.stats.blocked++;hb.blocked++;}_NXP.log.unshift({t:Date.now(),kind:kind,blk:blk});if(_NXP.log.length>50)_NXP.log.pop();_NXP.pruneHours();_NXP.saveStats();_NXP.tnotify();};
-_NXP.shouldBlock=function(url){try{var u=String(url);var kind=_NXP.classify(u);if(kind){var _bm={sentry:"blockSentry",harvest:"blockHarvest",analytics:"blockAnalytics",errors:"blockErrors",promotions:"blockPromotions",science:"blockTel",track:"blockTel",metrics:"blockTel"};var blk=!!_NXP.cfg[_bm[kind]||"blockTel"];if(blk)_NXP.logBlocked(kind,u);_NXP.mark(kind,blk);return blk;}var tc=_NXP.typingCh(u);if(tc){var g=_NXguildOf(tc);if(_NXP.cfg.silentTyping||(g&&_NXP.cfg.quiet[g]))return true;}var ac=_NXP.ackCh(u);if(ac){var g2=_NXguildOf(ac);if(_NXP.cfg.noAck||(g2&&_NXP.cfg.quiet[g2]))return true;}}catch(_){}return false;};
-_NXP.onFlux=function(a){try{if(window._NXPATCH&&!_NXPATCH.on)return false;if(!a||a.type!=="TRACK")return false;_NXP.stats.flux=(_NXP.stats.flux||0)+1;var blk=!!_NXP.cfg.blockTel;_NXP.mark("event",blk);return blk;}catch(_){return false;}};
+_NXP.mark=function(kind,blk){_NXP.rev=(_NXP.rev||0)+1;_NXP.seen++;_NXP.stats.seen++;_NXP.stats[kind]=(_NXP.stats[kind]||0)+1;var hk=_NXP.hourKey();var hb=_NXP.stats.hours[hk]||(_NXP.stats.hours[hk]={seen:0,blocked:0});hb.seen++;if(blk){_NXP.nBlocked++;_NXP.stats.blocked++;hb.blocked++;}_NXP.log.unshift({t:Date.now(),kind:kind,blk:blk});if(_NXP.log.length>50)_NXP.log.pop();_NXP.pruneHours();_NXP.saveStats();_NXP.tnotify();};
+_NXP.shouldBlock=function(url){try{var u=String(url);var kind=_NXP.classify(u);if(kind){var _bm={sentry:"blockSentry",harvest:"blockHarvest",analytics:"blockAnalytics",errors:"blockErrors",promotions:"blockPromotions",science:"blockTel",track:"blockTel",metrics:"blockTel",experiments:"noExperiments",detectables:"noDetectables",contacts:"noContacts",affinities:"noAffinities",guildevents:"noGuildEvents",recommendations:"noRecommendations",voiceprobe:"noVoiceProbe"};var blk=!!_NXP.cfg[_bm[kind]||"blockTel"];if(blk)_NXP.logBlocked(kind,u);_NXP.mark(kind,blk);return blk;}var tc=_NXP.typingCh(u);if(tc){var g=_NXguildOf(tc);if(_NXP.cfg.silentTyping||(g&&_NXP.cfg.quiet[g])){_NXP.logBlocked("typing",u);_NXP.mark("typing",true);return true;}_NXP.mark("typing",false);return false;}var ac=_NXP.ackCh(u);if(ac){var g2=_NXguildOf(ac);if(_NXP.cfg.noAck||(g2&&_NXP.cfg.quiet[g2])){_NXP.logBlocked("ack",u);_NXP.mark("ack",true);return true;}_NXP.mark("ack",false);return false;}}catch(_){}return false;};
+_NXP.onFlux=function(a){try{if(window._NXPATCH&&!_NXPATCH.on)return false;if(a&&a.type==="IDLE"&&_NXP.cfg.noPresenceIdle){_NXP.mark("idle",true);_NXP.logBlocked("idle","signal d inactivite");return true;}
+if(a&&_NXP.cfg.noActivityShare&&(a.type==="LOCAL_ACTIVITY_UPDATE"||a.type==="RUNNING_GAMES_CHANGE")){_NXP.mark("activity",true);_NXP.logBlocked("activity","partage de l activite en cours");return true;}if(!a||a.type!=="TRACK")return false;_NXP.stats.flux=(_NXP.stats.flux||0)+1;var blk=!!_NXP.cfg.blockTel;_NXP.mark("event",blk);return blk;}catch(_){return false;}};
 _NXP.wireFlux=function(){try{if(_NXP.fxi)return;var C=_NXcommon();var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));if(!FX||typeof FX.addInterceptor!=="function"){_NXP.ftr=(_NXP.ftr||0)+1;if(_NXP.ftr<25)setTimeout(_NXP.wireFlux,1500);return;}FX.addInterceptor(_NXP.onFlux);_NXP.fxi=true;}catch(_){}};
 _NXP.TRACK_PARAMS=["utm_source","utm_medium","utm_campaign","utm_term","utm_content","utm_id","fbclid","gclid","dclid","gbraid","wbraid","msclkid","mc_eid","igshid","igsh","si","twclid","ttclid","yclid","_ga","ref_src","ref_url","spm"];
 _NXP.cleanUrl=function(u){try{var url=new URL(u);var removed=0;for(var a=0;a<_NXP.TRACK_PARAMS.length;a++){if(url.searchParams.has(_NXP.TRACK_PARAMS[a])){url.searchParams.delete(_NXP.TRACK_PARAMS[a]);removed++;}}if(removed){_NXP.stats.stripped=(_NXP.stats.stripped||0)+removed;_NXP.saveStats();}return url.toString();}catch(_){return u;}};
 _NXP.open=function(u){try{if(window._NXPR&&_NXPR.cfg&&_NXPR.cfg.scanLinks&&typeof u==="string"){var cl=_NXPR.scanUrl(u,true);if(_NXPR.threat(cl)&&((cl.kind==="grabber"&&_NXPR.cfg.blockGrabbers)||((cl.kind==="phish"||cl.kind==="punycode")&&_NXPR.cfg.phishGuard))){_NXPR.blockedPrompt(u,cl);return;}}}catch(_){}try{if(_NXP.cfg&&_NXP.cfg.stripTracking&&typeof u==="string")u=_NXP.cleanUrl(u);}catch(_){}try{if(typeof VencordNative!=="undefined"&&VencordNative.native&&typeof VencordNative.native.openExternal==="function"){VencordNative.native.openExternal(u);}else if(window.VencordNative&&window.VencordNative.native){window.VencordNative.native.openExternal(u);}}catch(_){}};
+_NXP.HDRSTRIP=["x-debug-options","x-discord-timezone","x-track"];
+_NXP.stripOut=function(opts){try{
+if(!_NXP.cfg.stripHeaders||!opts||!opts.headers)return opts;
+var h=opts.headers,n=0,out=null;
+if(typeof Headers!=="undefined"&&h instanceof Headers){
+for(var a=0;a<_NXP.HDRSTRIP.length;a++){if(h.has(_NXP.HDRSTRIP[a])){h.delete(_NXP.HDRSTRIP[a]);n++;}}
+}else if(Array.isArray(h)){
+out=[];for(var b=0;b<h.length;b++){var k0=String((h[b]&&h[b][0])||"").toLowerCase();
+if(_NXP.HDRSTRIP.indexOf(k0)>=0){n++;continue;}out.push(h[b]);}
+}else if(typeof h==="object"){
+out={};for(var k in h){if(_NXP.HDRSTRIP.indexOf(String(k).toLowerCase())>=0){n++;continue;}out[k]=h[k];}}
+if(!n)return opts;
+_NXP.mark("headers",true);_NXP.logBlocked("headers",n+" en-tete(s) de suivi retire(s)");
+if(out===null)return opts;
+var o2={};for(var k2 in opts)o2[k2]=opts[k2];o2.headers=out;return o2;}catch(_){return opts;}};
+_NXP.RXATT=/\/channels\/\d+\/attachments\b/;
+_NXP.RXMSG=/\/channels\/\d+\/messages\b/;
+_NXP.anonName=function(n,i){try{
+var v=String(n||"");
+var m=v.match(/\.([A-Za-z0-9]{1,6})$/);
+var ext=m?("."+m[1].toLowerCase()):"";
+return "fichier"+((i>0)?("_"+(i+1)):"")+ext;}catch(_){return "fichier";}};
+_NXP.maskNames=function(url,opts){try{
+if(!_NXP.cfg.stripFilenames||!opts||typeof opts.body!=="string")return opts;
+var u=String(url||"");
+var att=_NXP.RXATT.test(u),msg=_NXP.RXMSG.test(u);
+if(!att&&!msg)return opts;
+var j=null;try{j=JSON.parse(opts.body);}catch(_){return opts;}
+if(!j||typeof j!=="object")return opts;
+var L=j.files||j.attachments;
+if(!Array.isArray(L)||!L.length)return opts;
+var n=0;
+for(var a=0;a<L.length;a++){var it=L[a];
+if(!it||typeof it!=="object"||typeof it.filename!=="string")continue;
+var nv=_NXP.anonName(it.filename,a);
+if(nv!==it.filename){it.filename=nv;n++;}}
+if(!n)return opts;
+var body=null;try{body=JSON.stringify(j);}catch(_){return opts;}
+_NXP.mark("filenames",true);_NXP.logBlocked("filenames",n+" nom(s) de fichier anonymise(s)");
+var o2={};for(var k in opts)o2[k]=opts[k];o2.body=body;return o2;}catch(_){return opts;}};
+_NXP.prepare=function(url,opts){try{
+if(!opts||typeof opts!=="object")return opts;
+var o=_NXP.stripOut(opts);
+o=_NXP.maskNames(url,o);
+return o;}catch(_){return opts;}};
+_NXP.applyHardware=function(){try{
+if(_NXP._hw||!_NXP.cfg.spoofHardware)return;
+_NXP._hw=true;
+var pose=function(o,k,v){try{Object.defineProperty(o,k,{configurable:true,enumerable:true,get:function(){return v;}});}catch(_){}};
+pose(navigator,"hardwareConcurrency",8);
+pose(navigator,"deviceMemory",8);
+pose(navigator,"maxTouchPoints",0);
+_NXP.mark("hardware",true);
+_NXP.logBlocked("hardware","caracteristiques materielles normalisees");}catch(_){}};
+_NXP.RXDISCICE=/discord(app)?\.(com|net|media|gg)/i;
+_NXP.wireRtc=function(){try{
+if(_NXP._rtc)return;_NXP._rtc=true;
+var RP=window.RTCPeerConnection;
+if(!RP||RP.__nxp)return;
+var W=function(cfg,c2){
+try{if(_NXP.cfg.blockStun&&cfg&&cfg.iceServers&&cfg.iceServers.length){
+var keep=[],n=0;
+for(var a=0;a<cfg.iceServers.length;a++){var it=cfg.iceServers[a];
+var urls=it&&it.urls;
+var list=(typeof urls==="string")?[urls]:(urls||[]);
+var garde=false;
+for(var b=0;b<list.length;b++){if(_NXP.RXDISCICE.test(String(list[b])))garde=true;}
+if(garde)keep.push(it);else n++;}
+if(n){var c={};for(var k in cfg)c[k]=cfg[k];c.iceServers=keep;cfg=c;
+_NXP.mark("stun",true);_NXP.logBlocked("stun",n+" serveur(s) STUN etranger(s) ecarte(s)");}}}catch(_){}
+return (arguments.length>1)?new RP(cfg,c2):new RP(cfg);};
+W.prototype=RP.prototype;W.__nxp=true;
+try{W.generateCertificate=RP.generateCertificate;}catch(_){}
+window.RTCPeerConnection=W;
+try{if(window.webkitRTCPeerConnection)window.webkitRTCPeerConnection=W;}catch(_){}
+}catch(_){}};
+_NXP.wireClip=function(){try{
+if(_NXP._clip)return;_NXP._clip=true;
+if(!navigator.clipboard||typeof navigator.clipboard.writeText!=="function")return;
+var ow=navigator.clipboard.writeText.bind(navigator.clipboard);
+navigator.clipboard.writeText=function(t){try{
+if(_NXP.cfg.cleanClipboard&&typeof t==="string"&&t.indexOf("http")>=0){
+var n=0;
+var t2=t.replace(/https?:\/\/[^\s<>"']+/g,function(u){try{var c=_NXP.cleanUrl(u);if(c!==u)n++;return c;}catch(_){return u;}});
+if(n){_NXP.mark("clip",true);_NXP.logBlocked("clip",n+" lien(s) copie(s) nettoye(s)");t=t2;}}}catch(_){}
+return ow(t);};}catch(_){}};
+_NXP.TRACES=["nexium_stats_v1","nexium_privacy_stats_v1","nexium_protect_v1_stats","nexium_gardes_v1_stats","nexium_errors","nexium_quarantine","nexium_reports"];
+_NXP.purgeTraces=function(force){try{
+if(!force&&!_NXP.cfg.purgeOnQuit)return 0;
+var n=0;
+for(var a=0;a<_NXP.TRACES.length;a++){try{if(_NXDB.get(_NXP.TRACES[a])!==null){_NXDB.del(_NXP.TRACES[a]);n++;}}catch(_){}}
+return n;}catch(_){return 0;}};
+_NXP.quietActif=function(){try{
+if(!_NXP.cfg.quietOn)return false;
+var h=new Date().getHours();
+var d=_NXP.cfg.quietDebut,f=_NXP.cfg.quietFin;
+if(d===f)return false;
+if(d<f)return h>=d&&h<f;
+return h>=d||h<f;}catch(_){return false;}};
+_NXP.quietTick=function(){try{
+var actif=_NXP.quietActif();
+if(actif===_NXP._quietEtat)return;
+_NXP._quietEtat=actif;
+if(actif){
+_NXP._avantQuiet={};
+for(var k in _NXP.PROFILS.maximal)_NXP._avantQuiet[k]=_NXP.cfg[k];
+_NXP.appliquerProfil("maximal");
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Heures discretes : confidentialite maximale jusqu a "+_NXP.cfg.quietFin+" h.",1);}catch(_){}}
+else if(_NXP._avantQuiet){
+for(var k2 in _NXP._avantQuiet)_NXP.cfg[k2]=_NXP._avantQuiet[k2];
+_NXP._avantQuiet=null;
+_NXP.saveCfg();_NXP.notify();
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Heures discretes terminees : tes reglages habituels sont revenus.",1);}catch(_){}}
+}catch(_){}};
+_NXP.bilan=function(jours){
+try{
+var n=jours||7,out={total:0,parJour:[],familles:{}};
+var maintenant=new Date();
+for(var a=n-1;a>=0;a--){
+var d=new Date(maintenant.getTime()-a*86400000);
+var somme=0;
+for(var h=0;h<24;h++){
+var k=d.getFullYear()+"-"+_NXP.pad(d.getMonth()+1)+"-"+_NXP.pad(d.getDate())+"-"+_NXP.pad(h);
+var e=(_NXP.stats.hours||{})[k];
+if(e)somme+=(e.blocked||0);}
+out.parJour.push({j:d.getDay(),n:somme});
+out.total+=somme;}
+for(var f in _NXP.KINDS){var v=_NXP.stats[f]||0;if(v>0)out.familles[f]=v;}
+return out;}catch(_){return {total:0,parJour:[],familles:{}};}};
+_NXP.KINDS={activity:"Partage d activite",recommendations:"Recommandations de serveurs",voiceprobe:"Sondage des regions vocales",science:"Telemetrie",track:"Suivi d evenements",metrics:"Mesures",sentry:"Rapports de plantage",harvest:"Moisson de donnees",analytics:"Analytique",errors:"Erreurs",promotions:"Promotions et quetes",event:"Evenement interne",experiments:"Experiences A/B",detectables:"Detection de jeux",contacts:"Synchronisation de contacts",affinities:"Affinites sociales",guildevents:"Evenements de serveur",typing:"Indicateur de frappe",ack:"Accuse de lecture",idle:"Signal d inactivite",headers:"En-tetes de suivi",filenames:"Noms de fichiers",stun:"Serveurs STUN etrangers",clip:"Liens copies",hardware:"Empreinte materielle"};
+_NXP.kindFr=function(k){return _NXP.KINDS[k]||k;};
+_NXP.PROFILS={
+discret:{noRecommendations:false,noVoiceProbe:false,noActivityShare:false,blockTel:true,blockSentry:true,blockHarvest:true,blockAnalytics:true,blockErrors:true,blockPromotions:false,stripTracking:true,silentTyping:false,noAck:false,noExperiments:false,noDetectables:false,noContacts:false,noAffinities:false,noPresenceIdle:false,stripHeaders:true,stripFilenames:false,spoofHardware:false,blockStun:true,cleanClipboard:true,purgeOnQuit:false,noGuildEvents:false},
+renforce:{noRecommendations:true,noVoiceProbe:false,noActivityShare:false,blockTel:true,blockSentry:true,blockHarvest:true,blockAnalytics:true,blockErrors:true,blockPromotions:true,stripTracking:true,silentTyping:true,noAck:false,noExperiments:false,noDetectables:true,noContacts:true,noAffinities:true,noPresenceIdle:true,stripHeaders:true,stripFilenames:true,spoofHardware:true,blockStun:true,cleanClipboard:true,purgeOnQuit:false,noGuildEvents:false},
+maximal:{noRecommendations:true,noVoiceProbe:true,noActivityShare:true,blockTel:true,blockSentry:true,blockHarvest:true,blockAnalytics:true,blockErrors:true,blockPromotions:true,stripTracking:true,silentTyping:true,noAck:true,noExperiments:true,noDetectables:true,noContacts:true,noAffinities:true,noPresenceIdle:true,stripHeaders:true,stripFilenames:true,spoofHardware:true,blockStun:true,cleanClipboard:true,purgeOnQuit:true,noGuildEvents:true}};
+_NXP.appliquerProfil=function(nom){try{
+var p=_NXP.PROFILS[nom];if(!p)return;
+for(var k in p)_NXP.cfg[k]=p[k];
+_NXP.cfg.profil=nom;
+_NXP.saveCfg();_NXP.applyHardware();_NXP.notify();}catch(_){}};
+_NXP.profilActuel=function(){try{
+var noms=["maximal","renforce","discret"];
+for(var a=0;a<noms.length;a++){var p=_NXP.PROFILS[noms[a]],ok=true;
+for(var k in p){if(!!_NXP.cfg[k]!==!!p[k]){ok=false;break;}}
+if(ok)return noms[a];}
+return "perso";}catch(_){return "perso";}};
+_NXP.score=function(){try{
+var K=["blockTel","blockSentry","blockHarvest","blockAnalytics","blockErrors","blockPromotions","stripTracking","silentTyping","noAck","noExperiments","noDetectables","noContacts","noAffinities","noPresenceIdle","stripHeaders","stripFilenames","spoofHardware","blockStun","cleanClipboard","purgeOnQuit","noGuildEvents","noRecommendations","noVoiceProbe","noActivityShare"];
+var n=0;for(var a=0;a<K.length;a++)if(_NXP.cfg[K[a]])n++;
+return {actifs:n,total:K.length,pct:Math.round(n/K.length*100)};}catch(_){return {actifs:0,total:21,pct:0};}};
 _NXP.wireFlux();
 try{window.addEventListener("beforeunload",_NXP.saveStatsNow);}catch(_){}
+try{_NXP.applyHardware();_NXP.wireRtc();_NXP.wireClip();}catch(_){}
+try{_NXP.quietTick();setInterval(function(){try{_NXP.quietTick();}catch(_){}},60000);}catch(_){}
+try{window.addEventListener("beforeunload",function(){try{_NXP.purgeTraces();}catch(_){}});}catch(_){}
 try{document.addEventListener("visibilitychange",function(){if(document.hidden)_NXP.saveStatsNow();});}catch(_){}
 try{if(window.fetch&&!window.fetch.__nx){var _of=window.fetch.bind(window);var pf=function(input,opts){try{var url=typeof input==="string"?input:(input&&input.url)?input.url:"";if(url&&window._NXV&&_NXV.checkOut(url,opts||(input&&typeof input==="object"?input:null),"requete"))return Promise.resolve(new Response("",{status:403,statusText:"Blocked by Nexium"}));
-if(url&&_NXP.shouldBlock(url))return Promise.resolve(new Response("",{status:204,statusText:"No Content"}));}catch(_){}return _of(input,opts);};pf.__nx=true;window.fetch=pf;}}catch(_){}
+if(url&&_NXP.shouldBlock(url))return Promise.resolve(new Response("",{status:204,statusText:"No Content"}));if(url)opts=_NXP.prepare(url,opts);}catch(_){}return _of(input,opts);};pf.__nx=true;window.fetch=pf;}}catch(_){}
 try{if(navigator.sendBeacon&&!navigator.sendBeacon.__nx){var _ob=navigator.sendBeacon.bind(navigator);var pb=function(url,data){try{if(url&&window._NXV&&_NXV.checkOut(url,{body:data},"balise"))return true;if(url&&_NXP.shouldBlock(url))return true;}catch(_){}return _ob(url,data);};pb.__nx=true;navigator.sendBeacon=pb;}}catch(_){}
 try{if(window.XMLHttpRequest&&!window.XMLHttpRequest.prototype.__nx){var _open=window.XMLHttpRequest.prototype.open;var _send=window.XMLHttpRequest.prototype.send;window.XMLHttpRequest.prototype.open=function(m,u){try{this.__nxurl=u;this.__nxh={};}catch(_){}return _open.apply(this,arguments);};
 var _srh=window.XMLHttpRequest.prototype.setRequestHeader;
@@ -1710,13 +2671,185 @@ window.XMLHttpRequest.prototype.setRequestHeader=function(k,v){try{if(this.__nxh
 if(!_NXNET.boot){_NXNET.boot=true;_NXNET.samples=[];_NXNET.count=0;_NXNET.conn=[];_NXNET.listeners=[];
 _NXNET.notify=function(){for(var a=0;a<_NXNET.listeners.length;a++){try{_NXNET.listeners[a]();}catch(_){}}};
 _NXNET.tnotify=function(){if(_NXNET.nt)return;_NXNET.nt=setTimeout(function(){_NXNET.nt=null;_NXNET.notify();},700);};
-_NXNET.sample=function(ms){try{_NXNET.count++;_NXNET.samples.push({t:Date.now(),ms:Math.round(ms)});if(_NXNET.samples.length>150)_NXNET.samples.shift();_NXNET.tnotify();}catch(_){}};
+_NXNET.KEY="nexium_reseau_v1";
+_NXNET.cfg=(function(){var d;try{var raw=_NXDB.get(_NXNET.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}
+if(!d||typeof d!=="object")d={};
+if(typeof d.seuil!=="number"||d.seuil<50)d.seuil=350;
+if(typeof d.alerte!=="boolean")d.alerte=true;
+if(typeof d.historique!=="boolean")d.historique=true;
+if(typeof d.inventaire!=="boolean")d.inventaire=true;
+return d;})();
+_NXNET.save=function(){try{_NXDB.set(_NXNET.KEY,JSON.stringify(_NXNET.cfg));}catch(_){}};
+_NXNET.set=function(k,v){try{_NXNET.cfg[k]=v;_NXNET.save();_NXNET.notify();}catch(_){}};
+_NXNET.HKEY="nexium_reseau_hist";
+_NXNET.hist=(function(){try{var raw=_NXDB.get(_NXNET.HKEY);var d=raw?JSON.parse(raw):null;
+if(d&&typeof d==="object"&&d.h&&typeof d.h==="object")return d;}catch(_){}
+return {h:{},hotes:{},routes:{},coupures:[],depuis:Date.now()};})();
+_NXNET.saveHist=function(){try{if(_NXNET._hs)return;
+_NXNET._hs=setTimeout(function(){_NXNET._hs=null;
+_NXPERF.repos(function(){try{_NXDB.set(_NXNET.HKEY,JSON.stringify(_NXNET.hist));}catch(_){}});},8000);}catch(_){}};
+_NXNET.saveHistNow=function(){try{if(_NXNET._hs){clearTimeout(_NXNET._hs);_NXNET._hs=null;}
+_NXDB.set(_NXNET.HKEY,JSON.stringify(_NXNET.hist));}catch(_){}};
+_NXNET.pad2=function(n){return n<10?"0"+n:""+n;};
+_NXNET.hourKey=function(t){var d=new Date(t||Date.now());
+return d.getFullYear()+"-"+_NXNET.pad2(d.getMonth()+1)+"-"+_NXNET.pad2(d.getDate())+"-"+_NXNET.pad2(d.getHours());};
+_NXNET.hostOf=function(u){try{
+var v=String(u||"");
+if(!v)return "";
+if(v.charAt(0)==="/")return "discord.com";
+var p=v.indexOf("://");
+if(p<0)return "";
+var r=v.slice(p+3);
+var e=r.length;
+var c1=r.indexOf("/");if(c1>=0&&c1<e)e=c1;
+var c2=r.indexOf("?");if(c2>=0&&c2<e)e=c2;
+var c3=r.indexOf("#");if(c3>=0&&c3<e)e=c3;
+var h=r.slice(0,e);
+var at=h.indexOf("@");if(at>=0)h=h.slice(at+1);
+var co=h.lastIndexOf(":");if(co>0&&h.indexOf("]")<0)h=h.slice(0,co);
+return h.toLowerCase().replace(/^www\./,"");}catch(_){return "";}};
+_NXNET.noteHost=function(u){try{
+if(!_NXNET.cfg.inventaire)return;
+var h=_NXNET.hostOf(u);
+if(!h)return;
+var H=_NXNET.hist.hotes||(_NXNET.hist.hotes={});
+var e=H[h];
+if(!e){e={n:0,at:0};H[h]=e;
+var ks=Object.keys(H);
+if(ks.length>120){ks.sort(function(x,y){return (H[x].at||0)-(H[y].at||0);});
+for(var a=0;a<ks.length-120;a++)delete H[ks[a]];}}
+e.n=(e.n||0)+1;e.at=Date.now();
+_NXNET.saveHist();}catch(_){}};
+_NXNET.route=function(u){try{
+var v=String(u||"");
+var m=v.match(/\/api\/v\d+(\/[^?#]*)/);
+var p=m?m[1]:(v.charAt(0)==="/"?v.split("?")[0]:"");
+if(!p)return "";
+p=p.replace(/\/\d{6,}/g,"/{id}").replace(/\/[0-9a-f]{16,}/gi,"/{hash}");
+var parts=p.split("/");
+if(parts.length>6)p=parts.slice(0,6).join("/")+"/…";
+return p.slice(0,60);}catch(_){return "";}};
+_NXNET.memoRoute=null;_NXNET.memoRouteN=0;
+_NXNET.routeCache=function(u){try{
+var v=String(u||"");
+var q=v.indexOf("?");
+var cle=q>=0?v.slice(0,q):v;
+if(!_NXNET.memoRoute)_NXNET.memoRoute=Object.create(null);
+var hit=_NXNET.memoRoute[cle];
+if(hit!==undefined)return hit;
+var r=_NXNET.route(v);
+if(_NXNET.memoRouteN>400){_NXNET.memoRoute=Object.create(null);_NXNET.memoRouteN=0;}
+_NXNET.memoRoute[cle]=r;_NXNET.memoRouteN++;
+return r;}catch(_){return "";}};
+_NXNET.noteRoute=function(u,ms){try{
+var r=_NXNET.routeCache(u);
+if(!r)return;
+var R2=_NXNET.hist.routes||(_NXNET.hist.routes={});
+var e=R2[r];
+if(!e){e={n:0,sum:0,max:0};R2[r]=e;
+var ks=Object.keys(R2);
+if(ks.length>60){ks.sort(function(x,y){return R2[x].n-R2[y].n;});
+for(var a=0;a<ks.length-60;a++)delete R2[ks[a]];}}
+e.n++;e.sum+=ms;if(ms>e.max)e.max=ms;
+_NXNET.saveHist();}catch(_){}};
+_NXNET.noteHeure=function(ms){try{
+if(!_NXNET.cfg.historique)return;
+var k=_NXNET.hourKey();
+var H=_NXNET.hist.h||(_NXNET.hist.h={});
+var e=H[k];
+if(!e){e={n:0,sum:0,max:0,lent:0};H[k]=e;
+var ks=Object.keys(H);
+if(ks.length>200){ks.sort();for(var a=0;a<ks.length-168;a++)delete H[ks[a]];}}
+e.n++;e.sum+=ms;if(ms>e.max)e.max=ms;
+if(ms>=_NXNET.cfg.seuil)e.lent++;
+_NXNET.saveHist();}catch(_){}};
+_NXNET.alerte=function(ms){try{
+if(!_NXNET.cfg.alerte)return;
+if(ms<_NXNET.cfg.seuil*2)return;
+if(_NXNET._al&&(Date.now()-_NXNET._al)<300000)return;
+_NXNET._al=Date.now();
+if(window._NXPR&&_NXPR.toast)_NXPR.toast("Reseau lent : "+Math.round(ms)+" ms vers Discord.",0);}catch(_){}};
+_NXNET.coupure=function(){try{
+var ss=_NXNET.samples||[];
+if(ss.length<2)return;
+var der=ss[ss.length-1],avd=ss[ss.length-2];
+var trou=der.t-avd.t;
+if(trou<120000)return;
+var C=_NXNET.hist.coupures||(_NXNET.hist.coupures=[]);
+C.unshift({t:avd.t,ms:trou});
+if(C.length>25)_NXNET.hist.coupures=C.slice(0,25);
+_NXNET.saveHist();}catch(_){}};
+_NXNET.stats=function(){try{
+var ss=_NXNET.samples||[];
+if(!ss.length)return {n:0,avg:0,min:0,max:0,p95:0,gigue:0,rpm:0};
+var vals=[],sum=0,mn=1e9,mx=0,now=Date.now(),rpm=0;
+for(var a=0;a<ss.length;a++){var m=ss[a].ms;vals.push(m);sum+=m;
+if(m<mn)mn=m;if(m>mx)mx=m;
+if(now-ss[a].t<60000)rpm++;}
+var avg=Math.round(sum/vals.length);
+vals.sort(function(x,y){return x-y;});
+var p95=vals[Math.min(vals.length-1,Math.floor(vals.length*0.95))];
+var vs=0;for(var b=0;b<ss.length;b++){var dv=ss[b].ms-avg;vs+=dv*dv;}
+return {n:vals.length,avg:avg,min:mn,max:mx,p95:Math.round(p95),
+gigue:Math.round(Math.sqrt(vs/vals.length)),rpm:rpm};}catch(_){return {n:0,avg:0,min:0,max:0,p95:0,gigue:0,rpm:0};}};
+_NXNET.topHotes=function(n){try{
+var H=_NXNET.hist.hotes||{},out=[];
+for(var h in H)out.push({h:h,n:H[h].n||0,at:H[h].at||0});
+out.sort(function(x,y){return y.n-x.n;});
+return out.slice(0,n||12);}catch(_){return [];}};
+_NXNET.topRoutes=function(n){try{
+var R2=_NXNET.hist.routes||{},out=[];
+for(var r in R2){var e=R2[r];
+out.push({r:r,n:e.n,moy:e.n?Math.round(e.sum/e.n):0,max:e.max});}
+out.sort(function(x,y){return y.moy-x.moy;});
+return out.slice(0,n||10);}catch(_){return [];}};
+_NXNET.heures=function(n){try{
+var out=[],maintenant=new Date();
+for(var a=(n||24)-1;a>=0;a--){
+var d=new Date(maintenant.getTime()-a*3600000);
+var k=_NXNET.hourKey(d.getTime());
+var e=(_NXNET.hist.h||{})[k];
+out.push({h:d.getHours(),n:(e&&e.n)||0,moy:(e&&e.n)?Math.round(e.sum/e.n):0,max:(e&&e.max)||0,lent:(e&&e.lent)||0});}
+return out;}catch(_){return [];}};
+_NXNET.ping=function(cb){try{
+if(_NXNET.pinging){cb&&cb(null);return;}
+_NXNET.pinging=true;_NXNET.notify();
+var t0=(typeof performance!=="undefined"&&performance.now)?performance.now():Date.now();
+_NXNETX.go("https://discord.com/api/v9/gateway?nx="+Date.now(),{cache:"no-store"},8000)
+.then(function(){var ms=((typeof performance!=="undefined"&&performance.now)?performance.now():Date.now())-t0;
+_NXNET.pinging=false;_NXNET.dernierPing=Math.round(ms);
+_NXNET.sample(ms,"https://discord.com/api/v9/gateway");
+_NXNET.notify();cb&&cb(Math.round(ms));})
+.catch(function(){_NXNET.pinging=false;_NXNET.dernierPing=null;_NXNET.notify();cb&&cb(null);});
+}catch(_){_NXNET.pinging=false;cb&&cb(null);}};
+_NXNET.exportCsv=function(){try{
+var L=["heure;requetes;latence_moyenne_ms;latence_max_ms;requetes_lentes"];
+var H=_NXNET.hist.h||{};
+var ks=Object.keys(H).sort();
+for(var a=0;a<ks.length;a++){var e=H[ks[a]];
+L.push(ks[a]+";"+e.n+";"+(e.n?Math.round(e.sum/e.n):0)+";"+e.max+";"+(e.lent||0));}
+var txt=L.join("\n");
+try{if(typeof Blob!=="undefined"&&typeof URL!=="undefined"&&URL.createObjectURL){
+var b=new Blob([txt],{type:"text/csv;charset=utf-8"});
+var u=URL.createObjectURL(b);
+var a2=document.createElement("a");
+a2.href=u;a2.download="nexium-reseau.csv";
+document.body.appendChild(a2);a2.click();
+setTimeout(function(){try{document.body.removeChild(a2);URL.revokeObjectURL(u);}catch(_){}},1500);
+return true;}}catch(_){}
+try{DiscordNative.clipboard.copy(txt);}catch(_){}
+return false;}catch(_){return false;}};
+_NXNET.reset=function(){try{
+_NXNET.samples=[];_NXNET.count=0;
+_NXNET.hist={h:{},hotes:{},routes:{},coupures:[],depuis:Date.now()};
+_NXNET.saveHistNow();_NXNET.notify();}catch(_){}};
+_NXNET.sample=function(ms,url){try{_NXNET.count++;var v=Math.round(ms);_NXNET.samples.push({t:Date.now(),ms:v});if(_NXNET.samples.length>240)_NXNET.samples.shift();_NXNET.coupure();_NXNET.noteHeure(v);if(url)_NXNET.noteRoute(url,v);_NXNET.alerte(v);_NXNET.tnotify();}catch(_){}};
 _NXNET.logConn=function(type){try{_NXNET.conn.unshift({t:Date.now(),type:type});if(_NXNET.conn.length>40)_NXNET.conn.pop();_NXNET.notify();}catch(_){}};
 _NXNET.isApi=function(u){return /discord(app)?\.com\/api\//.test(u)||/^\/api\/v\d+\//.test(u);};
 _NXNET.wireConn=function(){try{var C=_NXcommon();var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));if(!FX||!FX.subscribe){_NXNET.tr=(_NXNET.tr||0)+1;if(_NXNET.tr<25)setTimeout(_NXNET.wireConn,1500);return;}FX.subscribe("CONNECTION_OPEN",function(){_NXNET.logConn("Connexion ouverte");});FX.subscribe("RESUMED",function(){_NXNET.logConn("Session reprise");});FX.subscribe("GATEWAY_CONNECTED",function(){_NXNET.logConn("Gateway connectée");});FX.subscribe("CONNECTION_CLOSED",function(){_NXNET.logConn("Connexion fermée");});}catch(_){}};
 _NXNET.logConn("Client démarré");_NXNET.wireConn();}
-try{if(window.fetch&&!window.fetch.__nxlat){var _lf=window.fetch.bind(window);var lf=function(input,opts){if(_NXNET.paused)return _lf(input,opts);var u="";try{u=typeof input==="string"?input:(input&&input.url)?input.url:"";}catch(_){}if(u&&_NXNET.isApi(u)){var t0=(typeof performance!=="undefined"&&performance.now)?performance.now():Date.now();return _lf(input,opts).then(function(r){try{_NXNET.sample(((typeof performance!=="undefined"&&performance.now)?performance.now():Date.now())-t0);}catch(_){}return r;},function(e){throw e;});}return _lf(input,opts);};lf.__nxlat=true;window.fetch=lf;}}catch(_){}
-try{var XP=window.XMLHttpRequest&&window.XMLHttpRequest.prototype;if(XP&&!XP.__nxlat){var _xo=XP.open;XP.open=function(m,u){try{this.__nxlu=u;}catch(_){}return _xo.apply(this,arguments);};var _xs=XP.send;XP.send=function(){try{var self=this;if(self.__nxlu&&_NXNET.isApi(self.__nxlu)){var t0=(typeof performance!=="undefined"&&performance.now)?performance.now():Date.now();self.addEventListener("loadend",function(){try{_NXNET.sample(((typeof performance!=="undefined"&&performance.now)?performance.now():Date.now())-t0);}catch(_){}});}}catch(_){}return _xs.apply(this,arguments);};XP.__nxlat=true;}}catch(_){}var _NXCL=window._NXCL||(window._NXCL={});
+try{if(window.fetch&&!window.fetch.__nxlat){var _lf=window.fetch.bind(window);var lf=function(input,opts){if(_NXNET.paused)return _lf(input,opts);var u="";try{u=typeof input==="string"?input:(input&&input.url)?input.url:"";}catch(_){}try{if(u)_NXNET.noteHost(u);}catch(_){}if(u&&_NXNET.isApi(u)){var t0=(typeof performance!=="undefined"&&performance.now)?performance.now():Date.now();return _lf(input,opts).then(function(r){try{_NXNET.sample(((typeof performance!=="undefined"&&performance.now)?performance.now():Date.now())-t0,u);}catch(_){}return r;},function(e){throw e;});}return _lf(input,opts);};lf.__nxlat=true;window.fetch=lf;}}catch(_){}
+try{var XP=window.XMLHttpRequest&&window.XMLHttpRequest.prototype;if(XP&&!XP.__nxlat){var _xo=XP.open;XP.open=function(m,u){try{this.__nxlu=u;}catch(_){}return _xo.apply(this,arguments);};var _xs=XP.send;XP.send=function(){try{var self=this;if(self.__nxlu&&_NXNET.isApi(self.__nxlu)){var t0=(typeof performance!=="undefined"&&performance.now)?performance.now():Date.now();self.addEventListener("loadend",function(){try{_NXNET.sample(((typeof performance!=="undefined"&&performance.now)?performance.now():Date.now())-t0,self.__nxlu);}catch(_){}});}}catch(_){}return _xs.apply(this,arguments);};XP.__nxlat=true;}}catch(_){}var _NXCL=window._NXCL||(window._NXCL={});
 if(!_NXCL.boot){_NXCL.boot=true;_NXCL.KEY="nexium_changelog_v1";
 _NXCL.URL="https://raw.githubusercontent.com/Omega-devj/changelog-client-nexium/refs/heads/main/changelog.txt";
 _NXCL.st=(function(){try{var raw=_NXDB.get(_NXCL.KEY);var d=raw?JSON.parse(raw):null;if(d&&typeof d==="object"&&typeof d.text==="string")return d;}catch(_){}return {hash:"",text:"",ts:0};})();
@@ -1730,226 +2863,1193 @@ try{_NXNETX.go(_NXCL.URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){
 setTimeout(function(){_NXCL.refresh();},4000);
 _NXCL.iv=setInterval(function(){if(typeof document==="undefined"||!document.hidden)_NXCL.refresh();},1800000);
 }
-var NexiumPrivacyIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:18,height:18},i("path",{d:"M12 2 4 5v6c0 5 3.4 8.6 8 11 4.6-2.4 8-6 8-11V5l-8-3zm0 6a2 2 0 0 1 2 2c0 .9-.6 1.6-1.4 1.9V15h-1.2v-3.1A2 2 0 0 1 10 10a2 2 0 0 1 2-2z"}));};
+var NexiumPrivacyIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:18,height:18,"aria-hidden":"true"},i("path",{d:"M12 7a5 5 0 0 1 5 5c0 .65-.13 1.26-.36 1.83l2.92 2.92A11.8 11.8 0 0 0 23 12c-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.15 2.15C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46A11.8 11.8 0 0 0 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65a3 3 0 0 0 3 3c.22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53a5 5 0 0 1-5-5c0-.79.2-1.53.53-2.2z"}));};
+var PV_TELE=[
+{k:"blockTel",ic:"M4 20h16v-2H4v2zM6 16h3V9H6v7zm5 0h3V4h-3v12zm5 0h3v-4h-3v4z",t:"Telemetrie d usage",d:"Annule les requetes /science et /track. Discord les envoie sans attendre de reponse : rien ne casse."},
+{k:"blockSentry",ic:"M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V8h2v5z",t:"Rapports de plantage",d:"Empeche l envoi des rapports vers Sentry, qui embarquent l etat de ton client au moment de l erreur."},
+{k:"blockHarvest",ic:"M20 12V8H6a2 2 0 0 1 0-4h12v4h2V2H6a4 4 0 0 0-4 4v12a4 4 0 0 0 4 4h14v-8h-2z",t:"Moisson de donnees",d:"Coupe les requetes de collecte groupee de ton activite."},
+{k:"blockAnalytics",ic:"M3 3v18h18v-2H5V3H3zm4 12h2v-5H7v5zm4 0h2V7h-2v8zm4 0h2v-3h-2v3z",t:"Analytique des serveurs",d:"Bloque les statistiques d usage collectees sur les serveurs que tu frequentes."},
+{k:"blockErrors",ic:"M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z",t:"Rapports d erreurs detailles",d:"Coupe le second canal de remontee d erreurs, distinct de Sentry."},
+{k:"blockPromotions",ic:"M20 12l-8 8-8-8V4h8l8 8zM7 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z",t:"Promotions et quetes",d:"Coupe le suivi lie aux quetes, offres et promotions poussees dans le client."}];
+var PV_SOCIAL=[
+{k:"silentTyping",ic:"M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zM7 15H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm8 4h-6v-2h6v2zm0-4h-2V9h2v2z",t:"Frappe silencieuse",d:"Personne ne voit plus que tu es en train d ecrire, dans aucun salon."},
+{k:"noAck",ic:"M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zm0 12a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z",t:"Pas d accuse de lecture",d:"Le client ne signale plus quels salons tu as lus. Les pastilles de non-lu deviennent moins fiables."},
+{k:"noPresenceIdle",ic:"M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67V7z",t:"Ne pas signaler l inactivite",d:"Ton statut ne bascule plus tout seul en absent apres quelques minutes sans toucher au clavier.",n:true},
+{k:"noAffinities",ic:"M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13z",t:"Affinites sociales",d:"Discord calcule qui tu frequentes le plus et le renvoie au serveur. Cette liste ne part plus.",n:true},
+{k:"noContacts",ic:"M20 0H4v2h16V0zM4 24h16v-2H4v2zM20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm-8 2.75a2.25 2.25 0 1 1 0 4.5 2.25 2.25 0 0 1 0-4.5zM17 17H7v-1.5c0-1.67 3.33-2.5 5-2.5s5 .83 5 2.5V17z",t:"Synchronisation de contacts",d:"Coupe l envoi de ton carnet et les suggestions d amis qui en decoulent.",n:true},
+{k:"noGuildEvents",ic:"M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-1V1h-2zm3 18H5V8h14v11z",t:"Evenements de serveur",d:"Coupe la remontee de ta participation aux evenements planifies et aux parcours d accueil.",n:true},
+{k:"noActivityShare",ic:"M21 6H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zM11 13H9v2H7v-2H5v-2h2V9h2v2h2v2zm4.5 2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z",t:"Partage de ton activite",d:"Le logiciel que tu utilises cesse d etre annonce a Discord et a tes contacts. Ton statut redevient le tien.",n:true}];
+var PV_EMPREINTE=[
+{k:"stripHeaders",ic:"M3 17h18v2H3v-2zm0-6h18v2H3v-2zm0-6h18v2H3V5z",t:"En-tetes de suivi",d:"Retire x-debug-options et x-discord-timezone des requetes sortantes. L en-tete que Discord exige reste intact.",n:true},
+{k:"spoofHardware",ic:"M15 9H9v6h6V9zm-2 4h-2v-2h2v2zm8-2V9h-2V7a2 2 0 0 0-2-2h-2V3h-2v2h-2V3H9v2H7a2 2 0 0 0-2 2v2H3v2h2v2H3v2h2v2a2 2 0 0 0 2 2h2v2h2v-2h2v2h2v-2h2a2 2 0 0 0 2-2v-2h2v-2h-2v-2h2zm-4 6H7V7h10v10z",t:"Empreinte materielle",d:"Normalise le nombre de coeurs, la memoire et le tactile lus par les pages. Prend effet au redemarrage.",n:true},
+{k:"blockStun",ic:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 17.9A8 8 0 0 1 4 12c0-.6.1-1.2.2-1.8L9 15v1a2 2 0 0 0 2 2v1.9zm6.9-2.5c-.3-.8-1-1.4-1.9-1.4h-1v-3a1 1 0 0 0-1-1H8v-2h2a1 1 0 0 0 1-1V7h2a2 2 0 0 0 2-2v-.4A8 8 0 0 1 17.9 17.4z",t:"Serveurs STUN etrangers",d:"Une connexion audio ou video ne peut plus passer par un relais qui n appartient pas a Discord.",n:true},
+{k:"noDetectables",ic:"M21 6H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zM11 13H9v2H7v-2H5v-2h2V9h2v2h2v2zm4.5 2a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-3a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z",t:"Detection de jeux",d:"Le client cesse de telecharger la liste des logiciels a reconnaitre pour afficher ton activite.",n:true},
+{k:"noExperiments",ic:"M9 2v6.5L4.2 17A2 2 0 0 0 6 20h12a2 2 0 0 0 1.8-3L15 8.5V2H9zm2 2h2v5.1l4.4 7.9H6.6L11 9.1V4z",t:"Assignation aux tests A/B",d:"Coupe la recuperation de ta cohorte de test. Certaines nouveautes peuvent ne plus apparaitre.",n:true},
+{k:"noRecommendations",ic:"M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",t:"Recommandations de serveurs",d:"Discord deduit tes gouts pour te proposer des serveurs. Cette deduction cesse de remonter.",n:true},
+{k:"noVoiceProbe",ic:"M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z",t:"Sondage des regions vocales",d:"Avant chaque appel, le client mesure sa latence vers une dizaine de serveurs repartis dans le monde. Cette carte de ta position cesse d etre dressee.",n:true}];
+var PV_DONNEES=[
+{k:"stripTracking",ic:"M3.9 12a3.1 3.1 0 0 1 3.1-3.1h4V7H7a5 5 0 0 0 0 10h4v-1.9H7A3.1 3.1 0 0 1 3.9 12zM8 13h8v-2H8v2zm9-6h-4v1.9h4a3.1 3.1 0 0 1 0 6.2h-4V17h4a5 5 0 0 0 0-10z",t:"Anti-pistage des liens",d:"Retire utm, fbclid, igshid et une vingtaine d autres marqueurs des liens que tu ouvres."},
+{k:"stripFilenames",ic:"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z",t:"Anonymiser les noms de fichiers",d:"Un fichier envoye s appelle desormais fichier.jpg. Les noms d origine trahissent dates, lieux et prenoms.",n:true},
+{k:"cleanClipboard",ic:"M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z",t:"Nettoyer les liens copies",d:"Chaque lien que tu copies est debarrasse de ses marqueurs avant d atterrir dans le presse-papiers.",n:true},
+{k:"purgeOnQuit",ic:"M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z",t:"Purger les traces a la fermeture",d:"Efface statistiques, journaux et quarantaine en quittant. Tes reglages, eux, sont conserves.",n:true}];
+var PV_GROUPES=[["Telemetrie","Ce que Discord mesure sur ton usage.",PV_TELE],
+["Signaux sociaux","Ce que les autres et le serveur apprennent de ton comportement.",PV_SOCIAL],
+["Empreinte et identite","Ce qui permet de te reconnaitre d une session a l autre.",PV_EMPREINTE],
+["Donnees et traces","Ce que tu emportes avec toi, ou laisses derriere.",PV_DONNEES]];
 function NexiumPrivacyComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
-F.useEffect(function(){_NXP.listeners.push(force);var _r=_NXP.rev;var id=setInterval(function(){if((typeof document==="undefined"||!document.hidden)&&_r!==_NXP.rev){_r=_NXP.rev;force();}},2000);return function(){clearInterval(id);_NXP.listeners=_NXP.listeners.filter(function(f){return f!==force;});};},[]);
+var _t0=F.useState("apercu");var tab=_t0[0];var setTab=_t0[1];
+var _q0=F.useState("");var q=_q0[0];var setQ=_q0[1];
+F.useEffect(function(){
+var vivant=true,att=null;
+var maj=function(){try{if(!vivant||att)return;att=setTimeout(function(){att=null;if(vivant)force();},400);}catch(_){}};
+_NXP.listeners.push(maj);
+var id=setInterval(function(){try{if(typeof document==="undefined"||!document.hidden)maj();}catch(_){}},2500);
+return function(){vivant=false;
+try{if(att)clearTimeout(att);}catch(_){}
+try{clearInterval(id);}catch(_){}
+try{_NXP.listeners=_NXP.listeners.filter(function(f){return f!==maj;});}catch(_){}};},[]);
+var monte=_NXmounted(F);
 var P=_NXpal,cfg=_NXP.cfg,st=_NXP.stats;
-function fmtT(t){var d=new Date(t);return _NXP.pad(d.getHours())+":"+_NXP.pad(d.getMinutes())+":"+_NXP.pad(d.getSeconds());}
-function tog(k){return function(){cfg[k]=!cfg[k];_NXP.saveCfg();force();};}
-var qkeys=Object.keys(cfg.quiet).filter(function(k){return cfg.quiet[k];});
-var activeCount=(cfg.blockTel?1:0)+(cfg.blockSentry?1:0)+(cfg.silentTyping?1:0)+(cfg.noAck?1:0)+(cfg.blockHarvest?1:0)+(cfg.stripTracking?1:0)+(cfg.blockAnalytics?1:0)+(cfg.blockErrors?1:0)+(cfg.blockPromotions?1:0)+(qkeys.length?1:0);
-var anonScore=(cfg.blockTel?20:0)+(cfg.blockHarvest?15:0)+(cfg.silentTyping?12:0)+(cfg.noAck?12:0)+(cfg.stripTracking?9:0)+(cfg.blockSentry?8:0)+(cfg.blockAnalytics?9:0)+(cfg.blockErrors?6:0)+(cfg.blockPromotions?5:0)+(qkeys.length?4:0);if(anonScore>100)anonScore=100;var anonLabel=anonScore>=85?"Maximal":anonScore>=55?"Élevé":anonScore>=25?"Moyen":"Faible";var anonColor=anonScore>=85?_NXpal.ok:anonScore>=55?_NXpal.ok:anonScore>=25?_NXpal.warn:_NXpal.dangerSoft;
-var spark=[];var nowH=new Date();var smax=0;for(var h=23;h>=0;h--){var d=new Date(nowH.getTime()-h*3600000);var k=d.getFullYear()+"-"+_NXP.pad(d.getMonth()+1)+"-"+_NXP.pad(d.getDate())+"-"+_NXP.pad(d.getHours());var b=st.hours[k]||{seen:0,blocked:0};if(b.seen>smax)smax=b.seen;spark.push({seen:b.seen,blocked:b.blocked,h:d.getHours()});}
-var kinds=[{n:"science",c:_NXpal.pale},{n:"track",c:_NXpal.mid},{n:"sentry",c:_NXpal.soft}];
-var kindTot=(st.science||0)+(st.track||0)+(st.sentry||0);
-var statusTxt=activeCount===0?"Aucune protection active":activeCount+" protection"+(activeCount>1?"s":"")+" active"+(activeCount>1?"s":"");
-var conn=(window._NXNET&&_NXNET.conn)?_NXNET.conn:[];
-var ICO={analytics:"M4 20h16v-2H4v2zM6 16h3V9H6v7zm5 0h3V4h-3v12zm5 0h3v-4h-3v4z",errors:"M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V8h2v5z",promo:"M20 12l-8 8-8-8V4h6l10 8h-.01L20 12zm-5-6a1.5 1.5 0 100 3 1.5 1.5 0 000-3z",harvest:"M4 4h16v4H4V4zm2 6h12v10H6V10zm3 3v4h6v-4H9z",link:"M3.9 12a3 3 0 013-3h3v1.9h-3a1.1 1.1 0 100 2.2h3V15h-3a3 3 0 01-3-3zm5-1h6v2H9v-2zm5.1-2h-3V7h3a3 3 0 010 6h-3v-1.9h3a1.1 1.1 0 100-2.2z",tel:"M12 9a3 3 0 0 0 0 6 3 3 0 0 0 0-6zm0 2a1 1 0 1 1 0 2 1 1 0 0 1 0-2zM6.34 6.34 4.93 4.93a10 10 0 0 0 0 14.14l1.41-1.41a8 8 0 0 1 0-11.32zm11.32 0a8 8 0 0 1 0 11.32l1.41 1.41a10 10 0 0 0 0-14.14l-1.41 1.41z",sentry:"M12 2 2 20h20L12 2zm0 5 6.5 11.5h-13L12 7zm-1 4v4h2v-4h-2zm0 5v2h2v-2h-2z",type:"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.58z",eye:"M12 5C6 5 2 12 2 12s4 7 10 7 10-7 10-7-4-7-10-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-2a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"};
-return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
-_NXhead("Confidentialité","Nexium Privacy","Visibilité et contrôle sur ce que ton client transmet. Tout repose sur l'interception locale des requêtes réseau (fetch, XHR, sendBeacon) — patcher.js n'est jamais modifié."),
-_NXcard(i("div",null,_NXch(_T("Ce qui sort de ta machine"),_T("Transparence complète sur les données transmises.")),
-(function(){
-var reg=!(window._NXPR&&_NXPR.cfg&&_NXPR.cfg.noRegistry);
-var rows=[
-{t:"Identifiant Discord",d:reg?"Envoyé au démarrage pour le registre des utilisateurs":"Désactivé : tu ne figures pas dans le registre",on:reg},
-{t:"Signalements de menaces",d:"Uniquement si tu cliques sur « Signaler » (domaine + ton identifiant)",on:true},
-{t:"Contenu de tes messages",d:"Jamais transmis, sous aucune condition",on:false},
-{t:"Statistiques d'usage",d:"Conservées uniquement sur cette machine",on:false},
-{t:"Jetons et mots de passe",d:"Jamais lus ni transmis",on:false}];
-return i("div",null,rows.map(function(r,k2){
-return i("div",{key:k2,style:{display:"flex",alignItems:"flex-start",gap:"11px",padding:"10px 0",borderTop:k2?"1px solid "+P.line:"none"}},
-i("div",{style:{width:"8px",height:"8px",borderRadius:"50%",flexShrink:0,marginTop:"5px",background:r.on?_NXpal.warn:_NXpal.ok}}),
+var sc=_NXP.score();
+var profil=_NXP.profilActuel();
+var arretees=st.blocked||0,vues=st.seen||0,passees=Math.max(0,vues-arretees);
+var col=sc.pct>=80?_NXpal.ok:sc.pct>=40?P.txt:_NXpal.warn;
+function tog(k){return function(){cfg[k]=!cfg[k];_NXP.saveCfg();try{_NXP.applyHardware();}catch(_){}force();};}
+function match(it){var v=(q||"").trim().toLowerCase();if(!v)return true;return (_T(it.t)+" "+_T(it.d)+" "+it.k).toLowerCase().indexOf(v)>=0;}
+function jauge(){
+var out=[];
+for(var a=0;a<sc.total;a++){
+var on=monte&&a<sc.actifs;
+out.push(i("div",{key:a,"aria-hidden":"true",style:{flex:1,minWidth:"3px",borderRadius:"2px",
+height:on?(14+((a*7)%5)*5)+"px":"8px",background:on?col:P.line,opacity:on?1:.75,
+transition:"height .45s cubic-bezier(.22,.8,.28,1),background-color .35s ease,opacity .35s ease",
+transitionDelay:(a*18)+"ms"}}));}
+return i("div",{role:"img","aria-label":sc.actifs+" "+_T("protections actives sur")+" "+sc.total,
+style:{display:"flex",alignItems:"flex-end",gap:"3px",height:"40px",marginTop:"2px"}},out);}
+function fluxBar(){
+var tot=(arretees+passees)||1;
+return i("div",{style:{display:"flex",height:"9px",borderRadius:"99px",overflow:"hidden",background:P.line}},
+i("div",{"aria-hidden":"true",style:{width:(monte?(arretees/tot*100):0)+"%",background:_NXpal.ok,transition:"width .7s cubic-bezier(.22,.8,.28,1)"}}),
+i("div",{"aria-hidden":"true",style:{width:(monte?(passees/tot*100):0)+"%",background:_NXpal.warn,transition:"width .7s cubic-bezier(.22,.8,.28,1)"}}));}
+function histo(){
+var H=[],max=1;
+var maintenant=new Date();
+for(var h=23;h>=0;h--){
+var d=new Date(maintenant.getTime()-h*3600000);
+var k=d.getFullYear()+"-"+_NXP.pad(d.getMonth()+1)+"-"+_NXP.pad(d.getDate())+"-"+_NXP.pad(d.getHours());
+var e=(st.hours&&st.hours[k])||{seen:0,blocked:0};
+H.push({h:d.getHours(),s:e.seen||0,b:e.blocked||0});
+if(e.seen>max)max=e.seen;}
+return i("div",null,
+i("div",{style:{display:"flex",alignItems:"flex-end",gap:"2px",height:"56px"}},
+H.map(function(e,k){
+var ht=Math.max(2,Math.round(e.s/max*54));
+var hb=e.s?Math.round(e.b/e.s*ht):0;
+return i("div",{key:k,title:e.h+"h · "+e.s+" "+_T("interceptees")+" · "+e.b+" "+_T("arretees"),
+style:{flex:1,minWidth:0,height:ht+"px",background:P.line,borderRadius:"2px",overflow:"hidden",
+display:"flex",flexDirection:"column",justifyContent:"flex-end",
+transition:"height .5s cubic-bezier(.22,.8,.28,1)",transitionDelay:(k*8)+"ms"}},
+hb?i("div",{style:{height:hb+"px",background:_NXpal.ok,borderRadius:"2px"}}):null);})),
+i("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"7px",fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint,letterSpacing:".04em"}},
+i("span",null,"-24 h"),i("span",null,_T("maintenant"))));}
+function ligne(it,last){
+var on=!!cfg[it.k];
+return i("div",{key:it.k,className:"nx-fx",role:"button","aria-label":_T(it.t),"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:tog(it.k),
+style:{display:"flex",alignItems:"flex-start",gap:"13px",padding:"14px 0",cursor:"pointer",
+borderBottom:last?"none":"1px solid "+P.line}},
+i("div",{style:{width:"20px",flexShrink:0,marginTop:"1px",color:on?col:P.faint,transition:"color .2s ease"}},
+i("svg",{viewBox:"0 0 24 24",width:18,height:18,fill:"currentColor","aria-hidden":"true"},i("path",{d:it.ic}))),
 i("div",{style:{flex:1,minWidth:0}},
-i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt}},r.t),
-i("div",{style:{fontSize:"12px",color:P.dim,marginTop:"2px",lineHeight:1.5}},r.d)));}));})(),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{_NXPR.cfg.noRegistry=!_NXPR.cfg.noRegistry;_NXPR.saveCfg();_NXPR.notify();force();}catch(_){}},style:{marginTop:"13px",display:"inline-block",padding:"10px 16px",borderRadius:"10px",border:"1px solid "+P.line,color:P.sub,fontSize:"12.5px",fontWeight:"700",cursor:"pointer"}},(window._NXPR&&_NXPR.cfg&&_NXPR.cfg.noRegistry)?"Réintégrer le registre des utilisateurs":"Ne plus figurer dans le registre")),{mb:12}),
-
-i("div",{style:{position:"relative",overflow:"hidden",borderRadius:"18px",border:"1px solid "+P.line,background:"linear-gradient(135deg,#0e0e10,#0a0a0b)",padding:"20px",marginBottom:"12px"}},i("div",{style:{position:"absolute",inset:0,background:"radial-gradient(120% 130% at 85% -10%, "+anonColor+"22, transparent 55%)",pointerEvents:"none"}}),i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"20px"}},i("div",{style:{flexShrink:0,width:"92px",height:"92px",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",background:"conic-gradient("+anonColor+" "+(anonScore*3.6)+"deg, #1a1a1e 0deg)"}},i("div",{style:{width:"74px",height:"74px",borderRadius:"50%",background:_NXpal.panel,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}},i("div",{style:{fontFamily:_NXf.disp,fontSize:"26px",fontWeight:"800",color:P.txt,lineHeight:1}},anonScore),i("div",{style:{fontSize:"8px",fontFamily:_NXf.mono,color:P.faint,letterSpacing:".1em",marginTop:"2px"}},"/ 100"))),i("div",{style:{flex:1,minWidth:0}},i("div",{style:{fontSize:"10px",textTransform:"uppercase",letterSpacing:".14em",color:P.faint,fontWeight:"700"}},"Indice d'anonymat"),i("div",{style:{fontFamily:_NXf.disp,fontSize:"22px",fontWeight:"800",color:anonColor,letterSpacing:"-.02em",marginTop:"3px"}},anonLabel),i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:"1.55",marginTop:"6px"}},anonScore>=85?"Protection maximale — ton client transmet le strict minimum.":"Active plus de protections ci-dessous pour renforcer ton anonymat.")))),
-i("div",{style:{background:"linear-gradient(135deg,#0e0e10,#0a0a0b)",border:"1px solid "+P.line,borderRadius:"16px",padding:"18px",marginBottom:"12px",display:"flex",alignItems:"center",gap:"16px",boxShadow:"inset 0 1px 0 rgba(255,255,255,.05)"}},i("div",{style:{width:"48px",height:"48px",borderRadius:"13px",background:activeCount>0?P.acc:_NXpal.line,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,color:activeCount>0?_NXpal.ink:_NXpal.dim}},i(NexiumPrivacyIcon,null)),i("div",{style:{flex:1}},i("div",{style:{fontFamily:_NXf.disp,fontSize:"18px",fontWeight:"800",color:P.txt,letterSpacing:"-.01em"}},statusTxt),i("div",{style:{fontSize:"12px",color:P.sub,marginTop:"3px"}},i("span",{style:{fontFamily:_NXf.mono}},_NXn(st.blocked))," requêtes bloquées · ",i("span",{style:{fontFamily:_NXf.mono}},_NXn(st.seen))," observées"))),
-_NXcard(i("div",null,_NXch(_T("Télémétrie interceptée"),_T("Requêtes d'analyse envoyées par Discord (/science, /track, Sentry), comptées avant d'être neutralisées.")),
-_NXstrip([{v:_NXn(st.seen),label:"Interceptées"},{v:_NXn(st.blocked),label:"Bloquées",color:st.blocked>0?_NXpal.danger:P.txt},{v:_NXn(_NXP.seen),label:"Cette session"},{v:_NXn(st.flux||0),label:"Events client"}]),
-i("div",{style:{margin:"20px 0 0"}},i("div",{style:{display:"flex",justifyContent:"space-between",fontFamily:_NXf.mono,fontSize:"10px",color:P.dim,marginBottom:"7px"}},i("span",null,"24 DERNIÈRES HEURES"),i("span",null,"clair = bloqué")),i("div",{style:{display:"flex",alignItems:"flex-end",gap:"3px",height:"56px",borderBottom:"1px solid "+P.line,paddingBottom:"1px"}},spark.map(function(s,k){var pct=smax>0?Math.max(3,s.seen/smax*100):3;var bpct=s.seen>0?s.blocked/s.seen*100:0;return i("div",{key:k,title:s.h+"h · "+s.seen+" vus, "+s.blocked+" bloqués",style:{flex:1,height:pct+"%",borderRadius:"2px 2px 1px 1px",background:s.seen>0?"linear-gradient(180deg,#e8e8ea "+bpct+"%,#3a3a40 "+bpct+"%)":_NXpal.raise}});})),_NXaxis(["-24h","-12h","maintenant"])),
-i("div",{style:{marginTop:"18px"}},kinds.map(function(it,k){var v=st[it.n]||0;var share=kindTot>0?Math.round(v/kindTot*100):0;var pct=kindTot>0?Math.max(2,v/kindTot*100):0;return i("div",{key:k,style:{marginBottom:k<2?"10px":0}},i("div",{style:{display:"flex",justifyContent:"space-between",fontSize:"12px",marginBottom:"5px"}},i("span",{style:{color:P.txt,fontWeight:"600"}},"/"+it.n),i("span",{style:{fontFamily:_NXf.mono,color:P.sub}},_NXn(v)+"  ·  "+share+"%")),i("div",{style:{height:"5px",background:_NXpal.raise,borderRadius:"99px",overflow:"hidden"}},i("div",{style:{height:"100%",width:pct+"%",background:it.c,borderRadius:"99px",transition:"width .4s"}})));})))),
-_NXcard(i("div",null,_NXch("Journal en direct"),i("div",{style:{maxHeight:"176px",overflowY:"auto",margin:"0 -4px",padding:"0 4px"}},_NXP.log.length?_NXP.log.slice(0,14).map(function(l,k){return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"12px",padding:"8px 0",borderTop:k>0?"1px solid "+P.line:"none",fontSize:"12px"}},i("span",{style:{fontFamily:_NXf.mono,color:P.faint,fontSize:"11px"}},fmtT(l.t)),i("span",{style:{padding:"2px 9px",borderRadius:"99px",background:P.inset,border:"1px solid "+P.line,color:P.sub,fontSize:"10px",fontWeight:"600"}},"/"+l.kind),i("span",{style:{flex:1}}),i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",fontWeight:"700",letterSpacing:".05em",color:l.blk?_NXpal.danger:P.faint}},l.blk?"BLOQUÉE":"PASSÉE"));}):i("div",{style:{fontSize:"12px",color:P.dim,padding:"8px 0"}},"En attente d'un premier événement de tracking…")))),
-_NXcard(i("div",null,_NXch(_T("Journal de connexion"),_T("Connexions et reconnexions au serveur Discord depuis le démarrage.")),conn.length?i("div",{style:{maxHeight:"150px",overflowY:"auto",margin:"0 -4px",padding:"0 4px"}},conn.slice(0,12).map(function(l,k){return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"12px",padding:"8px 0",borderTop:k>0?"1px solid "+P.line:"none",fontSize:"12px"}},i("span",{style:{fontFamily:_NXf.mono,color:P.faint,fontSize:"11px"}},fmtT(l.t)),i("span",{style:{color:P.sub}},l.type));})):i("div",{style:{fontSize:"12px",color:P.dim}},"Aucun event de connexion pour l'instant."))),
-_NXcard(i("div",null,i("div",{style:{marginBottom:"4px"}},i("div",{style:{fontSize:"11px",fontWeight:"700",letterSpacing:".12em",color:P.dim,textTransform:"uppercase"}},"Contrôles")),
-_NXctrl(ICO.tel,"Bloquer la télémétrie","Annule les requêtes /science et /track. Discord les traite en fire-and-forget : aucun impact sur l'app.",cfg.blockTel,tog("blockTel"),false,false),
-_NXctrl(ICO.sentry,"Bloquer les rapports d'erreurs","Empêche l'envoi des rapports de crash vers Sentry (sentry.io).",cfg.blockSentry,tog("blockSentry"),false,false),
-_NXctrl(ICO.type,"Frappe silencieuse","Empêche l'envoi de l'indicateur « est en train d'écrire » dans tous les salons.",cfg.silentTyping,tog("silentTyping"),false,false),
-_NXctrl(ICO.eye,"Pas d'accusés de lecture","Bloque le marquage automatique des salons comme lus (requête ack).",cfg.noAck,tog("noAck"),false,false),
-_NXctrl(ICO.harvest,"Bloquer la collecte de données","Annule les requêtes de « harvest » (export/collecte de tes données d'usage par Discord).",cfg.blockHarvest,tog("blockHarvest"),false,false),
-_NXctrl(ICO.link,"Anti-pistage des liens","Retire les paramètres de suivi (utm, fbclid, igshid…) des liens que tu ouvres depuis Discord.",cfg.stripTracking,tog("stripTracking"),false,false),
-_NXctrl(ICO.analytics,"Bloquer les analytics de serveur","Annule les requêtes d'analytics (statistiques d'usage collectées sur les serveurs que tu fréquentes).",cfg.blockAnalytics,tog("blockAnalytics"),false,false),
-_NXctrl(ICO.errors,"Bloquer le rapport d'erreurs","Empêche l'envoi des rapports d'erreurs et de plantage détaillés vers Discord.",cfg.blockErrors,tog("blockErrors"),false,false),
-_NXctrl(ICO.promo,"Bloquer promotions & quêtes","Coupe le suivi lié aux quêtes, promotions et offres poussées par Discord.",cfg.blockPromotions,tog("blockPromotions"),false,true))),
-_NXcard(i("div",null,_NXch("Mode discret par serveur","Coupe la frappe et les accusés de lecture uniquement dans les serveurs choisis. Discord n'expose pas de statut invisible par serveur côté client — c'est le contrôle le plus proche réellement applicable.",i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},qkeys.length+" actif"+(qkeys.length>1?"s":""))),qkeys.length?i("div",{style:{marginBottom:"12px"}},qkeys.map(function(g,k){return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"10px",padding:"11px 14px",background:P.inset,border:"1px solid "+P.line,borderRadius:"11px",marginBottom:"8px"}},i("span",{style:{flex:1,fontSize:"13px",color:P.txt,fontWeight:"600",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},_NXguildName(g)),i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){delete cfg.quiet[g];_NXP.saveCfg();force();},style:{cursor:"pointer",color:P.sub,fontSize:"18px",lineHeight:1,padding:"0 4px"}},"×"));})):i("div",{style:{fontSize:"12px",color:P.dim,marginBottom:"12px"}},"Aucun serveur en mode discret."),i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){var g=_NXP.currentGuild();if(!g){window.alert("Ouvre d'abord un serveur, puis réessaie.");return;}cfg.quiet[g]=true;_NXP.saveCfg();force();},style:{textAlign:"center",padding:"12px",borderRadius:"11px",background:P.inset,border:"1px solid "+P.line,color:_NXpal.pale,fontSize:"12px",fontWeight:"600",cursor:"pointer"}},"+ Ajouter le serveur actuel"))),
-i("div",{style:{display:"flex",gap:"10px",marginTop:"4px"}},_NXbtn("Rafraîchir",function(){force();}),_NXbtn("Réinitialiser les compteurs",function(){if(window.confirm("Remettre à zéro les compteurs de télémétrie ?")){_NXP.resetStats();force();}},"danger")),
-(function(){var B=(window._NXP&&_NXP.blocked)||[];
-return _NXcard(i("div",null,_NXch(_T("Requêtes bloquées"),_T("Le détail des requêtes de télémétrie réellement bloquées, avec l'heure et le domaine.")),
-B.length?i("div",{style:{maxHeight:"200px",overflowY:"auto"}},B.slice(0,15).map(function(r,k){
-var d=new Date(r.t);var hh=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)+":"+("0"+d.getSeconds()).slice(-2);
-var lab=r.k==="harvest"?"Collecte":r.k==="analytics"?"Analytics":r.k==="errors"?"Rapport d erreur":r.k==="promotions"?"Promotions":r.k==="sentry"?"Sentry":r.k==="science"?"Telemetrie":r.k==="track"?"Pistage":r.k;
-return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 10px",background:P.inset,border:"1px solid "+P.line,borderRadius:"9px",marginBottom:"5px"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},
+i("div",{style:{fontSize:"13.5px",fontWeight:"600",color:on?P.txt:P.sub,letterSpacing:"-.01em",transition:"color .2s ease"}},_T(it.t)),
+it.n?_NXneuf():null),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"4px",lineHeight:1.55}},_T(it.d))),
+i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{width:"38px",height:"22px",borderRadius:"11px",flexShrink:0,marginTop:"1px",
+background:on?col:"transparent",border:"1px solid "+(on?col:P.faint)}},
+i("div",{style:{width:"14px",height:"14px",borderRadius:"50%",margin:"3px",
+background:on?_NXpal.ink:P.faint,transform:on?"translateX(16px)":"none"}})));}
+function groupe(nom,desc,liste){
+var L=liste.filter(match);
+if(!L.length)return null;
+var n=0;for(var a=0;a<L.length;a++)if(cfg[L[a].k])n++;
+return _NXcard(i("div",null,
+_NXch(_T(nom),_T(desc),i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:n?col:P.faint,whiteSpace:"nowrap"}},n+"/"+L.length)),
+L.map(function(it,k){return ligne(it,k===L.length-1);})),{mb:12});}
+var TABS=[["apercu","Aperçu"],["reglages","Réglages"],["journal","Journal"],["serveurs","Serveurs"]];
+function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Privacy"),
+style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
+TABS.map(function(t){var on=tab===t[0];
+return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,"data-nx-tab":"1",
+"aria-label":_T(t[1]),
+onClick:function(){if(tab!==t[0]){setTab(t[0]);setQ("");}},
+style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",
+letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
+_T(t[1]),
+i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",borderRadius:"2px",
+background:P.txt,transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
+transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function tApercu(){
+var fams=[];
+try{for(var k in _NXP.KINDS){var v=st[k]||0;if(v>0)fams.push([k,v]);}
+fams.sort(function(x,y){return y[1]-x[1];});}catch(_){}
+var maxF=fams.length?fams[0][1]:1;
+return i("div",null,
+i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,borderRadius:"22px",
+background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",padding:"25px 24px",marginBottom:"14px"}},
+i("div",{style:{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:"14px",flexWrap:"wrap",marginBottom:"4px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint}},_T("Niveau de discretion")),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},sc.actifs+" / "+sc.total)),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"12px",flexWrap:"wrap",marginBottom:"12px"}},
+i("div",{key:"p"+sc.pct,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"40px",fontWeight:"800",color:col,letterSpacing:"-.045em",lineHeight:1}},sc.pct+"%"),
+i("div",{style:{fontSize:"13px",color:P.sub,fontWeight:"600"}},
+_T(sc.pct>=80?"Discretion maximale":sc.pct>=40?"Discretion partielle":"Client bavard"))),
+jauge(),
+i("div",{style:{marginTop:"22px",paddingTop:"19px",borderTop:"1px solid "+P.line}},
+i("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:"12px",marginBottom:"9px",flexWrap:"wrap"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".14em",textTransform:"uppercase",color:P.faint}},_T("Flux sortant intercepte")),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},_NXn(vues)+" "+_T("requetes"))),
+fluxBar(),
+i("div",{style:{display:"flex",gap:"18px",flexWrap:"wrap",marginTop:"11px"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px"}},
+i("span",{style:{width:"7px",height:"7px",borderRadius:"2px",background:_NXpal.ok,flexShrink:0}}),
+i("span",{style:{fontSize:"11.5px",color:P.sub}},_NXn(arretees)+" "+_T("arretees"))),
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px"}},
+i("span",{style:{width:"7px",height:"7px",borderRadius:"2px",background:_NXpal.warn,flexShrink:0}}),
+i("span",{style:{fontSize:"11.5px",color:P.sub}},_NXn(passees)+" "+_T("laissees passer")))))),
+_NXcard(i("div",null,
+_NXch(_T("Profil de discretion"),_T("Trois reglages d ensemble. Tu peux ensuite ajuster chaque option."),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:profil==="perso"?_NXpal.warn:P.faint,textTransform:"uppercase",letterSpacing:".08em"}},
+profil==="perso"?_T("perso"):"")),
+i("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap"}},
+[["discret","Discret","Coupe la telemetrie, ne change rien a ton usage"],
+["renforce","Renforcé","Coupe aussi les signaux sociaux et l empreinte"],
+["maximal","Maximal","Tout, y compris ce qui degrade le confort"]].map(function(p){
+var on=profil===p[0];
+return i("div",{key:p[0],className:"nx-fx",role:"button","aria-label":_T(p[1]),"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){_NXP.appliquerProfil(p[0]);force();},
+style:{flex:1,minWidth:"142px",padding:"13px 14px",borderRadius:"13px",cursor:"pointer",
+background:on?P.inset:"transparent",border:"1px solid "+(on?col:P.line)}},
+i("div",{style:{fontSize:"13px",fontWeight:"800",color:on?P.txt:P.sub}},_T(p[1])),
+i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"4px",lineHeight:1.45}},_T(p[2])));}))),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Heures discrètes"),_T("Sur une plage horaire choisie, le client passe tout seul en confidentialite maximale, puis rend tes reglages."),
+_NXneuf()),
+i("div",{className:"nx-fx",role:"button","aria-label":_T("Activer les heures discretes"),
+"aria-pressed":cfg.quietOn?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){cfg.quietOn=!cfg.quietOn;_NXP.saveCfg();try{_NXP.quietTick();}catch(_){}force();},
+style:{display:"flex",alignItems:"center",gap:"13px",padding:"12px 0",cursor:"pointer",
+borderBottom:"1px solid "+P.line}},
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13.5px",fontWeight:"600",color:cfg.quietOn?P.txt:P.sub}},
+_T("Basculer automatiquement")),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"4px",lineHeight:1.55}},
+cfg.quietOn?(_NXP.quietActif()?_T("En cours : tout est coupe jusqu a ")+cfg.quietFin+" h"
+:_T("En attente : demarrera a ")+cfg.quietDebut+" h")
+:_T("Une fois actif, rien a faire : la bascule se declenche a l heure dite."))),
+i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{width:"38px",height:"22px",borderRadius:"11px",flexShrink:0,
+background:cfg.quietOn?col:"transparent",border:"1px solid "+(cfg.quietOn?col:P.faint)}},
+i("div",{style:{width:"14px",height:"14px",borderRadius:"50%",margin:"3px",
+background:cfg.quietOn?_NXpal.ink:P.faint,transform:cfg.quietOn?"translateX(16px)":"none"}}))),
+cfg.quietOn?i("div",{style:{display:"flex",gap:"22px",flexWrap:"wrap",paddingTop:"15px"}},
+[["quietDebut",_T("Debut")],["quietFin",_T("Fin")]].map(function(o){
+return i("div",{key:o[0],style:{flex:1,minWidth:"180px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:".09em",textTransform:"uppercase",
+color:P.dim,marginBottom:"8px"}},o[1]),
+i("div",{style:{display:"flex",gap:"4px",flexWrap:"wrap"}},
+[0,2,4,6,8,10,12,14,16,18,20,22].map(function(h){
+var on=cfg[o[0]]===h;
+return i("div",{key:h,className:"nx-fx",role:"button","aria-label":h+" h",
+"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){cfg[o[0]]=h;_NXP.saveCfg();try{_NXP.quietTick();}catch(_){}force();},
+style:{padding:"6px 9px",borderRadius:"8px",cursor:"pointer",fontFamily:_NXf.mono,fontSize:"10.5px",
+background:on?P.inset:"transparent",border:"1px solid "+(on?P.txt:P.line),
+color:on?P.txt:P.dim}},h+"h");})));})):null),{mb:12}),
+(function(){var B=_NXP.bilan(7);
+if(!B.total)return null;
+var mx=1;for(var a=0;a<B.parJour.length;a++)if(B.parJour[a].n>mx)mx=B.parJour[a].n;
+var JJ=["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
+return _NXcard(i("div",null,
+_NXch(_T("Ta semaine"),_T("Ce qui a ete arrete sur les sept derniers jours.")),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"11px",marginBottom:"15px"}},
+i("div",{key:"b"+B.total,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"30px",fontWeight:"800",
+color:_NXpal.ok,letterSpacing:"-.04em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},_NXn(B.total)),
+i("div",{style:{fontSize:"12.5px",color:P.sub}},_T("requetes arretees cette semaine"))),
+i("div",{style:{display:"flex",alignItems:"flex-end",gap:"6px",height:"52px"}},
+B.parJour.map(function(o,k){
+var ht=o.n?Math.max(4,Math.round(o.n/mx*50)):3;
+return i("div",{key:k,style:{flex:1,minWidth:0,display:"flex",flexDirection:"column",
+alignItems:"center",gap:"5px"}},
+i("div",{title:o.n+" "+_T("arretees"),style:{width:"100%",height:ht+"px",borderRadius:"3px",
+background:o.n?_NXpal.ok:P.line,
+transition:"height .5s cubic-bezier(.22,.8,.28,1)",transitionDelay:(k*40)+"ms"}}));})),
+i("div",{style:{display:"flex",gap:"6px",marginTop:"7px"}},
+B.parJour.map(function(o,k){
+return i("div",{key:k,style:{flex:1,textAlign:"center",fontFamily:_NXf.mono,
+fontSize:"9.5px",color:P.faint}},JJ[o.j]);}))),{mb:12});})(),
+_NXcard(i("div",null,_NXch(_T("Activite des 24 dernieres heures"),_T("En clair ce qui a ete intercepte, en vert ce qui a ete arrete.")),histo()),{mb:12}),
+fams.length?_NXcard(i("div",null,
+_NXch(_T("Ce qui cherche a sortir"),_T("Par famille, depuis l installation.")),
+fams.slice(0,8).map(function(o,k,arr){
+var pct=Math.max(3,Math.round(o[1]/maxF*100));
+return i("div",{key:o[0],style:{padding:"9px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{style:{display:"flex",justifyContent:"space-between",gap:"12px",marginBottom:"6px"}},
+i("span",{style:{fontSize:"12.5px",color:P.sub}},_T(_NXP.kindFr(o[0]))),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.txt}},_NXn(o[1]))),
+i("div",{"data-nx-bar":"1",style:{height:"4px",borderRadius:"99px",background:P.line,overflow:"hidden"}},
+i("div",{style:{height:"100%",borderRadius:"99px",background:P.mid,
+transform:"scaleX("+(monte?pct/100:0)+")",transformOrigin:"left center"}})));})),{mb:12}):null,
+_NXcard(i("div",null,_NXch(_T("Ce qui sort de cette machine"),_T("La liste complete, sans exception.")),
+[[_T("Contenu de tes messages"),_T("Jamais transmis, sous aucune condition"),false],
+[_T("Jetons et mots de passe"),_T("Jamais lus ni transmis"),false],
+[_T("Statistiques d usage Nexium"),_T("Calculees et gardees sur cette machine"),false],
+[_T("Base de menaces"),_T("Telechargee depuis le depot Nexium, rien n est envoye en retour"),false],
+[_T("Signalements de menaces"),_T("Uniquement si tu cliques sur Signaler : domaine et identifiant Discord"),true]].map(function(r,k,arr){
+return i("div",{key:k,style:{display:"flex",alignItems:"flex-start",gap:"11px",padding:"11px 0",
+borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{style:{width:"7px",height:"7px",borderRadius:"50%",flexShrink:0,marginTop:"5px",background:r[2]?_NXpal.warn:_NXpal.ok}}),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13px",fontWeight:"600",color:P.txt}},r[0]),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"3px",lineHeight:1.5}},r[1])));})),{mb:0}));}
+function tReglages(){
+var vide=!PV_TELE.filter(match).length&&!PV_SOCIAL.filter(match).length&&!PV_EMPREINTE.filter(match).length&&!PV_DONNEES.filter(match).length;
+return i("div",null,
+i("div",{style:{position:"relative",marginBottom:"12px"}},
+i("input",{value:q,onChange:function(e){setQ(e.target.value);},placeholder:_T("Rechercher un reglage…"),spellCheck:false,
+"aria-label":_T("Rechercher un reglage"),
+style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,borderRadius:"11px",
+padding:"11px 13px",color:P.txt,fontSize:"12.5px",outline:"none",fontFamily:"inherit"}}),
+q?i("div",{className:"nx-fx",role:"button","aria-label":_T("Effacer la recherche"),tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){setQ("");},
+style:{position:"absolute",right:"11px",top:"10px",color:P.faint,fontSize:"14px",cursor:"pointer",lineHeight:1}},"\u00d7"):null),
+vide?_NXcard(i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},_T("Aucun reglage ne correspond a cette recherche.")),{mb:12}):null,
+PV_GROUPES.map(function(g,k){return i("div",{key:k},groupe(g[0],g[1],g[2]));}));}
+function tJournal(){
+var B=(window._NXP&&Array.isArray(_NXP.blocked))?_NXP.blocked:[];
+var L=_NXP.log||[];
+var conn=(window._NXNET&&_NXNET.conn)?_NXNET.conn:[];
+if(!B.length&&!L.length&&!conn.length)
+return _NXcard(i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},
+_T("Rien a afficher pour l instant. Active des reglages, puis reviens : chaque requete interceptee apparaitra ici, a la seconde pres.")),{mb:0});
+return i("div",null,
+B.length?_NXcard(i("div",null,
+_NXch(_T("Requetes arretees"),_T("Ce qui n a pas quitte cette machine."),
+_NXbtn(_T("Vider"),function(){_NXP.blocked=[];force();})),
+i("div",{style:{maxHeight:"260px",overflowY:"auto",margin:"0 -2px",padding:"0 2px"}},
+B.slice(0,40).map(function(r,k){
+var d=new Date(r.t);
+var hh=_NXP.pad(d.getHours())+":"+_NXP.pad(d.getMinutes())+":"+_NXP.pad(d.getSeconds());
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 11px",
+background:P.inset,border:"1px solid "+P.line,borderRadius:"9px",marginBottom:"5px"}},
 i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0}},hh),
-i("span",{style:{fontSize:"11px",fontWeight:"700",color:_NXpal.okSoft,flexShrink:0}},lab),
-i("span",{style:{fontSize:"11px",color:P.dim,fontFamily:_NXf.mono,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},r.h));}))
-:i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.55}},"Rien de bloque pour le moment. Active des protections ci-dessus, puis reviens : chaque requete bloquee apparaitra ici avec son horaire.")),{mb:12});})(),
-_NXfoot("fetch · XHR · sendBeacon · localStorage[nexium_privacy_v1]")));
+i("span",{style:{fontSize:"11px",fontWeight:"700",color:_NXpal.ok,flexShrink:0,whiteSpace:"nowrap"}},_T(_NXP.kindFr(r.k))),
+i("span",{style:{flex:1,minWidth:0,fontSize:"11px",color:P.dim,fontFamily:_NXf.mono,
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},r.h));}))),{mb:12}):null,
+L.length?_NXcard(i("div",null,_NXch(_T("Flux en direct"),_T("Tout ce qui est intercepte, arrete ou non.")),
+i("div",{style:{maxHeight:"200px",overflowY:"auto"}},
+L.slice(0,30).map(function(e,k){
+var d=new Date(e.t);
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"10px",padding:"7px 0",
+borderBottom:"1px solid "+P.line}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0}},
+_NXP.pad(d.getHours())+":"+_NXP.pad(d.getMinutes())+":"+_NXP.pad(d.getSeconds())),
+i("span",{style:{width:"6px",height:"6px",borderRadius:"50%",flexShrink:0,background:e.b?_NXpal.ok:_NXpal.warn}}),
+i("span",{style:{flex:1,minWidth:0,fontSize:"11.5px",color:P.sub}},_T(_NXP.kindFr(e.k))),
+i("span",{style:{fontSize:"10.5px",color:P.faint,flexShrink:0}},e.b?_T("arretee"):_T("passee")));}))),{mb:12}):null,
+conn.length?_NXcard(i("div",null,_NXch(_T("Connexions au serveur Discord"),_T("Depuis le demarrage de ce client.")),
+i("div",{style:{maxHeight:"150px",overflowY:"auto"}},
+conn.slice(0,14).map(function(c,k){
+var d=new Date(c.t||Date.now());
+return i("div",{key:k,style:{display:"flex",gap:"10px",padding:"6px 0",borderBottom:"1px solid "+P.line}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0}},
+_NXP.pad(d.getHours())+":"+_NXP.pad(d.getMinutes())),
+i("span",{style:{fontSize:"11.5px",color:P.sub}},String(c.k||c.t||"")));}))),{mb:12}):null,
+_NXcard(i("div",null,_NXch(_T("Compteurs"),_T("Depuis l installation du client.")),
+_NXstrip([{v:_NXn(vues),label:_T("Interceptees")},
+{v:_NXn(arretees),label:_T("Arretees"),color:arretees?_NXpal.ok:P.txt},
+{v:_NXn(_NXP.seen||0),label:_T("Cette session")},
+{v:_NXn(_NXP.nBlocked||0),label:_T("Arretees ici")}]),
+i("div",{style:{display:"flex",gap:"9px",marginTop:"16px",flexWrap:"wrap"}},
+_NXbtn(_T("Reinitialiser les compteurs"),function(){
+if(window.confirm(_T("Remettre tous les compteurs de vie privee a zero ?"))){_NXP.resetStats();force();}}),
+_NXbtn(_T("Purger les traces maintenant"),function(){
+var n=_NXP.purgeTraces(true);
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast(n+" "+_T("trace(s) effacee(s)."),1);}catch(_){}
+force();}))),{mb:0}));}
+function tServeurs(){
+var qk=Object.keys(cfg.quiet||{}).filter(function(k){return cfg.quiet[k];});
+var mesG=[];
+try{var GS=_NXcommon().store("GuildStore");
+var all=GS&&GS.getGuilds&&GS.getGuilds();
+if(all)for(var gid in all)mesG.push({id:gid,name:(all[gid]&&all[gid].name)||gid});
+mesG.sort(function(x,y){return String(x.name).localeCompare(String(y.name));});}catch(_){}
+return i("div",null,
+_NXcard(i("div",null,
+_NXch(_T("Mode discret par serveur"),_T("Coupe la frappe et les accuses de lecture dans les serveurs choisis, sans toucher aux autres."),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:qk.length?col:P.faint}},qk.length+"")),
+mesG.length?i("div",{style:{maxHeight:"420px",overflowY:"auto",margin:"0 -2px",padding:"0 2px"}},
+mesG.map(function(g,k,arr){
+var on=!!(cfg.quiet&&cfg.quiet[g.id]);
+return i("div",{key:g.id,className:"nx-fx",role:"button","aria-label":g.name,"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){cfg.quiet[g.id]=!on;_NXP.saveCfg();force();},
+style:{display:"flex",alignItems:"center",gap:"12px",padding:"11px 0",cursor:"pointer",
+borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{style:{flex:1,minWidth:0,fontSize:"13px",color:on?P.txt:P.sub,fontWeight:on?"600":"400",
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},g.name),
+i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{width:"38px",height:"22px",borderRadius:"11px",flexShrink:0,
+background:on?col:"transparent",border:"1px solid "+(on?col:P.faint)}},
+i("div",{style:{width:"14px",height:"14px",borderRadius:"50%",margin:"3px",
+background:on?_NXpal.ink:P.faint,transform:on?"translateX(16px)":"none"}})));}))
+:i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},
+_T("La liste des serveurs n est pas encore chargee. Reviens dans quelques secondes."))),{mb:0}));}
+return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
+_NXhead(_T("Confidentialité"),"Nexium Privacy",_T("Ce que ton client transmet, et ce qu il cesse de transmettre. Tout est intercepte localement : fetch, XHR, balises et evenements internes.")),
+tabbar(),
+i("div",{key:tab,"data-nx-panel":"1"},
+tab==="apercu"?tApercu():tab==="reglages"?tReglages():tab==="journal"?tJournal():tServeurs()),
+_NXfoot("Nexium Privacy · interception locale, aucune donnée envoyée")));
 }
 
-var NexiumNetworkIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:18,height:18},i("path",{d:"M12 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM5.6 11.6 4.2 10.2a11 11 0 0 1 15.6 0l-1.4 1.4a9 9 0 0 0-12.8 0zm2.8 2.8L7 13a7 7 0 0 1 10 0l-1.4 1.4a5 5 0 0 0-7.2 0z"}));};
+var NexiumNetworkIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:18,height:18,"aria-hidden":"true"},i("path",{d:"M17 16l-4-4V8.82C14.16 8.4 15 7.3 15 6c0-1.66-1.34-3-3-3S9 4.34 9 6c0 1.3.84 2.4 2 2.82V12l-4 4H3v5h5v-3.05l4-4.2 4 4.2V21h5v-5h-4z"}));};
 function NexiumNetworkComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
-F.useEffect(function(){var net=window._NXNET;if(net){net.listeners.push(force);}var _r=_NXNET.count+_NXNET.conn.length;var id=setInterval(function(){var _n=_NXNET.count+_NXNET.conn.length;if((typeof document==="undefined"||!document.hidden)&&_r!==_n){_r=_n;force();}},1500);return function(){clearInterval(id);if(net)net.listeners=net.listeners.filter(function(f){return f!==force;});};},[]);
-var P=_NXpal;var net=window._NXNET||{samples:[],conn:[],count:0};
-function fmtT(t){var d=new Date(t);function p(n){return n<10?"0"+n:""+n;}return p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds());}
-var ss=net.samples||[];var last=ss.length?ss[ss.length-1].ms:0;var mn=Infinity,mx=0,sum=0;for(var a=0;a<ss.length;a++){var m=ss[a].ms;if(m<mn)mn=m;if(m>mx)mx=m;sum+=m;}if(mn===Infinity)mn=0;var avg=ss.length?Math.round(sum/ss.length):0;
-var now=Date.now();var rpm=0;for(var b=0;b<ss.length;b++)if(now-ss[b].t<60000)rpm++;var jit=0;if(ss.length>1){var vs=0;for(var jb=0;jb<ss.length;jb++){var dv=ss[jb].ms-avg;vs+=dv*dv;}jit=Math.round(Math.sqrt(vs/ss.length));}
-var bars=ss.slice(-60);var scale=Math.max(mx,150);
-function lat(ms){return ms<120?{t:"Excellente",c:_NXpal.okSoft}:ms<300?{t:"Correcte",c:_NXpal.warnSoft}:{t:"Lente",c:_NXpal.dangerSoft};}
-var q=lat(last||avg);
-return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
-_NXhead("Réseau","Nexium Réseau","Latence mesurée passivement sur les requêtes API que Discord effectue déjà — aucune requête supplémentaire n'est générée."),
-i("div",{style:{background:"linear-gradient(135deg,#0e0e10,#0a0a0b)",border:"1px solid "+P.line,borderRadius:"16px",padding:"20px",marginBottom:"12px",boxShadow:"inset 0 1px 0 rgba(255,255,255,.05)"}},i("div",{style:{display:"flex",alignItems:"baseline",gap:"10px"}},i("div",{style:{fontFamily:_NXf.mono,fontSize:"40px",fontWeight:"600",color:P.txt,letterSpacing:"-.03em",lineHeight:1}},last||avg),i("div",{style:{fontFamily:_NXf.mono,fontSize:"15px",color:P.dim}},"ms")),i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"10px"}},i("div",{style:{width:"8px",height:"8px",borderRadius:"50%",background:q.c}}),i("div",{style:{fontSize:"13px",fontWeight:"600",color:P.sub}},"Latence "+q.t.toLowerCase()))),
-(function(){
-var q=avg<80?{t:"Excellente",c:_NXpal.ok,d:"Ta connexion à Discord est très bonne."}:avg<160?{t:"Correcte",c:_NXpal.okSoft,d:"Latence normale, aucun impact perceptible."}:avg<300?{t:"Moyenne",c:_NXpal.warn,d:"Tu peux ressentir de légers retards en vocal."}:{t:"Faible",c:_NXpal.danger,d:"Latence élevée : vocal et envois peuvent être lents."};
-var st=jit<30?{t:"Stable",c:_NXpal.ok}:jit<80?{t:"Variable",c:_NXpal.warn}:{t:"Instable",c:_NXpal.danger};
-return i("div",{style:{position:"relative",overflow:"hidden",borderRadius:"18px",border:"1px solid "+P.line,background:P.panel,padding:"22px",marginBottom:"12px"}},
-i("div",{style:{position:"absolute",inset:0,background:"radial-gradient(120% 130% at 85% -10%, "+q.c+"22, transparent 55%)",pointerEvents:"none"}}),
-i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"20px",flexWrap:"wrap"}},
-i("div",{style:{flex:1,minWidth:"170px"}},
-i("div",{style:{fontSize:"10px",textTransform:"uppercase",letterSpacing:".14em",color:P.faint,fontWeight:"700"}},"Qualité de connexion"),
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"24px",fontWeight:"800",color:q.c,letterSpacing:"-.02em",marginTop:"3px"}},q.t),
-i("div",{style:{fontSize:"12.5px",color:P.sub,marginTop:"6px",lineHeight:1.5}},q.d)),
+var _t0=F.useState("direct");var tab=_t0[0];var setTab=_t0[1];
+F.useEffect(function(){
+var vivant=true,att=null;
+var maj=function(){try{if(!vivant||att)return;att=setTimeout(function(){att=null;if(vivant)force();},450);}catch(_){}};
+try{if(window._NXNET)_NXNET.listeners.push(maj);}catch(_){}
+var id=setInterval(function(){try{if(typeof document==="undefined"||!document.hidden)maj();}catch(_){}},2000);
+return function(){vivant=false;
+try{if(att)clearTimeout(att);}catch(_){}
+try{clearInterval(id);}catch(_){}
+try{if(window._NXNET)_NXNET.listeners=_NXNET.listeners.filter(function(f){return f!==maj;});}catch(_){}};},[]);
+var monte=_NXmounted(F);
+var P=_NXpal;
+var net=window._NXNET;
+if(!net||!net.stats)return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
+_NXhead(_T("Réseau"),"Nexium Réseau",_T("Mesure passive de la latence.")),
+_NXcard(i("div",{style:{fontSize:"12.5px",color:_NXpal.warn,lineHeight:1.6}},
+_T("Le module reseau n a pas demarre sur ce client.")),{mb:0})));
+var S=net.stats();
+var ss=net.samples||[];
+var seuil=net.cfg.seuil;
+function qualite(ms){
+if(!ms)return {t:_T("En attente"),c:P.dim,d:_T("Aucune requete mesuree pour l instant.")};
+if(ms<80)return {t:_T("Excellente"),c:_NXpal.ok,d:_T("La liaison avec Discord est tres bonne.")};
+if(ms<160)return {t:_T("Correcte"),c:_NXpal.ok,d:_T("Latence normale, aucun impact perceptible.")};
+if(ms<seuil)return {t:_T("Moyenne"),c:_NXpal.warn,d:_T("Les envois peuvent marquer un temps.")};
+return {t:_T("Lente"),c:_NXpal.danger,d:_T("Au-dela de ton seuil : messages et vocal en souffrent.")};}
+var Q=qualite(S.avg);
+function stab(){
+if(!S.n)return {t:_T("Inconnue"),c:P.dim};
+if(S.gigue<30)return {t:_T("Stable"),c:_NXpal.ok};
+if(S.gigue<80)return {t:_T("Variable"),c:_NXpal.warn};
+return {t:_T("Instable"),c:_NXpal.danger};}
+var ST=stab();
+function trace(){
+var vals=ss.slice(-72);
+if(!vals.length)return i("div",{style:{height:"86px",display:"flex",alignItems:"center",justifyContent:"center",
+fontSize:"12px",color:P.dim}},_T("En attente des premieres requetes…"));
+var mx=Math.max(S.max,seuil,120);
+var W=100,H=86;
+var pas=vals.length>1?(W/(vals.length-1)):W;
+var pts=[],aire=["M 0 "+H];
+for(var a=0;a<vals.length;a++){
+var x=(a*pas).toFixed(2);
+var y=(H-Math.max(2,Math.min(H-2,vals[a].ms/mx*H))).toFixed(2);
+pts.push(x+","+y);
+aire.push("L "+x+" "+y);}
+aire.push("L "+W+" "+H+" Z");
+var ySeuil=(H-Math.max(2,Math.min(H-2,seuil/mx*H))).toFixed(2);
+return i("div",{style:{position:"relative",height:H+"px"}},
+i("svg",{viewBox:"0 0 "+W+" "+H,preserveAspectRatio:"none",
+style:{width:"100%",height:H+"px",display:"block",overflow:"visible"},"aria-hidden":"true"},
+i("defs",null,i("linearGradient",{id:"nxnetg","x1":"0","y1":"0","x2":"0","y2":"1"},
+i("stop",{offset:"0%","stop-color":Q.c,"stop-opacity":"0.28"}),
+i("stop",{offset:"100%","stop-color":Q.c,"stop-opacity":"0"}))),
+i("line",{x1:"0",y1:ySeuil,x2:W,y2:ySeuil,stroke:_NXpal.warn,"stroke-width":"0.6",
+"stroke-dasharray":"2 2","stroke-opacity":"0.55"}),
+i("path",{d:aire.join(" "),fill:"url(#nxnetg)"}),
+i("polyline",{points:pts.join(" "),fill:"none",stroke:Q.c,"stroke-width":"1.4",
+"stroke-linejoin":"round","stroke-linecap":"round",
+style:{opacity:monte?1:0,transition:"opacity .6s ease"}})),
+i("div",{style:{position:"absolute",right:"2px",top:"-4px",fontFamily:_NXf.mono,fontSize:"9px",
+color:_NXpal.warn,opacity:.8}},_T("seuil")+" "+seuil+" ms"));}
+function chiffre(v,lab,c){return i("div",{style:{flex:1,minWidth:"70px"}},
+i("div",{key:"v"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"21px",fontWeight:"800",
+color:c||P.txt,letterSpacing:"-.035em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
+i("div",{style:{fontSize:"10px",color:P.dim,marginTop:"5px"}},lab));}
+var TABS=[["direct","En direct"],["hotes","Hôtes"],["routes","Routes"],["reglages","Réglages"]];
+function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Réseau"),
+style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
+TABS.map(function(t){var on=tab===t[0];
+return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+"aria-label":_T(t[1]),onClick:function(){if(tab!==t[0])setTab(t[0]);},
+style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",
+letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
+_T(t[1]),
+i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",
+borderRadius:"2px",background:P.txt,transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
+transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function tDirect(){
+var H=net.heures(24);
+var hmax=1;for(var a=0;a<H.length;a++)if(H[a].moy>hmax)hmax=H[a].moy;
+var coup=(net.hist&&net.hist.coupures)||[];
+return i("div",null,
+i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
+borderRadius:"22px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",padding:"24px",marginBottom:"14px"}},
+i("div",{style:{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:"18px",flexWrap:"wrap",marginBottom:"18px"}},
+i("div",{style:{flex:1,minWidth:"180px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"8px"}},_T("Qualite de liaison")),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"11px",flexWrap:"wrap"}},
+i("div",{key:"a"+S.avg,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"38px",fontWeight:"800",
+color:Q.c,letterSpacing:"-.045em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},S.avg+" ms"),
+i("div",{style:{fontSize:"13px",color:P.sub,fontWeight:"600"}},Q.t)),
+i("div",{style:{fontSize:"12px",color:P.dim,marginTop:"8px",lineHeight:1.55}},Q.d)),
 i("div",{style:{textAlign:"right"}},
-i("div",{style:{fontSize:"10px",textTransform:"uppercase",letterSpacing:".14em",color:P.faint,fontWeight:"700"}},"Stabilité"),
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"20px",fontWeight:"800",color:st.c,marginTop:"3px"}},st.t),
-i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"3px"}},"gigue "+jit+" ms"))));})(),
-_NXcard(_NXstrip([{v:avg,label:"Moyenne ms"},{v:mn,label:"Min ms"},{v:mx,label:"Max ms"},{v:jit,label:"Gigue ms",color:jit<40?_NXpal.okSoft:jit<100?_NXpal.warnSoft:_NXpal.dangerSoft},{v:_NXn(net.count||0),label:"Requêtes"}]),{pad:"20px 18px"}),
-_NXcard(i("div",null,_NXch("Latence en direct",null,i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},rpm+" req/min")),bars.length?i("div",null,i("div",{style:{display:"flex",alignItems:"flex-end",gap:"2px",height:"110px",borderBottom:"1px solid "+P.line,paddingBottom:"1px"}},bars.map(function(s,k){var pct=Math.max(3,s.ms/scale*100);var col=s.ms<120?"linear-gradient(180deg,#cde0d4,#5a6a5e)":s.ms<300?"linear-gradient(180deg,#e0dbc4,#6a6650)":"linear-gradient(180deg,#e0c4c4,#6a5050)";return i("div",{key:k,title:s.ms+" ms",style:{flex:1,height:pct+"%",borderRadius:"2px 2px 1px 1px",background:col}});})),_NXaxis(["plus ancien","→","maintenant"])):i("div",{style:{fontSize:"12px",color:P.dim}},"En attente d'une première requête API…"))),
-_NXcard(i("div",null,_NXch("Journal de connexion"),(net.conn&&net.conn.length)?i("div",{style:{maxHeight:"170px",overflowY:"auto"}},net.conn.slice(0,14).map(function(l,k){return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"12px",padding:"8px 0",borderTop:k>0?"1px solid "+P.line:"none",fontSize:"12px"}},i("span",{style:{fontFamily:_NXf.mono,color:P.faint,fontSize:"11px"}},fmtT(l.t)),i("span",{style:{color:P.sub}},l.type));})):i("div",{style:{fontSize:"12px",color:P.dim}},"Aucun event de connexion observé.")),{mb:0}),
-_NXfoot("Mesure passive · aucune donnée envoyée")));
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".14em",textTransform:"uppercase",color:P.faint}},_T("Stabilite")),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"18px",fontWeight:"800",color:ST.c,marginTop:"4px"}},ST.t),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.dim,marginTop:"4px"}},_T("gigue")+" "+S.gigue+" ms"))),
+trace(),
+i("div",{style:{display:"flex",gap:"14px",flexWrap:"wrap",marginTop:"20px",paddingTop:"18px",borderTop:"1px solid "+P.line}},
+chiffre(S.min||0,_T("Minimum")),
+chiffre(S.p95||0,_T("95e centile"),S.p95>=seuil?_NXpal.warn:P.txt),
+chiffre(S.max||0,_T("Maximum"),S.max>=seuil*2?_NXpal.danger:P.txt),
+chiffre(S.rpm||0,_T("Req. / min")),
+chiffre(S.n||0,_T("Echantillons")))),
+_NXcard(i("div",null,
+_NXch(_T("Mesure a la demande"),_T("Une seule requete vers la passerelle Discord, chronometree."),
+_NXbtn(net.pinging?_T("Mesure…"):_T("Mesurer"),function(){if(!net.pinging)net.ping(function(){force();});},true)),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"26px",fontWeight:"800",letterSpacing:"-.03em",
+color:net.dernierPing?(net.dernierPing<seuil?_NXpal.ok:_NXpal.warn):P.faint}},
+net.pinging?"…":(net.dernierPing?(net.dernierPing+" ms"):"—")),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"6px",lineHeight:1.5}},
+_T("Le reste de la page ne genere aucune requete : tout est mesure sur celles que Discord fait deja."))),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Latence moyenne par heure"),_T("Sur les vingt-quatre dernieres heures, conservee entre les sessions.")),
+i("div",{style:{display:"flex",alignItems:"flex-end",gap:"2px",height:"64px"}},
+H.map(function(e,k){
+var ht=e.moy?Math.max(3,Math.round(e.moy/hmax*62)):2;
+var c=!e.n?P.line:(e.moy>=seuil?_NXpal.danger:(e.moy>=seuil*0.6?_NXpal.warn:P.mid));
+return i("div",{key:k,title:e.h+"h · "+(e.n?(e.moy+" ms · "+e.n+" "+_T("requetes")):_T("aucune requete")),
+style:{flex:1,minWidth:0,height:ht+"px",background:c,borderRadius:"2px",
+transition:"height .5s cubic-bezier(.22,.8,.28,1)",transitionDelay:(k*10)+"ms"}});})),
+i("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"7px",fontFamily:_NXf.mono,
+fontSize:"9.5px",color:P.faint}},i("span",null,"-24 h"),i("span",null,_T("maintenant")))),{mb:12}),
+coup.length?_NXcard(i("div",null,
+_NXch(_T("Coupures detectees"),_T("Periodes de plus de deux minutes sans aucune requete vers Discord.")),
+coup.slice(0,8).map(function(c,k,arr){
+var d=new Date(c.t);
+var min=Math.round(c.ms/60000);
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"11px",padding:"10px 0",
+borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("span",{style:{width:"7px",height:"7px",borderRadius:"50%",background:_NXpal.warn,flexShrink:0}}),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.faint,flexShrink:0}},
+_NXNET.pad2(d.getHours())+":"+_NXNET.pad2(d.getMinutes())),
+i("span",{style:{flex:1,minWidth:0,fontSize:"12.5px",color:P.sub}},
+_T("interruption de")+" "+(min>=60?(Math.round(min/60)+" h"):(min+" min"))));})),{mb:12}):null,
+(net.conn&&net.conn.length)?_NXcard(i("div",null,
+_NXch(_T("Journal de connexion"),_T("Ce que la passerelle Discord a fait depuis le demarrage.")),
+i("div",{style:{maxHeight:"180px",overflowY:"auto"}},
+net.conn.slice(0,16).map(function(l,k){
+var d=new Date(l.t);
+return i("div",{key:k,style:{display:"flex",gap:"11px",padding:"8px 0",borderBottom:"1px solid "+P.line}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0}},
+_NXNET.pad2(d.getHours())+":"+_NXNET.pad2(d.getMinutes())+":"+_NXNET.pad2(d.getSeconds())),
+i("span",{style:{fontSize:"12px",color:P.sub}},String(l.type||"")));}))),{mb:0}):null);}
+function tHotes(){
+var L=net.topHotes(30);
+var mx=L.length?L[0].n:1;
+var G=window._NXGD;
+return i("div",null,
+_NXcard(i("div",null,
+_NXch(_T("Hôtes contactés"),_T("Tous les serveurs que ce client a joints, toutes origines confondues."),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},L.length+"")),
+L.length?L.map(function(o,k,arr){
+var pct=Math.max(3,Math.round(o.n/mx*100));
+var connu=G&&G.connu?G.connu(o.h):true;
+var d=new Date(o.at);
+return i("div",{key:o.h,style:{padding:"11px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"7px",flexWrap:"wrap"}},
+i("span",{style:{width:"7px",height:"7px",borderRadius:"50%",flexShrink:0,
+background:connu?_NXpal.ok:_NXpal.warn}}),
+i("span",{style:{flex:1,minWidth:"120px",fontFamily:_NXf.mono,fontSize:"12px",color:P.txt,
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},o.h),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.sub,fontVariantNumeric:"tabular-nums"}},_NXn(o.n)),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0}},
+_NXNET.pad2(d.getHours())+":"+_NXNET.pad2(d.getMinutes()))),
+i("div",{"data-nx-bar":"1",style:{height:"3px",borderRadius:"99px",background:P.line,overflow:"hidden"}},
+i("div",{style:{height:"100%",borderRadius:"99px",background:connu?P.mid:_NXpal.warn,
+transform:"scaleX("+(monte?pct/100:0)+")",transformOrigin:"left center"}})),
+(!connu&&G&&G.approuver)?i("div",{style:{display:"flex",gap:"7px",marginTop:"9px"}},
+_NXbtn(_T("Approuver"),function(){G.approuver(o.h);force();})):null);})
+:i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},
+_T("Aucun hote recense pour l instant. L inventaire se remplit au fil des requetes."))),{mb:12}),
+_NXcard(i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.6}},
+_T("Un point vert signale un hote reconnu par les gardes de sortie. Un point orange signale un hote inconnu : c est exactement ce que le pare-feu sortant surveille.")),{mb:0}));}
+function tRoutes(){
+var L=net.topRoutes(20);
+var mx=L.length?L[0].moy:1;
+return i("div",null,
+_NXcard(i("div",null,
+_NXch(_T("Points d entrée les plus lents"),_T("Les routes de l API Discord, classees par latence moyenne.")),
+L.length?L.map(function(o,k,arr){
+var pct=Math.max(3,Math.round(o.moy/mx*100));
+var c=o.moy>=seuil?_NXpal.danger:(o.moy>=seuil*0.6?_NXpal.warn:P.mid);
+return i("div",{key:o.r,style:{padding:"11px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"10px",marginBottom:"6px",flexWrap:"wrap"}},
+i("span",{style:{flex:1,minWidth:"140px",fontFamily:_NXf.mono,fontSize:"11.5px",color:P.sub,
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},o.r),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"12px",color:c,fontWeight:"600",fontVariantNumeric:"tabular-nums"}},o.moy+" ms"),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint}},"×"+_NXn(o.n))),
+i("div",{"data-nx-bar":"1",style:{height:"3px",borderRadius:"99px",background:P.line,overflow:"hidden"}},
+i("div",{style:{height:"100%",borderRadius:"99px",background:c,
+transform:"scaleX("+(monte?pct/100:0)+")",transformOrigin:"left center"}})),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint,marginTop:"5px"}},
+_T("pic")+" "+o.max+" ms"));})
+:i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},
+_T("Aucune route mesuree pour l instant."))),{mb:0}));}
+function tReglages(){
+var seuils=[150,250,350,500,800];
+return i("div",null,
+_NXcard(i("div",null,
+_NXch(_T("Seuil de latence"),_T("Au-dela, une requete est comptee comme lente et coloree en rouge.")),
+i("div",{style:{display:"flex",gap:"7px",flexWrap:"wrap"}},
+seuils.map(function(v){
+var on=seuil===v;
+return i("div",{key:v,className:"nx-fx",role:"button","aria-label":v+" ms","aria-pressed":on?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,onClick:function(){net.set("seuil",v);force();},
+style:{padding:"10px 16px",borderRadius:"11px",cursor:"pointer",fontFamily:_NXf.mono,fontSize:"12px",
+fontWeight:"700",background:on?P.inset:"transparent",border:"1px solid "+(on?P.txt:P.line),
+color:on?P.txt:P.sub}},v+" ms");}))),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Comportement")),
+[["alerte",_T("M avertir quand le reseau decroche"),_T("Un message discret quand la latence depasse le double du seuil, au plus une fois par cinq minutes.")],
+["historique",_T("Conserver l historique horaire"),_T("Garde sept jours de latence moyenne pour retrouver les creux.")],
+["inventaire",_T("Recenser les hotes contactes"),_T("Note chaque serveur joint par le client, sans rien envoyer nulle part.")]].map(function(o,k,arr){
+var on=!!net.cfg[o[0]];
+return i("div",{key:o[0],className:"nx-fx",role:"button","aria-label":o[1],"aria-pressed":on?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,onClick:function(){net.set(o[0],!on);force();},
+style:{display:"flex",alignItems:"flex-start",gap:"13px",padding:"14px 0",cursor:"pointer",
+borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13.5px",fontWeight:"600",color:on?P.txt:P.sub}},o[1]),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"4px",lineHeight:1.55}},o[2])),
+i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{width:"38px",height:"22px",borderRadius:"11px",flexShrink:0,
+marginTop:"1px",background:on?P.txt:"transparent",border:"1px solid "+(on?P.txt:P.faint)}},
+i("div",{style:{width:"14px",height:"14px",borderRadius:"50%",margin:"3px",
+background:on?_NXpal.ink:P.faint,transform:on?"translateX(16px)":"none"}})));})),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Données de mesure"),_T("Tout est calcule et garde sur cette machine.")),
+i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
+_NXbtn(_T("Exporter en CSV"),function(){
+var ok=net.exportCsv();
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast(ok?_T("Fichier CSV telecharge."):_T("Copie dans le presse-papiers."),1);}catch(_){}}),
+_NXbtn(_T("Effacer l historique"),function(){
+if(window.confirm(_T("Effacer tout l historique reseau ?"))){net.reset();force();}}))),{mb:0}));}
+return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
+_NXhead(_T("Réseau"),"Nexium Réseau",_T("La latence est mesuree sur les requetes que Discord effectue deja : aucune requete supplementaire n est generee, sauf si tu demandes une mesure.")),
+tabbar(),
+i("div",{key:tab,"data-nx-panel":"1"},
+tab==="direct"?tDirect():tab==="hotes"?tHotes():tab==="routes"?tRoutes():tReglages()),
+_NXfoot("Nexium Réseau · mesure passive, aucune donnée envoyée")));
 }
 
+var _NXDATA=window._NXDATA||(window._NXDATA={});
+if(!_NXDATA.boot){try{_NXDATA.boot=true;
+_NXDATA.KEY="nexium_sauvegardes";
+_NXDATA.CFGKEY="nexium_donnees_v1";
+_NXDATA.cfg=(function(){var d;try{var raw=_NXDB.get(_NXDATA.CFGKEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}
+if(!d||typeof d!=="object")d={};
+if(typeof d.auto!=="boolean")d.auto=true;
+if(typeof d.jours!=="number"||d.jours<1)d.jours=3;
+if(typeof d.max!=="number"||d.max<1)d.max=3;
+return d;})();
+_NXDATA.save=function(){try{_NXDB.set(_NXDATA.CFGKEY,JSON.stringify(_NXDATA.cfg));}catch(_){}};
+_NXDATA.set=function(k,v){try{_NXDATA.cfg[k]=v;_NXDATA.save();_NXDATA.notify();}catch(_){}};
+_NXDATA.listeners=[];
+_NXDATA.notify=function(){for(var a=0;a<_NXDATA.listeners.length;a++){try{_NXDATA.listeners[a]();}catch(_){}}};
+_NXDATA.LABELS={"nexium_stats_v1":"Statistiques d usage","nexium_privacy_v1":"Confidentialite — reglages","nexium_privacy_stats_v1":"Confidentialite — compteurs","nexium_music_v1":"Lecteur audio","nexium_protect_v1":"Protect — reglages","nexium_protect_v1_stats":"Protect — compteurs","nexium_gardes_v1":"Gardes de sortie — reglages","nexium_gardes_v1_stats":"Gardes de sortie — compteurs","nexium_coffre_v1":"Coffre-fort","nexium_reseau_v1":"Reseau — reglages","nexium_reseau_hist":"Reseau — historique","nexium_donnees_v1":"Donnees — reglages","nexium_sauvegardes":"Sauvegardes","nexium_errors":"Journal des erreurs","nexium_quarantine":"Quarantaine","nexium_reports":"Signalements","nexium_changelog_v1":"Journal des versions","nexium_skin_v1":"Apparence","nexium_focus_v1":"Concentration","nexium_auto_v1":"Automatisations","nexium_motion":"Animations","nexium_eco_v1":"Performances","nexium_install":"Identifiant d installation","nexium_allowlist":"Liste de confiance","nexium_community":"Signalements communautaires","nexium_sharemask":"Masque de partage","nexium_boot_guard":"Garde de demarrage","nexium_welcome":"Ecran d accueil"};
+_NXDATA.libelle=function(k){return _NXDATA.LABELS[k]||k;};
+_NXDATA.REGLAGES=["nexium_privacy_v1","nexium_protect_v1","nexium_gardes_v1","nexium_coffre_v1","nexium_reseau_v1","nexium_donnees_v1","nexium_skin_v1","nexium_focus_v1","nexium_auto_v1","nexium_motion","nexium_eco_v1","nexium_music_v1","nexium_sharemask"];
+_NXDATA.cles=function(){try{
+var out=[],ks=_NXDB.keys()||[];
+for(var a=0;a<ks.length;a++){var k=ks[a];
+if(!k||String(k).indexOf("nexium_")!==0)continue;
+var v="";try{v=_NXDB.get(k)||"";}catch(_){}
+out.push({k:k,taille:v.length,libelle:_NXDATA.libelle(k),reglage:_NXDATA.REGLAGES.indexOf(k)>=0});}
+out.sort(function(x,y){return y.taille-x.taille;});
+return out;}catch(_){return [];}};
+_NXDATA.total=function(){try{
+var L=_NXDATA.cles(),n=0;
+for(var a=0;a<L.length;a++)n+=L[a].taille;
+return n;}catch(_){return 0;}};
+_NXDATA.fmtTaille=function(n){try{
+if(n>=1048576)return (n/1048576).toFixed(2)+" Mo";
+if(n>=1024)return (n/1024).toFixed(1)+" Ko";
+return n+" o";}catch(_){return "0 o";}};
+_NXDATA.lire=function(k){try{
+var v=_NXDB.get(k);
+if(v===null||v===undefined)return null;
+try{return JSON.stringify(JSON.parse(v),null,2);}catch(_){return String(v);}}catch(_){return null;}};
+_NXDATA.quota=function(cb){try{
+if(!navigator.storage||typeof navigator.storage.estimate!=="function"){cb(null);return;}
+navigator.storage.estimate().then(function(e){
+cb({utilise:e.usage||0,dispo:e.quota||0,
+pct:(e.quota?Math.min(100,Math.round((e.usage||0)/e.quota*100)):0)});}).catch(function(){cb(null);});
+}catch(_){cb(null);}};
+_NXDATA.sauvegardes=function(){try{
+var raw=_NXDB.get(_NXDATA.KEY);
+var d=raw?JSON.parse(raw):null;
+return (d&&Array.isArray(d.list))?d.list:[];}catch(_){return [];}};
+_NXDATA.ecrireSauvegardes=function(L){try{_NXDB.set(_NXDATA.KEY,JSON.stringify({list:L}));}catch(_){}};
+_NXDATA.sauvegarder=function(auto){try{
+var data={};
+for(var a=0;a<_NXDATA.REGLAGES.length;a++){
+var k=_NXDATA.REGLAGES[a];
+var v=null;try{v=_NXDB.get(k);}catch(_){}
+if(v!==null&&v!==undefined)data[k]=v;}
+var txt=JSON.stringify(data);
+if(txt.length>240000)return null;
+var L=_NXDATA.sauvegardes();
+if(L.length&&L[0].txt===txt){L[0].t=Date.now();_NXDATA.ecrireSauvegardes(L);return L[0];}
+var e={t:Date.now(),n:Object.keys(data).length,taille:txt.length,auto:!!auto,txt:txt};
+L.unshift(e);
+var max=_NXDATA.cfg.max||3;
+if(L.length>max)L=L.slice(0,max);
+_NXDATA.ecrireSauvegardes(L);
+_NXDATA.notify();
+return e;}catch(_){return null;}};
+_NXDATA.restaurer=function(idx){try{
+var L=_NXDATA.sauvegardes();
+var e=L[idx];
+if(!e||!e.txt)return 0;
+var d=JSON.parse(e.txt),n=0;
+for(var k in d){try{_NXDB.set(k,d[k]);n++;}catch(_){}}
+return n;}catch(_){return 0;}};
+_NXDATA.supprimerSauvegarde=function(idx){try{
+var L=_NXDATA.sauvegardes();
+L.splice(idx,1);
+_NXDATA.ecrireSauvegardes(L);
+_NXDATA.notify();}catch(_){}};
+_NXDATA.autoSiBesoin=function(){try{
+if(!_NXDATA.cfg.auto)return;
+var L=_NXDATA.sauvegardes();
+var der=L.length?(L[0].t||0):0;
+var delai=(_NXDATA.cfg.jours||3)*86400000;
+if(Date.now()-der<delai)return;
+_NXDATA.sauvegarder(true);}catch(_){}};
+_NXDATA.sante=function(){try{
+var mods=(window._NXHEALTH&&_NXHEALTH.MODS)||[];
+var ko=(window._NXHEALTH&&_NXHEALTH.failed)||[];
+var fail=(window._NXFAIL||[]);
+var vivants=0;
+for(var a=0;a<mods.length;a++){var o=window[mods[a][0]];
+if(o&&(o.boot===true||o.init===true||mods[a][0]==="_NXDB"))vivants++;}
+return {total:mods.length,vivants:vivants,
+morts:ko.slice(0),modulesEnEchec:fail.slice(0),
+erreurs:((window._NXERR||[]).length)};}catch(_){return {total:0,vivants:0,morts:[],modulesEnEchec:[],erreurs:0};}};
+try{setTimeout(function(){_NXDATA.autoSiBesoin();},25000);}catch(_){}
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXDATA");if(window._NXERR)_NXERR.push("module _NXDATA :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXDATA desactive:",_nxE);}catch(_){}}
+}
 var NexiumDataIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:18,height:18},i("path",{d:"M12 2C7 2 3 3.6 3 5.5v13C3 20.4 7 22 12 22s9-1.6 9-3.5v-13C21 3.6 17 2 12 2zm0 2c4.4 0 7 1.3 7 1.5S16.4 7 12 7 5 5.7 5 5.5 7.6 4 12 4zM5 8.2C6.7 9.1 9.2 9.5 12 9.5s5.3-.4 7-1.3v3.1c0 .2-2.6 1.5-7 1.5s-7-1.3-7-1.5V8.2zm0 5.5C6.7 14.6 9.2 15 12 15s5.3-.4 7-1.3v3.1c0 .2-2.6 1.5-7 1.5s-7-1.3-7-1.5v-3.1z"}));};
 function NexiumDataComp(){
-var _nxr=F.useReducer(function(x){return x+1;},0)[1];
-F.useEffect(function(){try{if(window._NXSKIN)_NXSKIN.listeners.push(_nxr);if(window._NXECO)_NXECO.listeners.push(_nxr);}catch(_){}
-return function(){try{if(window._NXSKIN)_NXSKIN.listeners=_NXSKIN.listeners.filter(function(f){return f!==_nxr;});
-if(window._NXECO)_NXECO.listeners=_NXECO.listeners.filter(function(f){return f!==_nxr;});}catch(_){}};},[]);
 var force=F.useReducer(function(x){return x+1;},0)[1];
-var _df=F.useState("");var dflt=_df[0];var setDflt=_df[1];
+var _t0=F.useState("stockage");var tab=_t0[0];var setTab=_t0[1];
+var _f0=F.useState("");var flt=_f0[0];var setFlt=_f0[1];
+var _o0=F.useState("");var ouvert=_o0[0];var setOuvert=_o0[1];
+var _q0=F.useState(null);var quota=_q0[0];var setQuota=_q0[1];
+F.useEffect(function(){
+var vivant=true;
+var maj=function(){if(vivant)force();};
+try{if(window._NXSKIN)_NXSKIN.listeners.push(maj);}catch(_){}
+try{if(window._NXECO)_NXECO.listeners.push(maj);}catch(_){}
+try{if(window._NXDATA)_NXDATA.listeners.push(maj);}catch(_){}
+try{if(window._NXDATA)_NXDATA.quota(function(q){if(vivant)setQuota(q||{indisponible:true});});}catch(_){}
+return function(){vivant=false;
+try{if(window._NXSKIN)_NXSKIN.listeners=_NXSKIN.listeners.filter(function(f){return f!==maj;});}catch(_){}
+try{if(window._NXECO)_NXECO.listeners=_NXECO.listeners.filter(function(f){return f!==maj;});}catch(_){}
+try{if(window._NXDATA)_NXDATA.listeners=_NXDATA.listeners.filter(function(f){return f!==maj;});}catch(_){}};},[]);
+var monte=_NXmounted(F);
 var P=_NXpal;
-var LABELS={"nexium_stats_v1":"Statistiques","nexium_privacy_v1":"Confidentialité — réglages","nexium_privacy_stats_v1":"Confidentialité — compteurs","nexium_music_v1":"Musique — playlist","nexium_protect_v1":"Protect — réglages","nexium_protect_v1_stats":"Protect — menaces détectées","nexium_changelog_v1":"Changelog — cache","nexium_update_v1":"Mise à jour — état"};
-function wipeKey(k){try{
-if(k==="nexium_stats_v1"&&window._NXS&&_NXS.reset){try{_NXDB.set(_NXS.KEY+"_wipe",String(Date.now()));}catch(_){}_NXS.reset();return;}
+var D=window._NXDATA;
+if(!D)return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
+_NXhead(_T("Données"),"Nexium Données",_T("Stockage local du client.")),
+_NXcard(i("div",{style:{fontSize:"12.5px",color:_NXpal.warn,lineHeight:1.6}},
+_T("Le module de gestion des donnees n a pas demarre sur ce client.")),{mb:0})));
+var toutes=D.cles();
+var total=0;for(var a0=0;a0<toutes.length;a0++)total+=toutes[a0].taille;
+var maxT=toutes.length?toutes[0].taille:1;
+var vues=toutes;
+var fq=(flt||"").trim().toLowerCase();
+if(fq)vues=toutes.filter(function(r){return (r.libelle+" "+r.k).toLowerCase().indexOf(fq)>=0;});
+function effacer(k){try{
+if(k==="nexium_stats_v1"&&window._NXS&&_NXS.reset){_NXS.reset();return;}
 if(k==="nexium_privacy_stats_v1"&&window._NXP&&_NXP.resetStats){_NXP.resetStats();return;}
-if(k==="nexium_privacy_v1"&&window._NXP){_NXP.cfg={blockTel:false,blockSentry:false,silentTyping:false,noAck:false,blockHarvest:false,stripTracking:false,blockAnalytics:false,blockErrors:false,blockPromotions:false,quiet:{}};if(_NXP.saveCfg)_NXP.saveCfg();return;}
-if(k==="nexium_protect_v1"&&window._NXPR){_NXPR.cfg={scanLinks:true,blockGrabbers:true,scamAlerts:true,warnAccounts:true,phishGuard:true,consoleGuard:true};if(_NXPR.saveCfg)_NXPR.saveCfg();if(_NXPR.notify)_NXPR.notify();return;}
-if(k==="nexium_protect_v1_stats"&&window._NXPR){_NXPR.stats={scanned:0,blocked:0,scams:0,accounts:0,recent:[]};if(_NXPR.saveStats)_NXPR.saveStats();if(_NXPR.notify)_NXPR.notify();return;}
-if(k==="nexium_music_v1"&&window._NXM){_NXM.cfg={tracks:[],vol:0.7,shuffle:false,repeat:false,popup:true,idx:0,px:null,py:null};_NXM.idx=0;if(_NXM.save)_NXM.save();if(_NXM.loadRemote)_NXM.loadRemote();if(_NXM.notify)_NXM.notify();return;}
-}catch(_){}try{_NXDB.del(k);}catch(_){}}
-function nxExportAll(){try{var obj={_nexium:1,at:Date.now(),data:{}};var ks=_NXDB.keys();for(var a=0;a<ks.length;a++){if(ks[a]&&ks[a].indexOf("nexium_")===0)obj.data[ks[a]]=_NXDB.get(ks[a]);}DiscordNative.clipboard.copy(JSON.stringify(obj));if(window._NXUP&&_NXUP.toast)_NXUP.toast("Réglages Nexium copiés dans le presse-papiers");}catch(_){}}
-function nxImportAll(){try{var raw=window.prompt("Colle ici la sauvegarde Nexium (JSON) :","");if(!raw)return;var obj=JSON.parse(raw);if(!obj||!obj.data||typeof obj.data!=="object"){window.alert("Sauvegarde invalide.");return;}var n=0;for(var k in obj.data){if(k.indexOf("nexium_")===0&&typeof obj.data[k]==="string"){_NXDB.set(k,obj.data[k]);n++;}}try{if(window._NXPR&&_NXPR.reload)_NXPR.reload();}catch(_){}
-window.alert(n+" éléments restaurés et appliqués immédiatement.");}catch(e){window.alert("Import impossible : sauvegarde illisible.");}}
-var keys=[];try{var _ak=_NXDB.keys();for(var a=0;a<_ak.length;a++){if(_ak[a]&&_ak[a].indexOf("nexium_")===0)keys.push(_ak[a]);}}catch(_){}
-var rows=keys.map(function(k){var sz=0;try{sz=(_NXDB.get(k)||"").length;}catch(_){}return{k:k,sz:sz,label:LABELS[k]||k};}).sort(function(x,y){return y.sz-x.sz;});
-var totalSz=rows.reduce(function(s,r){return s+r.sz;},0);
-var _dq=(dflt||"").toLowerCase();if(_dq)rows=rows.filter(function(r){return (r.label+" "+r.k).toLowerCase().indexOf(_dq)>=0;});
-function fmtSz(n){return n>=1024?(n/1024).toFixed(1)+" Ko":n+" o";}
-function exportAll(){try{var obj={};for(var a=0;a<keys.length;a++)obj[keys[a]]=_NXDB.get(keys[a]);var blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});var url=URL.createObjectURL(blob);var el=document.createElement("a");el.href=url;el.download="nexium-data.json";document.body.appendChild(el);el.click();setTimeout(function(){try{document.body.removeChild(el);URL.revokeObjectURL(url);}catch(_){}},120);}catch(_){}}
-return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
-_NXhead("Stockage local","Nexium Données","Tout ce que Nexium conserve sur ton client, et rien d'autre. Aucune donnée n'est synchronisée ni envoyée. Vider une clé efface aussi son état en mémoire — l'effacement est immédiat."),
-(_NXDB.fail)?_NXcard(i("div",null,i("div",{style:{fontSize:"14px",fontWeight:"800",color:_NXpal.dangerSoft,marginBottom:"5px"}},"Sauvegarde impossible"),i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.55}},"Le stockage local est plein ou inaccessible : tes réglages et statistiques ne sont plus enregistrés. Le stockage est partagé avec Discord. Vide des données ci-dessous pour libérer de la place."),i("div",{style:{fontSize:"11px",color:P.faint,fontFamily:_NXf.mono,marginTop:"7px"}},"clé : "+_NXDB.fail.key+" · "+_NXDB.fail.msg)),{mb:12,glow:"rgba(214,72,72,.14)"}):null,
-i("input",{value:dflt,onChange:function(e){setDflt(e.target.value);},placeholder:"Filtrer les données…",spellCheck:false,style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,borderRadius:"11px",padding:"10px 13px",color:P.txt,fontSize:"12.5px",fontFamily:_NXf.mono,outline:"none",marginBottom:"12px"}}),(function(){try{if(window._NXDIAG)_NXDIAG.scan();}catch(_){}
-var D=(window._NXDIAG&&_NXDIAG.broken)?_NXDIAG.list():null;
-if(!D||!D.length)return null;
-return _NXcard(i("div",null,
-i("div",{style:{fontSize:"14px",fontWeight:"800",color:_NXpal.warn,marginBottom:"6px"}},"Installation Discord incomplete"),
-i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6,marginBottom:"10px"}},"Des composants de Discord n ont pas pu se charger. Cela provoque des plantages (profils, overlay, parametres) qui ne viennent pas de Nexium."),
-D.map(function(t,k){return i("div",{key:k,style:{fontSize:"12px",color:P.dim,marginBottom:"4px"}},"\u2022 "+t);}),
-i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6,marginTop:"10px"}},"Solution : ferme Discord et reinstalle le client Nexium a partir d une copie complete du dossier, puis relance.")),{mb:12,glow:"rgba(250,166,97,.14)"});})(),
-(function(){var E=(window._NXERR||[]);
-return _NXcard(i("div",null,_NXch("Journal des erreurs","Les "+(E.length||0)+" dernieres erreurs internes de Nexium."),
-E.length?i("div",null,
-i("div",{style:{maxHeight:"170px",overflowY:"auto",marginBottom:"10px"}},E.slice().reverse().slice(0,12).map(function(m,k){
-return i("div",{key:k,style:{fontSize:"11px",color:P.sub,fontFamily:_NXf.mono,padding:"7px 9px",background:P.inset,border:"1px solid "+P.line,borderRadius:"8px",marginBottom:"5px",wordBreak:"break-word"}},String(m).slice(0,220));})),
-i("div",{style:{display:"flex",gap:"8px"}},
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{DiscordNative.clipboard.copy(E.join("\n\n"));}catch(_){}},style:{padding:"8px 14px",borderRadius:"9px",border:"1px solid "+P.line,color:P.sub,fontSize:"12px",fontWeight:"700",cursor:"pointer"}},"Copier tout"),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{window._NXERR.length=0;}catch(_){}force();},style:{padding:"8px 14px",borderRadius:"9px",border:"1px solid "+P.line,color:P.sub,fontSize:"12px",fontWeight:"700",cursor:"pointer"}},"Vider")))
-:i("div",{style:{fontSize:"12.5px",color:P.dim}},"Aucune erreur enregistree. Tout va bien.")),{mb:12});})(),
-_NXcard(i("div",null,
-_NXch(_T("Mes données Nexium"),_T("Contrôle total sur tout ce que Nexium sait de toi, tous modules confondus.")),
-i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6,marginBottom:"14px"}},"L\'export rassemble les données de tous les modules (statistiques, confidentialité, Protect, coffre-fort) dans un seul fichier JSON lisible. La suppression efface tout, partout, en une fois."),
-i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{_NXV.exportAll();}catch(_){}},style:{flex:1,minWidth:"180px",textAlign:"center",padding:"12px",borderRadius:"11px",background:P.acc,color:P.light?"#fff":_NXpal.ink,fontSize:"13px",fontWeight:"800",cursor:"pointer"}},"Exporter tout ce que Nexium sait de moi"),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{_NXV.purgeAll();force();}catch(_){}},style:{flex:1,minWidth:"150px",textAlign:"center",padding:"12px",borderRadius:"11px",background:"transparent",border:"1px solid rgba(214,72,72,.32)",color:_NXpal.danger,fontSize:"13px",fontWeight:"700",cursor:"pointer"}},"Tout supprimer (tous modules)"))),{mb:12}),
-_NXcard(i("div",null,_NXch(_T("Sauvegarde des réglages"),_T("Copie tous tes réglages Nexium, ou restaure-les sur une autre machine.")),
-i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:nxExportAll,style:{flex:1,minWidth:"150px",textAlign:"center",padding:"11px",borderRadius:"10px",background:P.acc,color:_NXpal.ink,fontSize:"13px",fontWeight:"800",cursor:"pointer"}},"Exporter (presse-papiers)"),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){nxImportAll();force();},style:{flex:1,minWidth:"150px",textAlign:"center",padding:"11px",borderRadius:"10px",background:"transparent",border:"1px solid "+P.line,color:P.sub,fontSize:"13px",fontWeight:"700",cursor:"pointer"}},"Importer"))),{mb:12}),
-
-
-_NXcard(_NXstrip([{v:_NXn(rows.length),label:"Modules"},{v:fmtSz(totalSz),label:"Taille totale"},{v:_NXDB.mode==="mem"?"Volatile":"Local",label:"Portée",color:_NXDB.mode==="mem"?_NXpal.dangerSoft:P.acc}]),{pad:"20px 18px"}),
-_NXDB.mode==="mem"?_NXcard(i("div",{style:{fontSize:"12px",color:_NXpal.dangerSoft,lineHeight:"1.6"}},"Persistance indisponible dans cet environnement — les données ne survivront pas au redémarrage de Discord."),{mb:10}):null,
-rows.length&&totalSz>0?_NXcard(i("div",null,_NXch("Répartition"),i("div",{style:{display:"flex",height:"14px",borderRadius:"7px",overflow:"hidden",background:P.inset,border:"1px solid "+P.hair,marginTop:"4px"}},rows.map(function(rw,k){var cols=[_NXpal.acc,_NXpal.sub,_NXpal.dim,_NXpal.faint,_NXpal.edge];var pct=Math.max(1,rw.sz/totalSz*100);return i("div",{key:k,title:rw.label+" — "+fmtSz(rw.sz),style:{width:pct+"%",background:cols[k%cols.length],height:"100%"}});})),i("div",{style:{display:"flex",flexWrap:"wrap",gap:"10px 16px",marginTop:"12px"}},rows.map(function(rw,k){var cols=[_NXpal.acc,_NXpal.sub,_NXpal.dim,_NXpal.faint,_NXpal.edge];return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"7px"}},i("div",{style:{width:"9px",height:"9px",borderRadius:"3px",background:cols[k%cols.length],flexShrink:0}}),i("div",{style:{fontSize:"11px",color:P.sub}},rw.label),i("div",{style:{fontSize:"11px",color:P.faint,fontFamily:_NXf.mono}},Math.round(rw.sz/totalSz*100)+"%"));}))),{mb:10}):null,
-_NXcard(i("div",null,_NXch(_T("Données stockées"),_T("Chaque module enregistre ses données séparément. Tu peux en supprimer une sans toucher aux autres.")),rows.length?i("div",null,rows.map(function(rw,k){return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"14px",padding:"13px 0",borderTop:k>0?"1px solid "+P.line:"none"}},i("div",{style:{flex:1,minWidth:0}},i("div",{style:{fontSize:"13px",fontWeight:"600",color:P.txt}},rw.label),i("div",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,marginTop:"3px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},rw.k)),i("div",{style:{width:"70px",flexShrink:0}},i("div",{style:{height:"4px",borderRadius:"2px",background:P.hair,overflow:"hidden"}},i("div",{style:{width:(totalSz>0?Math.max(4,rw.sz/totalSz*100):0)+"%",height:"100%",background:P.sub,borderRadius:"2px"}})),i("div",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.sub,marginTop:"4px",textAlign:"right"}},fmtSz(rw.sz))),i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){if(window.confirm("Vider « "+rw.label+" » ?")){wipeKey(rw.k);force();}},style:{cursor:"pointer",fontSize:"11px",fontWeight:"600",color:_NXpal.dangerSoft,border:"1px solid #291313",borderRadius:"8px",padding:"6px 11px",flexShrink:0}},"Vider"));})):i("div",{style:{fontSize:"12px",color:P.dim}},"Aucune donnée Nexium stockée pour l'instant."))),
-i("div",{style:{display:"flex",gap:"10px",marginTop:"4px"}},_NXbtn("Rafraîchir",function(){force();}),_NXbtn("Exporter tout (.json)",function(){exportAll();}),_NXbtn("Tout effacer",function(){if(window.confirm("Effacer TOUTES les données Nexium ?")){for(var a=keys.length-1;a>=0;a--)wipeKey(keys[a]);force();}},"danger")),
-(function(){
-var S=window._NXSKIN,E=window._NXECO,P2=_NXpal;
-function sw2(on){return i("div",{"data-nx-sw":"1",style:{width:"38px",height:"22px",borderRadius:_NXrad.pill,background:on?P2.txt:"transparent",border:"1px solid "+(on?P2.txt:P2.faint),position:"relative",flexShrink:0}},
-i("div",{style:{position:"absolute",top:"3px",left:on?"19px":"3px",width:"14px",height:"14px",borderRadius:"50%",background:on?P2.panel:P2.faint}}));}
-function opt2(lab,desc,on,onClick){return i("div",{className:"nx-fx",role:"button","aria-label":lab,"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,onClick:onClick,
-style:{display:"flex",alignItems:"center",gap:"12px",padding:"13px 0",borderBottom:"1px solid "+P2.line,cursor:"pointer"}},
-i("div",{style:{flex:1,minWidth:0}},
-i("div",{style:{fontSize:_NXtype.md,fontWeight:"600",color:on?P2.txt:P2.sub}},lab),
-desc?i("div",{style:{fontSize:_NXtype.sm,color:P2.dim,marginTop:"3px",lineHeight:1.5}},desc):null),
-sw2(on));}
-function chip2(lab,on,onClick){return i("div",{key:lab,className:"nx-fx",role:"button","aria-label":lab,"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,onClick:onClick,
-style:{padding:"7px 12px",borderRadius:_NXrad.sm,cursor:"pointer",fontSize:_NXtype.sm,fontWeight:"600",
-background:on?P2.inset:"transparent",border:"1px solid "+(on?P2.sub:P2.line),color:on?P2.txt:P2.sub}},lab);}
-function grp(titre,opts,cur,cle){return i("div",{style:{paddingTop:"13px"}},
-i("div",{style:{fontSize:_NXtype.xs,fontWeight:"700",letterSpacing:".08em",textTransform:"uppercase",color:P2.dim,marginBottom:"7px"}},titre),
-i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap"}},opts.map(function(o){
-return chip2(o[1],cur===o[0],function(){S.set(cle,o[0]);_nxr();});})));}
+if(k==="nexium_reseau_hist"&&window._NXNET&&_NXNET.reset){_NXNET.reset();return;}
+}catch(_){}
+try{_NXDB.del(k);}catch(_){}}
+function grand2(v,lab,sub,c){return i("div",{style:{flex:1,minWidth:"96px"}},
+i("div",{key:"d"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"25px",fontWeight:"800",
+color:c||P.txt,letterSpacing:"-.04em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
+i("div",{style:{fontSize:"11px",color:P.sub,marginTop:"6px",fontWeight:"600"}},lab),
+sub?i("div",{style:{fontSize:"10px",color:P.faint,marginTop:"2px"}},sub):null);}
+var TABS=[["stockage","Stockage"],["sauvegardes","Sauvegardes"],["sante","Santé"],["apparence","Apparence"]];
+function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Données"),
+style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
+TABS.map(function(t){var on=tab===t[0];
+return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+"aria-label":_T(t[1]),onClick:function(){if(tab!==t[0]){setTab(t[0]);setOuvert("");}},
+style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",
+letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
+_T(t[1]),
+i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",
+borderRadius:"2px",background:P.txt,transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
+transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function tStockage(){
+var teintes=[P.txt,P.mid,P.soft,P.sub,P.dim,P.mute,P.faint];
 return i("div",null,
-S?_NXcard(i("div",null,_NXch(_T("Apparence Nexium"),_T("Habille Discord aux couleurs du client : fonds, accents, typographie et coins.")),
-opt2(_T("Appliquer le theme Nexium"),_T("Active par defaut. Decoche pour retrouver l apparence d origine de Discord."),S.cfg.on,function(){S.set("on",!S.cfg.on);_nxr();}),
-S.cfg.on?grp(_T("Fond"),[["encre",_T("Encre")],["graphite",_T("Graphite")],["papier",_T("Papier")]],S.cfg.variante,"variante"):null,
-S.cfg.on?grp(_T("Accent"),[["ivoire",_T("Ivoire")],["cendre",_T("Cendre")],["braise",_T("Braise")],["discord",_T("Aucun")]],S.cfg.accent,"accent"):null,
-S.cfg.on?grp(_T("Typographie"),[["defaut",_T("Origine")],["grotesque",_T("Grotesque")],["editoriale",_T("Editoriale")]],S.cfg.police,"police"):null,
-S.cfg.on?grp(_T("Coins"),[["arrondi",_T("Arrondis")],["doux",_T("Doux")],["net",_T("Nets")]],S.cfg.coins,"coins"):null,
-S.cfg.on?grp(_T("Signature"),[["discrete",_T("Discrete")],["affirmee",_T("Affirmee")],["totale",_T("Totale")]],S.cfg.intensite,"intensite"):null,
-S.cfg.on?i("div",{style:{fontSize:_NXtype.sm,color:P2.dim,lineHeight:1.6,paddingTop:"9px"}},
-S.cfg.intensite==="discrete"?_T("Couleurs, typographie et coins seulement.")
-:(S.cfg.intensite==="affirmee"?_T("Ajoute le filet d accent en haut, le rail de serveurs, le lisere des messages et les categories en capitales.")
-:_T("Ajoute le sigle NEXIUM dans la barre de titre et un filigrane discret au fond de la fenetre."))):null,
-S.cfg.on?opt2(_T("Images sobres"),_T("Desature les bannieres pour garder une lecture monochrome."),S.cfg.sobre,function(){S.set("sobre",!S.cfg.sobre);_nxr();}):null,
+i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
+borderRadius:"22px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",padding:"25px 24px",marginBottom:"14px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",
+color:P.faint,marginBottom:"9px"}},_T("Occupe sur cette machine")),
+i("div",{key:"t"+total,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"40px",fontWeight:"800",
+color:P.txt,letterSpacing:"-.045em",lineHeight:1,marginBottom:"16px"}},D.fmtTaille(total)),
+total>0?i("div",null,
+i("div",{style:{display:"flex",height:"14px",borderRadius:"7px",overflow:"hidden",background:P.line,marginBottom:"12px"}},
+toutes.slice(0,7).map(function(r,k){
+return i("div",{key:r.k,title:r.libelle+" · "+D.fmtTaille(r.taille),
+style:{width:(monte?(r.taille/total*100):0)+"%",background:teintes[k],
+transition:"width .7s cubic-bezier(.22,.8,.28,1)",transitionDelay:(k*40)+"ms"}});})),
+i("div",{style:{display:"flex",flexWrap:"wrap",gap:"9px 16px"}},
+toutes.slice(0,7).map(function(r,k){
+return i("div",{key:r.k,style:{display:"flex",alignItems:"center",gap:"7px"}},
+i("span",{style:{width:"8px",height:"8px",borderRadius:"2px",background:teintes[k],flexShrink:0}}),
+i("span",{style:{fontSize:"11px",color:P.dim}},r.libelle));}))):null,
+i("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap",marginTop:"20px",paddingTop:"18px",borderTop:"1px solid "+P.line}},
+grand2(toutes.length,_T("Modules")),
+grand2(_NXDB.mode==="mem"?_T("Volatile"):_T("Persistant"),_T("Stockage"),null,
+_NXDB.mode==="mem"?_NXpal.warn:_NXpal.ok),
+quota&&!quota.indisponible?grand2(quota.pct+"%",_T("Du quota"),D.fmtTaille(quota.utilise)):null,
+grand2(D.sauvegardes().length,_T("Sauvegardes")))),
+_NXDB.mode==="mem"?_NXcard(i("div",{style:{fontSize:"12.5px",color:_NXpal.warn,lineHeight:1.6}},
+_T("Le stockage persistant est indisponible dans cet environnement : tes reglages seront perdus a la fermeture.")),{mb:12}):null,
+_NXDB.fail?_NXcard(i("div",null,
+i("div",{style:{fontSize:"14px",fontWeight:"800",color:_NXpal.danger,marginBottom:"6px"}},_T("Sauvegarde impossible")),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6}},
+_T("Une ecriture a echoue. Le disque est peut-etre plein, ou le quota du navigateur atteint."))),{mb:12}):null,
+_NXcard(i("div",null,
+_NXch(_T("Contenu détaillé"),_T("Chaque module range ses donnees separement. Ouvre une ligne pour voir exactement ce qu elle contient."),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},vues.length+"/"+toutes.length)),
+i("div",{style:{position:"relative",marginBottom:"12px"}},
+i("input",{value:flt,onChange:function(e){setFlt(e.target.value);},placeholder:_T("Filtrer les donnees…"),
+spellCheck:false,"aria-label":_T("Filtrer les donnees"),
+style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,borderRadius:"11px",
+padding:"11px 13px",color:P.txt,fontSize:"12.5px",outline:"none",fontFamily:"inherit"}}),
+flt?i("div",{className:"nx-fx",role:"button","aria-label":_T("Effacer le filtre"),tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){setFlt("");},
+style:{position:"absolute",right:"11px",top:"10px",color:P.faint,fontSize:"14px",cursor:"pointer",lineHeight:1}},"\u00d7"):null),
+vues.length?vues.map(function(r,k,arr){
+var op=ouvert===r.k;
+return i("div",{key:r.k,style:{borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{className:"nx-fx",role:"button","aria-label":r.libelle,"aria-expanded":op?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,onClick:function(){setOuvert(op?"":r.k);},
+style:{display:"flex",alignItems:"center",gap:"12px",padding:"12px 0",cursor:"pointer"}},
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},
+i("span",{style:{fontSize:"13px",fontWeight:"600",color:P.txt}},r.libelle),
+r.reglage?i("span",{style:{fontSize:"9px",fontWeight:"700",letterSpacing:".08em",textTransform:"uppercase",
+color:P.faint,border:"1px solid "+P.line,borderRadius:"99px",padding:"2px 6px"}},_T("reglage")):null),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.faint,marginTop:"3px"}},r.k)),
+i("div",{style:{width:"64px",flexShrink:0}},
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.sub,textAlign:"right",
+fontVariantNumeric:"tabular-nums"}},D.fmtTaille(r.taille)),
+i("div",{style:{marginTop:"5px"}},
+i("div",{style:{height:"3px",borderRadius:"99px",background:P.line,overflow:"hidden"}},
+i("div",{style:{height:"100%",borderRadius:"99px",background:P.mid,
+width:(monte?Math.max(3,r.taille/maxT*100):0)+"%",transition:"width .6s cubic-bezier(.22,.8,.28,1)"}})))),
+i("span",{"aria-hidden":"true",style:{flexShrink:0,color:P.faint,fontSize:"11px",
+transform:op?"rotate(90deg)":"none",transition:"transform .2s ease"}},"\u203a")),
+op?i("div",{style:{paddingBottom:"14px"}},
+i("pre",{style:{margin:"0 0 11px",padding:"12px 13px",background:P.inset,border:"1px solid "+P.line,
+borderRadius:"10px",fontFamily:_NXf.mono,fontSize:"10.5px",color:P.sub,lineHeight:1.6,
+maxHeight:"260px",overflow:"auto",whiteSpace:"pre-wrap",wordBreak:"break-word"}},
+(D.lire(r.k)||_T("(vide)")).slice(0,20000)),
+i("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap"}},
+_NXbtn(_T("Copier"),function(){
+try{DiscordNative.clipboard.copy(D.lire(r.k)||"");
+if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Copie dans le presse-papiers."),1);}catch(_){}}),
+_NXbtn(_T("Effacer cette donnee"),function(){
+if(window.confirm(_T("Effacer")+" \u00ab "+r.libelle+" \u00bb ?")){effacer(r.k);setOuvert("");force();}}))):null);})
+:i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},_T("Aucune donnee ne correspond a ce filtre."))),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Tout exporter, tout effacer"),
+_T("L export rassemble reglages et compteurs de tous les modules dans un seul fichier.")),
+i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
+_NXbtn(_T("Exporter tout"),function(){try{if(window._NXV&&_NXV.exportAll)_NXV.exportAll();}catch(_){}},true),
+_NXbtn(_T("Tout effacer"),function(){
+if(window.confirm(_T("Effacer toutes les donnees Nexium de cette machine ? Cette action est definitive.")))
+{try{if(window._NXV&&_NXV.purgeAll)_NXV.purgeAll();}catch(_){}force();}}))),{mb:0}));}
+function tSauvegardes(){
+var L=D.sauvegardes();
+return i("div",null,
+_NXcard(i("div",null,
+_NXch(_T("Sauvegarde automatique"),_T("Une copie de tes reglages est gardee ici, sans jamais quitter la machine.")),
+[["auto",_T("Sauvegarder tout seul"),_T("Une copie est prise au demarrage si la derniere date de plus de quelques jours.")]].map(function(o){
+var on=!!D.cfg[o[0]];
+return i("div",{key:o[0],className:"nx-fx",role:"button","aria-label":o[1],"aria-pressed":on?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,onClick:function(){D.set(o[0],!on);force();},
+style:{display:"flex",alignItems:"flex-start",gap:"13px",padding:"13px 0",cursor:"pointer",
+borderBottom:"1px solid "+P.line}},
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13.5px",fontWeight:"600",color:on?P.txt:P.sub}},o[1]),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"4px",lineHeight:1.55}},o[2])),
+i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{width:"38px",height:"22px",borderRadius:"11px",flexShrink:0,
+marginTop:"1px",background:on?P.txt:"transparent",border:"1px solid "+(on?P.txt:P.faint)}},
+i("div",{style:{width:"14px",height:"14px",borderRadius:"50%",margin:"3px",
+background:on?_NXpal.ink:P.faint,transform:on?"translateX(16px)":"none"}})));}),
+i("div",{style:{paddingTop:"14px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:".09em",textTransform:"uppercase",
+color:P.dim,marginBottom:"8px"}},_T("Frequence")),
+i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap"}},
+[1,3,7,14].map(function(j){
+var on=D.cfg.jours===j;
+return i("div",{key:j,className:"nx-fx",role:"button","aria-label":j+" "+_T("jours"),
+"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){D.set("jours",j);force();},
+style:{padding:"8px 14px",borderRadius:"10px",cursor:"pointer",fontFamily:_NXf.mono,fontSize:"11.5px",
+background:on?P.inset:"transparent",border:"1px solid "+(on?P.txt:P.line),color:on?P.txt:P.sub}},
+j===1?_T("chaque jour"):(j+" j"));}))),
+i("div",{style:{display:"flex",gap:"9px",marginTop:"16px",flexWrap:"wrap"}},
+_NXbtn(_T("Sauvegarder maintenant"),function(){
+var e=D.sauvegarder(false);
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast(e?_T("Sauvegarde enregistree."):_T("Sauvegarde impossible : trop volumineuse."),e?1:0);}catch(_){}
+force();},true))),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Copies disponibles"),_T("De la plus recente a la plus ancienne."),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},L.length+"/"+D.cfg.max)),
+L.length?L.map(function(e,k,arr){
+var d=new Date(e.t);
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"12px",flexWrap:"wrap",padding:"13px 0",
+borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{style:{width:"7px",height:"7px",borderRadius:"50%",flexShrink:0,
+background:k===0?_NXpal.ok:P.faint}}),
+i("div",{style:{flex:1,minWidth:"140px"}},
+i("div",{style:{fontSize:"12.5px",color:P.txt,fontWeight:"600"}},
+d.toLocaleDateString()+" "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.faint,marginTop:"3px"}},
+e.n+" "+_T("modules")+" · "+D.fmtTaille(e.taille)+" · "+(e.auto?_T("automatique"):_T("manuelle")))),
+_NXbtn(_T("Restaurer"),function(){
+if(window.confirm(_T("Restaurer cette sauvegarde ? Tes reglages actuels seront remplaces."))){
+var n=D.restaurer(k);
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast(n+" "+_T("module(s) restaure(s). Redemarre Discord pour tout appliquer."),1);}catch(_){}
+force();}}),
+_NXbtn(_T("Supprimer"),function(){D.supprimerSauvegarde(k);force();}));})
+:i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},
+_T("Aucune copie pour l instant. La premiere sera prise automatiquement, ou tout de suite si tu le demandes."))),{mb:12}),
+_NXcard(i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.65}},
+_T("Une sauvegarde ne contient que tes reglages, jamais tes statistiques ni tes journaux. Elle reste sur cette machine : pour la deplacer, utilise Exporter tout dans l onglet Stockage.")),{mb:0}));}
+function tSante(){
+var S=D.sante();
+var E=(window._NXERR||[]);
+var diag=(window._NXDIAG&&_NXDIAG.list)?_NXDIAG.list():[];
+var pct=S.total?Math.round(S.vivants/S.total*100):100;
+return i("div",null,
+i("div",{"data-nx-lift":"1",style:{border:"1px solid "+P.hair,borderRadius:"22px",
+background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",padding:"25px 24px",marginBottom:"14px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",
+color:P.faint,marginBottom:"9px"}},_T("Modules en fonctionnement")),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"12px",flexWrap:"wrap",marginBottom:"15px"}},
+i("div",{key:"s"+S.vivants,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"40px",fontWeight:"800",
+color:pct===100?_NXpal.ok:_NXpal.warn,letterSpacing:"-.045em",lineHeight:1}},S.vivants+" / "+S.total),
+i("div",{style:{fontSize:"13px",color:P.sub,fontWeight:"600"}},
+_T(pct===100?"Tout tourne":"Certains modules n ont pas demarre"))),
+i("div",{style:{display:"flex",gap:"3px",flexWrap:"wrap"}},
+(function(){var out=[];
+for(var k=0;k<S.total;k++){
+out.push(i("div",{key:k,style:{width:"14px",height:"5px",borderRadius:"2px",
+background:k<S.vivants?_NXpal.ok:_NXpal.warn,
+opacity:monte?1:0,transition:"opacity .3s ease",transitionDelay:(k*18)+"ms"}}));}
+return out;})()),
+S.morts.length?i("div",{style:{marginTop:"16px",paddingTop:"14px",borderTop:"1px solid "+P.line,
+fontSize:"12px",color:_NXpal.warn,lineHeight:1.6}},
+_T("N ont pas demarre")+" : "+S.morts.join(", ")):null),
+diag.length?_NXcard(i("div",null,
+i("div",{style:{fontSize:"14px",fontWeight:"800",color:_NXpal.warn,marginBottom:"7px"}},
+_T("Installation Discord incomplete")),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6,marginBottom:"11px"}},
+_T("Des composants de Discord n ont pas pu se charger. Cela provoque des plantages sur les profils, l overlay ou le partage d ecran.")),
+diag.map(function(t,k){return i("div",{key:k,style:{fontSize:"12px",color:P.dim,marginBottom:"5px"}},"\u2022 "+t);}),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6,marginTop:"11px"}},
+_T("Solution : ferme Discord et reinstalle le client Nexium a partir d une copie complete du dossier."))),{mb:12,glow:"rgba(214,72,72,.12)"}):null,
+_NXcard(i("div",null,
+_NXch(_T("Journal des erreurs"),_T("Les erreurs internes rencontrees par Nexium depuis le demarrage."),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:E.length?_NXpal.warn:P.faint}},E.length+"")),
+E.length?i("div",null,
+i("div",{style:{maxHeight:"260px",overflowY:"auto",marginBottom:"12px"}},
+E.slice().reverse().slice(0,20).map(function(m,k){
+return i("div",{key:k,style:{fontSize:"10.5px",color:P.sub,fontFamily:_NXf.mono,padding:"9px 11px",
+background:P.inset,border:"1px solid "+P.line,borderRadius:"9px",marginBottom:"5px",
+lineHeight:1.6,wordBreak:"break-word"}},String(m).slice(0,400));})),
+i("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap"}},
+_NXbtn(_T("Copier le journal"),function(){
+try{DiscordNative.clipboard.copy(E.join("\n\n"));
+if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Journal copie."),1);}catch(_){}}),
+_NXbtn(_T("Vider"),function(){try{window._NXERR.length=0;}catch(_){}force();})))
+:i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},
+_T("Aucune erreur enregistree. Tout va bien."))),{mb:12}),
+_NXcard(i("div",null,_NXch(_T("Version installée")),
+i("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap"}},
+grand2("v"+((window._NXUP&&_NXUP.VERSION)||"?"),_T("Nexium Client")),
+grand2(_NXn(((window._NXPR&&_NXPR.remote&&_NXPR.remote.n)||0)),_T("Domaines en base")),
+grand2(((window._NXNETX&&_NXNETX.timeouts)||0),_T("Delais depasses"),_T("depuis le demarrage")))),{mb:0}));}
+function tApparence(){
+var S=window._NXSKIN,E2=window._NXECO;
+function bascule(lab,desc,on,onClick,last){
+return i("div",{className:"nx-fx",role:"button","aria-label":lab,"aria-pressed":on?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,onClick:onClick,
+style:{display:"flex",alignItems:"flex-start",gap:"13px",padding:"13px 0",cursor:"pointer",
+borderBottom:last?"none":"1px solid "+P.line}},
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13.5px",fontWeight:"600",color:on?P.txt:P.sub}},lab),
+desc?i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"4px",lineHeight:1.55}},desc):null),
+i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{width:"38px",height:"22px",borderRadius:"11px",flexShrink:0,
+marginTop:"1px",background:on?P.txt:"transparent",border:"1px solid "+(on?P.txt:P.faint)}},
+i("div",{style:{width:"14px",height:"14px",borderRadius:"50%",margin:"3px",
+background:on?_NXpal.ink:P.faint,transform:on?"translateX(16px)":"none"}})));}
+function puce(lab,on,onClick){
+return i("div",{key:lab,className:"nx-fx",role:"button","aria-label":lab,"aria-pressed":on?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,onClick:onClick,
+style:{padding:"8px 13px",borderRadius:"10px",cursor:"pointer",fontSize:"11.5px",fontWeight:"600",
+background:on?P.inset:"transparent",border:"1px solid "+(on?P.txt:P.line),color:on?P.txt:P.sub}},lab);}
+function famille(titre,opts,cur,cle){
+return i("div",{style:{paddingTop:"14px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:".09em",textTransform:"uppercase",
+color:P.dim,marginBottom:"8px"}},titre),
+i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap"}},
+opts.map(function(o){return puce(o[1],cur===o[0],function(){S.set(cle,o[0]);force();});})));}
+return i("div",null,
+S?_NXcard(i("div",null,
+_NXch(_T("Apparence Nexium"),_T("Habille Discord aux couleurs du client : fonds, accents, typographie et coins.")),
+bascule(_T("Appliquer le theme Nexium"),
+_T("Actif par defaut. Decoche pour retrouver l apparence d origine de Discord."),
+S.cfg.on,function(){S.set("on",!S.cfg.on);force();},!S.cfg.on),
+S.cfg.on?famille(_T("Fond"),[["encre",_T("Encre")],["graphite",_T("Graphite")],["papier",_T("Papier")]],S.cfg.variante,"variante"):null,
+S.cfg.on?famille(_T("Accent"),[["ivoire",_T("Ivoire")],["cendre",_T("Cendre")],["braise",_T("Braise")],["discord",_T("Aucun")]],S.cfg.accent,"accent"):null,
+S.cfg.on?famille(_T("Typographie"),[["defaut",_T("Origine")],["grotesque",_T("Grotesque")],["editoriale",_T("Editoriale")]],S.cfg.police,"police"):null,
+S.cfg.on?famille(_T("Coins"),[["arrondi",_T("Arrondis")],["doux",_T("Doux")],["net",_T("Nets")]],S.cfg.coins,"coins"):null,
+S.cfg.on?famille(_T("Signature"),[["discrete",_T("Discrete")],["affirmee",_T("Affirmee")],["totale",_T("Totale")]],S.cfg.intensite,"intensite"):null,
+S.cfg.on?i("div",{style:{paddingTop:"14px"}},
+bascule(_T("Images sobres"),_T("Desature les bannieres pour garder une lecture monochrome."),
+S.cfg.sobre,function(){S.set("sobre",!S.cfg.sobre);force();},true)):null,
 (function(){var st=S.status();
-return i("div",{style:{marginTop:"13px",paddingTop:"12px",borderTop:"1px solid "+P2.line,fontSize:_NXtype.sm,color:st.applique?P2.dim:"#e6c48a",lineHeight:1.6}},
-st.applique?(_T("Theme applique")+" / "+_T("fond")+" "+((st.sonde&&(st.sonde.fondNouveau||st.sonde.fondAncien))||"?")+" / "+_T("accent")+" "+((st.sonde&&st.sonde.accent)||"-")
-+((st.manquants&&st.manquants.length)?(" / "+_T("elements de Discord introuvables")+" : "+st.manquants.join(", ")):""))
+return i("div",{style:{marginTop:"14px",paddingTop:"13px",borderTop:"1px solid "+P.line,
+fontSize:"11.5px",color:st.applique?P.dim:_NXpal.warn,lineHeight:1.6}},
+st.applique?(_T("Theme applique")
++((st.manquants&&st.manquants.length)?(" · "+_T("elements Discord introuvables")+" : "+st.manquants.join(", ")):""))
 :(_T("Theme non applique")+" : "+(st.pourquoi||"?")));})(),
-i("div",{style:{marginTop:"14px"}},_NXbtn(_T("Revoir l ecran d accueil"),function(){try{if(window._NXWEL)_NXWEL.rejouer();}catch(_){}}))),{mb:12}):null,
-E?_NXcard(i("div",null,_NXch(_T("Performances"),_T("Allege le client sur les machines modestes.")),
-i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"14px"}},
-chip2(_T("Automatique"),E.cfg.mode==="auto",function(){E.set("mode","auto");_nxr();}),
-chip2(_T("Toujours allege"),E.cfg.mode==="on",function(){E.set("mode","on");_nxr();}),
-chip2(_T("Jamais"),E.cfg.mode==="off",function(){E.set("mode","off");_nxr();})),
-opt2(_T("Couper les animations"),_T("Supprime les transitions et les entrees en cascade."),E.cfg.legerAnim,function(){E.set("legerAnim",!E.cfg.legerAnim);_nxr();}),
-opt2(_T("Alleger la mesure reseau"),_T("Cesse de chronometrer chaque requete : c est le poste le plus couteux."),E.cfg.legerReseau,function(){E.set("legerReseau",!E.cfg.legerReseau);_nxr();}),
-opt2(_T("Alleger les images"),_T("Met en pause les animations d images et retire les flous d arriere-plan."),E.cfg.legerImages,function(){E.set("legerImages",!E.cfg.legerImages);_nxr();}),
-opt2(_T("Suspendre en arriere-plan"),_T("Arrete les boucles Nexium quand la fenetre n est pas visible."),E.cfg.pauseCachee,function(){E.set("pauseCachee",!E.cfg.pauseCachee);_nxr();}),
-(function(){var st=E.status();
-return i("div",{style:{marginTop:"13px",paddingTop:"12px",borderTop:"1px solid "+P2.line,fontSize:_NXtype.sm,color:P2.dim,lineHeight:1.6}},
-(st.coeurs?(st.coeurs+" "+_T("coeurs")):_T("coeurs inconnus"))+(st.memoire?("  ·  "+st.memoire+" "+_T("Go de memoire")):"")
-+"  ·  "+(st.detecteFaible?_T("machine modeste detectee"):_T("machine confortable"))
-+"  ·  "+(st.actif?_T("mode allege actif"):_T("mode allege inactif")));})()),{mb:12}):null);})(),
-_NXfoot("localStorage · clés nexium_*")));
-}var _NXUP=window._NXUP||(window._NXUP={});
+i("div",{style:{marginTop:"14px"}},
+_NXbtn(_T("Revoir l ecran d accueil"),function(){try{if(window._NXWEL)_NXWEL.rejouer();}catch(_){}}))),{mb:12}):null,
+E2?_NXcard(i("div",null,
+_NXch(_T("Performances"),_T("Allege le client sur les machines modestes.")),
+i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"6px"}},
+puce(_T("Automatique"),E2.cfg.mode==="auto",function(){E2.set("mode","auto");force();}),
+puce(_T("Toujours allege"),E2.cfg.mode==="on",function(){E2.set("mode","on");force();}),
+puce(_T("Jamais"),E2.cfg.mode==="off",function(){E2.set("mode","off");force();})),
+i("div",{style:{paddingTop:"8px"}},
+bascule(_T("Couper les animations"),_T("Supprime les transitions et les entrees en cascade."),
+E2.cfg.legerAnim,function(){E2.set("legerAnim",!E2.cfg.legerAnim);force();}),
+bascule(_T("Alleger la mesure reseau"),_T("Cesse de chronometrer chaque requete : c est le poste le plus couteux."),
+E2.cfg.legerReseau,function(){E2.set("legerReseau",!E2.cfg.legerReseau);force();}),
+bascule(_T("Alleger les images"),_T("Met en pause les animations d images et retire les flous d arriere-plan."),
+E2.cfg.legerImages,function(){E2.set("legerImages",!E2.cfg.legerImages);force();}),
+bascule(_T("Suspendre en arriere-plan"),_T("Arrete les boucles Nexium quand la fenetre n est pas visible."),
+E2.cfg.pauseCachee,function(){E2.set("pauseCachee",!E2.cfg.pauseCachee);force();},true)),
+(function(){var st=E2.status();
+return i("div",{style:{marginTop:"14px",paddingTop:"13px",borderTop:"1px solid "+P.line,
+fontSize:"11.5px",color:P.dim,lineHeight:1.6}},
+(st.coeurs?(st.coeurs+" "+_T("coeurs")):_T("coeurs inconnus"))
++(st.memoire?(" · "+st.memoire+" "+_T("Go de memoire")):"")
++" · "+(st.detecteFaible?_T("machine modeste detectee"):_T("machine confortable"))
++" · "+(st.actif?_T("mode allege actif"):_T("mode allege inactif")));})()),{mb:12}):null,
+(window._NXMO)?_NXcard(i("div",null,
+_NXch(_T("Animations Nexium"),_T("Les transitions des pages Nexium, independamment du reste de Discord.")),
+bascule(_T("Animer les pages Nexium"),
+_T("Cascades, jauges qui se remplissent et compteurs qui reagissent. Le reglage systeme de mouvement reduit reste prioritaire."),
+_NXMO.on,function(){_NXMO.set(!_NXMO.on);force();},true)),{mb:0}):null);}
+return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
+_NXhead(_T("Données"),"Nexium Données",_T("Tout ce que Nexium garde sur cette machine, et rien d autre. Rien n est synchronise, rien n est envoye : tu peux ouvrir chaque ligne pour verifier.")),
+tabbar(),
+i("div",{key:tab,"data-nx-panel":"1"},
+tab==="stockage"?tStockage():tab==="sauvegardes"?tSauvegardes():tab==="sante"?tSante():tApparence()),
+_NXfoot("Nexium Données · stockage local, clés nexium_*")));
+
+}var _NXNG=window._NXNG||(window._NXNG={});
+if(!_NXNG.boot){try{_NXNG.boot=true;
+_NXNG.KEY="nexium_newgen_v150";
+_NXNG.ID="nx-newgen";
+_NXNG.vu=function(){try{return _NXDB.get(_NXNG.KEY)==="1";}catch(_){return false;}};
+_NXNG.marquer=function(){try{_NXDB.set(_NXNG.KEY,"1");}catch(_){}};
+_NXNG.PAS=[
+{eyebrow:"Nexium NEW Gen",titre:"Le client change de generation.",
+texte:"Cette version n ajoute pas une fonction de plus : elle refait le moteur de securite, la couche de vie privee, et la totalite des pages. Voici ce qui a change.",
+chiffres:[["11","protections inedites"],["24","reglages de vie privee"],["11","pages refaites"]]},
+{eyebrow:"Securite",titre:"Onze protections qui n existaient pas.",
+listes:[["Cinq gardes de sortie",[
+"Gardien des webhooks : la sortie qui passait par discord.com, donc que rien ne filtrait",
+"Pare-feu sortant : aucune donnee ne part vers un serveur inconnu sans ton accord",
+"Anti-balise invisible : image d un pixel, WebSocket, flux permanent",
+"Gardien du DOM : scripts et cadres injectes, retires avant de servir",
+"Anti-charge utile : le code qu un theme veut executer est lu avant"]],
+["Six pieges dans les messages",[
+"Caracteres invisibles caches dans un texte",
+"Adresses de portefeuille, et detournement du presse-papiers",
+"Liens recus en prive d un compte hors de tes amis",
+"Fuite de webhook dans un message que tu envoies",
+"Vagues coordonnees de comptes recents",
+"Noms de fichiers a double extension ou sens de lecture inverse"]]]},
+{eyebrow:"Anti-exfiltration",titre:"Ton jeton est reconnu meme deguise.",
+texte:"Jusqu ici, seule sa forme litterale etait surveillee, et uniquement dans le corps de la requete.",
+puces:["Encode en URL, en base64, inverse, recompose sans ses points, ou coupe en deux",
+"L adresse de la requete est enfin inspectee : un jeton en parametre sortait sans un bruit",
+"Corps binaires, formulaires et parametres d URL couverts",
+"supabase.co n est plus autorise en entier : n importe qui pouvait ouvrir un projet gratuit et s en servir comme sortie",
+"Le jeton ne reste plus pose sur une variable globale"]},
+{eyebrow:"Failles corrigees",titre:"Quatre trous, dont un beant.",
+puces:["La chaine de mise a jour n avait jamais fonctionne : le controle exigeait dix marqueurs qui n ont jamais existe qu en deux exemplaires. Aucune version publiee depuis un an n etait arrivee chez personne.",
+"Un domaine de la base de menaces echappait au blocage s il etait servi sur un port inhabituel",
+"Autoriser un domaine autorisait aussi tout domaine qui le contenait",
+"Le lanceur sait desormais se mettre a jour lui-meme, avec retour arriere automatique"]},
+{eyebrow:"Vie privee",titre:"Vingt-quatre reglages, trois profils, et des heures discretes.",
+puces:["Telemetrie, plantages, moisson, analytique, promotions, tests A/B, detection de jeux, contacts, affinites, evenements, recommandations, sondage vocal",
+"Frappe silencieuse, accuses de lecture, inactivite, partage de l activite en cours",
+"En-tetes de suivi retires, empreinte materielle normalisee, serveurs STUN etrangers ecartes",
+"Noms de fichiers anonymises a l envoi, liens copies nettoyes, traces purgees a la fermeture",
+"Heures discretes : sur une plage horaire, le client passe tout seul en confidentialite maximale"]},
+{eyebrow:"Interface",titre:"Onze pages refaites, de fond en comble.",
+puces:["Un accueil qui devient un vrai tableau de bord",
+"Protect : anneau de protection, vitrines des nouveautes, journal des sorties",
+"Privacy : jauge segmentee, barre de flux, histogramme et bilan de la semaine",
+"Reseau : trace de latence, inventaire des hotes, routes les plus lentes",
+"Stats : calendrier de constance, rythme de journee, objectifs",
+"Donnees : inspecteur de contenu, sauvegardes automatiques, tableau de sante",
+"Music : disque qui tourne, forme d onde, touches media du clavier",
+"Theme, Team, Sponsor et journal des versions"]},
+{eyebrow:"Performances",titre:"Moins de travail a chaque message.",
+puces:["Classification des requetes : une seule expression au lieu de douze, 1,6 fois plus rapide",
+"162 400 recherches dans les stores de Discord remplacees par deux",
+"Les tableaux de reglages ne sont plus reconstruits a chaque rendu",
+"Les ecritures sur disque attendent un temps mort",
+"Un panneau complet se redessine en moins d une milliseconde"],
+final:true}];
+_NXNG.el=function(t,style,txt){var e=document.createElement(t);if(style)e.style.cssText=style;if(txt!=null)e.textContent=txt;return e;};
+_NXNG.fermer=function(){try{
+_NXNG.marquer();
+var ov=document.getElementById(_NXNG.ID);
+if(!ov)return;
+ov.style.opacity="0";
+ov.style.transform="scale(.985)";
+setTimeout(function(){try{if(ov.parentNode)ov.parentNode.removeChild(ov);}catch(_){}},240);
+}catch(_){}};
+_NXNG.dessine=function(idx){try{
+var P=_NXpal;
+var ov=document.getElementById(_NXNG.ID);
+if(!ov)return;
+var pas=_NXNG.PAS[idx];
+var corps=ov.querySelector("[data-nxng-corps]");
+if(!corps)return;
+corps.innerHTML="";
+corps.style.animation="none";
+void corps.offsetWidth;
+corps.style.animation="nx-rise .34s cubic-bezier(.22,.8,.28,1) both";
+corps.appendChild(_NXNG.el("div","font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:"+P.faint+";margin-bottom:13px;",pas.eyebrow));
+corps.appendChild(_NXNG.el("div","font-family:"+_NXf.disp+";font-size:29px;font-weight:800;color:"+P.txt+";letter-spacing:-.042em;line-height:1.14;margin-bottom:"+(pas.texte?"13px":"20px")+";",pas.titre));
+if(pas.texte)corps.appendChild(_NXNG.el("div","font-size:13.5px;color:"+P.sub+";line-height:1.68;margin-bottom:22px;max-width:520px;",pas.texte));
+if(pas.chiffres){
+var row=_NXNG.el("div","display:flex;gap:26px;flex-wrap:wrap;margin-top:6px;");
+for(var c=0;c<pas.chiffres.length;c++){
+var bloc=_NXNG.el("div","min-width:104px;");
+bloc.appendChild(_NXNG.el("div","font-family:"+_NXf.disp+";font-size:38px;font-weight:800;color:"+P.txt+";letter-spacing:-.05em;line-height:1;",pas.chiffres[c][0]));
+bloc.appendChild(_NXNG.el("div","font-size:11.5px;color:"+P.dim+";margin-top:7px;line-height:1.4;",pas.chiffres[c][1]));
+row.appendChild(bloc);}
+corps.appendChild(row);}
+if(pas.listes){
+for(var l=0;l<pas.listes.length;l++){
+var grp=pas.listes[l];
+corps.appendChild(_NXNG.el("div","font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:"+P.dim+";margin:"+(l?"20px":"2px")+" 0 10px;",grp[0]));
+for(var m=0;m<grp[1].length;m++)corps.appendChild(_NXNG.puce(grp[1][m],m));}}
+if(pas.puces){for(var p=0;p<pas.puces.length;p++)corps.appendChild(_NXNG.puce(pas.puces[p],p));}
+var pts=ov.querySelector("[data-nxng-points]");
+if(pts){var enf=pts.childNodes;
+for(var q=0;q<enf.length;q++){
+enf[q].style.width=(q===idx?"20px":"6px");
+enf[q].style.background=(q===idx?P.txt:P.faint);}}
+var prec=ov.querySelector("[data-nxng-prec]");
+if(prec)prec.style.visibility=idx?"visible":"hidden";
+var suiv=ov.querySelector("[data-nxng-suiv]");
+if(suiv)suiv.textContent=(idx>=_NXNG.PAS.length-1)?"Commencer":"Suivant";
+_NXNG.idx=idx;}catch(_){}};
+_NXNG.puce=function(txt,k){try{
+var P=_NXpal;
+var l=_NXNG.el("div","display:flex;gap:11px;align-items:flex-start;padding:6px 0;animation:nx-rise .3s cubic-bezier(.22,.8,.28,1) both;animation-delay:"+(0.03*k+0.05)+"s;");
+var d=_NXNG.el("div","width:5px;height:5px;border-radius:50%;background:"+P.mid+";flex-shrink:0;margin-top:8px;");
+var t=_NXNG.el("div","font-size:12.5px;color:"+P.sub+";line-height:1.62;",txt);
+l.appendChild(d);l.appendChild(t);
+return l;}catch(_){return _NXNG.el("div",null,txt);}};
+_NXNG.show=function(){try{
+if(!document.body)return;
+if(document.getElementById(_NXNG.ID))return;
+var P=_NXpal;
+var ov=_NXNG.el("div","position:fixed;left:0;top:0;right:0;bottom:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(0,0,0,"+(P.light?".42":".76")+");opacity:0;transition:opacity .3s ease,transform .3s ease;");
+ov.id=_NXNG.ID;
+var carte=_NXNG.el("div","position:relative;overflow:hidden;width:640px;max-width:100%;max-height:88vh;display:flex;flex-direction:column;border-radius:26px;border:1px solid "+P.hair+";background:linear-gradient(158deg,"+P.panel+","+P.bg+");box-shadow:0 40px 110px rgba(0,0,0,.62);");
+var halo=_NXNG.el("div","position:absolute;right:-110px;top:-130px;width:340px;height:340px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,"+P.txt+"14,transparent 70%);animation:nx-breathe 4s ease-in-out infinite;");
+carte.appendChild(halo);
+var tete=_NXNG.el("div","position:relative;display:flex;align-items:center;gap:11px;padding:20px 26px 0;flex-shrink:0;");
+tete.appendChild(_NXNG.el("div","font-size:10px;font-weight:900;letter-spacing:.42em;color:"+P.txt+";","NEXIUM"));
+var badge=_NXNG.el("div","margin-left:auto;font-family:"+_NXf.mono+";font-size:10.5px;color:"+P.dim+";padding:3px 10px;border-radius:99px;border:1px solid "+P.line+";","v"+((window._NXUP&&_NXUP.VERSION)||"150"));
+tete.appendChild(badge);
+carte.appendChild(tete);
+var corps=_NXNG.el("div","position:relative;flex:1;min-height:0;overflow-y:auto;padding:26px 26px 8px;");
+corps.setAttribute("data-nxng-corps","1");
+carte.appendChild(corps);
+var pied=_NXNG.el("div","position:relative;display:flex;align-items:center;gap:14px;padding:18px 26px 22px;border-top:1px solid "+P.line+";flex-shrink:0;");
+var pts=_NXNG.el("div","display:flex;align-items:center;gap:6px;flex:1;");
+pts.setAttribute("data-nxng-points","1");
+for(var a=0;a<_NXNG.PAS.length;a++){
+var pt=_NXNG.el("div","height:6px;width:6px;border-radius:99px;background:"+P.faint+";transition:width .3s cubic-bezier(.22,.8,.28,1),background-color .3s ease;");
+pts.appendChild(pt);}
+pied.appendChild(pts);
+var mkBtn=function(txt,style,fn,attr){
+var b=_NXNG.el("div",style,txt);
+b.className="nx-fx";
+b.setAttribute("role","button");
+b.setAttribute("tabindex","0");
+if(attr)b.setAttribute(attr,"1");
+b.onclick=fn;
+b.onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();fn();}};
+return b;};
+pied.appendChild(mkBtn("Precedent","padding:10px 16px;border-radius:11px;cursor:pointer;font-size:12.5px;font-weight:700;color:"+P.dim+";visibility:hidden;",
+function(){if(_NXNG.idx>0)_NXNG.dessine(_NXNG.idx-1);},"data-nxng-prec"));
+pied.appendChild(mkBtn("Suivant","padding:11px 24px;border-radius:11px;cursor:pointer;font-size:13px;font-weight:800;background:"+P.acc+";color:"+(P.light?"#fff":_NXpal.ink)+";",
+function(){if(_NXNG.idx>=_NXNG.PAS.length-1)_NXNG.fermer();else _NXNG.dessine(_NXNG.idx+1);},"data-nxng-suiv"));
+carte.appendChild(pied);
+ov.appendChild(carte);
+ov.onclick=function(e){if(e.target===ov)_NXNG.fermer();};
+document.body.appendChild(ov);
+_NXNG.dessine(0);
+setTimeout(function(){try{ov.style.opacity="1";}catch(_){}},20);
+_NXNG._clav=function(e){try{
+if(e.key==="Escape"){_NXNG.fermer();document.removeEventListener("keydown",_NXNG._clav,true);return;}
+if(e.key==="ArrowRight"&&_NXNG.idx<_NXNG.PAS.length-1)_NXNG.dessine(_NXNG.idx+1);
+if(e.key==="ArrowLeft"&&_NXNG.idx>0)_NXNG.dessine(_NXNG.idx-1);}catch(_){}};
+document.addEventListener("keydown",_NXNG._clav,true);
+}catch(_){}};
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXNG");}catch(_){}}
+}
+var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="145";_NXUP.repoVersion=null;
+_NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
+_NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="150";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -2031,10 +4131,16 @@ _NXUP.freshInstall=!prev;
 try{if(_NXCL&&_NXCL.refresh)_NXCL.refresh();}catch(_){}
 setTimeout(function(){try{
 if(!prev&&window._NXWEL&&!_NXWEL.vu()){_NXWEL.show();return;}
+if(window._NXNG&&!_NXNG.vu()){_NXNG.show();return;}
 _NXUP.showVersionScreen(prev||null);}catch(_){}},2500);
 }catch(_){}};
 _NXUP.probeNative();
 setTimeout(function(){_NXUP.maybeVersionScreen();},1500);
+try{setTimeout(function(){try{
+if(!window._NXNG||_NXNG.vu())return;
+if(document.getElementById(_NXNG.ID))return;
+if(window._NXWEL&&!_NXWEL.vu())return;
+_NXNG.show();}catch(_){}},4200);}catch(_){}
 setTimeout(function(){_NXUP.check();},6000);
 _NXUP.iv=setInterval(function(){if(typeof document==="undefined"||!document.hidden)_NXUP.check();},2700000);
 }
@@ -2114,7 +4220,7 @@ _NXLY.typeLabel=function(t){return t===2?"Écoute":t===1?"Diffuse":t===3?"Regard
 _NXLY.actImgSmall=function(a){try{var as=a&&a.assets;if(as&&as.small_image){var s=as.small_image;if(s.indexOf("mp:external/")===0)return "https://media.discordapp.net/external/"+s.slice(12);if(s.indexOf("http")===0)return s;if(a.application_id)return "https://cdn.discordapp.com/app-assets/"+a.application_id+"/"+s+".png";}}catch(_){}return null;};
 _NXLY.acts=function(){try{var d=_NXLY.data;if(!d)return [];var out=[];if(d.listening_to_spotify&&d.spotify){var sp=d.spotify,ts=(d.activities||[]).filter(function(z){return z.type===2;})[0];var st=ts&&ts.timestamps;out.push({spotify:true,label:"Écoute sur Spotify",name:sp.song,sub:sp.artist,sub2:sp.album,img:sp.album_art_url,imgSmall:null,elapsed:null,start:st&&st.start,end:st&&st.end});}var acts=d.activities||[];for(var a=0;a<acts.length;a++){var x=acts[a];if(x.type===4)continue;if(x.type===2&&x.name==="Spotify"&&d.listening_to_spotify)continue;var tt=x.timestamps||{};out.push({spotify:false,label:_NXLY.typeLabel(x.type)+" "+(x.name||""),name:x.details||x.name||"",sub:x.state||"",sub2:(x.details&&x.name&&x.details!==x.name)?x.name:"",img:_NXLY.actImg(x),imgSmall:_NXLY.actImgSmall(x),elapsed:_NXLY.elapsed(x),start:tt.start,end:tt.end});}return out;}catch(_){return [];}};
 }
-var NexiumTeamIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20},i("path",{d:"M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"}));};
+var NexiumTeamIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20,"aria-hidden":"true"},i("path",{d:"M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.18.68-2.26 1.76-2.73 1.17-.52 2.61-.91 4.24-.91zM4 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c-.37-.06-.74-.1-1.13-.1-.99 0-1.93.21-2.78.58A2.01 2.01 0 0 0 0 16.43V18h4.5v-1.61c0-.83.23-1.61.63-2.29zM20 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4 3.43c0-.81-.48-1.53-1.22-1.85A6.95 6.95 0 0 0 20 14c-.39 0-.76.04-1.13.1.4.68.63 1.46.63 2.29V18H24v-1.57zM12 6c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"}));};
 function _NXthemeWrap(Orig){try{
 if(!Orig)return Orig;
 if(Orig.__nxwrapped)return Orig;
@@ -2125,22 +4231,180 @@ var pick=null;
 try{pick=i(_NXsafe(NexiumBgPicker,"Couleur des paramètres"),null);}catch(_){pick=null;}
 var head=null;
 try{head=i(_NXsafe(NexiumThemeHeader,"Apparence"),null);}catch(_){head=null;}
-return i("div",null,head,inner,pick);};
+return i("div",null,head,i("div",{style:{marginTop:"6px"}},inner),pick);};
 W.__nxwrapped=true;
 return W;}catch(_){return Orig;}}
-function NexiumThemeHeader(){
-try{
+var NX_PRESETS=[
+{k:"encre",n:"Encre",d:"Le noir profond d origine, sans concession.",
+c:{variante:"encre",accent:"ivoire",police:"grotesque",coins:"doux",intensite:"affirmee",sobre:false},
+p:["#08080a","#0e0e10","#e8e8ea"]},
+{k:"graphite",n:"Graphite",d:"Un gris chaud, plus doux pour les longues sessions.",
+c:{variante:"graphite",accent:"cendre",police:"defaut",coins:"arrondi",intensite:"discrete",sobre:false},
+p:["#17171a","#1e1e22","#c9c9cf"]},
+{k:"braise",n:"Braise",d:"Fond sombre, accent chaud. Le plus affirme.",
+c:{variante:"encre",accent:"braise",police:"grotesque",coins:"net",intensite:"totale",sobre:true},
+p:["#08080a","#1a0f0c","#d97a4a"]},
+{k:"papier",n:"Papier",d:"Un theme clair, editorial, pour travailler en plein jour.",
+c:{variante:"papier",accent:"cendre",police:"editoriale",coins:"doux",intensite:"discrete",sobre:false},
+p:["#f2f3f5","#ffffff","#4e5058"]},
+{k:"origine",n:"Discord d origine",d:"Nexium se retire completement.",
+c:{variante:"encre",accent:"discord",police:"defaut",coins:"arrondi",intensite:"discrete",sobre:false},
+p:["#313338","#2b2d31","#dbdee1"]}];
+function NexiumThemeComp(){
+var force=F.useReducer(function(x){return x+1;},0)[1];
+var _o0=F.useState(false);var avance=_o0[0];var setAvance=_o0[1];
+F.useEffect(function(){
+var vivant=true;
+var maj=function(){if(vivant)force();};
+try{if(window._NXSKIN)_NXSKIN.listeners.push(maj);}catch(_){}
+return function(){vivant=false;
+try{if(window._NXSKIN)_NXSKIN.listeners=_NXSKIN.listeners.filter(function(f){return f!==maj;});}catch(_){}};},[]);
+var monte=_NXmounted(F);
 var P=_NXpal;
-var risky=(window._NXV&&_NXV.cssRisky)||[];
-return i("div",{style:{position:"relative",overflow:"hidden",borderRadius:"18px",border:"1px solid "+P.line,background:P.panel,padding:"22px 22px 20px",marginBottom:"18px"}},
-i("div",{style:{position:"absolute",inset:0,background:"radial-gradient(115% 130% at 88% -15%, rgba(88,101,242,.18), transparent 58%)",pointerEvents:"none"}}),
-i("div",{style:{position:"relative"}},
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".18em",textTransform:"uppercase",color:P.faint,marginBottom:"8px"}},"Nexium"),
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"22px",fontWeight:"800",color:P.txt,letterSpacing:"-.03em",marginBottom:"7px"}},_T("Apparence")),
-i("div",{style:{fontSize:"13px",color:P.sub,lineHeight:1.6,maxWidth:"520px"}},_T("Installe des thèmes de la communauté, ou choisis simplement une couleur de fond ci-dessous. Les deux se combinent sans conflit.")),
-risky.length?i("div",{style:{marginTop:"14px",padding:"11px 13px",borderRadius:"11px",background:"rgba(250,166,97,.1)",border:"1px solid rgba(250,166,97,.26)",fontSize:"12px",color:_NXpal.warn,lineHeight:1.5}},
-_T("Attention : ")+risky.length+" "+_T("de tes thèmes chargent des ressources externes qui exposent ton adresse IP. Détail dans Nexium Protect.")):null));
-}catch(_){return null;}}
+var S=window._NXSKIN;
+if(!S)return i("div",null,null);
+var cfg=S.cfg;
+var st=S.status();
+function estPreset(pr){
+try{for(var k in pr.c){if(String(cfg[k])!==String(pr.c[k]))return false;}return true;}catch(_){return false;}}
+var actif=null;
+for(var a0=0;a0<NX_PRESETS.length;a0++)if(estPreset(NX_PRESETS[a0])){actif=NX_PRESETS[a0].k;break;}
+function poser(pr){try{
+for(var k in pr.c)S.set(k,pr.c[k]);
+if(!cfg.on)S.set("on",true);
+force();}catch(_){}}
+function apercu(){
+var clair=cfg.variante==="papier";
+var fond=clair?"#f2f3f5":(cfg.variante==="graphite"?"#17171a":"#08080a");
+var panneau=clair?"#ffffff":(cfg.variante==="graphite"?"#1e1e22":"#0e0e10");
+var texte=clair?"#2e3338":"#e8e8ea";
+var doux=clair?"#6d6f78":"#8a8a92";
+var acc=cfg.accent==="braise"?"#d97a4a":(cfg.accent==="cendre"?"#9a9aa0":(cfg.accent==="discord"?"#5865f2":"#e8e8ea"));
+var rayon=cfg.coins==="net"?"3px":(cfg.coins==="doux"?"8px":"14px");
+var police=cfg.police==="editoriale"?"Georgia,serif":(cfg.police==="grotesque"?_NXf.disp:"inherit");
+return i("div",{style:{borderRadius:"16px",overflow:"hidden",border:"1px solid "+P.hair,
+background:fond,display:"flex",height:"178px",
+transition:"background-color .35s ease"}},
+i("div",{style:{width:"52px",flexShrink:0,background:panneau,padding:"11px 0",
+display:"flex",flexDirection:"column",alignItems:"center",gap:"8px",
+transition:"background-color .35s ease"}},
+[0,1,2,3].map(function(k){
+return i("div",{key:k,style:{width:"30px",height:"30px",borderRadius:k===0?rayon:"50%",
+background:k===0?acc:(clair?"#e3e5e8":"#1a1a1d"),
+transition:"border-radius .3s ease,background-color .35s ease"}});})),
+i("div",{style:{flex:1,minWidth:0,padding:"13px 15px",display:"flex",flexDirection:"column",gap:"11px"}},
+i("div",{style:{height:"3px",width:cfg.intensite==="discrete"?"0":"100%",background:acc,
+borderRadius:"2px",transition:"width .4s ease"}}),
+[["Nexium",true],["Le theme se voit ici, en direct.",false],["Change un reglage, l apercu suit.",false]].map(function(o,k){
+return i("div",{key:k,style:{display:"flex",gap:"9px",alignItems:"flex-start"}},
+i("div",{style:{width:"22px",height:"22px",borderRadius:rayon,flexShrink:0,
+background:clair?"#e3e5e8":"#1a1a1d",transition:"border-radius .3s ease"}}),
+i("div",{style:{flex:1,minWidth:0}},
+o[1]?i("div",{style:{fontFamily:police,fontSize:"11.5px",fontWeight:"700",color:texte,
+marginBottom:"3px",transition:"color .35s ease"}},o[0]):null,
+!o[1]?i("div",{style:{fontFamily:police,fontSize:"11px",color:doux,lineHeight:1.5,
+borderLeft:cfg.intensite==="totale"?("2px solid "+acc):"none",
+paddingLeft:cfg.intensite==="totale"?"7px":"0",
+transition:"color .35s ease,padding-left .3s ease"}},o[0]):null));})));}
+function puce(lab,on,onClick){
+return i("div",{key:lab,className:"nx-fx",role:"button","aria-label":lab,"aria-pressed":on?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,onClick:onClick,
+style:{padding:"8px 13px",borderRadius:"10px",cursor:"pointer",fontSize:"11.5px",fontWeight:"600",
+background:on?P.inset:"transparent",border:"1px solid "+(on?P.txt:P.line),
+color:on?P.txt:P.sub}},lab);}
+function famille(titre,opts,cle){
+return i("div",{style:{paddingTop:"15px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:".09em",textTransform:"uppercase",
+color:P.dim,marginBottom:"8px"}},titre),
+i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap"}},
+opts.map(function(o){return puce(o[1],cfg[cle]===o[0],function(){S.set(cle,o[0]);force();});})));}
+function bascule(lab,desc,on,onClick,last){
+return i("div",{className:"nx-fx",role:"button","aria-label":lab,"aria-pressed":on?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,onClick:onClick,
+style:{display:"flex",alignItems:"flex-start",gap:"13px",padding:"13px 0",cursor:"pointer",
+borderBottom:last?"none":"1px solid "+P.line}},
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13.5px",fontWeight:"600",color:on?P.txt:P.sub}},lab),
+desc?i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"4px",lineHeight:1.55}},desc):null),
+i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{width:"38px",height:"22px",borderRadius:"11px",flexShrink:0,
+marginTop:"1px",background:on?P.txt:"transparent",border:"1px solid "+(on?P.txt:P.faint)}},
+i("div",{style:{width:"14px",height:"14px",borderRadius:"50%",margin:"3px",
+background:on?_NXpal.ink:P.faint,transform:on?"translateX(16px)":"none"}})));}
+return i("div",{"data-nx-panel":"1",style:{marginBottom:"20px"}},
+i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
+borderRadius:"22px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",
+padding:"24px",marginBottom:"14px"}},
+i("div",{style:{display:"flex",alignItems:"baseline",justifyContent:"space-between",
+gap:"12px",flexWrap:"wrap",marginBottom:"6px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".18em",textTransform:"uppercase",
+color:P.faint}},_T("Apparence Nexium")),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",
+color:st.applique?_NXpal.ok:_NXpal.warn}},
+st.applique?_T("applique"):_T("non applique"))),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"27px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.04em",lineHeight:1.12,marginBottom:"9px"}},
+actif?(_T("Theme")+" "+(function(){for(var z=0;z<NX_PRESETS.length;z++)if(NX_PRESETS[z].k===actif)return NX_PRESETS[z].n;return "";})())
+:_T("Ton theme, sur mesure")),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.65,marginBottom:"18px",maxWidth:"440px"}},
+_T("Nexium habille Discord par ses variables de couleur, pas par des noms de classes : le theme survit aux mises a jour de Discord.")),
+apercu()),
+_NXcard(i("div",null,
+_NXch(_T("Ambiances"),_T("Cinq combinaisons pretes. Tu peux ensuite retoucher chaque reglage.")),
+i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(168px,1fr))",gap:"10px"}},
+NX_PRESETS.map(function(pr){
+var on=actif===pr.k&&cfg.on;
+return i("div",{key:pr.k,className:"nx-fx","data-nx-tile":"1",role:"button","aria-label":pr.n,
+"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){poser(pr);},
+style:{padding:"14px",borderRadius:"15px",cursor:"pointer",
+background:on?P.inset:"transparent",border:"1px solid "+(on?P.txt:P.line)}},
+i("div",{style:{display:"flex",gap:"4px",marginBottom:"11px"}},
+pr.p.map(function(c,k){
+return i("div",{key:k,style:{flex:1,height:"26px",background:c,
+borderRadius:k===0?"7px 0 0 7px":(k===2?"0 7px 7px 0":"0"),
+border:"1px solid "+P.hair,borderLeft:k?"none":("1px solid "+P.hair)}});})),
+i("div",{style:{fontSize:"13px",fontWeight:"800",color:on?P.txt:P.sub,
+letterSpacing:"-.012em",marginBottom:"4px"}},pr.n),
+i("div",{style:{fontSize:"11px",color:P.dim,lineHeight:1.5}},pr.d));}))),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Réglages"),_T("Chaque element se change independamment ; l apercu suit en direct.")),
+bascule(_T("Appliquer le theme Nexium"),
+_T("Decoche pour retrouver l apparence d origine de Discord, a l identique."),
+cfg.on,function(){S.set("on",!cfg.on);force();},!cfg.on),
+cfg.on?famille(_T("Fond"),[["encre",_T("Encre")],["graphite",_T("Graphite")],["papier",_T("Papier")]],"variante"):null,
+cfg.on?famille(_T("Accent"),[["ivoire",_T("Ivoire")],["cendre",_T("Cendre")],["braise",_T("Braise")],["discord",_T("Aucun")]],"accent"):null,
+cfg.on?famille(_T("Typographie"),[["defaut",_T("Origine")],["grotesque",_T("Grotesque")],["editoriale",_T("Editoriale")]],"police"):null,
+cfg.on?famille(_T("Coins"),[["arrondi",_T("Arrondis")],["doux",_T("Doux")],["net",_T("Nets")]],"coins"):null,
+cfg.on?famille(_T("Signature"),[["discrete",_T("Discrete")],["affirmee",_T("Affirmee")],["totale",_T("Totale")]],"intensite"):null,
+cfg.on?i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.6,paddingTop:"12px"}},
+cfg.intensite==="discrete"?_T("Couleurs, typographie et coins seulement.")
+:(cfg.intensite==="affirmee"?_T("Ajoute le filet d accent en haut, le liserE des messages et les categories en capitales.")
+:_T("Ajoute le sigle NEXIUM dans la barre de titre et un filigrane au fond de la fenetre."))):null,
+cfg.on?i("div",{style:{paddingTop:"13px"}},
+bascule(_T("Images sobres"),_T("Desature les bannieres pour garder une lecture monochrome."),
+cfg.sobre,function(){S.set("sobre",!cfg.sobre);force();},true)):null),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Etat"),_T("Ce que Nexium a reellement pu appliquer."),
+_NXbtn(_T("Reverifier"),function(){try{S.probe&&S.probe();S.apply&&S.apply();}catch(_){}force();})),
+i("div",{style:{fontSize:"12px",color:st.applique?P.dim:_NXpal.warn,lineHeight:1.65}},
+st.applique
+?(_T("Le theme est applique.")
++((st.manquants&&st.manquants.length)
+?(" "+_T("Elements de Discord introuvables")+" : "+st.manquants.join(", ")+".")
+:(" "+_T("Tous les elements vises ont ete trouves."))))
+:(_T("Le theme n est pas applique")+" : "+(st.pourquoi||"raison inconnue")))),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Thèmes et CSS d origine"),
+_T("Le gestionnaire de themes d Equicord, QuickCSS et les themes en ligne. Rien n a ete retire."),
+_NXbtn(avance?_T("Replier"):_T("Deplier"),function(){setAvance(!avance);force();})),
+avance?i("div",{"data-nx-fade":"1",style:{marginTop:"8px",paddingTop:"14px",
+borderTop:"1px solid "+P.line}},i("div",{id:"nx-themes-origine"},null)):
+i("div",{style:{fontSize:"12px",color:P.dim,lineHeight:1.6}},
+_T("A deplier si tu veux ajouter un theme externe ou ecrire du CSS."))),{mb:0,_deplie:avance}));
+}
+function NexiumThemeHeader(){
+try{return i(_NXsafe(NexiumThemeComp,"Apparence Nexium"),null);}catch(_){return null;}}
+
 function NexiumBgPicker(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 F.useEffect(function(){_NXBG.listeners.push(force);return function(){var k=_NXBG.listeners.indexOf(force);if(k>=0)_NXBG.listeners.splice(k,1);};},[]);
@@ -2186,67 +4450,159 @@ i("span",{style:{fontSize:"11px",color:prev.dim}},_T("Contraste")+" "+_NXBG.cont
 }
 function NexiumTeamComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
-F.useEffect(function(){_NXLY.listeners.push(force);_NXLY.start();return function(){_NXLY.listeners=_NXLY.listeners.filter(function(f){return f!==force;});_NXLY.stop();};},[]);
+F.useEffect(function(){
+_NXLY.listeners.push(force);_NXLY.start();
+return function(){
+try{_NXLY.listeners=_NXLY.listeners.filter(function(f){return f!==force;});}catch(_){}
+try{_NXLY.stop();}catch(_){}};},[]);
+var monte=_NXmounted(F);
 var P=_NXpal;
 var d=_NXLY.data;
 var du=d&&d.discord_user;
-var name=(du&&(du.global_name||du.username))||"5dj0";
-var uname=du&&du.username?"@"+du.username:null;
+var nom=(du&&(du.global_name||du.username))||"5dj0";
+var pseudo=du&&du.username?"@"+du.username:null;
 var sm=_NXLY.statusMeta();
-var custom=_NXLY.customStatus();
+var perso=_NXLY.customStatus();
 var acts=_NXLY.acts();
 var live=!!d&&!_NXLY.err;
-var contribs=[{name:"kikou",role:_T("Développeur C++ / Lua / Luau")},{name:"Zeo",role:_T("Contributeur — communication & visibilité")},{name:"elias.qsd7",role:_T("Contributeur — invitations & diffusion")}];
-var support=[{name:"Ps9chotik",role:_T("Support technique"),tag:"10348295",tagLabel:_T("pseudo"),note:_T("Un souci technique ? Écris-lui en message privé sur Discord.")}];
-function glow(hex,al){return hex+Math.round(al*255).toString(16).padStart(2,"0");}
-function fmtMS(ms){var s=Math.max(0,Math.floor(ms/1000));var m=Math.floor(s/60);var r=s%60;return m+":"+(r<10?"0":"")+r;}
-function actCard(x,k){
+var CONTRIB=[
+{n:"kikou",r:_T("Developpeur"),s:_T("C++ · Lua · Luau")},
+{n:"elias.qsd7",r:_T("Contributeur"),s:_T("Idees et retours")}];
+function ms(x){var t=Math.max(0,Math.floor(x/1000));var m=Math.floor(t/60);var r=t%60;return m+":"+(r<10?"0":"")+r;}
+function anneau(){
+var taille=104,r=taille/2-5,c=2*Math.PI*r;
+return i("div",{style:{position:"relative",width:taille+"px",height:taille+"px",flexShrink:0}},
+i("svg",{width:taille,height:taille,viewBox:"0 0 "+taille+" "+taille,
+style:{transform:"rotate(-90deg)",display:"block"},"aria-hidden":"true"},
+i("circle",{cx:taille/2,cy:taille/2,r:r,fill:"none",stroke:P.line,"stroke-width":"3"}),
+i("circle",{"data-nx-ring":"1",cx:taille/2,cy:taille/2,r:r,fill:"none",stroke:sm.c,
+"stroke-width":"3","stroke-linecap":"round",
+"stroke-dasharray":c.toFixed(1),
+"stroke-dashoffset":(monte?(live?0:c*0.72):c).toFixed(1)})),
+i("div",{style:{position:"absolute",left:"11px",top:"11px",width:"82px",height:"82px",
+borderRadius:"50%",overflow:"hidden",background:P.inset,border:"1px solid "+P.hair}},
+i("img",{src:_NXLY.avatar(),alt:nom,
+style:{width:"100%",height:"100%",objectFit:"cover",display:"block"}})),
+i("div",{"data-nx-dot":live?"1":null,"aria-hidden":"true",
+style:{position:"absolute",right:"3px",bottom:"3px",width:"20px",height:"20px",borderRadius:"50%",
+background:sm.c,border:"3px solid "+P.panel}}));}
+function carteActivite(x,k){
 var prog=null,cur="",tot="";
-if(x.start&&x.end&&x.end>x.start){var now=Date.now();var p=Math.min(1,Math.max(0,(now-x.start)/(x.end-x.start)));prog=Math.round(p*100);cur=fmtMS(now-x.start);tot=fmtMS(x.end-x.start);}
-return i("div",{key:k,style:{padding:"14px",background:x.spotify?"linear-gradient(135deg, rgba(29,185,84,.09), rgba(29,185,84,.01))":P.inset,border:"1px solid "+(x.spotify?"rgba(29,185,84,.25)":P.line),borderRadius:"15px",marginBottom:"8px"}},
+if(x.start&&x.end&&x.end>x.start){
+var now=Date.now();
+var p=Math.min(1,Math.max(0,(now-x.start)/(x.end-x.start)));
+prog=Math.round(p*100);cur=ms(now-x.start);tot=ms(x.end-x.start);}
+var vert="#3ecf6f";
+return i("div",{key:k,"data-nx-tile":"1",
+style:{padding:"15px",borderRadius:"15px",marginBottom:"9px",
+background:x.spotify?("linear-gradient(140deg,rgba(62,207,111,.09),"+P.inset+" 70%)"):P.inset,
+border:"1px solid "+(x.spotify?"rgba(62,207,111,.28)":P.line)}},
 i("div",{style:{display:"flex",alignItems:"center",gap:"14px"}},
-i("div",{style:{position:"relative",flexShrink:0,width:"56px",height:"56px"}},
-x.img?i("img",{src:x.img,style:{width:"56px",height:"56px",borderRadius:"12px",objectFit:"cover",background:P.panel,border:"1px solid "+P.hair}}):i("div",{style:{width:"56px",height:"56px",borderRadius:"12px",background:P.panel,border:"1px solid "+P.hair,display:"flex",alignItems:"center",justifyContent:"center",color:P.faint}},i("svg",{viewBox:"0 0 24 24",width:26,height:26,fill:"currentColor"},i("path",{d:"M6 9h2v2H6V9zm4 0h2v2h-2V9zm7 0a1 1 0 100 2 1 1 0 000-2zm-2 3a1 1 0 100 2 1 1 0 000-2zM4 6h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"}))),
-x.imgSmall?i("img",{src:x.imgSmall,style:{position:"absolute",right:"-5px",bottom:"-5px",width:"22px",height:"22px",borderRadius:"50%",border:"2px solid "+(x.spotify?"#0e1a12":P.inset),background:P.panel,objectFit:"cover"}}):null),
+i("div",{style:{position:"relative",flexShrink:0,width:"54px",height:"54px"}},
+x.img?i("img",{src:x.img,alt:"",
+style:{width:"54px",height:"54px",borderRadius:"13px",objectFit:"cover",
+background:P.panel,border:"1px solid "+P.hair,display:"block"}})
+:i("div",{style:{width:"54px",height:"54px",borderRadius:"13px",background:P.panel,
+border:"1px solid "+P.hair,display:"flex",alignItems:"center",justifyContent:"center",color:P.faint}},
+i("svg",{viewBox:"0 0 24 24",width:20,height:20,fill:"currentColor","aria-hidden":"true"},
+i("path",{d:"M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"}))),
+x.imgSmall?i("img",{src:x.imgSmall,alt:"",
+style:{position:"absolute",right:"-5px",bottom:"-5px",width:"21px",height:"21px",
+borderRadius:"50%",border:"2px solid "+P.panel,display:"block"}}):null),
 i("div",{style:{flex:1,minWidth:0}},
-i("div",{style:{fontSize:"10px",textTransform:"uppercase",letterSpacing:".07em",fontWeight:"800",color:x.spotify?"#3ecf6f":P.dim,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},x.label),
-i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt,marginTop:"3px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",letterSpacing:"-.01em"}},x.name||"—"),
-x.sub?i("div",{style:{fontSize:"12px",color:P.sub,marginTop:"1px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},x.sub):null,
-x.sub2?i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"1px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},x.sub2):null,
-(!prog&&x.elapsed)?i("div",{style:{fontSize:"10px",fontFamily:_NXf.mono,color:P.faint,marginTop:"4px"}},"◷ "+x.elapsed):null)),
-prog!=null?i("div",{style:{marginTop:"12px"}},i("div",{style:{height:"4px",borderRadius:"2px",background:x.spotify?"rgba(255,255,255,.10)":P.hair,overflow:"hidden"}},i("div",{style:{width:prog+"%",height:"100%",borderRadius:"2px",background:x.spotify?"#1db954":P.acc}})),i("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"5px",fontSize:"9px",fontFamily:_NXf.mono,color:P.faint}},i("span",null,cur),i("span",null,tot))):null);
-}
-return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
-_NXhead("L'équipe","Team","Le client Nexium est conçu et développé par 5dj0. Son statut Discord s'affiche ici en temps réel."),
-i("div",{style:{position:"relative",borderRadius:"20px",overflow:"hidden",marginBottom:"12px",border:"1px solid "+P.line,background:P.panel}},
-i("div",{style:{position:"absolute",inset:0,background:"radial-gradient(120% 140% at 20% -20%, "+glow(sm.c,.16)+", transparent 55%)",pointerEvents:"none"}}),
-i("div",{style:{position:"relative",padding:"24px 22px"}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"18px"}},
-i("div",{style:{position:"relative",flexShrink:0}},
-i("div",{style:{position:"absolute",inset:"-4px",borderRadius:"24px",background:glow(sm.c,live?.5:.2),filter:"blur(9px)",opacity:live?1:.5}}),
-i("img",{src:_NXLY.avatar(),style:{position:"relative",width:"78px",height:"78px",borderRadius:"22px",objectFit:"cover",background:P.inset,border:"2px solid "+glow(sm.c,.55)}}),
-i("div",{style:{position:"absolute",right:"-4px",bottom:"-4px",width:"22px",height:"22px",borderRadius:"50%",background:sm.c,border:"4px solid "+P.panel,boxShadow:"0 0 0 1px "+glow(sm.c,.4)}})),
-i("div",{style:{flex:1,minWidth:0}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},i("div",{style:{fontFamily:_NXf.disp,fontSize:"25px",fontWeight:"800",color:P.txt,letterSpacing:"-.03em",lineHeight:1}},name),i("div",{style:{fontSize:"9px",fontWeight:"800",letterSpacing:".1em",color:_NXpal.ink,background:P.acc,padding:"3px 9px",borderRadius:"99px",textTransform:"uppercase"}},"Créateur")),
-uname?i("div",{style:{fontSize:"12px",fontFamily:_NXf.mono,color:P.dim,marginTop:"5px"}},uname):null,
-i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginTop:"9px"}},i("div",{style:{position:"relative",width:"8px",height:"8px",flexShrink:0}},i("div",{style:{position:"absolute",inset:0,borderRadius:"50%",background:sm.c}}),live?i("div",{style:{position:"absolute",inset:"-3px",borderRadius:"50%",border:"1px solid "+sm.c,opacity:.5}}):null),i("div",{style:{fontSize:"12px",color:P.sub,fontWeight:"600"}},sm.t),live?i("div",{style:{fontSize:"9px",fontFamily:_NXf.mono,color:_NXpal.ok,letterSpacing:".08em",marginLeft:"2px"}},"● LIVE"):null))),
-custom?i("div",{style:{fontSize:"13px",color:P.sub,marginTop:"18px",padding:"12px 15px",background:"rgba(255,255,255,.02)",borderRadius:"12px",border:"1px solid "+P.hair,lineHeight:"1.5",fontStyle:"italic"}},"« "+custom+" »"):null,
-acts.length?i("div",{style:{marginTop:"18px"}},i("div",{style:{fontSize:"10px",textTransform:"uppercase",letterSpacing:".14em",color:P.faint,fontWeight:"700",marginBottom:"10px"}},"En ce moment"),acts.map(actCard)):((_NXLY.loading&&!d)?i("div",{style:{fontSize:"12px",color:P.dim,fontFamily:_NXf.mono,marginTop:"18px"}},"Chargement du statut…"):((_NXLY.err&&!d)?i("div",{style:{fontSize:"12px",color:P.dim,marginTop:"18px"}},"Statut Discord indisponible pour le moment."):null)),
-i("div",{style:{display:"flex",gap:"9px",marginTop:"20px"}},i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{_NXP.open("https://guns.lol/5dj0");}catch(_){}},style:{padding:"11px 20px",borderRadius:"11px",background:P.acc,color:_NXpal.ink,fontSize:"12px",fontWeight:"700",cursor:"pointer"}},"guns.lol ↗")))),
+i("div",{style:{fontSize:"9.5px",textTransform:"uppercase",letterSpacing:".1em",fontWeight:"800",
+color:x.spotify?vert:P.faint,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},
+x.type||_T("Activite")),
+i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt,marginTop:"4px",
+letterSpacing:"-.012em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},x.name||""),
+x.sub?i("div",{style:{fontSize:"12px",color:P.sub,marginTop:"2px",
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},x.sub):null,
+x.sub2?i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"2px",
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},x.sub2):null,
+(!prog&&x.elapsed)?i("div",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,marginTop:"5px"}},
+x.elapsed):null)),
+prog!=null?i("div",{style:{marginTop:"13px"}},
+i("div",{"data-nx-bar":"1",style:{height:"4px",borderRadius:"99px",
+background:x.spotify?"rgba(255,255,255,.10)":P.hair,overflow:"hidden"}},
+i("div",{style:{height:"100%",borderRadius:"99px",background:x.spotify?vert:P.txt,
+transform:"scaleX("+(monte?prog/100:0)+")",transformOrigin:"left center"}})),
+i("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"6px",
+fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint}},
+i("span",null,cur),i("span",null,tot))):null);}
+function chiffre(v,lab){return i("div",{style:{flex:1,minWidth:"84px"}},
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"22px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.035em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
+i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"5px"}},lab));}
+var sante=(window._NXDATA&&_NXDATA.sante)?_NXDATA.sante():{total:0,vivants:0};
+var nProt=0;
+try{nProt=(SH_LIENS.length+SH_CONTENU.length+SH_AVANCE.length+SH_PIEGES.length+SH_SORTIE.length);}catch(_){}
+function lien(txt,url,fort){
+return i("div",{className:"nx-fx",role:"button","aria-label":txt,tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){try{_NXP.open(url);}catch(_){}},
+style:{flex:"1 1 150px",textAlign:"center",padding:"12px",borderRadius:"12px",cursor:"pointer",
+background:fort?P.acc:"transparent",border:"1px solid "+(fort?P.acc:P.line),
+color:fort?_NXpal.ink:P.sub,fontSize:"12.5px",fontWeight:"800"}},txt);}
+return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
+_NXhead(_T("L'équipe"),"Nexium Team",
+_T("Le client est concu et developpe par 5dj0. Sa presence Discord est lue en direct tant que cette page reste ouverte, et nulle part ailleurs.")),
+i("div",{"data-nx-panel":"1"},
+i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
+borderRadius:"24px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",
+padding:"26px 24px",marginBottom:"14px"}},
+live?i("div",{"data-nx-breathe":"1","aria-hidden":"true",
+style:{position:"absolute",left:"-70px",top:"-90px",width:"260px",height:"260px",borderRadius:"50%",
+background:"radial-gradient(circle,"+sm.c+"22,transparent 70%)",pointerEvents:"none"}}):null,
+i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"22px",flexWrap:"wrap"}},
+anneau(),
+i("div",{style:{flex:1,minWidth:"180px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".18em",textTransform:"uppercase",
+color:P.faint,marginBottom:"8px"}},_T("Createur du client")),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"28px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.04em",lineHeight:1.1}},nom),
+pseudo?i("div",{style:{fontFamily:_NXf.mono,fontSize:"11.5px",color:P.dim,marginTop:"6px"}},pseudo):null,
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"11px"}},
+i("span",{"data-nx-dot":live?"1":null,"aria-hidden":"true",
+style:{width:"7px",height:"7px",borderRadius:"50%",background:sm.c,flexShrink:0}}),
+i("span",{style:{fontSize:"12px",color:P.sub,fontWeight:"600"}},
+sm.t+(live?"":" \u00b7 "+_T("hors ligne")))))),
+perso?i("div",{style:{position:"relative",marginTop:"18px",padding:"13px 15px",
+background:P.inset,borderRadius:"13px",border:"1px solid "+P.line,
+fontSize:"12.5px",color:P.sub,lineHeight:1.6}},perso):null,
+i("div",{style:{position:"relative",display:"flex",gap:"16px",flexWrap:"wrap",
+marginTop:"20px",paddingTop:"18px",borderTop:"1px solid "+P.line}},
+chiffre("v"+((window._NXUP&&_NXUP.VERSION)||"?"),_T("Version")),
+chiffre(nProt||"\u2014",_T("Protections")),
+chiffre(sante.total?(sante.vivants+"/"+sante.total):"\u2014",_T("Modules")),
+chiffre(CONTRIB.length+1,_T("Personnes")))),
+acts.length?_NXcard(i("div",null,
+_NXch(_T("En ce moment"),_T("Ce que Discord annonce publiquement de son activite.")),
+acts.map(carteActivite)),{mb:12}):null,
 _NXcard(i("div",null,
-i("div",{style:{fontSize:"11px",fontWeight:"700",textTransform:"uppercase",letterSpacing:".14em",color:P.dim,marginBottom:"14px"}},"Contributeurs"),
-contribs.map(function(m,k){return i("div",{key:k,style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"13px 15px",background:P.inset,borderRadius:"12px",marginBottom:"7px",border:"1px solid "+P.line}},i("div",{style:{display:"flex",alignItems:"center",gap:"13px",minWidth:0}},i("div",{style:{width:"38px",height:"38px",borderRadius:"11px",background:"linear-gradient(135deg,#1a1a1c,#0d0d0e)",border:"1px solid "+P.hair,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:_NXf.disp,fontWeight:"800",color:P.sub,fontSize:"15px",flexShrink:0}},m.name.charAt(0).toUpperCase()),i("div",{style:{minWidth:0}},i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt}},m.name),i("div",{style:{fontSize:"12px",color:P.dim,marginTop:"2px"}},m.role))),m.url?i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{_NXP.open(m.url);}catch(_){}},style:{fontSize:"12px",color:P.sub,cursor:"pointer",flexShrink:0,fontWeight:"600"}},m.label||"Lien ↗"):i("span",{style:{fontSize:"12px",color:P.faint,flexShrink:0}},"—"));})),{mb:12}),
-_NXcard(i("div",null,
-i("div",{style:{fontSize:"11px",fontWeight:"700",textTransform:"uppercase",letterSpacing:".14em",color:P.dim,marginBottom:"14px"}},"Support"),
-support.map(function(s,k){return i("div",{key:k,style:{padding:"14px 15px",background:P.inset,borderRadius:"12px",border:"1px solid "+P.line}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"13px",minWidth:0}},
-i("div",{style:{width:"38px",height:"38px",borderRadius:"11px",background:"linear-gradient(135deg,#1a1a1c,#0d0d0e)",border:"1px solid "+P.hair,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:_NXf.disp,fontWeight:"800",color:P.sub,fontSize:"15px",flexShrink:0}},s.name.charAt(0).toUpperCase()),
+_NXch(_T("Contributeurs"),_T("Ceux qui font avancer le client autrement qu en ecrivant du code.")),
+i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(178px,1fr))",gap:"10px"}},
+CONTRIB.map(function(m,k){
+return i("div",{key:k,"data-nx-tile":"1",
+style:{padding:"14px",borderRadius:"14px",background:P.inset,border:"1px solid "+P.line}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"11px",marginBottom:"9px"}},
+i("div",{style:{width:"34px",height:"34px",borderRadius:"11px",flexShrink:0,
+background:"linear-gradient(140deg,"+P.raise+","+P.panel+")",border:"1px solid "+P.hair,
+display:"flex",alignItems:"center",justifyContent:"center",
+fontFamily:_NXf.disp,fontSize:"14px",fontWeight:"800",color:P.sub}},
+String(m.n).charAt(0).toUpperCase()),
 i("div",{style:{flex:1,minWidth:0}},
-i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt}},s.name),
-i("div",{style:{fontSize:"12px",color:P.dim,marginTop:"2px"}},s.role)),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){try{DiscordNative.clipboard.copy(s.tag);if(window._NXPR&&_NXPR.toast)_NXPR.toast("Copie : "+s.tag,1);}catch(_){}},style:{flexShrink:0,fontSize:"11px",fontFamily:_NXf.mono,color:P.sub,cursor:"pointer",padding:"6px 11px",border:"1px solid "+P.line,borderRadius:"8px"}},(s.tagLabel?s.tagLabel+" ":"")+s.tag)),
-i("div",{style:{fontSize:"12.5px",color:P.sub,marginTop:"11px",lineHeight:1.55}},s.note));})),{mb:0}),
-_NXfoot("Statut Discord en temps réel · actualisé uniquement sur cette page")));
+i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt,
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},m.n),
+i("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:".07em",textTransform:"uppercase",
+color:P.faint,marginTop:"3px"}},m.r))),
+i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.5}},m.s));}))),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Le projet"),_T("Tout est ouvert : le code, les listes de menaces, le journal des versions.")),
+i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
+lien(_T("Site officiel"),"https://nexium-client.netlify.app/",true),
+lien(_T("Depot du client"),"https://github.com/Omega-devj/nexium-client"),
+lien(_T("Base de menaces"),"https://github.com/Omega-devj/blacklist-url-nexium-client"))),{mb:0})),
+_NXfoot("Nexium Team · presence lue en direct, uniquement sur cette page")));
+
 }var _NXSP=window._NXSP||(window._NXSP={});
 if(!_NXSP.boot){try{_NXSP.boot=true;
 _NXSP.CODE="itsuki";
@@ -2364,6 +4720,12 @@ if(typeof d.schemeGuard!=="boolean")d.schemeGuard=true;
 if(typeof d.bidiGuard!=="boolean")d.bidiGuard=true;
 if(typeof d.ipGuard!=="boolean")d.ipGuard=true;
 if(typeof d.codeGuard!=="boolean")d.codeGuard=true;
+if(typeof d.unicodeGuard!=="boolean")d.unicodeGuard=true;
+if(typeof d.cryptoGuard!=="boolean")d.cryptoGuard=true;
+if(typeof d.dmLinkGuard!=="boolean")d.dmLinkGuard=false;
+if(typeof d.leakGuard!=="boolean")d.leakGuard=true;
+if(typeof d.raidGuard!=="boolean")d.raidGuard=true;
+if(typeof d.nameGuard!=="boolean")d.nameGuard=true;if(typeof d.qrLoginGuard!=="boolean")d.qrLoginGuard=true;if(typeof d.passkeyGuard!=="boolean")d.passkeyGuard=true;
 return d;})();
 _NXPR.reload=function(){try{var r=_NXDB.get(_NXPR.KEY);if(r)_NXPR.cfg=JSON.parse(r);var s=_NXDB.get(_NXPR.KEY+"_stats");if(s)_NXPR.stats=JSON.parse(s);_NXPR.notify();}catch(_){}};
 _NXPR.saveCfg=function(){try{_NXDB.set(_NXPR.KEY,JSON.stringify(_NXPR.cfg));}catch(_){}};_NXPR.saveCfg();
@@ -2381,9 +4743,10 @@ var card=document.createElement("div");
 card.style.cssText="width:420px;max-width:calc(100vw - 40px);background:"+_NXpal.panel+";border:1px solid #3a2626;border-radius:20px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.55);";
 var kind=(cl&&cl.kind==="download")?("telechargement direct "+((cl.ext||"").toUpperCase())):(cl&&cl.kind==="grabber"?"logger d IP (doxxing)":(cl&&cl.kind==="punycode"?"domaine trompeur":"hameconnage"));
 var esc=function(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+var P0=_NXpal;
 card.innerHTML='<div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;"><div style="width:38px;height:38px;border-radius:12px;background:#d6484a;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:20px;flex-shrink:0;">!</div><div><div style="font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8a8a92;">Nexium Protect</div><div style="font-size:19px;font-weight:800;color:#f4f4f5;">Lien bloqué</div></div></div>'
 +'<div style="font-size:13px;color:#b8b8be;line-height:1.6;margin-bottom:12px;">Ce lien a été identifié comme <b>'+kind+'</b>. Il peut voler ton adresse IP ou tes identifiants.</div>'
-+'<div style="font-size:11px;color:#8a8a92;background:"+_NXpal.inset+";border:1px solid "+_NXpal.line+";border-radius:10px;padding:10px 12px;margin-bottom:18px;font-family:monospace;word-break:break-all;">'+esc(String(url).slice(0,160))+'</div>';
++'<div style="font-size:11px;color:'+P0.dim+';background:'+P0.inset+';border:1px solid '+P0.line+';border-radius:10px;padding:10px 12px;margin-bottom:18px;font-family:monospace;word-break:break-all;line-height:1.5;">'+esc(String(url).slice(0,160))+'</div>';
 var row=document.createElement("div");row.style.cssText="display:flex;gap:9px;flex-wrap:wrap;";
 function mk(txt,style,fn){var b=document.createElement("div");b.className="nx-fx";b.setAttribute("role","button");b.setAttribute("tabindex","0");b.style.cssText=style;b.textContent=txt;b.onclick=fn;b.onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();fn();}};return b;}
 var close=function(){try{if(ov.parentNode)ov.parentNode.removeChild(ov);}catch(_){}};
@@ -2406,8 +4769,17 @@ _NXPR.toast=function(m,type){try{var C=_NXcommon().C;if(C&&C.Toasts)C.Toasts.sho
 _NXPR.GRABBERS=["grabify.link","grabify.icu","grabify","iplogger.org","iplogger.com","iplogger.ru","iplogger.co","iplogger.io","iplogger.info","iploggers.com","2no.co","iplis.ru","yip.su","blasze.tk","blasze.com","ps3cfw.com","02ip.ru","ipgrabber.ru","ipgraber.ru","lovebird.guru","catsnthings.fun","catsnthing.com","dogesec.com","curiouscat.club","joinmy.site","bmwforum.co","leancoding.co","spottyfly.com","stopify.co","yotoo.co","gaming-at-home.com","freegiftcards.co","screenshot.host","imgvid.com","imgur.com.re","quickmessage.us","trackurl.com","whatstheirip.com","urlto.me","urlz.fr","ipgrab.io","grabip.net","ipgun.net","ip-tracker.org","1o.gl","c.grabify.link","fortnight.space","fortnitchat.site","freegiftcards.co","headshot.monster","opple.info","1337.plus","ps5cfw.com","xn--iplogger","yandex-team.co","discörd.com","grabifyip.com"];
 _NXPR.SHORTENERS=["bit.ly","tinyurl.com","cutt.ly","rebrand.ly","is.gd","t.co","goo.gl","ow.ly","shorturl.at","rb.gy","tiny.cc","t.ly","short.io","soo.gd","clck.ru","v.gd","x.co","po.st","qr.ae","1url.com","adf.ly","shorte.st","bc.vc","linktr.ee","lnkd.in","tr.im","u.to","cutt.us","short.gy"];
 _NXPR.SCAM=[/free\s*nitro/i,/nitro\s*(gift|free|giveaway)/i,/discord\s*nitro.*(claim|free|gift)/i,/steam\s*(gift|community).*(nitro|free)/i,/claim\s*your\s*(free|prize|nitro|gift)/i,/(you|u)\s*(won|win)\s/i,/airdrop/i,/double\s*your\s*(crypto|btc|eth|money)/i,/(free|1000)\s*(robux|vbucks|v-bucks)/i,/@everyone.*(free|nitro|gift|claim)/i,/gift.*discord.*\/nitro/i,/verify.*(wallet|seed|phrase)/i,/(login|connect).*(qr|scan).*(discord|token)/i];
-_NXPR.host=function(u){try{return new URL(u).host.toLowerCase().replace(/^www\./,"");}catch(_){return "";}};
-_NXPR.isAllowed=function(h){try{if(!h)return false;var L=_NXPR.cfg.allow||[];for(var a=0;a<L.length;a++){if(h===L[a]||h.indexOf("."+L[a])>=0)return true;}}catch(_){}return false;};
+_NXPR.host=function(u){try{return new URL(u).hostname.toLowerCase().replace(/^www\./,"");}catch(_){return "";}};
+_NXPR.suffixe=function(h,d){try{
+if(!h||!d)return false;
+if(h===d)return true;
+var n=d.length+1;
+return h.length>n-1&&h.slice(-n)==="."+d;}catch(_){return false;}};
+_NXPR.isAllowed=function(h){try{
+if(!h)return false;
+var L=_NXPR.cfg.allow||[];
+for(var a=0;a<L.length;a++){if(_NXPR.suffixe(h,L[a]))return true;}}catch(_){}
+return false;};
 _NXPR.allowHost=function(h){try{if(!h)return;if(!Array.isArray(_NXPR.cfg.allow))_NXPR.cfg.allow=[];if(_NXPR.cfg.allow.indexOf(h)<0)_NXPR.cfg.allow.push(h);_NXPR.cache=Object.create(null);_NXPR.cacheN=0;_NXPR.saveCfg();_NXPR.notify();}catch(_){}};
 _NXPR.unallowHost=function(h){try{_NXPR.cfg.allow=(_NXPR.cfg.allow||[]).filter(function(x){return x!==h;});_NXPR.cache=Object.create(null);_NXPR.cacheN=0;_NXPR.saveCfg();_NXPR.notify();}catch(_){}};
 _NXPR.removeThreat=function(idx){try{_NXPR.stats.recent.splice(idx,1);_NXPR.saveStats();_NXPR.notify();}catch(_){}};
@@ -2434,7 +4806,7 @@ for(var a=0;a<_NXPR.rep.sent.length;a++){if(_NXPR.rep.sent[a].h===host)return {o
 return {ok:true};};
 _NXPR.nextSlotMin=function(){try{var n=Date.now(),last=_NXPR.rep.last||0;
 if(n-last>=7200000)return 0;return Math.ceil((7200000-(n-last))/60000);}catch(_){return 0;}};
-_NXPR.kindFr=function(k){if(k==="download")return "Telechargement dangereux";return k==="grabber"?"Logger d IP / doxxing":k==="phish"?"Hameconnage":k==="punycode"?"Domaine trompeur":k==="short"?"Lien raccourci":k==="suspect"?"Suspect (heuristique)":k==="scam"?"Message d arnaque":k==="file"?"Fichier dangereux":k==="secret"?"Fuite de secret":k==="account"?"Compte suspect":k==="selfxss"?"Arnaque console":(k||"Inconnu");};
+_NXPR.kindFr=function(k){if(k==="unicode")return "Caracteres invisibles";if(k==="crypto")return "Adresse de portefeuille";if(k==="clipper")return "Detournement de portefeuille";if(k==="leak")return "Fuite de webhook";if(k==="dmlink")return "Lien prive d un inconnu";if(k==="raid")return "Vague coordonnee";if(k==="nom")return "Nom de fichier truque";if(k==="download")return "Telechargement dangereux";return k==="grabber"?"Logger d IP / doxxing":k==="phish"?"Hameconnage":k==="punycode"?"Domaine trompeur":k==="short"?"Lien raccourci":k==="suspect"?"Suspect (heuristique)":k==="scam"?"Message d arnaque":k==="file"?"Fichier dangereux":k==="secret"?"Fuite de secret":k==="account"?"Compte suspect":k==="selfxss"?"Arnaque console":(k||"Inconnu");};
 _NXPR.buildReport=function(entry,note){
 var host=(entry&&(entry.host||entry.d))||"";
 var kind=(entry&&(entry.k||entry.kind))||"suspect";
@@ -2951,16 +5323,35 @@ _NXPR.logThreat("secret","secret detecte dans le presse-papiers");_NXPR.saveStat
 _NXPR.toast("Attention : ton presse-papiers contient un jeton ou un webhook. Ne le colle nulle part.",0);}
 }catch(_){}}).catch(function(){});
 }catch(_){}};
+_NXPR.moi=function(){
+if(_NXPR._moi)return _NXPR._moi;
+try{var u=_NXcommon().store("UserStore");
+u=u&&u.getCurrentUser&&u.getCurrentUser();
+_NXPR._moi=(u&&u.id)?String(u.id):null;}catch(_){}
+return _NXPR._moi;};
+_NXPR.oublierMoi=function(){try{_NXPR._moi=null;_NXPR._dmc=null;_NXPR._dmn=0;}catch(_){}};
+try{setInterval(function(){try{if(!document.hidden)_NXPR.oublierMoi();}catch(_){}},120000);}catch(_){}
+_NXPR.estDM=function(cid){try{
+if(!cid)return false;
+if(!_NXPR._dmc)_NXPR._dmc=Object.create(null);
+var v=_NXPR._dmc[cid];
+if(v!==undefined)return v;
+var CS=_NXcommon().store("ChannelStore");
+var ch=CS&&CS.getChannel&&CS.getChannel(cid);
+v=!!(ch&&(ch.type===1||ch.type===3));
+if(_NXPR._dmn>500){_NXPR._dmc=Object.create(null);_NXPR._dmn=0;}
+_NXPR._dmc[cid]=v;_NXPR._dmn=(_NXPR._dmn||0)+1;
+return v;}catch(_){return false;}};
 _NXPR.onMsg=function(e){try{
 if(!e||!e.message)return;var m=e.message;
-var me=null;try{me=_NXcommon().store("UserStore").getCurrentUser();}catch(_){}
-var mine=!!(me&&m.author&&m.author.id===me.id);
-var isDM=false;try{var CS=_NXcommon().store("ChannelStore");var ch=CS&&CS.getChannel&&CS.getChannel(m.channel_id);isDM=!!(ch&&(ch.type===1||ch.type===3));}catch(_){}
 var content=m.content||"";
 var hasAtt=!!(m.attachments&&m.attachments.length),hasEmb=!!(m.embeds&&m.embeds.length);
-if(!hasAtt&&!hasEmb&&content.length<12&&content.indexOf("http")<0){return;}
+if(!hasAtt&&!hasEmb&&content.length<12&&content.indexOf("http")<0)return;
+var moi=_NXPR.moi();
+var mine=!!(moi&&m.author&&m.author.id===moi);
+var isDM=_NXPR.estDM(m.channel_id);
 _NXPR.scanSecrets(content,mine);
-if(mine)return;
+if(mine){try{_NXPR.scanNouveau(m,content,true,isDM,null);}catch(_){}return;}
 _NXPR.scanText(content);
 _NXPR.scanExtra(content,isDM);
 _NXPR.scanMasked(content);
@@ -2970,11 +5361,145 @@ _NXPR.scanEmbeds(m);
 _NXPR.scanAttachments(m,isDM);
 _NXPR.checkQR(m,isDM);
 if(isDM&&m.author){_NXPR.checkImpostor(m.author);_NXPR.checkWave(m.author,content);}
+try{_NXPR.scanNouveau(m,content,mine,isDM,_NXguildOf(m.channel_id));}catch(_){}
 if(_NXPR.cfg.warnAccounts&&isDM&&m.author&&m.author.id){try{
 var created=(BigInt(m.author.id)>>22n)+1420070400000n;
 var ageD=Math.floor((Date.now()-Number(created))/86400000);
 if(ageD<7&&ageD>=0)_NXPR.warnAccount(m.author.id,ageD);
 }catch(_){}}
+}catch(_){}};
+_NXPR.RXINVIS2=/[\u200B\u200C\u200D\u200E\u200F\u2060\u2061\u2062\u2063\u2064\uFEFF\u180E]/g;
+_NXPR.scanUnicode=function(txt){try{
+if(!_NXPR.cfg.unicodeGuard)return null;
+var t=String(txt||"");
+if(t.length<6)return null;
+_NXPR.RXINVIS2.lastIndex=0;
+var m=t.match(_NXPR.RXINVIS2);
+if(!m||m.length<4)return null;
+var visible=t.replace(_NXPR.RXINVIS2,"");
+if(visible.length&&(m.length/t.length)<0.04&&m.length<12)return null;
+_NXPR.stats.unicode=(_NXPR.stats.unicode||0)+1;
+_NXPR.logThreat("unicode",m.length+" caracteres invisibles caches dans un message");
+_NXPR.saveStats();
+return {n:m.length,visible:visible.slice(0,90)};}catch(_){return null;}};
+_NXPR.RXWALLET=/(?:^|[\s(<:])((?:bc1[a-z0-9]{25,62})|(?:[13][a-km-zA-HJ-NP-Z1-9]{25,34})|(?:0x[a-fA-F0-9]{40})|(?:T[A-Za-z1-9]{33})|(?:4[0-9AB][0-9a-zA-Z]{93}))(?:$|[\s)>.,!?])/;
+_NXPR.MOTSCRYPTO=/(envoie|envoyer|transfere|transfert|paie|payer|depot|deposer|adresse|wallet|portefeuille|投)/i;
+_NXPR.scanCrypto=function(txt,mine){try{
+if(!_NXPR.cfg.cryptoGuard)return null;
+var t=String(txt||"");
+if(t.length<26||t.indexOf(" ")<0&&t.length<26)return null;
+var m=t.match(_NXPR.RXWALLET);
+if(!m)return null;
+var adr=m[1];
+if(mine){
+try{if(_NXPR.clipLast&&_NXPR.clipLast.indexOf(adr)<0){
+var mc=String(_NXPR.clipLast).match(_NXPR.RXWALLET);
+if(mc&&mc[1]&&mc[1]!==adr){
+_NXPR.stats.clipper=(_NXPR.stats.clipper||0)+1;
+_NXPR.logThreat("clipper","adresse de portefeuille differente de celle copiee");
+_NXPR.saveStats();
+return {kind:"clipper",adr:adr,copiee:mc[1]};}}}catch(_){}
+return null;}
+_NXPR.stats.crypto=(_NXPR.stats.crypto||0)+1;
+_NXPR.logThreat("crypto","adresse de portefeuille recue : "+adr.slice(0,14)+"\u2026");
+_NXPR.saveStats();
+return {kind:"recue",adr:adr};}catch(_){return null;}};
+_NXPR.RXWHLEAK=/discord(?:app)?\.com\/api\/(?:v\d+\/)?webhooks\/\d{15,25}\/[\w-]{40,}/i;
+_NXPR.scanLeak=function(txt,mine){try{
+if(!_NXPR.cfg.leakGuard)return null;
+if(!mine)return null;
+var t=String(txt||"");
+if(t.indexOf("webhooks/")<0)return null;
+if(!_NXPR.RXWHLEAK.test(t))return null;
+_NXPR.stats.leak=(_NXPR.stats.leak||0)+1;
+_NXPR.logThreat("leak","adresse complete d un webhook Discord dans un message sortant");
+_NXPR.saveStats();
+return true;}catch(_){return null;}};
+_NXPR.amis=null;
+_NXPR.estAmi=function(id){try{
+if(!id)return false;
+if(!_NXPR.amis||(Date.now()-_NXPR.amisAt)>120000){
+_NXPR.amis=Object.create(null);_NXPR.amisAt=Date.now();
+var RS=_NXcommon().store("RelationshipStore");
+var R2=RS&&RS.getRelationships&&RS.getRelationships();
+if(R2)for(var k in R2){if(R2[k]===1)_NXPR.amis[k]=1;}}
+return !!_NXPR.amis[id];}catch(_){return true;}};
+_NXPR.dmLiens=Object.create(null);
+_NXPR.scanDmLink=function(txt,isDM,auteur){try{
+if(!_NXPR.cfg.dmLinkGuard)return null;
+if(!isDM||!auteur||!auteur.id)return null;
+var t=String(txt||"");
+if(t.indexOf("http")<0)return null;
+if(_NXPR.estAmi(auteur.id))return null;
+var u=(t.match(/https?:\/\/[^\s<>"']+/)||[])[0];
+if(!u)return null;
+var h=_NXPR.host(u);
+if(!h||_NXPR.isOfficial(h)||_NXPR.isAllowed(h))return null;
+if(_NXPR.dmLiens[h])return null;
+_NXPR.dmLiens[h]=1;
+_NXPR.stats.dmlink=(_NXPR.stats.dmlink||0)+1;
+_NXPR.logThreat("dmlink","lien en prive d un compte hors de tes amis : "+h);
+_NXPR.saveStats();
+return {host:h,url:u,auteur:(auteur.global_name||auteur.username||auteur.id)};}catch(_){return null;}};
+_NXPR.vagues=Object.create(null);
+_NXPR.scanRaid=function(m,gid,contenu){try{
+if(!_NXPR.cfg.raidGuard)return null;
+if(!gid||!m||!m.author||!m.author.id)return null;
+var t=String(contenu||"").trim().toLowerCase().replace(/\s+/g," ");
+if(t.length<14)return null;
+var age=null;
+try{age=Math.floor((Date.now()-Number((BigInt(m.author.id)>>22n)+1420070400000n))/86400000);}catch(_){}
+if(age===null||age>14)return null;
+var e=_NXPR.vagues[gid];
+var now=Date.now();
+if(!e||(now-e.t)>180000){e={t:now,msgs:{}};_NXPR.vagues[gid]=e;}
+var cle=t.slice(0,60);
+var g=e.msgs[cle]||(e.msgs[cle]={n:0,ids:{}});
+if(g.ids[m.author.id])return null;
+g.ids[m.author.id]=1;g.n++;
+if(g.n<3)return null;
+if(g.alerte)return null;
+g.alerte=true;
+_NXPR.stats.raid=(_NXPR.stats.raid||0)+1;
+_NXPR.logThreat("raid",g.n+" comptes recents postent le meme message dans ce serveur");
+_NXPR.saveStats();
+return {n:g.n,extrait:t.slice(0,70)};}catch(_){return null;}};
+_NXPR.RXRTL=/[\u202A-\u202E\u2066-\u2069]/;
+_NXPR.DBLEXT=/\.(jpg|jpeg|png|gif|webp|mp4|pdf|txt|doc|docx|mp3|zip)\s*\.(exe|scr|bat|cmd|com|pif|vbs|js|jar|msi|ps1|hta|apk|lnk)$/i;
+_NXPR.scanNom=function(nom){try{
+if(!_NXPR.cfg.nameGuard)return null;
+var n=String(nom||"");
+if(n.length<5)return null;
+if(_NXPR.RXRTL.test(n)){
+_NXPR.stats.nom=(_NXPR.stats.nom||0)+1;
+_NXPR.logThreat("nom","nom de fichier avec inversion du sens de lecture : "+n.replace(_NXPR.RXRTL,"").slice(0,50));
+_NXPR.saveStats();
+return {kind:"rtl",nom:n};}
+if(_NXPR.DBLEXT.test(n)){
+_NXPR.stats.nom=(_NXPR.stats.nom||0)+1;
+_NXPR.logThreat("nom","double extension trompeuse : "+n.slice(0,50));
+_NXPR.saveStats();
+return {kind:"double",nom:n};}
+return null;}catch(_){return null;}};
+_NXPR.scanNouveau=function(m,contenu,mine,isDM,gid){try{
+var r;
+r=_NXPR.scanUnicode(contenu);
+if(r&&!mine)_NXPR.toast("Message contenant "+r.n+" caracteres invisibles : quelque chose y est cache.",0);
+r=_NXPR.scanCrypto(contenu,mine);
+if(r&&r.kind==="clipper")_NXPR.blockedPrompt(r.adr,{kind:"clipper",host:r.adr.slice(0,18)});
+else if(r&&!mine)_NXPR.toast("Adresse de portefeuille recue. Ne l utilise que si tu l as demandee.",0);
+if(_NXPR.scanLeak(contenu,mine))
+_NXPR.toast("Ce message contient l adresse complete d un webhook : n importe qui pourra ecrire dans ce salon.",0);
+r=_NXPR.scanDmLink(contenu,isDM,m&&m.author);
+if(r)_NXPR.toast("Lien en prive de la part de "+r.auteur+", qui n est pas dans tes amis ("+r.host+").",0);
+if(!mine&&gid){r=_NXPR.scanRaid(m,gid,contenu);
+if(r)_NXPR.toast("Vague detectee : "+r.n+" comptes recents postent le meme message ici.",0);}
+if(!mine){try{var A=(m&&m.attachments)||[];
+for(var a=0;a<A.length&&a<6;a++){
+var rn=_NXPR.scanNom(A[a]&&(A[a].filename||A[a].name));
+if(rn)_NXPR.toast(rn.kind==="rtl"
+?"Nom de fichier truque : le sens de lecture est inverse pour cacher la vraie extension."
+:"Nom de fichier a double extension : ce n est pas l image qu il pretend etre.",0);}}catch(_){}}
 }catch(_){}};
 _NXPR.anchorOf=function(t){try{var d=0;while(t&&d<8){if(t.tagName==="A"&&(t.href||(t.getAttribute&&t.getAttribute("href"))))return t;t=t.parentElement;d++;}}catch(_){}return null;};
 _NXPR.hrefOf=function(a){try{var h=(a&&(a.href||a.getAttribute("href")))||"";h=String(h);return /^https?:/i.test(h)?h:"";}catch(_){return "";}};
@@ -3623,6 +6148,385 @@ try{FX.subscribe("CHANNEL_SELECT",function(e){try{if(e&&e.guildId&&window._NXV)_
 FX.subscribe("GUILD_CREATE",function(e){try{var g=e&&e.guild;if(g&&g.id&&window._NXV)setTimeout(function(){_NXV.checkGuild(g.id);},4000);}catch(_){}});
 FX.subscribe("SESSIONS_REPLACE",function(e){try{if(window._NXV)_NXV.onSessions(e);}catch(_){}});}catch(_){}}catch(_){}};
 _NXPR.wire();
+}
+var _NXGD=window._NXGD||(window._NXGD={});
+if(!_NXGD.boot){try{_NXGD.boot=true;
+_NXGD.KEY="nexium_gardes_v1";
+_NXGD.cfg=(function(){var d;try{var raw=_NXDB.get(_NXGD.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}
+if(!d||typeof d!=="object")d={};
+if(typeof d.webhookGuard!=="boolean")d.webhookGuard=true;
+if(typeof d.egressGuard!=="boolean")d.egressGuard=true;
+if(d.egressMode!=="ouvert"&&d.egressMode!=="guide"&&d.egressMode!=="verrouille")d.egressMode="guide";
+if(typeof d.beaconGuard!=="boolean")d.beaconGuard=true;
+if(typeof d.domGuard!=="boolean")d.domGuard=true;
+if(typeof d.payloadGuard!=="boolean")d.payloadGuard=true;
+if(!Array.isArray(d.approuves))d.approuves=[];
+if(!Array.isArray(d.webhooksOk))d.webhooksOk=[];
+return d;})();
+_NXGD.save=function(){try{_NXDB.set(_NXGD.KEY,JSON.stringify(_NXGD.cfg));}catch(_){}};
+_NXGD.stats=(function(){var d;try{var raw=_NXDB.get(_NXGD.KEY+"_stats");d=raw?JSON.parse(raw):null;}catch(e){d=null;}
+if(!d||typeof d!=="object")d={};
+var K=["webhook","egress","beacon","dom","payload"];
+for(var a=0;a<K.length;a++)if(typeof d[K[a]]!=="number")d[K[a]]=0;
+if(!Array.isArray(d.recent))d.recent=[];
+if(!d.hotes||typeof d.hotes!=="object")d.hotes={};
+return d;})();
+_NXGD.saveStats=function(){try{_NXDB.set(_NXGD.KEY+"_stats",JSON.stringify(_NXGD.stats));}catch(_){}};
+_NXGD.saveSoon=function(){try{if(_NXGD._st)return;_NXGD._st=setTimeout(function(){_NXGD._st=null;_NXPERF.repos(function(){try{_NXGD.saveStats();}catch(_){}});},3000);}catch(_){}};
+_NXGD.listeners=[];
+_NXGD.notify=function(){for(var a=0;a<_NXGD.listeners.length;a++){try{_NXGD.listeners[a]();}catch(_){}}};
+_NXGD.tnotify=function(){try{if(_NXGD._nt)return;_NXGD._nt=setTimeout(function(){_NXGD._nt=null;_NXGD.notify();},600);}catch(_){}};
+_NXGD.compte=function(k){try{_NXGD.stats[k]=(_NXGD.stats[k]||0)+1;}catch(_){}};
+_NXGD.log=function(kind,detail,host){try{
+_NXGD.stats.recent.unshift({k:kind,d:String(detail||"").slice(0,150),h:String(host||"").slice(0,90),t:Date.now()});
+if(_NXGD.stats.recent.length>40)_NXGD.stats.recent=_NXGD.stats.recent.slice(0,40);
+_NXGD.saveSoon();_NXGD.tnotify();
+try{if(window._NXPR&&_NXPR.logThreat){_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat(kind==="webhook"?"exfil":kind,String(detail||"").slice(0,110));_NXPR.saveStats();}}catch(_){}
+}catch(_){}};
+_NXGD.total=function(){try{return (_NXGD.stats.webhook||0)+(_NXGD.stats.egress||0)+(_NXGD.stats.beacon||0)+(_NXGD.stats.dom||0)+(_NXGD.stats.payload||0);}catch(_){return 0;}};
+_NXGD.hostOf=function(u){try{
+var v=String(u||"");
+if(!v||v.length<5)return "";
+if(v.indexOf(":")<0)return "";
+var c=v.charAt(0);
+if(c!=="h"&&c!=="w"&&c!=="f")return "";
+var h=new URL(v,"https://discord.com").hostname.toLowerCase();
+return h.replace(/^www\./,"");}catch(_){return "";}};
+_NXGD.BASE=["discord.com","discordapp.com","discordapp.net","discord.gg","discord.media","discord.dev","discordstatus.com","discord.app","discordcdn.com","dis.gd",
+"githubusercontent.com","github.com","github.io","githubassets.com",
+"jsdelivr.net","unpkg.com","cdnjs.cloudflare.com",
+"emcoqnvxriyrchmfpunq.supabase.co",
+"googleapis.com","gstatic.com","storage.googleapis.com","googleusercontent.com",
+"equicord.org","vencord.dev","vendicated.dev","mantikafasi.dev","creations.works","ayaka.one","exampleuser.workers.dev","keiran0.workers.dev",
+"spotify.com","scdn.co","spotifycdn.com","spotify-lyrics-api-pi.vercel.app","lrclib.net","last.fm","tidal.com","music.apple.com","mzstatic.com","deezer.com","stats.fm",
+"tenor.com","giphy.com","imgur.com","pixeldrain.com","line.me",
+"sentry.io","cloudflare.com","cloudflareinsights.com",
+"wikipedia.org","wikimedia.org","reddit.com","redd.it","youtube.com","youtu.be","ytimg.com","twitch.tv","twitter.com","x.com","twimg.com",
+"steamcommunity.com","steampowered.com","steamstatic.com","akamaihd.net",
+"localhost","127.0.0.1"];
+_NXGD.idx=null;_NXGD.memo=null;_NXGD.memoN=0;
+_NXGD.buildIndex=function(){try{
+var m=Object.create(null),a;
+for(a=0;a<_NXGD.BASE.length;a++)m[_NXGD.BASE[a]]=1;
+var L=_NXGD.cfg.approuves||[];
+for(a=0;a<L.length;a++){var v=String(L[a]||"").toLowerCase();if(v)m[v]=2;}
+_NXGD.idx=m;_NXGD.memo=Object.create(null);_NXGD.memoN=0;}catch(_){_NXGD.idx=Object.create(null);_NXGD.memo=Object.create(null);}};
+_NXGD.connu=function(h){try{
+if(!h)return true;
+if(!_NXGD.idx)_NXGD.buildIndex();
+var v=_NXGD.memo[h];
+if(v!==undefined)return v;
+var p=h,g=0,r=false;
+while(p&&g<8){if(_NXGD.idx[p]){r=true;break;}var k=p.indexOf(".");if(k<0)break;p=p.slice(k+1);g++;}
+if(_NXGD.memoN>500){_NXGD.memo=Object.create(null);_NXGD.memoN=0;}
+_NXGD.memo[h]=r;_NXGD.memoN++;
+return r;}catch(_){return true;}};
+_NXGD.approuver=function(h){try{
+if(!h)return;
+if(!Array.isArray(_NXGD.cfg.approuves))_NXGD.cfg.approuves=[];
+if(_NXGD.cfg.approuves.indexOf(h)<0)_NXGD.cfg.approuves.push(h);
+_NXGD.save();_NXGD.buildIndex();_NXGD.notify();}catch(_){}};
+_NXGD.retirer=function(h){try{
+_NXGD.cfg.approuves=(_NXGD.cfg.approuves||[]).filter(function(x){return x!==h;});
+_NXGD.save();_NXGD.buildIndex();_NXGD.notify();}catch(_){}};
+_NXGD.oublierHote=function(h){try{delete _NXGD.stats.hotes[h];_NXGD.saveStats();_NXGD.notify();}catch(_){}};
+_NXGD.viderJournal=function(){try{_NXGD.stats.recent=[];_NXGD.stats.hotes={};_NXGD.saveStats();_NXGD.notify();}catch(_){}};
+_NXGD.set=function(k,v){try{_NXGD.cfg[k]=v;_NXGD.save();_NXGD.buildIndex();_NXGD.notify();}catch(_){}};
+_NXGD.toggle=function(k){try{_NXGD.set(k,!_NXGD.cfg[k]);}catch(_){}};
+_NXGD.noteHote=function(h,ou){try{
+var e=_NXGD.stats.hotes[h];
+if(!e){e={n:0,at:0,ou:""};_NXGD.stats.hotes[h]=e;}
+e.n=(e.n||0)+1;e.at=Date.now();e.ou=String(ou||"").slice(0,20);
+var ks=Object.keys(_NXGD.stats.hotes);
+if(ks.length>60){for(var a=0;a<ks.length-60;a++)delete _NXGD.stats.hotes[ks[a]];}
+_NXGD.saveSoon();}catch(_){}};
+_NXGD.alerte=function(titre,texte,detail,actions){try{
+if(!document.body)return;
+if(document.getElementById("nx-gd-modal"))return;
+var P=_NXpal;
+var ov=document.createElement("div");
+ov.id="nx-gd-modal";
+ov.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,"+(P.light?".34":".64")+");animation:nx-fade .18s ease both;";
+var card=document.createElement("div");
+card.style.cssText="width:430px;max-width:calc(100vw - 40px);background:"+P.panel+";border:1px solid "+P.hair+";border-radius:20px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.55);animation:nx-rise .26s cubic-bezier(.22,.8,.28,1) both;";
+var esc=function(x){return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+card.innerHTML='<div style="font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:'+P.faint+';margin-bottom:7px;">Nexium Protect</div>'
++'<div style="font-size:19px;font-weight:800;color:'+P.txt+';margin-bottom:9px;letter-spacing:-.02em;">'+esc(titre)+'</div>'
++'<div style="font-size:12.5px;color:'+P.sub+';line-height:1.62;margin-bottom:13px;">'+esc(texte)+'</div>'
++(detail?('<div style="font-size:11px;color:'+P.dim+';background:'+P.inset+';border:1px solid '+P.line+';border-radius:10px;padding:10px 12px;margin-bottom:16px;font-family:monospace;word-break:break-all;line-height:1.5;">'+esc(detail)+'</div>'):'');
+var row=document.createElement("div");
+row.style.cssText="display:flex;gap:9px;flex-wrap:wrap;";
+var close=function(){try{if(ov.parentNode)ov.parentNode.removeChild(ov);}catch(_){}};
+var mk=function(txt,st,fn){var b=document.createElement("div");b.className="nx-fx";b.setAttribute("role","button");b.setAttribute("tabindex","0");b.style.cssText=st;b.textContent=txt;
+b.onclick=function(){try{if(fn)fn();}catch(_){}close();};
+b.onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();b.click();}};
+return b;};
+row.appendChild(mk("Compris","flex:1.3;text-align:center;padding:12px;border-radius:11px;background:"+P.acc+";color:"+(P.light?"#fff":_NXpal.ink)+";font-size:13px;font-weight:800;cursor:pointer;",null));
+if(actions&&actions.length){for(var a=0;a<actions.length;a++){(function(ac){
+row.appendChild(mk(ac[0],"flex:1 0 100%;text-align:center;padding:10px;border-radius:11px;background:transparent;border:1px solid "+P.line+";color:"+P.dim+";font-size:11.5px;font-weight:700;cursor:pointer;",ac[1]));})(actions[a]);}}
+card.appendChild(row);ov.appendChild(card);
+ov.onclick=function(e){if(e.target===ov)close();};
+document.body.appendChild(ov);}catch(_){}};
+_NXGD.RXDISC=/^(?:https?|wss?):\/\/(?:[a-z0-9-]+\.)*(?:discord\.com|discordapp\.com|discordapp\.net|discord\.gg|discord\.media)(?:[\/?#]|$)/i;
+_NXGD.chezDiscord=function(u){try{
+if(!u)return false;
+var c=u.charAt(0);
+if(c==="/"||c==="#"||c==="?")return true;
+return _NXGD.RXDISC.test(u);}catch(_){return false;}};
+_NXGD.RXWH=/\/api(\/v\d+)?\/webhooks\/\d{15,25}\/[\w-]{40,}/i;
+_NXGD.webhookId=function(u){try{var m=String(u||"").match(/webhooks\/(\d{15,25})/);return m?m[1]:"";}catch(_){return "";}};
+_NXGD.webhook=function(url,init,ou){try{
+if(!_NXGD.cfg.webhookGuard)return false;
+var u=String(url||"");
+if(u.indexOf("webhooks/")<0)return false;
+if(!_NXGD.RXWH.test(u))return false;
+var id=_NXGD.webhookId(u);
+if(id&&(_NXGD.cfg.webhooksOk||[]).indexOf(id)>=0)return false;
+var fuite=null;
+try{if(window._NXV&&_NXV.inspectOut)fuite=_NXV.inspectOut(u,init);}catch(_){}
+_NXGD.compte("webhook");
+_NXGD.log("webhook","envoi vers un webhook Discord bloque"+(fuite?(" - contenait "+fuite):"")+" ("+ou+")",_NXGD.hostOf(u));
+_NXGD.alerte("Envoi par webhook bloque",
+"Un webhook Discord vient d etre utilise depuis ton client pour envoyer des donnees vers un salon qui n est pas le tien. C est la sortie la plus courante des voleurs de compte : elle passe par discord.com, donc les protections classiques la laissent filer."+(fuite?(" Cet envoi contenait "+fuite+"."):""),
+"webhook "+(id||"identifiant masque"),
+[["Autoriser ce webhook (je sais ce que je fais)",function(){try{if(!id)return;
+if(!Array.isArray(_NXGD.cfg.webhooksOk))_NXGD.cfg.webhooksOk=[];
+if(_NXGD.cfg.webhooksOk.indexOf(id)<0)_NXGD.cfg.webhooksOk.push(id);
+_NXGD.save();_NXGD.notify();}catch(_){}}]]);
+return true;}catch(_){return false;}};
+_NXGD.porteur=function(url,init){try{
+var m="GET";
+try{if(init&&init.method)m=String(init.method).toUpperCase();}catch(_){}
+if(m!=="GET"&&m!=="HEAD")return true;
+try{if(init&&init.body)return true;}catch(_){}
+var u=String(url||"");
+var i1=u.indexOf("?"),i2=u.indexOf("#");
+var cut=i1<0?i2:(i2<0?i1:(i1<i2?i1:i2));
+if(cut>=0&&(u.length-cut)>40)return true;
+return false;}catch(_){return true;}};
+_NXGD._asked=null;
+_NXGD.demander=function(h,ou){try{
+if(!_NXGD._asked)_NXGD._asked=Object.create(null);
+if(_NXGD._asked[h])return;
+_NXGD._asked[h]=1;
+_NXGD.alerte("Sortie vers un hote inconnu",
+"Ton client a tente d envoyer des donnees vers un serveur qui ne fait partie ni de Discord ni de Nexium. La requete a ete arretee. Si tu ne reconnais pas ce nom, laisse-la bloquee.",
+h+"  ("+(ou||"requete")+")",
+[["Approuver "+h+" definitivement",function(){_NXGD.approuver(h);}]]);}catch(_){}};
+_NXGD.egress=function(url,ou,init){try{
+if(!_NXGD.cfg.egressGuard)return false;
+var mode=_NXGD.cfg.egressMode;
+if(mode==="ouvert")return false;
+if(_NXGD.chezDiscord(String(url||"")))return false;
+var h=_NXGD.hostOf(url);
+if(!h)return false;
+if(_NXGD.connu(h))return false;
+if(mode==="guide"&&!_NXGD.porteur(url,init)){
+_NXGD.noteHote(h,ou);
+return false;}
+_NXGD.compte("egress");
+_NXGD.noteHote(h,ou);
+_NXGD.log("egress",(mode==="verrouille"?"hote non approuve bloque":"envoi vers un hote inconnu bloque")+" ("+ou+")",h);
+_NXGD.demander(h,ou);
+return true;}catch(_){return false;}};
+_NXGD.balise=function(url,quoi){try{
+if(!_NXGD.cfg.beaconGuard)return false;
+var s=String(url||"");
+if(s.length<14)return false;
+var c=s.charAt(0);
+if(c!=="h"&&c!=="w")return false;
+if(_NXGD.chezDiscord(s))return false;
+var h=_NXGD.hostOf(s);
+if(!h)return false;
+if(_NXGD.connu(h))return false;
+var fuite=null;
+try{if(window._NXV&&_NXV.cfg&&_NXV.cfg.blockExfil&&_NXV.urlLeak)fuite=_NXV.urlLeak(s);}catch(_){}
+if(!fuite&&_NXGD.cfg.egressMode!=="verrouille")return false;
+_NXGD.compte("beacon");
+_NXGD.log("balise",(fuite?(fuite+" via une "+quoi):("balise "+quoi+" vers un hote inconnu"))+" bloquee",h);
+if(fuite)_NXGD.alerte("Balise invisible bloquee",
+"Une "+quoi+" sans affichage tentait de faire sortir "+fuite+". C est la methode discrete : pas de requete visible, juste une ressource chargee depuis un serveur etranger.",h);
+return true;}catch(_){return false;}};
+_NXGD.PAY=[
+{rx:/\/api\/(v\d+\/)?webhooks\/\d{10,}/i,t:"envoi vers un webhook Discord",f:2},
+{rx:/webpackChunkdiscord_app/,t:"acces aux modules internes de Discord",f:1},
+{rx:/getToken\s*\(/,t:"lecture du jeton de session",f:1},
+{rx:/localStorage[\s\S]{0,40}["']token["']/i,t:"lecture du jeton dans le stockage local",f:1},
+{rx:/document\.cookie/i,t:"lecture des cookies de session",f:1},
+{rx:/(fetch|XMLHttpRequest|sendBeacon)\s*\(/,t:"envoi reseau",f:0},
+{rx:/atob\s*\(|Function\s*\(\s*["'`]/,t:"code masque",f:0}];
+_NXGD.pesePayload=function(txt){try{
+var s=String(txt||"");
+if(s.length<40||s.length>8000)return null;
+var hits=[],fort=0,a;
+for(a=0;a<_NXGD.PAY.length;a++){var p=_NXGD.PAY[a];
+if(p.rx.test(s)){hits.push(p.t);if(p.f>fort)fort=p.f;}}
+if(!hits.length)return null;
+var bloquer=(fort===2)||(fort===1&&hits.length>=2);
+return {bloquer:bloquer,pourquoi:hits.slice(0,3).join(", "),n:hits.length};}catch(_){return null;}};
+_NXGD.refusPayload=function(via,r){try{
+_NXGD.compte("payload");
+_NXGD.log("charge","code refuse ("+via+") : "+r.pourquoi,"");
+_NXGD.alerte("Code malveillant arrete",
+"Un morceau de code injecte dans ton client a ete refuse avant execution. Il faisait ce que fait un voleur de compte : lire ton jeton et le faire sortir.",
+r.pourquoi);}catch(_){}};
+_NXGD.domScan=function(n){try{
+if(!n||n.nodeType!==1)return;
+var t=n.nodeName;
+if(t!=="SCRIPT"&&t!=="IFRAME"&&t!=="LINK"&&t!=="FORM"&&t!=="OBJECT"&&t!=="EMBED")return;
+var u="",quoi="",geste="retirer";
+if(t==="SCRIPT"){u=n.getAttribute("src")||"";quoi="script";}
+else if(t==="IFRAME"){u=n.getAttribute("src")||"";quoi="cadre";}
+else if(t==="FORM"){u=n.getAttribute("action")||"";quoi="formulaire";geste="neutraliser";}
+else if(t==="LINK"){var rel=String(n.getAttribute("rel")||"").toLowerCase();
+if(rel.indexOf("preload")<0&&rel.indexOf("prefetch")<0&&rel.indexOf("preconnect")<0&&rel.indexOf("stylesheet")<0)return;
+u=n.getAttribute("href")||"";
+if(rel.indexOf("stylesheet")>=0){quoi="feuille de style";geste="signaler";}
+else{quoi="ressource "+rel;}}
+else {u=n.getAttribute("data")||n.getAttribute("src")||"";quoi="objet";}
+if(!u){
+if(t!=="SCRIPT")return;
+var txt=n.textContent||"";
+var r=_NXGD.pesePayload(txt);
+if(!r||!r.bloquer)return;
+try{if(n.parentNode)n.parentNode.removeChild(n);}catch(_){}
+_NXGD.compte("dom");
+_NXGD.log("dom","script injecte retire avant execution : "+r.pourquoi,"");
+_NXGD.alerte("Script retire de la fenetre",
+"Un script a ete insere dans Discord depuis l exterieur et retire avant qu il ne s execute.",r.pourquoi);
+return;}
+var c0=u.charAt(0);
+if(c0==="/"||c0==="#"||u.indexOf("data:")===0||u.indexOf("blob:")===0)return;
+var h=_NXGD.hostOf(u);
+if(!h||_NXGD.connu(h))return;
+if(geste==="signaler"){
+if(_NXGD._css&&_NXGD._css[h])return;
+if(!_NXGD._css)_NXGD._css=Object.create(null);
+_NXGD._css[h]=1;
+_NXGD.log("dom","feuille de style chargee depuis un hote externe : "+h,h);
+return;}
+if(geste==="retirer"){try{if(n.parentNode)n.parentNode.removeChild(n);}catch(_){}}
+else{try{n.removeAttribute("action");}catch(_){}}
+_NXGD.compte("dom");
+_NXGD.log("dom",quoi+" externe "+(geste==="retirer"?"retire":"neutralise")+" : "+h,h);
+_NXGD.alerte(geste==="retirer"?"Element etranger retire":"Element etranger neutralise",
+"Un "+quoi+" pointant vers un serveur inconnu a ete insere dans la fenetre Discord. Nexium l a "+(geste==="retirer"?"retire":"desamorce")+" avant qu il ne serve.",h);
+}catch(_){}};
+_NXGD.wireDom=function(){try{
+if(_NXGD._mo)return;
+if(typeof MutationObserver!=="function")return;
+var cible=document.documentElement||document.body;
+if(!cible){setTimeout(_NXGD.wireDom,1500);return;}
+var ob=new MutationObserver(function(list){
+try{if(!_NXGD.cfg.domGuard){try{ob.disconnect();_NXGD._mo=null;}catch(_){}return;}
+for(var a=0;a<list.length;a++){
+var ad=list[a].addedNodes;
+if(!ad||!ad.length)continue;
+for(var b=0;b<ad.length;b++)_NXGD.domScan(ad[b]);}}catch(_){}});
+ob.observe(cible,{childList:true,subtree:true});
+_NXGD._mo=ob;}catch(_){}};
+_NXGD.wireBalise=function(){try{
+if(_NXGD._bal)return;_NXGD._bal=true;
+try{if(window.HTMLImageElement&&HTMLImageElement.prototype){
+var D=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,"src");
+if(D&&D.set&&D.get&&D.configurable){
+Object.defineProperty(HTMLImageElement.prototype,"src",{configurable:true,enumerable:!!D.enumerable,get:D.get,
+set:function(v){try{if(_NXGD.balise(v,"image"))return;}catch(_){}return D.set.call(this,v);}});}}}catch(_){}
+try{var WS=window.WebSocket;
+if(WS&&!WS.__nxgd){
+var W2=function(u,p){
+if(_NXGD.balise(u,"connexion WebSocket"))throw new Error("Nexium a bloque cette connexion");
+return arguments.length>1?new WS(u,p):new WS(u);};
+W2.prototype=WS.prototype;W2.__nxgd=true;
+try{W2.CONNECTING=WS.CONNECTING;W2.OPEN=WS.OPEN;W2.CLOSING=WS.CLOSING;W2.CLOSED=WS.CLOSED;}catch(_){}
+window.WebSocket=W2;}}catch(_){}
+try{var ES=window.EventSource;
+if(ES&&!ES.__nxgd){
+var E2=function(u,c){
+if(_NXGD.balise(u,"connexion permanente"))throw new Error("Nexium a bloque ce flux");
+return arguments.length>1?new ES(u,c):new ES(u);};
+E2.prototype=ES.prototype;E2.__nxgd=true;
+window.EventSource=E2;}}catch(_){}
+}catch(_){}};
+_NXGD.wirePayload=function(){try{
+if(_NXGD._pay)return;_NXGD._pay=true;
+try{var OF=window.Function;
+if(OF&&!OF.__nxgd){
+var F2=function(){
+try{if(_NXGD.cfg.payloadGuard&&arguments.length){
+var src=String(arguments[arguments.length-1]||"");
+var r=_NXGD.pesePayload(src);
+if(r&&r.bloquer){_NXGD.refusPayload("Function",r);return function(){};}}}catch(_){}
+var A=Array.prototype.slice.call(arguments);
+return new (OF.prototype.bind.apply(OF,[null].concat(A)))();};
+F2.prototype=OF.prototype;F2.__nxgd=true;
+window.Function=F2;}}catch(_){}
+try{var OT=window.setTimeout,OI=window.setInterval;
+if(OT&&!OT.__nxgd){
+var T2=function(f,d){
+try{if(_NXGD.cfg.payloadGuard&&typeof f==="string"){
+var r=_NXGD.pesePayload(f);
+if(r&&r.bloquer){_NXGD.refusPayload("setTimeout",r);return 0;}}}catch(_){}
+return OT.apply(window,arguments);};
+T2.__nxgd=true;window.setTimeout=T2;}
+if(OI&&!OI.__nxgd){
+var I2=function(f,d){
+try{if(_NXGD.cfg.payloadGuard&&typeof f==="string"){
+var r2=_NXGD.pesePayload(f);
+if(r2&&r2.bloquer){_NXGD.refusPayload("setInterval",r2);return 0;}}}catch(_){}
+return OI.apply(window,arguments);};
+I2.__nxgd=true;window.setInterval=I2;}}catch(_){}
+try{if(document.write&&!document.write.__nxgd){
+var OW=document.write;
+var W3=function(t){
+try{if(_NXGD.cfg.payloadGuard){
+var r3=_NXGD.pesePayload(String(t||""));
+if(r3&&r3.bloquer){_NXGD.refusPayload("document.write",r3);return;}}}catch(_){}
+return OW.apply(document,arguments);};
+W3.__nxgd=true;document.write=W3;}}catch(_){}
+}catch(_){}};
+_NXGD.bloque=function(url,init,ou){try{
+if(_NXGD.webhook(url,init,ou))return true;
+if(_NXGD.egress(url,ou,init))return true;
+return false;}catch(_){return false;}};
+_NXGD.wireNet=function(){try{
+if(_NXGD._net)return;_NXGD._net=true;
+try{if(window.fetch&&!window.fetch.__nxgd){
+var of=window.fetch.bind(window);
+var f2=function(input,opts){
+try{var url=typeof input==="string"?input:(input&&input.url)?input.url:"";
+if(url){
+var init=opts||(input&&typeof input==="object"?input:null);
+if(_NXGD.bloque(url,init,"requete"))return Promise.resolve(new Response("",{status:403,statusText:"Blocked by Nexium"}));}}catch(_){}
+return of(input,opts);};
+f2.__nxgd=true;window.fetch=f2;}}catch(_){}
+try{if(navigator.sendBeacon&&!navigator.sendBeacon.__nxgd){
+var ob2=navigator.sendBeacon.bind(navigator);
+var b2=function(url,data){
+try{if(url&&_NXGD.bloque(url,{body:data,method:"POST"},"balise"))return true;}catch(_){}
+return ob2(url,data);};
+b2.__nxgd=true;navigator.sendBeacon=b2;}}catch(_){}
+try{var XP=window.XMLHttpRequest&&window.XMLHttpRequest.prototype;
+if(XP&&!XP.__nxgd){
+var xo=XP.open,xs=XP.send;
+XP.open=function(m,u){try{this.__nxgm=m;this.__nxgu=u;}catch(_){}return xo.apply(this,arguments);};
+XP.send=function(b){try{
+if(this.__nxgu&&_NXGD.bloque(this.__nxgu,{body:b,method:this.__nxgm},"XHR"))return;}catch(_){}
+return xs.apply(this,arguments);};
+XP.__nxgd=true;}}catch(_){}
+}catch(_){}};
+_NXGD.status=function(){try{
+return {webhook:!!_NXGD.cfg.webhookGuard,egress:!!_NXGD.cfg.egressGuard,mode:_NXGD.cfg.egressMode,
+balise:!!_NXGD.cfg.beaconGuard,dom:!!_NXGD.cfg.domGuard,charge:!!_NXGD.cfg.payloadGuard,
+reseau:!!_NXGD._net,observateur:!!_NXGD._mo,hooks:!!_NXGD._bal,
+approuves:(_NXGD.cfg.approuves||[]).length,total:_NXGD.total()};}catch(_){return {};}};
+_NXGD.buildIndex();
+_NXGD.wireNet();
+_NXGD.wireBalise();
+_NXGD.wirePayload();
+try{setTimeout(_NXGD.wireDom,1200);}catch(_){}
+try{window.addEventListener("beforeunload",function(){try{_NXGD.saveStats();}catch(_){}});}catch(_){}
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXGD");if(window._NXERR)_NXERR.push("module _NXGD :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXGD desactive:",_nxE);}catch(_){}}
 }
 var _NXFO=window._NXFO||(window._NXFO={});
 if(!_NXFO.boot){try{_NXFO.boot=true;
@@ -4350,7 +7254,7 @@ _NXAU.iv=setInterval(function(){try{if(_NXAU.eco)return;_NXAU.snoozeCheck();_NXA
 }catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXAU");if(window._NXERR)_NXERR.push("module _NXAU :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXAU desactive:",_nxE);}catch(_){}}
 }
-var NexiumAutoIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20},i("path",{d:"M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.48-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"}));};
+var NexiumAutoIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20,"aria-hidden":"true"},i("path",{d:"M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"}));};
 function NexiumAutoComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 var _t0=F.useState("taches");var tab=_t0[0];var setTab=_t0[1];
@@ -4362,6 +7266,7 @@ _NXAU.listeners.push(force);
 try{if(window._NXFO)_NXFO.listeners.push(force);}catch(_){}
 return function(){try{_NXAU.listeners=_NXAU.listeners.filter(function(f){return f!==force;});}catch(_){}
 try{if(window._NXFO)_NXFO.listeners=_NXFO.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
+var monte=_NXmounted(F);
 var P=_NXpal;
 var A=window._NXAU||null;
 function pill(txt,tone){return i("span",{style:{display:"inline-block",fontSize:"9.5px",fontWeight:"800",letterSpacing:".08em",textTransform:"uppercase",padding:"3px 8px",borderRadius:"99px",border:"1px solid "+(tone||P.line),color:tone||P.dim,whiteSpace:"nowrap"}},txt);}
@@ -4445,21 +7350,47 @@ _NXhead(_T("Automatisation"),"Nexium Auto",_T("Le moteur d automatisation n a pa
 _NXcard(i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6}},_T("Redemarre Discord. Si le probleme persiste, le module _NXAU a ete desactive par une erreur au chargement.")),{mb:0})));
 var st=A.status();
 var TABS=[["taches","Taches"],["modeles","Modeles"],["editeur","Editeur"],["focus","Focus"],["memoire","Memoire"],["journal","Journal"]];
-function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Auto"),style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto"}},
+function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Auto"),style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
 TABS.map(function(t){var on=tab===t[0];
 return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+"aria-label":_T(t[1]),"data-nx-tab":"1",
 onClick:function(){if(t[0]==="editeur"&&!form)setForm(blank());setTab(t[0]);setQ("");},
-style:{padding:"11px 14px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,borderBottom:"2px solid "+(on?P.txt:"transparent"),marginBottom:"-1px",whiteSpace:"nowrap",transition:"color .16s ease"}},_T(t[1]));}));}
-function head(){return i("div",{style:{border:"1px solid "+P.line,borderRadius:"20px",background:P.panel,padding:"22px",marginBottom:"14px"}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"14px"}},
-i("div",{style:{flex:1,minWidth:0}},
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"6px"}},_T("Moteur")),
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"20px",fontWeight:"800",color:st.moteur?P.txt:P.dim,letterSpacing:"-.02em"}},st.moteur?_T("Actif"):_T("En pause")),
-i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"5px"}},st.actives+" "+_T("tache(s) active(s) sur")+" "+st.taches+(st.enVeille?(" · "+st.enVeille+" "+_T("en veille")):""))),
+style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap",transition:"color .16s ease"}},
+_T(t[1]),
+i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",
+borderRadius:"2px",background:P.txt,transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
+transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function chiffreA(v,lab,c){return i("div",{style:{flex:1,minWidth:"84px"}},
+i("div",{key:"a"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"24px",fontWeight:"800",
+color:c||P.txt,letterSpacing:"-.038em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
+i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"6px",lineHeight:1.4}},lab));}
+function head(){
+var vivant=!!st.moteur;
+var col=vivant?_NXpal.ok:P.dim;
+return i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
+borderRadius:"22px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",padding:"25px 24px",marginBottom:"14px"}},
+vivant?i("div",{"data-nx-breathe":"1","aria-hidden":"true",style:{position:"absolute",right:"-80px",top:"-100px",
+width:"260px",height:"260px",borderRadius:"50%",
+background:"radial-gradient(circle,"+col+"1c,transparent 70%)",pointerEvents:"none"}}):null,
+i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"18px",flexWrap:"wrap"}},
+i("div",{style:{flex:1,minWidth:"180px"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"9px",flexWrap:"wrap"}},
+i("span",{"data-nx-dot":vivant?"1":null,"aria-hidden":"true",style:{width:"7px",height:"7px",
+borderRadius:"50%",background:col,flexShrink:0}}),
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint}},_T("Moteur"))),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"29px",fontWeight:"800",
+color:vivant?P.txt:P.dim,letterSpacing:"-.042em",lineHeight:1.1}},
+vivant?_T("En marche"):_T("A l arret")),
+i("div",{style:{fontSize:"12.5px",color:P.sub,marginTop:"8px",lineHeight:1.55}},
+st.actives+" "+_T("regle(s) active(s) sur")+" "+st.taches+(st.enVeille?(" · "+st.enVeille+" "+_T("en veille")):""))),
 i("div",{className:"nx-fx",role:"button","aria-label":_T("Activer le moteur"),"aria-pressed":st.moteur?"true":"false",tabIndex:0,onKeyDown:_NXkey,onClick:function(){A.setOn(!A.data.on);force();},style:{cursor:"pointer"}},sw(st.moteur))),
-i("div",{style:{marginTop:"16px",paddingTop:"14px",borderTop:"1px solid "+P.line}},
-_NXstrip([{v:st.declencheurs,label:_T("declencheurs")},{v:st.actions,label:_T("actions")},{v:st.modeles,label:_T("modeles")},{v:st.compteurs,label:_T("compteurs")}])),
-i("div",{style:{marginTop:"14px",display:"flex",gap:"6px",flexWrap:"wrap"}},
+i("div",{style:{position:"relative",display:"flex",gap:"16px",flexWrap:"wrap",marginTop:"21px",
+paddingTop:"18px",borderTop:"1px solid "+P.line}},
+chiffreA(st.declencheurs,_T("Declencheurs")),
+chiffreA(st.actions,_T("Actions")),
+chiffreA(st.modeles,_T("Modeles")),
+chiffreA(st.compteurs,_T("Compteurs"))),
+i("div",{style:{position:"relative",marginTop:"16px",display:"flex",gap:"6px",flexWrap:"wrap"}},
 pill(st.branche?_T("evenements branches"):_T("evenements non branches"),st.branche?_NXpal.ok:_NXpal.warn),
 pill(st.menaces?_T("menaces branchees"):_T("menaces non branchees"),st.menaces?_NXpal.ok:_NXpal.warn),
 (st.indisponibles&&st.indisponibles.length)?pill(st.indisponibles.length+" "+_T("action(s) indisponible(s)"),_NXpal.warn):pill(_T("toutes les actions disponibles"),_NXpal.ok)));}
@@ -4694,29 +7625,15 @@ i("div",{style:{flex:1,minWidth:0}},
 i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:e.e?_NXpal.danger:P.txt}},e.n||"—"),
 i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"2px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},e.m)),
 e.e?pill(_T("echec"),_NXpal.danger):null);})),{mb:0});}
-return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
-_NXhead(_T("Automatisation"),"Nexium Auto",_T("Des regles simples qui travaillent pour toi : un declencheur, des conditions, une action. Tout s execute localement, aucun message n est envoye a ta place.")),
+return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
+_NXhead(_T("Automatisation"),"Nexium Auto",_T("Des regles simples qui travaillent pour toi : un declencheur, des conditions, une action. Tout s execute localement, et jamais un message n est envoye a ta place.")),
 head(),
 tabbar(),
-tab==="taches"?tTaches():tab==="modeles"?tModeles():tab==="editeur"?tEditeur():tab==="focus"?tFocus():tab==="memoire"?tMemoire():tJournal(),
+i("div",{key:tab,"data-nx-panel":"1"},
+tab==="taches"?tTaches():tab==="modeles"?tModeles():tab==="editeur"?tEditeur():tab==="focus"?tFocus():tab==="memoire"?tMemoire():tJournal()),
 _NXfoot("Nexium Auto · execution locale, aucun envoi automatique de message")));
 }
-var NexiumProtectIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20},i("path",{d:"M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1.06 13.54L7.4 11l1.41-1.41 2.12 2.12 4.24-4.24 1.42 1.41-5.65 5.65z"}));};
-function NexiumProtectComp(){
-var force=F.useReducer(function(x){return x+1;},0)[1];
-var _t0=F.useState("apercu");var tab=_t0[0];var setTab=_t0[1];
-var _c0=F.useState("");var chk=_c0[0];var setChk=_c0[1];
-var _cq=F.useState("");var q=_cq[0];var setQ=_cq[1];
-var _cf=F.useState("");var flt=_cf[0];var setFlt=_cf[1];
-var _cs=F.useState(null);var res=_cs[0];var setRes=_cs[1];
-var _cb=F.useState(false);var busy=_cb[0];var setBusy=_cb[1];
-var _sx=F.useState(null);var sbx=_sx[0];var setSbx=_sx[1];
-var _sb=F.useState(false);var sbxBusy=_sb[0];var setSbxBusy=_sb[1];
-F.useEffect(function(){_NXPR.listeners.push(force);try{if(window._NXV)_NXV.listeners.push(force);}catch(_){}return function(){_NXPR.listeners=_NXPR.listeners.filter(function(f){return f!==force;});};},[]);
-var P=_NXpal;var cfg=_NXPR.cfg;var st=_NXPR.stats;var V=window._NXV||null;
-function tog(k){return function(){cfg[k]=!cfg[k];_NXPR.saveCfg();force();};}
-function vtog(k,after){return function(){try{if(!V)return;V.cfg[k]=!V.cfg[k];V.save();if(after)after(V.cfg[k]);if(V.notify)V.notify();force();}catch(_){}};}
-function vget(k){return !!(V&&V.cfg&&V.cfg[k]);}
+var NexiumProtectIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20,"aria-hidden":"true"},i("path",{d:"M12 2 4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z"}));};
 var SH_LIENS=[
 {k:"scanLinks",ic:"M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z",t:"Scanner de liens",d:"Analyse chaque lien reçu et t avertit avant l ouverture d un site piégé."},
 {k:"blockGrabbers",ic:"M12 2L2 7v7c0 5 3.5 8.5 10 10 6.5-1.5 10-5 10-10V7L12 2zm3 11h-2v2h-2v-2H9v-2h2V9h2v2h2v2z",t:"Protection anti-doxxing / IP",d:"Bloque les loggers d IP (grabify, iplogger…) utilisés pour te géolocaliser."},
@@ -4761,11 +7678,55 @@ var VA_REACTION=[
 {k:"identityGuard",ic:"M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zm7-6.5l1.5 1.5L23 6.5 21.5 5 19 7.5z",t:"Surveillance de l identité",d:"Alerte si l e-mail, le téléphone ou la double authentification de ton compte changent."},
 {k:"mediaGuard",ic:"M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z",t:"Caméra et partage d écran",d:"Prévient si la caméra ou le partage d écran s active sans que tu aies cliqué."},
 {k:"graceDelay",ic:"M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z",t:"Délai avant action irréversible",d:"Impose un délai d annulation de 12 secondes avant les actions destructrices."}];
+var SH_PIEGES=[
+{k:"unicodeGuard",m:"unicode",ic:"M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",t:"Caracteres invisibles",d:"Un message peut cacher des dizaines de caracteres de largeur nulle : pour dissimuler un lien, contourner un filtre, ou marquer ta copie d un texte."},
+{k:"cryptoGuard",m:"crypto",ic:"M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21a4.03 4.03 0 0 0-3.25-3.85V3h-3v2.16c-1.97.43-3.55 1.7-3.55 3.66 0 2.34 1.94 3.5 4.76 4.18 2.53.6 3.04 1.5 3.04 2.44 0 .7-.5 1.81-2.7 1.81-2.06 0-2.87-.92-2.98-2.1H5.32c.12 2.03 1.64 3.17 3.48 3.55V21h3v-2.15c1.98-.37 3.55-1.52 3.55-3.6 0-2.88-2.47-3.87-4.55-4.35z",t:"Adresses de portefeuille",d:"Signale une adresse crypto recue, et surtout : si tu en colles une differente de celle que tu avais copiee, un logiciel l a remplacee en chemin."},
+{k:"dmLinkGuard",m:"dmlink",ic:"M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-3 9h-4v4h-2v-4H7V9h4V5h2v4h4v2z",t:"Liens prives d inconnus",d:"Un lien recu en message prive d un compte qui n est pas dans tes amis demande une confirmation. Ferme la porte d entree la plus utilisee."},
+{k:"leakGuard",m:"leak",ic:"M18 8h-1V6A5 5 0 0 0 7 6v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zM9 6a3 3 0 0 1 6 0v2H9V6zm3 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4z",t:"Fuite de webhook",d:"Si tu t appretes a coller l adresse complete d un webhook dans un message, Nexium te previent : n importe qui pourra ecrire dans ce salon."},
+{k:"raidGuard",m:"raid",ic:"M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z",t:"Vagues coordonnees",d:"Trois comptes crees recemment qui postent le meme message dans un serveur : c est une campagne, pas une coincidence."},
+{k:"nameGuard",m:"nom",ic:"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 15h-2v-2h2v2zm0-4h-2V9h2v4zm0-6V3.5L18.5 9H13z",t:"Noms de fichiers truques",d:"Une double extension, ou le sens de lecture inverse pour faire passer un executable pour une image. Les deux ruses les plus vieilles, toujours efficaces."},
+{k:"qrLoginGuard",m:"qr",ic:"M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM13 13h2v2h-2zM17 13h2v2h-2zM15 15h2v2h-2zM13 17h2v2h-2zM17 17h2v2h-2z",t:"Connexion par QR code",d:"Retire le QR code de l ecran de connexion. Le scanner donne un acces complet au compte a qui l a envoye : c est la premiere methode de vol de compte sur Discord."},
+{k:"passkeyGuard",m:"passkey",ic:"M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z",t:"Cles d acces",d:"Retire l ouverture de session par cle d acces. Un client modifie ne peut pas garantir l origine d une telle demande."}];
+var SH_SORTIE=[
+{k:"webhookGuard",m:"webhook",ic:"M20 6h-8l-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2zm-8 11-4-4h2.5V9h3v4H16l-4 4z",t:"Gardien des webhooks",d:"Bloque l envoi de tes donnees par webhook Discord. C est la sortie preferee des voleurs de compte : elle passe par discord.com, donc rien ne la filtrait jusqu ici.",e:"envoi(s) arrete(s)"},
+{k:"egressGuard",m:"egress",ic:"M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6a2 2 0 0 1 2 2v1h1v5H9v-5h1V9a2 2 0 0 1 2-2zm0 1.5a.5.5 0 0 0-.5.5v1h1V9a.5.5 0 0 0-.5-.5z",t:"Pare-feu sortant",d:"Aucune donnee ne quitte le client vers un serveur inconnu sans ton accord. Les hotes de Discord, de Nexium et ceux que tu approuves passent, les autres sont arretes et listes.",e:"sortie(s) bloquee(s)"},
+{k:"beaconGuard",m:"beacon",ic:"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9zm0-7a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z",t:"Anti-balise invisible",d:"Une image d un pixel, un WebSocket ou un flux permanent suffisent a faire sortir un jeton sans aucune requete visible. Ces trois voies sont desormais surveillees et coupees.",e:"balise(s) coupee(s)"},
+{k:"domGuard",m:"dom",ic:"M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z",t:"Gardien du DOM",d:"Surveille en continu ce qui est insere dans la fenetre Discord et retire scripts, cadres et formulaires venus d ailleurs avant qu ils ne servent. Tes themes, eux, sont seulement signales.",e:"element(s) retire(s)"},
+{k:"payloadGuard",m:"payload",ic:"M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM7 9h10v2H7V9zm0 4h7v2H7v-2z",t:"Anti-charge utile",d:"Lit le code qu un theme, un greffon ou un script injecte veut faire executer, et le refuse quand il fait ce que fait un voleur : lire ton jeton et le faire sortir.",e:"code(s) refuse(s)"}];
+function NexiumProtectComp(){
+var force=F.useReducer(function(x){return x+1;},0)[1];
+var _t0=F.useState("apercu");var tab=_t0[0];var setTab=_t0[1];
+var _c0=F.useState("");var chk=_c0[0];var setChk=_c0[1];
+var _cq=F.useState("");var q=_cq[0];var setQ=_cq[1];
+var _cf=F.useState("");var flt=_cf[0];var setFlt=_cf[1];
+var _cs=F.useState(null);var res=_cs[0];var setRes=_cs[1];
+var _cb=F.useState(false);var busy=_cb[0];var setBusy=_cb[1];
+var _sx=F.useState(null);var sbx=_sx[0];var setSbx=_sx[1];
+var _sb=F.useState(false);var sbxBusy=_sb[0];var setSbxBusy=_sb[1];
+F.useEffect(function(){
+var vivant=true,att=null;
+var maj=function(){try{if(!vivant||att)return;att=setTimeout(function(){att=null;if(vivant)force();},220);}catch(_){}};
+_NXPR.listeners.push(maj);
+try{if(window._NXV)_NXV.listeners.push(maj);}catch(_){}
+try{if(window._NXGD)_NXGD.listeners.push(maj);}catch(_){}
+return function(){vivant=false;
+try{if(att)clearTimeout(att);}catch(_){}
+try{_NXPR.listeners=_NXPR.listeners.filter(function(f){return f!==maj;});}catch(_){}
+try{if(window._NXV)_NXV.listeners=_NXV.listeners.filter(function(f){return f!==maj;});}catch(_){}
+try{if(window._NXGD)_NXGD.listeners=_NXGD.listeners.filter(function(f){return f!==maj;});}catch(_){}};},[]);
+var monte=_NXmounted(F);
+var G=window._NXGD||null;
+var P=_NXpal;var cfg=_NXPR.cfg;var st=_NXPR.stats;var V=window._NXV||null;
+function tog(k){return function(){cfg[k]=!cfg[k];_NXPR.saveCfg();force();};}
+function vtog(k,after){return function(){try{if(!V)return;V.cfg[k]=!V.cfg[k];V.save();if(after)after(V.cfg[k]);if(V.notify)V.notify();force();}catch(_){}};}
+function vget(k){return !!(V&&V.cfg&&V.cfg[k]);}
 var _KEYS=[];for(var _a=0;_a<SH_LIENS.length;_a++)_KEYS.push(SH_LIENS[_a].k);
 for(var _b=0;_b<SH_CONTENU.length;_b++)_KEYS.push(SH_CONTENU[_b].k);
 for(var _c=0;_c<SH_AVANCE.length;_c++)_KEYS.push(SH_AVANCE[_c].k);
 var active=0;for(var _k=0;_k<_KEYS.length;_k++)if(cfg[_KEYS[_k]])active++;
 var total=_KEYS.length;
+if(G&&G.cfg){for(var _g=0;_g<SH_SORTIE.length;_g++){total++;if(G.cfg[SH_SORTIE[_g].k])active++;}}
+for(var _p=0;_p<SH_PIEGES.length;_p++){total++;if(cfg[SH_PIEGES[_p].k])active++;}
 var score=Math.round(active/total*100);
 var scol=score>=85?P.txt:score>=50?P.sub:_NXpal.warn;
 var sclabel=score>=85?"Protection maximale":score>=50?"Protection partielle":"Protection faible";
@@ -4791,21 +7752,101 @@ function empty(t){return _NXcard(i("div",{style:{fontSize:"12.5px",color:P.dim,l
 function kindLabel(k){return k==="grabber"?"Logger d IP":k==="phish"?"Hameçonnage":k==="punycode"?"Domaine trompeur":k==="scam"?"Arnaque":k==="oauth"?"Autorisation d application":k==="scheme"?"Schéma exécutable":k==="bidi"?"Texte trompeur":k==="rawip"?"Adresse IP brute":k==="code"?"Demande de code":k==="download"?"Téléchargement":k==="short"?"Lien raccourci":k==="secret"?"Secret exposé":k==="selfxss"?"Console":k;}
 function pill(txt,tone){return i("span",{style:{display:"inline-block",fontSize:"9.5px",fontWeight:"800",letterSpacing:".08em",textTransform:"uppercase",padding:"3px 8px",borderRadius:"99px",border:"1px solid "+(tone||P.line),color:tone||P.dim,whiteSpace:"nowrap"}},txt);}
 function btn(label,onClick,strong){return i("div",{className:"nx-fx",role:"button","aria-label":label,tabIndex:0,onKeyDown:_NXkey,onClick:onClick,style:{display:"inline-block",padding:strong?"11px 20px":"7px 12px",borderRadius:"10px",border:"1px solid "+P.line,background:strong?P.acc:"transparent",color:strong?_NXpal.ink:P.sub,fontSize:strong?"12.5px":"11px",fontWeight:"700",cursor:"pointer",whiteSpace:"nowrap"}},label);}
-var TABS=[["apercu","Aperçu"],["boucliers","Boucliers"],["coffre","Coffre-fort"],["journal","Journal"],["base","Base"]];
-function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Protect"),style:{display:"flex",gap:"0",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto"}},
+var nQuar=(_NXPR.quar||[]).length;
+var nSortie=G?G.total():0;
+var TABS=[["apercu","Aperçu",null],["boucliers","Boucliers",null],["coffre","Coffre-fort",null],["journal","Journal",nQuar?String(nQuar>99?"99+":nQuar):null],["base","Base",null]];
+function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Protect"),style:{display:"flex",gap:"0",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
 TABS.map(function(t){var on=tab===t[0];
-return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,onClick:function(){setTab(t[0]);setQ("");},style:{padding:"11px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,borderBottom:"2px solid "+(on?P.txt:"transparent"),marginBottom:"-1px",whiteSpace:"nowrap",transition:"color .16s ease"}},_T(t[1]));}));}
+return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,"data-nx-tab":"1",
+"aria-label":_T(t[1])+(t[2]?(" \u2014 "+t[2]+" "+_T("en quarantaine")):""),
+onClick:function(){if(tab!==t[0]){setTab(t[0]);setQ("");}},
+style:{position:"relative",display:"flex",alignItems:"center",gap:"7px",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",
+letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
+_T(t[1]),
+t[2]?i("span",{key:"b"+t[2],"data-nx-pop":"1",style:{fontFamily:_NXf.mono,fontSize:"9px",fontWeight:"800",color:_NXpal.ink,
+background:_NXpal.warn,borderRadius:"99px",padding:"2px 6px",lineHeight:1.3,letterSpacing:0}},t[2]):null,
+i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",borderRadius:"2px",background:P.txt,
+transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function chiffre(v,lab,col){return i("div",{style:{flex:1,minWidth:"74px"}},
+_NXbigNum(v,col),
+i("div",{style:{fontSize:"10px",color:P.dim,marginTop:"5px",lineHeight:1.4}},lab));}
 function tApercu(){
+var gHotes=0;try{if(G&&G.stats&&G.stats.hotes)gHotes=Object.keys(G.stats.hotes).length;}catch(_){}
 return i("div",null,
-i("div",{style:{border:"1px solid "+P.line,borderRadius:"20px",background:P.panel,padding:"24px",marginBottom:"14px"}},
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"12px"}},_T("Niveau de protection")),
-i("div",{style:{display:"flex",alignItems:"baseline",gap:"12px",flexWrap:"wrap"}},
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"44px",fontWeight:"800",color:scol,letterSpacing:"-.045em",lineHeight:1}},score+"%"),
-i("div",{style:{fontSize:"13px",color:P.sub,fontWeight:"600"}},_T(sclabel))),
-i("div",{style:{marginTop:"16px",height:"3px",borderRadius:"2px",background:P.line,overflow:"hidden"}},
-i("div",{style:{width:Math.max(2,score)+"%",height:"100%",background:scol,transition:"width .3s ease"}})),
-i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"11px"}},active+" "+_T("protections actives sur")+" "+total)),
-_NXcard(_NXstrip([{v:_NXn(st.blocked||0),label:_T("Menaces bloquées")},{v:_NXn(st.safe||0),label:_T("Liens sûrs")},{v:_NXn(st.scanned||0),label:_T("Liens analysés")},{v:_NXn(st.scams||0),label:_T("Arnaques")}]),{pad:"20px 18px",mb:12}),
+i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,borderRadius:"22px",
+background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",padding:"26px 24px",marginBottom:"14px"}},
+i("div",{"data-nx-breathe":"1","aria-hidden":"true",style:{position:"absolute",right:"-80px",top:"-100px",width:"280px",height:"280px",borderRadius:"50%",
+background:"radial-gradient(circle,"+scol+"1f,transparent 70%)",pointerEvents:"none"}}),
+i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"22px",flexWrap:"wrap"}},
+_NXring(monte?score:0,scol,106,score+"%",_T("actif")),
+i("div",{style:{flex:1,minWidth:"186px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"9px"}},_T("Niveau de protection")),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"26px",fontWeight:"800",color:P.txt,letterSpacing:"-.035em",lineHeight:1.12,marginBottom:"9px"}},_T(sclabel)),
+i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.6}},active+" "+_T("protections actives sur")+" "+total),
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"12px"}},
+i("span",{"data-nx-dot":"1","aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",background:_NXpal.ok,flexShrink:0}}),
+i("span",{style:{fontSize:"11px",color:P.dim,lineHeight:1.5}},_T("Analyse en temps reel")+(gHotes?(" · "+gHotes+" "+_T("hote(s) inconnu(s) recense(s)")):""))))),
+i("div",{style:{position:"relative",display:"flex",gap:"14px",flexWrap:"wrap",marginTop:"21px",paddingTop:"19px",borderTop:"1px solid "+P.line}},
+chiffre(_NXn(st.blocked||0),_T("Menaces bloquées"),P.txt),
+chiffre(_NXn(nSortie),_T("Sorties arrêtées"),nSortie?_NXpal.ok:P.txt),
+chiffre(_NXn(st.scanned||0),_T("Liens analysés"),P.txt),
+chiffre(_NXn(st.safe||0),_T("Liens sûrs"),P.txt))),
+_NXcard(i("div",null,
+i("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"7px",flexWrap:"wrap"}},
+i("div",{style:{fontSize:"15px",fontWeight:"800",color:P.txt,letterSpacing:"-.018em"}},_T("Cinq protections inedites")),
+_NXneuf()),
+i("div",{style:{fontSize:"12px",color:P.dim,lineHeight:1.62,marginBottom:"16px"}},
+_T("Elles ne previennent pas : elles coupent la sortie. Chacune ferme une voie par laquelle ton jeton pouvait encore quitter ce client.")),
+G?i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(186px,1fr))",gap:"10px"}},
+SH_SORTIE.map(function(it){
+var on=!!G.cfg[it.k];
+var n=(G.stats&&G.stats[it.m])||0;
+return i("div",{key:it.k,className:"nx-fx","data-nx-tile":"1",role:"button","aria-label":_T(it.t),"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){G.toggle(it.k);force();},
+style:{padding:"15px 14px",borderRadius:"15px",cursor:"pointer",background:on?P.inset:"transparent",border:"1px solid "+(on?P.edge:P.line)}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"9px"}},
+i("div",{style:{color:on?P.txt:P.faint,display:"flex",flexShrink:0}},
+i("svg",{viewBox:"0 0 24 24",width:17,height:17,fill:"currentColor","aria-hidden":"true"},i("path",{d:it.ic}))),
+i("div",{style:{flex:1,minWidth:0,fontSize:"12.5px",fontWeight:"800",color:on?P.txt:P.sub,letterSpacing:"-.012em"}},_T(it.t)),
+i("span",{"aria-hidden":"true",style:{width:"7px",height:"7px",borderRadius:"50%",flexShrink:0,background:on?_NXpal.ok:P.faint}})),
+i("div",{style:{fontSize:"11px",color:P.dim,lineHeight:1.55,marginBottom:"12px"}},_T(it.d)),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"6px"}},
+i("span",{key:"c"+n,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"19px",fontWeight:"800",color:n?P.txt:P.faint,letterSpacing:"-.03em"}},_NXn(n)),
+i("span",{style:{fontSize:"10px",color:P.faint}},_T(it.e))));})):
+i("div",{style:{fontSize:"12.5px",color:_NXpal.warn,lineHeight:1.6}},_T("Les gardes de sortie n ont pas demarre sur ce client.")),
+i("div",{style:{marginTop:"18px",paddingTop:"16px",borderTop:"1px solid "+P.line}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"12px",flexWrap:"wrap"}},
+i("div",{style:{fontSize:"13.5px",fontWeight:"800",color:P.txt,letterSpacing:"-.012em"}},_T("Et six pieges de plus, dans les messages")),
+_NXneuf()),
+i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(186px,1fr))",gap:"10px"}},
+SH_PIEGES.map(function(it){
+var on=!!cfg[it.k];
+var n=(st&&st[it.m])||0;
+return i("div",{key:it.k,className:"nx-fx","data-nx-tile":"1",role:"button","aria-label":_T(it.t),
+"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){cfg[it.k]=!cfg[it.k];_NXPR.saveCfg();force();},
+style:{padding:"14px 13px",borderRadius:"14px",cursor:"pointer",
+background:on?P.inset:"transparent",border:"1px solid "+(on?P.edge:P.line)}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"8px"}},
+i("div",{style:{color:on?P.txt:P.faint,display:"flex",flexShrink:0}},
+i("svg",{viewBox:"0 0 24 24",width:16,height:16,fill:"currentColor","aria-hidden":"true"},i("path",{d:it.ic}))),
+i("div",{style:{flex:1,minWidth:0,fontSize:"12px",fontWeight:"800",color:on?P.txt:P.sub,
+letterSpacing:"-.012em"}},_T(it.t)),
+i("span",{"aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",flexShrink:0,
+background:on?_NXpal.ok:P.faint}})),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"16px",fontWeight:"800",
+color:n?P.txt:P.faint,letterSpacing:"-.03em"}},_NXn(n)));}))),
+G?i("div",{style:{marginTop:"16px",paddingTop:"15px",borderTop:"1px solid "+P.line}},
+_NXch(_T("Posture du pare-feu sortant"),_T("Ce que Nexium fait face a un serveur qu il ne connait pas.")),
+i("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap"}},
+[["ouvert","Ouvert","Journalise sans rien bloquer"],["guide","Guidé","Bloque ce qui emporte des données"],["verrouille","Verrouillé","Bloque tout hôte non approuvé"]].map(function(m){
+var on=G.cfg.egressMode===m[0];
+return i("div",{key:m[0],className:"nx-fx",role:"button","aria-label":_T(m[1]),"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){G.set("egressMode",m[0]);force();},
+style:{flex:1,minWidth:"128px",padding:"12px 13px",borderRadius:"12px",cursor:"pointer",
+background:on?P.inset:"transparent",border:"1px solid "+(on?P.txt:P.line)}},
+i("div",{style:{fontSize:"12.5px",fontWeight:"800",color:on?P.txt:P.sub}},_T(m[1])),
+i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"3px",lineHeight:1.45}},_T(m[2])));}))):null),{mb:12}),
 _NXcard(i("div",null,_NXch(_T("Profil de protection"),_T("Choisis un réglage global ; tu peux ensuite ajuster chaque bouclier.")),
 i("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap"}},[["strict","Strict","Bloque au moindre doute"],["equilibre","Équilibré","Recommandé"],["minimal","Minimal","Le strict nécessaire"]].map(function(p,k){var on=(cfg.profile||"equilibre")===p[0];
 return i("div",{key:k,className:"nx-fx",role:"button","aria-label":_T(p[1]),"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,onClick:function(){_NXPR.applyProfile(p[0]);force();},style:{flex:1,minWidth:"124px",padding:"13px 14px",borderRadius:"13px",cursor:"pointer",background:on?P.inset:"transparent",border:"1px solid "+(on?P.sub:P.line),transition:"border-color .16s ease"}},
@@ -4900,11 +7941,30 @@ _NXcard(i("div",null,_NXch(_T("Conseils de sécurité")),
 return i("div",{key:k,style:{display:"flex",gap:"11px",alignItems:"flex-start",padding:"10px 0",borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
 i("div",{style:{color:P.faint,flexShrink:0,fontFamily:_NXf.mono,fontSize:"10px",marginTop:"2px"}},("0"+(k+1)).slice(-2)),
 i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.6}},_T(t)));})),{mb:0}));}
+function groupGD(){
+if(!G)return null;
+var L=SH_SORTIE.filter(match);
+if(!L.length)return null;
+return _NXcard(i("div",null,
+_NXch(_T("Gardes de sortie"),_T("Ajoutees avec cette version. Elles agissent sur ce qui sort du client, pas sur ce qui entre."),_NXneuf()),
+L.map(function(it,k){
+var on=!!G.cfg[it.k];
+return row(it,on,function(){G.toggle(it.k);force();},k===L.length-1);})),{mb:12});}
+function groupePieges(){
+var L=SH_PIEGES.filter(match);
+if(!L.length)return null;
+return _NXcard(i("div",null,
+_NXch(_T("Pieges dans les messages"),_T("Ce qui se cache dans un message plutot que dans un lien."),_NXneuf()),
+L.map(function(it,k){
+return row(it,!!cfg[it.k],tog(it.k),k===L.length-1);})),{mb:12});}
 function tBoucliers(){
-var none=!SH_LIENS.filter(match).length&&!SH_CONTENU.filter(match).length&&!SH_AVANCE.filter(match).length;
+var none=!SH_LIENS.filter(match).length&&!SH_CONTENU.filter(match).length&&!SH_AVANCE.filter(match).length
+&&!SH_PIEGES.filter(match).length&&!(G&&SH_SORTIE.filter(match).length);
 return i("div",null,
 searchBox("Rechercher un bouclier…"),
 none?empty("Aucun bouclier ne correspond à cette recherche."):null,
+groupGD(),
+groupePieges(),
 group("Liens et messages","Ce que Nexium inspecte à la réception.",SH_LIENS),
 group("Contenus reçus","Pièces jointes, aperçus, invitations et messages privés.",SH_CONTENU),
 group("Analyse avancée","Contrôles supplémentaires sur la forme des liens et des demandes.",SH_AVANCE));}
@@ -4943,13 +8003,55 @@ i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"6px"}
 i("div",{style:{flex:1,minWidth:0,fontSize:"13px",fontWeight:"700",color:P.txt}},pl.n),
 pill(pl.risk>=3?_T("risque élevé"):pl.risk===2?_T("à vérifier"):_T("signal"),col)),
 pl.f.map(function(fl,k2){return i("div",{key:k2,style:{fontSize:"11.5px",color:P.sub,lineHeight:1.55}},"— "+fl);}));})),{mb:12}):null);}
+function gdLabel(k){return k==="webhook"?"Webhook":k==="egress"?"Sortie":k==="balise"?"Balise":k==="dom"?"DOM":k==="charge"?"Code":"Garde";}
+function tSorties(){
+if(!G)return null;
+var rec=(G.stats&&G.stats.recent)||[];
+var hotes=[];
+try{var H=(G.stats&&G.stats.hotes)||{};
+for(var hk in H)hotes.push([hk,H[hk]]);
+hotes.sort(function(x,y){return (y[1].n||0)-(x[1].n||0);});}catch(_){}
+if(!rec.length&&!hotes.length)return null;
+return i("div",null,
+hotes.length?_NXcard(i("div",null,
+_NXch(_T("Hôtes inconnus rencontrés"),_T("Des serveurs hors Discord et hors Nexium ont été contactés depuis ce client. Approuve ceux que tu reconnais."),
+btn(_T("Tout oublier"),function(){G.viderJournal();force();})),
+hotes.slice(0,10).map(function(o,k,arr){
+var d=new Date(o[1].at||0);
+var hh=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+return i("div",{key:o[0],style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap",padding:"12px 0",
+borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{style:{flex:1,minWidth:"150px"}},
+i("div",{style:{fontSize:"12.5px",fontFamily:_NXf.mono,color:P.txt,wordBreak:"break-all",lineHeight:1.4}},o[0]),
+i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"3px"}},(o[1].n||0)+" "+_T("tentative(s)")+" · "+(o[1].ou||_T("requete"))+" · "+hh)),
+btn(_T("Approuver"),function(){G.approuver(o[0]);force();}),
+btn(_T("Oublier"),function(){G.oublierHote(o[0]);force();}));})),{mb:12}):null,
+rec.length?_NXcard(i("div",null,
+_NXch(_T("Sorties arrêtées"),_T("Ce que les gardes ont coupé, du plus récent au plus ancien.")),
+rec.slice(0,12).map(function(L,k,arr){
+var d=new Date(L.t);
+var hh=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+return i("div",{key:k,style:{display:"flex",alignItems:"flex-start",gap:"10px",padding:"11px 0",
+borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0,marginTop:"3px"}},hh),
+pill(_T(gdLabel(L.k)),L.k==="webhook"||L.k==="charge"?_NXpal.danger:_NXpal.warn),
+i("div",{style:{flex:1,minWidth:0,fontSize:"11.5px",color:P.sub,lineHeight:1.55,wordBreak:"break-word"}},L.d));})),{mb:12}):null,
+(G.cfg.approuves&&G.cfg.approuves.length)?_NXcard(i("div",null,
+_NXch(_T("Hôtes approuvés"),_T("Ces serveurs peuvent recevoir des données depuis ton client.")),
+i("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px"}},G.cfg.approuves.map(function(h,k){
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"8px",padding:"6px 10px",background:P.inset,border:"1px solid "+P.line,borderRadius:"99px"}},
+i("span",{style:{fontSize:"11px",color:P.sub,fontFamily:_NXf.mono}},h),
+i("span",{className:"nx-fx",role:"button","aria-label":_T("Retirer")+" "+h,tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){G.retirer(h);force();},style:{cursor:"pointer",color:P.faint,fontSize:"13px",lineHeight:1}},"\u00d7"));}))),{mb:12}):null);}
 function tJournal(){
 var quar=(_NXPR.quar||[]);
 var recent=(st.recent||[]);
 var vlog=(V&&V.stats&&V.stats.log)||[];
 var allow=(cfg.allow||[]);
-if(!quar.length&&!recent.length&&!vlog.length&&!allow.length)return empty("Rien à afficher pour l instant : aucune menace bloquée, aucun domaine autorisé.");
+var gdVide=!G||(!((G.stats&&G.stats.recent)||[]).length&&!Object.keys((G.stats&&G.stats.hotes)||{}).length&&!((G.cfg&&G.cfg.approuves)||[]).length);
+if(!quar.length&&!recent.length&&!vlog.length&&!allow.length&&gdVide)return empty("Rien à afficher pour l instant : aucune menace bloquée, aucun domaine autorisé.");
 return i("div",null,
+tSorties(),
 quar.length?_NXcard(i("div",null,
 _NXch(_T("Quarantaine"),_T("Liens bloqués avant ouverture. Tu peux les ouvrir quand même ou autoriser le domaine."),btn(_T("Tout vider"),function(){if(window.confirm(_T("Vider la quarantaine ?"))){_NXPR.clearQuar();force();}})),
 quar.slice(0,8).map(function(qq,k,arr){
@@ -5015,14 +8117,194 @@ qn?i("div",{style:{marginTop:"12px"}},btn(_T("Réessayer maintenant"),function()
 return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
 _NXhead(_T("Sécurité"),"Nexium Protect",_T("Un bouclier en temps réel contre les liens piégés, les arnaques, le doxxing et l usurpation. Tout est analysé localement, rien n est envoyé.")),
 tabbar(),
-tab==="apercu"?tApercu():tab==="boucliers"?tBoucliers():tab==="coffre"?tCoffre():tab==="journal"?tJournal():tBase(),
+i("div",{key:tab,"data-nx-panel":"1"},
+tab==="apercu"?tApercu():tab==="boucliers"?tBoucliers():tab==="coffre"?tCoffre():tab==="journal"?tJournal():tBase()),
 _NXfoot("Nexium Protect · analyse 100% locale, aucune donnée envoyée")));
 }var _NXlogin=window._NXlogin||(window._NXlogin={});
 if(!_NXlogin.boot){try{_NXlogin.boot=true;
-_NXlogin.injectStyle=function(){try{if(document.getElementById("nx-login-style"))return;var s=document.createElement("style");s.id="nx-login-style";s.textContent="@keyframes nxWelcomeIn{0%{opacity:0;transform:translateY(-14px)}100%{opacity:1;transform:translateY(0)}}@keyframes nxSheen{0%{background-position:-140% 0}100%{background-position:240% 0}}#nx-welcome{position:fixed;top:0;left:0;right:0;z-index:2000;display:flex;flex-direction:column;align-items:center;pointer-events:none;padding-top:26px;animation:nxWelcomeIn .8s cubic-bezier(.16,1,.3,1) both}#nx-welcome .nx-kick{font-size:11px;font-weight:800;letter-spacing:.42em;text-transform:uppercase;color:rgba(190,190,198,.72);margin-bottom:8px;padding-left:.42em}#nx-welcome .nx-brand{font-family:var(--font-display),'Bricolage Grotesque','gg sans',sans-serif;font-size:46px;font-weight:800;letter-spacing:.02em;line-height:1;background:linear-gradient(100deg,#ffffff,#c9c9d2 30%,#ffffff 50%,#c9c9d2 70%,#ffffff);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;animation:nxSheen 6s linear infinite}#nx-welcome .nx-sub{margin-top:11px;font-size:12.5px;color:rgba(150,150,158,.7)}#nx-welcome .nx-line{margin-top:15px;width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,rgba(232,232,234,.6),transparent)}.nx-login-glow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 45% at 50% 12%, rgba(120,110,180,.10), transparent 60%),radial-gradient(50% 40% at 50% 100%, rgba(80,90,140,.08), transparent 60%)}";document.head.appendChild(s);}catch(_){}};
-_NXlogin.isLogin=function(){try{return !!document.querySelector('[class*="authBox"],[class*="AuthBox"],[class*="authBoxContainer"],[class*="qrLogin"]');}catch(_){return false;}};
-_NXlogin.mount=function(){try{if(!_NXlogin.isLogin()){_NXlogin.unmount();return;}_NXlogin.seen=true;_NXlogin.injectStyle();if(!document.getElementById("nx-login-glow")){var g=document.createElement("div");g.id="nx-login-glow";g.className="nx-login-glow";if(document.body)document.body.appendChild(g);}if(document.getElementById("nx-welcome"))return;var b=document.createElement("div");b.id="nx-welcome";b.innerHTML="<div class='nx-kick'>Bienvenue sur l'environnement</div><div class='nx-brand'>NEXIUM</div><div class='nx-sub'>Ton Discord, augmenté — sécurité, confidentialité et style.</div><div class='nx-line'></div>";if(document.body)document.body.appendChild(b);}catch(_){}};
-_NXlogin.unmount=function(){try{["nx-welcome","nx-login-glow"].forEach(function(id){var e=document.getElementById(id);if(e&&e.parentNode)e.parentNode.removeChild(e);});}catch(_){}};
+_NXlogin.CSS=[
+"@keyframes nxLogIn{from{opacity:0;transform:translate3d(0,-12px,0)}to{opacity:1;transform:none}}",
+"@keyframes nxLogUp{from{opacity:0;transform:translate3d(0,10px,0)}to{opacity:1;transform:none}}",
+"@keyframes nxSheen{0%{background-position:-140% 0}100%{background-position:240% 0}}",
+"@keyframes nxHalo{0%,100%{opacity:.34}50%{opacity:.92}}",
+"@keyframes nxBip{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}",
+"#nx-welcome{position:fixed;top:0;left:0;right:0;z-index:2000;display:flex;flex-direction:column;",
+"align-items:center;pointer-events:none;padding-top:22px;user-select:none}",
+"#nx-welcome > *{animation:nxLogIn .78s cubic-bezier(.16,1,.3,1) both}",
+"#nx-welcome > *:nth-child(2){animation-delay:.08s}",
+"#nx-welcome > *:nth-child(3){animation-delay:.17s}",
+"#nx-welcome > *:nth-child(4){animation-delay:.26s}",
+"#nx-welcome > *:nth-child(5){animation-delay:.34s}",
+"#nx-welcome .nx-kick{display:flex;align-items:center;gap:9px;font-size:9.5px;font-weight:800;",
+"letter-spacing:.36em;text-transform:uppercase;color:rgba(190,190,198,.62);padding-left:.36em}",
+"#nx-welcome .nx-kick i{display:block;width:18px;height:1px;background:rgba(190,190,198,.32)}",
+"#nx-welcome .nx-brand{margin-top:11px;font-family:var(--font-display),'Bricolage Grotesque','gg sans',sans-serif;",
+"font-size:44px;font-weight:800;letter-spacing:.055em;line-height:1;padding-left:.055em;",
+"background:linear-gradient(100deg,#ffffff,#b9b9c4 28%,#ffffff 50%,#b9b9c4 72%,#ffffff);",
+"background-size:220% 100%;-webkit-background-clip:text;background-clip:text;",
+"-webkit-text-fill-color:transparent;color:transparent;animation:nxSheen 7s linear infinite}",
+"#nx-welcome .nx-sub{margin-top:12px;font-size:13px;color:rgba(168,168,178,.82);letter-spacing:-.005em}",
+"#nx-welcome .nx-row{margin-top:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}",
+"#nx-welcome .nx-chip{display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:99px;",
+"border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.035);",
+"font-size:10.5px;font-weight:700;color:rgba(196,196,204,.85);letter-spacing:.02em}",
+"#nx-welcome .nx-chip b{font-family:var(--font-code),'JetBrains Mono',ui-monospace,monospace;font-weight:600;color:rgba(232,232,238,.95)}",
+"#nx-welcome .nx-bip{width:6px;height:6px;border-radius:50%;background:#57f287;flex-shrink:0;animation:nxBip 2.6s ease-in-out infinite}",
+"#nx-foot{position:fixed;left:0;right:0;bottom:20px;z-index:2000;display:flex;flex-direction:column;",
+"align-items:center;gap:9px;pointer-events:none;user-select:none;",
+"animation:nxLogUp .9s cubic-bezier(.16,1,.3,1) .5s both}",
+"#nx-foot .nx-mots{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;",
+"font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(150,150,160,.5)}",
+"#nx-foot .nx-mots span{display:flex;align-items:center;gap:14px}",
+"#nx-foot .nx-mots em{font-style:normal;width:3px;height:3px;border-radius:50%;background:rgba(150,150,160,.32)}",
+"#nx-foot .nx-note{font-size:11px;color:rgba(140,140,150,.55);letter-spacing:.01em}",
+".nx-login-glow{position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;",
+"background:radial-gradient(58% 42% at 50% 8%, rgba(126,116,190,.13), transparent 62%),",
+"radial-gradient(46% 38% at 50% 100%, rgba(72,84,138,.10), transparent 62%);",
+"animation:nxHalo 7s ease-in-out infinite}",
+"@media (prefers-reduced-motion: reduce){#nx-welcome *,#nx-welcome,#nx-foot,.nx-login-glow{animation:none!important}}",
+"@media (max-height: 720px){#nx-foot{display:none}#nx-welcome .nx-row{display:none}}"
+].join("");
+_NXlogin.injectStyle=function(){try{
+if(document.getElementById("nx-login-style"))return;
+var s=document.createElement("style");
+s.id="nx-login-style";
+s.textContent=_NXlogin.CSS;
+if(document.head)document.head.appendChild(s);}catch(_){}};
+_NXlogin.cfg=function(){try{
+var c=(window._NXPR&&_NXPR.cfg)||null;
+return {qr:!c||c.qrLoginGuard!==false,passkey:!c||c.passkeyGuard!==false};}catch(_){return {qr:true,passkey:true};}};
+_NXlogin.SELQR='[class*="qrLogin"],[class*="qrCode"],[class*="QRLogin"]';
+_NXlogin.MOTSCLE=/(cl[ée]s?\s*d[' \u2019]?acc[èe]s|passkey|cl[ée]\s*de\s*s[ée]curit[ée]|security\s*key|windows\s*hello|touch\s*id|face\s*id)/i;
+_NXlogin.trouve={qr:0,passkey:0};
+_NXlogin.styleGarde=function(){try{
+var id="nx-login-guard";
+var on=_NXlogin.cfg();
+var vieux=document.getElementById(id);
+if(!on.qr){if(vieux&&vieux.parentNode)vieux.parentNode.removeChild(vieux);return;}
+if(vieux)return;
+var st=document.createElement("style");
+st.id=id;
+st.textContent=_NXlogin.SELQR+"{display:none!important}";
+if(document.head)document.head.appendChild(st);}catch(_){}};
+_NXlogin.conteneur=function(el){try{
+var n=el,d=0;
+while(n&&d<5){
+var p=n.parentElement;
+if(!p)break;
+var r=p.getBoundingClientRect?p.getBoundingClientRect():null;
+if(r&&r.height>0&&r.height<260&&r.width>0&&r.width<560)return p;
+n=p;d++;}
+return el;}catch(_){return el;}};
+_NXlogin.coupePasskey=function(){try{
+var on=_NXlogin.cfg();
+if(!on.passkey){_NXlogin.trouve.passkey=0;return;}
+var n=0;
+var cand=document.querySelectorAll('button,a,[role="button"],[class*="passkey"],[class*="Passkey"],[class*="webauthn"]');
+for(var a=0;a<cand.length&&a<400;a++){
+var el=cand[a];
+if(el.getAttribute&&el.getAttribute("data-nx-coupe"))continue;
+var t="";
+try{t=(el.textContent||"")+" "+(el.getAttribute("aria-label")||"")+" "+(el.className&&el.className.baseVal!==undefined?el.className.baseVal:(el.className||""));}catch(_){}
+if(t.length>160)continue;
+if(!_NXlogin.MOTSCLE.test(t))continue;
+var cible=_NXlogin.conteneur(el);
+try{cible.setAttribute("data-nx-coupe","1");
+cible.style.setProperty("display","none","important");}catch(_){}
+n++;}
+try{_NXlogin.trouve.passkey=document.querySelectorAll('[data-nx-coupe]').length;}
+catch(_){_NXlogin.trouve.passkey=n;}}catch(_){}};
+_NXlogin.avis=function(){try{
+var on=_NXlogin.cfg();
+if(!on.qr&&!on.passkey){var v=document.getElementById("nx-login-avis");
+if(v&&v.parentNode)v.parentNode.removeChild(v);return;}
+if(document.getElementById("nx-login-avis"))return;
+var boite=document.querySelector('[class*="authBox"],[class*="AuthBox"],[class*="authBoxContainer"]');
+if(!boite)return;
+var quoi=(on.qr&&on.passkey)?"Le QR code et les cl\u00e9s d\u2019acc\u00e8s sont d\u00e9sactiv\u00e9s"
+:(on.qr?"La connexion par QR code est d\u00e9sactiv\u00e9e":"Les cl\u00e9s d\u2019acc\u00e8s sont d\u00e9sactiv\u00e9es");
+var pourquoi=on.qr
+?"Un QR code de connexion donne un acc\u00e8s complet \u00e0 ton compte \u00e0 qui le scanne. C\u2019est la premi\u00e8re m\u00e9thode de vol de compte sur Discord : on te demande de scanner sous un pr\u00e9texte, et la session part."
+:"Un client modifi\u00e9 ne peut pas garantir l\u2019origine d\u2019une demande de cl\u00e9 d\u2019acc\u00e8s. Nexium pr\u00e9f\u00e8re fermer cette porte.";
+var d=document.createElement("div");
+d.id="nx-login-avis";
+d.setAttribute("role","note");
+d.style.cssText="position:absolute;left:0;right:0;top:100%;margin-top:12px;"
++"padding:14px 16px;border-radius:12px;box-sizing:border-box;"
++"border:1px solid rgba(87,242,135,.24);background:rgba(87,242,135,.055);"
++"font-family:var(--font-primary),system-ui,sans-serif;"
++"animation:nxLogUp .5s cubic-bezier(.16,1,.3,1) .25s both;";
+try{var pos=window.getComputedStyle(boite).position;
+if(pos==="static")boite.style.position="relative";}catch(_){}
+var esc=function(x){return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+d.innerHTML='<div style="display:flex;align-items:center;gap:9px;margin-bottom:7px;">'
++'<svg viewBox="0 0 24 24" width="15" height="15" fill="#57f287" aria-hidden="true"><path d="M12 2 4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z"/></svg>'
++'<div style="font-size:12.5px;font-weight:700;color:#57f287;letter-spacing:-.01em;">'+esc(quoi)+'</div></div>'
++'<div style="font-size:12px;color:rgba(181,186,193,.9);line-height:1.62;">'+esc(pourquoi)+'</div>'
++'<div style="font-size:10.5px;color:rgba(150,150,160,.7);margin-top:8px;">'
++'Nexium Protect \u203a Boucliers \u2014 si tu en as vraiment besoin, tu peux le r\u00e9activer.</div>';
+try{boite.appendChild(d);}catch(_){}}catch(_){}};
+_NXlogin.garde=function(){try{
+_NXlogin.styleGarde();
+_NXlogin.coupePasskey();
+_NXlogin.avis();
+try{_NXlogin.trouve.qr=document.querySelectorAll(_NXlogin.SELQR).length;}catch(_){_NXlogin.trouve.qr=0;}
+}catch(_){}};
+_NXlogin.status=function(){try{
+var on=_NXlogin.cfg();
+return {surLaPageDeConnexion:_NXlogin.isLogin(),
+qrCoupe:on.qr,qrTrouve:_NXlogin.trouve.qr,
+passkeyCoupe:on.passkey,passkeyTrouve:_NXlogin.trouve.passkey,
+avis:!!document.getElementById("nx-login-avis")};}catch(_){return {};}};
+_NXlogin.isLogin=function(){try{
+return !!document.querySelector('[class*="authBox"],[class*="AuthBox"],[class*="authBoxContainer"],[class*="qrLogin"]');}catch(_){return false;}};
+_NXlogin.arretees=function(){try{
+var n=0;
+try{n+=(window._NXPR&&_NXPR.stats&&_NXPR.stats.blocked)||0;}catch(_){}
+try{n+=(window._NXGD&&_NXGD.total)?_NXGD.total():0;}catch(_){}
+try{n+=(window._NXP&&_NXP.stats&&_NXP.stats.blocked)||0;}catch(_){}
+return n;}catch(_){return 0;}};
+_NXlogin.nombre=function(v){try{
+if(v>=1000000)return (v/1000000).toFixed(1).replace(/\.0$/,"")+" M";
+if(v>=1000)return (v/1000).toFixed(1).replace(/\.0$/,"")+" k";
+return String(v);}catch(_){return String(v);}};
+_NXlogin.esc=function(x){return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+_NXlogin.mount=function(){try{
+if(!_NXlogin.isLogin()){_NXlogin.unmount();return;}
+_NXlogin.seen=true;
+_NXlogin.injectStyle();
+_NXlogin.garde();
+if(!document.getElementById("nx-login-glow")){
+var g=document.createElement("div");
+g.id="nx-login-glow";g.className="nx-login-glow";
+if(document.body)document.body.appendChild(g);}
+if(!document.getElementById("nx-welcome")){
+var ver=(window._NXUP&&_NXUP.VERSION)?("v"+_NXUP.VERSION):"";
+var n=_NXlogin.arretees();
+var b=document.createElement("div");
+b.id="nx-welcome";
+b.setAttribute("aria-hidden","true");
+b.innerHTML="<div class='nx-kick'><i></i>Environnement protégé<i></i></div>"
++"<div class='nx-brand'>NEXIUM</div>"
++"<div class='nx-sub'>Ton Discord, repris en main.</div>"
++"<div class='nx-row'>"
++"<span class='nx-chip'><span class='nx-bip'></span>Protection active</span>"
++(ver?("<span class='nx-chip'><b>"+_NXlogin.esc(ver)+"</b></span>"):"")
++(n>0?("<span class='nx-chip'><b>"+_NXlogin.esc(_NXlogin.nombre(n))+"</b> déjà arrêtées ici</span>"):"")
++"</div>";
+if(document.body)document.body.appendChild(b);}
+if(!document.getElementById("nx-foot")){
+var f=document.createElement("div");
+f.id="nx-foot";
+f.setAttribute("aria-hidden","true");
+f.innerHTML="<div class='nx-mots'><span>Liens piégés<em></em>Télémétrie<em></em>Exfiltration</span></div>"
++"<div class='nx-note'>arrêtés avant toi, sur cette machine</div>";
+if(document.body)document.body.appendChild(f);}
+}catch(_){}};
+_NXlogin.unmount=function(){try{
+["nx-welcome","nx-foot","nx-login-glow","nx-login-guard","nx-login-avis"].forEach(function(id){
+var e=document.getElementById(id);
+if(e&&e.parentNode)e.parentNode.removeChild(e);});}catch(_){}};
 _NXlogin.tick=function(){try{if(document.hidden)return;_NXlogin.mount();}catch(_){}};
 try{
 _NXlogin.t0=Date.now();
@@ -5031,6 +8313,7 @@ _NXlogin.iv=setInterval(function(){try{
 if(Date.now()-_NXlogin.t0>150000&&!_NXlogin.seen){clearInterval(_NXlogin.iv);_NXlogin.iv=null;return;}
 _NXlogin.tick();}catch(_){}},3000);}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXlogin");if(window._NXERR)_NXERR.push("module _NXlogin :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXlogin desactive:",_nxE);}catch(_){}}
+
 }var _NXWelcome=window._NXWelcome||(window._NXWelcome={});
 if(!_NXWelcome.boot){try{_NXWelcome.boot=true;
 _NXWelcome.KEY="nexium_onboarded";
@@ -5827,8 +9110,8 @@ try{setTimeout(function(){_NXDIAG.scan();},15000);setInterval(function(){if(!doc
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXDIAG");if(window._NXERR)_NXERR.push("module _NXDIAG :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXDIAG desactive:",_nxE);}catch(_){}}
 }var _NXHEALTH=window._NXHEALTH||(window._NXHEALTH={});
 if(!_NXHEALTH.init){try{_NXHEALTH.init=true;
-_NXHEALTH.MODS=[["_NXDB","stockage"],["_NXM","musique"],["_NXS","statistiques"],["_NXP","confidentialite"],["_NXNET","reseau"],["_NXCL","changelog"],["_NXUP","mise a jour"],["_NXLY","presence"],["_NXPR","protect"],["_NXSP","sponsor"],["_NXUA","icones"],["_NXCP","recherche rapide"],["_NXBADGE","badge"],["_NXBAN","bannissement"],["_NXlogin","ecran de connexion"],["_NXWelcome","accueil"],["_NXDIAG","diagnostic"]];
-_NXHEALTH.isolated=["_NXDB","_NXP","_NXSP","_NXUA","_NXBAN","_NXDIAG","_NXHEALTH","_NXSAFE","_NXBADGE","_NXWelcome","_NXlogin"];
+_NXHEALTH.MODS=[["_NXGD","gardes de sortie"],["_NXDB","stockage"],["_NXM","musique"],["_NXS","statistiques"],["_NXP","confidentialite"],["_NXNET","reseau"],["_NXCL","changelog"],["_NXUP","mise a jour"],["_NXLY","presence"],["_NXPR","protect"],["_NXSP","sponsor"],["_NXUA","icones"],["_NXCP","recherche rapide"],["_NXBADGE","badge"],["_NXBAN","bannissement"],["_NXlogin","ecran de connexion"],["_NXWelcome","accueil"],["_NXDIAG","diagnostic"]];
+_NXHEALTH.isolated=["_NXDB","_NXP","_NXSP","_NXUA","_NXBAN","_NXDIAG","_NXHEALTH","_NXSAFE","_NXBADGE","_NXWelcome","_NXlogin","_NXGD","_NXDATA"];
 _NXHEALTH.check=function(){try{
 var ko=[];
 try{var F=window._NXFAIL||[];for(var f=0;f<F.length;f++){var lab=F[f];
@@ -6017,7 +9300,155 @@ try{document.addEventListener("keydown",function(e){try{
 if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==="N"||e.key==="n")){e.preventDefault();e.stopPropagation();_NXCP.open();}
 }catch(_){}},true);}catch(_){}
 }
-var NexiumSponsorIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20},i("path",{d:"M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"}));};
+function NexiumHomeComp(){
+var force=F.useReducer(function(x){return x+1;},0)[1];
+var _r0=F.useState(false);var reglages=_r0[0];var setReglages=_r0[1];
+F.useEffect(function(){
+var vivant=true,att=null;
+var maj=function(){try{if(!vivant||att)return;att=setTimeout(function(){att=null;if(vivant)force();},500);}catch(_){}};
+var mods=["_NXPR","_NXGD","_NXP","_NXNET"];
+for(var a=0;a<mods.length;a++){try{var o=window[mods[a]];if(o&&o.listeners)o.listeners.push(maj);}catch(_){}}
+var id=setInterval(function(){try{if(typeof document==="undefined"||!document.hidden)maj();}catch(_){}},3000);
+return function(){vivant=false;
+try{if(att)clearTimeout(att);}catch(_){}
+try{clearInterval(id);}catch(_){}
+for(var b=0;b<mods.length;b++){try{var o2=window[mods[b]];
+if(o2&&o2.listeners)o2.listeners=o2.listeners.filter(function(f){return f!==maj;});}catch(_){}}};},[]);
+var monte=_NXmounted(F);
+var P=_NXpal;
+var PR=window._NXPR,G=window._NXGD,PV=window._NXP,NT=window._NXNET,V=window._NXV,DA=window._NXDATA;
+var menaces=((PR&&PR.stats&&PR.stats.blocked)||0);
+var sorties=(G&&G.total)?G.total():0;
+var interceptees=((PV&&PV.stats&&PV.stats.seen)||0);
+var arretees=((PV&&PV.stats&&PV.stats.blocked)||0);
+var analyses=((PR&&PR.stats&&PR.stats.scanned)||0);
+var sante=(DA&&DA.sante)?DA.sante():{total:0,vivants:0,morts:[],erreurs:0};
+var lat=(NT&&NT.stats)?NT.stats():{avg:0,n:0};
+var ver=(window._NXUP&&_NXUP.VERSION)||"?";
+var pctSante=sante.total?Math.round(sante.vivants/sante.total*100):100;
+var tout=menaces+sorties+arretees;
+var etat=sante.morts.length?{t:_T("Attention requise"),c:_NXpal.warn}:
+(tout>0?{t:_T("Protection active"),c:_NXpal.ok}:{t:_T("En veille"),c:_NXpal.ok});
+function aller(cle){try{if(window._NXCP&&_NXCP.goto)_NXCP.goto(cle);}catch(_){}}
+function grand(v,lab,c){return i("div",{style:{flex:1,minWidth:"88px"}},
+i("div",{key:"h"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"27px",fontWeight:"800",
+color:c||P.txt,letterSpacing:"-.04em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
+i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"6px",lineHeight:1.4}},lab));}
+var TUILES=[
+{k:"equicord_protect",n:"Nexium Protect",d:_T("Liens, arnaques, fichiers"),ic:NexiumProtectIcon,
+v:_NXn(menaces),u:_T("bloquees")},
+{k:"equicord_privacy",n:"Nexium Privacy",d:_T("Ce qui sort de ta machine"),ic:NexiumPrivacyIcon,
+v:_NXn(arretees),u:_T("arretees")},
+{k:"equicord_network",n:"Nexium Réseau",d:_T("Latence et hotes contactes"),ic:NexiumNetworkIcon,
+v:lat.n?(lat.avg+" ms"):"—",u:_T("moyenne")},
+{k:"equicord_stats",n:"Nexium Stats",d:_T("Ton usage, en local"),ic:NexiumStatsIcon,
+v:_NXn((window._NXS&&_NXS.data&&_NXS.data.msgCount)||0),u:_T("messages")},
+{k:"equicord_data",n:"Nexium Données",d:_T("Stockage, sauvegardes, sante"),ic:NexiumDataIcon,
+v:(DA&&DA.fmtTaille)?DA.fmtTaille(DA.total()):"—",u:_T("stockes")},
+{k:"equicord_music",n:"Nexium Music",d:_T("Lecteur et playlist"),ic:NexiumMusicIcon,
+v:_NXn(((window._NXM&&_NXM.cfg&&_NXM.cfg.tracks)||[]).length),u:_T("pistes")},
+{k:"equicord_auto",n:"Nexium Auto",d:_T("Automatisations et rappels"),ic:NexiumAutoIcon,
+v:_NXn((((window._NXAU&&_NXAU.data&&_NXAU.data.tasks)||[]).length)||0),u:_T("regles")},
+{k:"equicord_team",n:"Nexium Team",d:_T("Qui construit le client"),ic:NexiumTeamIcon,v:"",u:""},
+{k:"equicord_sponsor",n:"Sponsor",d:_T("Mettre ton serveur en avant"),ic:NexiumSponsorIcon,v:"",u:""}];
+function tuile(t,k){
+return i("div",{key:t.k,className:"nx-fx","data-nx-tile":"1",role:"button","aria-label":t.n,
+tabIndex:0,onKeyDown:_NXkey,onClick:function(){aller(t.k);},
+style:{padding:"16px 15px",borderRadius:"15px",cursor:"pointer",
+background:P.panel,border:"1px solid "+P.line,
+display:"flex",flexDirection:"column",gap:"11px"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
+i("div",{style:{width:"32px",height:"32px",borderRadius:"10px",flexShrink:0,
+background:P.inset,border:"1px solid "+P.hair,color:P.sub,
+display:"flex",alignItems:"center",justifyContent:"center"}},
+(typeof t.ic==="function")?i(t.ic,null):null),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt,letterSpacing:"-.012em",
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},t.n),
+i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"3px",lineHeight:1.4,
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},t.d))),
+t.v?i("div",{style:{display:"flex",alignItems:"baseline",gap:"5px"}},
+i("span",{style:{fontFamily:_NXf.disp,fontSize:"17px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.03em",fontVariantNumeric:"tabular-nums"}},t.v),
+i("span",{style:{fontSize:"10px",color:P.faint}},t.u)):null);}
+function activite(){
+var L=[];
+try{var A=(PR&&PR.stats&&PR.stats.recent)||[];
+for(var a=0;a<A.length&&a<6;a++)L.push({t:A[a].t,k:_T("Protect"),d:PR.kindFr(A[a].k),c:_NXpal.danger});}catch(_){}
+try{var B=(G&&G.stats&&G.stats.recent)||[];
+for(var b=0;b<B.length&&b<6;b++)L.push({t:B[b].t,k:_T("Gardes"),d:B[b].d,c:_NXpal.warn});}catch(_){}
+try{var C=(PV&&Array.isArray(PV.blocked))?PV.blocked:[];
+for(var c=0;c<C.length&&c<6;c++)L.push({t:C[c].t,k:_T("Privacy"),d:PV.kindFr(C[c].k),c:_NXpal.ok});}catch(_){}
+L.sort(function(x,y){return (y.t||0)-(x.t||0);});
+return L.slice(0,8);}
+var ACT=activite();
+return i(Kr,null,i("div",{style:{maxWidth:"680px",margin:"0 auto"}},
+i("div",{"data-nx-panel":"1"},
+i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
+borderRadius:"24px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",
+padding:"28px 26px",marginBottom:"14px"}},
+i("div",{"data-nx-breathe":"1","aria-hidden":"true",style:{position:"absolute",right:"-90px",top:"-110px",
+width:"300px",height:"300px",borderRadius:"50%",
+background:"radial-gradient(circle,"+etat.c+"1c,transparent 70%)",pointerEvents:"none"}}),
+i("div",{style:{position:"relative"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap",marginBottom:"12px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".2em",textTransform:"uppercase",color:P.faint}},"Nexium Client"),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.dim,padding:"2px 8px",
+borderRadius:"99px",border:"1px solid "+P.line}},"v"+ver),
+i("div",{style:{display:"flex",alignItems:"center",gap:"6px",marginLeft:"auto"}},
+i("span",{"data-nx-dot":"1","aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",
+background:etat.c,flexShrink:0}}),
+i("span",{style:{fontSize:"11px",fontWeight:"700",color:etat.c}},etat.t))),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"31px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.045em",lineHeight:1.12,marginBottom:"10px",maxWidth:"430px"}},
+tout>0?(_NXn(tout)+" "+_T(tout>1?"choses arretees avant toi":"chose arretee avant toi"))
+:_T("Ton client veille, rien a signaler")),
+i("div",{style:{fontSize:"13px",color:P.sub,lineHeight:1.65,maxWidth:"460px"}},
+_T("Discord repris en main : un bouclier en temps reel, un pare-feu sortant, et pas une ligne de tes donnees qui quitte cette machine.")),
+i("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap",marginTop:"22px",paddingTop:"19px",
+borderTop:"1px solid "+P.line}},
+grand(_NXn(menaces),_T("Menaces bloquees"),menaces?_NXpal.danger:P.txt),
+grand(_NXn(sorties),_T("Sorties arretees"),sorties?_NXpal.ok:P.txt),
+grand(_NXn(interceptees),_T("Requetes vues")),
+grand(_NXn(analyses),_T("Liens analyses")),
+grand(pctSante+"%",_T("Modules actifs"),pctSante===100?_NXpal.ok:_NXpal.warn)))),
+sante.morts.length?_NXcard(i("div",null,
+i("div",{style:{fontSize:"13.5px",fontWeight:"800",color:_NXpal.warn,marginBottom:"6px"}},
+_T("Certains modules n ont pas demarre")),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6,marginBottom:"12px"}},
+sante.morts.join(", ")+". "+_T("Le reste du client fonctionne normalement.")),
+_NXbtn(_T("Voir le detail"),function(){aller("equicord_data");})),{mb:12,glow:"rgba(240,178,108,.12)"}):null,
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",
+color:P.faint,marginBottom:"11px",marginTop:"4px"}},_T("Tout le client, d un coup d oeil")),
+i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(192px,1fr))",gap:"10px",marginBottom:"14px"}},
+TUILES.map(tuile)),
+ACT.length?_NXcard(i("div",null,
+_NXch(_T("Dernieres interventions"),_T("Ce que le client a fait sans rien te demander."),
+_NXbtn(_T("Tout voir"),function(){aller("equicord_protect");})),
+ACT.map(function(o,k,arr){
+var d=new Date(o.t||Date.now());
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"11px",padding:"10px 0",
+borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("span",{style:{width:"6px",height:"6px",borderRadius:"50%",background:o.c,flexShrink:0}}),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0}},
+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)),
+i("span",{style:{fontSize:"10.5px",fontWeight:"700",color:P.dim,flexShrink:0,
+textTransform:"uppercase",letterSpacing:".06em",width:"52px"}},o.k),
+i("span",{style:{flex:1,minWidth:0,fontSize:"12px",color:P.sub,
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},String(o.d||"")));})),{mb:12}):
+_NXcard(i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.65}},
+_T("Rien n a encore ete arrete depuis l installation. C est bon signe : les protections tournent, elles n ont juste pas eu a intervenir.")),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Réglages avancés du client"),
+_T("Greffons, themes, raccourcis et options d Equicord. Rien n a ete retire."),
+_NXbtn(reglages?_T("Replier"):_T("Deplier"),function(){setReglages(!reglages);force();})),
+reglages?i("div",{"data-nx-fade":"1",style:{marginTop:"6px",paddingTop:"14px",borderTop:"1px solid "+P.line}},
+i(zT,null)):
+i("div",{style:{fontSize:"12px",color:P.dim,lineHeight:1.6}},
+_T("Tous les reglages d origine restent disponibles ici."))),{mb:0}),
+_NXfoot("Nexium Client v"+ver+" · tout est calcule et garde sur cette machine"))));
+}
+var NexiumSponsorIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20,"aria-hidden":"true"},i("path",{d:"M5 16 3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 3h14v2H5v-2z"}));};
 function fmtN(n){if(n==null)return "—";if(n>=1000)return (n/1000).toFixed(n>=10000?0:1).replace(".0","")+"k";return ""+n;}
 function InviteCard(){
 var P=_NXpal;var d=_NXSP.data;var bn=_NXSP.banner();var ic=_NXSP.icon();var on=_NXSP.online(),mb=_NXSP.members();
@@ -6069,11 +9500,13 @@ var force=F.useReducer(function(x){return x+1;},0)[1];
 F.useEffect(function(){_NXSP.listeners.push(force);_NXSP.loadSlots();return function(){_NXSP.listeners=_NXSP.listeners.filter(function(f){return f!==force;});};},[]);
 var P=_NXpal;var BR="#5865f2";
 var st=F.useState(false);var wasCopied=st[0];var setCopied=st[1];
+var _fq=F.useState(-1);var ouvQ=_fq[0];var setOuvQ=_fq[1];
+var monte=_NXmounted(F);
 function copyContact(){try{DiscordNative.clipboard.copy("5dj0");setCopied(true);setTimeout(function(){try{setCopied(false);}catch(_){}},2000);if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Pseudo copié : 5dj0"),1);}catch(_){}}
 var f=_NXSP.free();
 function stat(v,label,accent){
 return i("div",{style:{flex:"1 1 130px",minWidth:"118px"}},
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"26px",fontWeight:"800",color:accent||P.txt,letterSpacing:"-.035em",lineHeight:1}},v),
+i("div",{key:"s"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"26px",fontWeight:"800",color:accent||P.txt,letterSpacing:"-.035em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
 i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"5px",lineHeight:1.4}},label));}
 function pt(txt,color){
 return i("div",{style:{display:"flex",gap:"9px",alignItems:"flex-start",marginBottom:"8px"}},
@@ -6082,11 +9515,11 @@ i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.55}},txt));}
 function tier(o){
 var featured=!!o.featured;
 var used=(f.byTier[o.key]||0);
-return i("div",{style:{position:"relative",flex:"1 1 250px",minWidth:"232px",borderRadius:"18px",padding:featured?"24px 20px":"22px 20px",
+return i("div",{"data-nx-tile":"1",style:{position:"relative",flex:"1 1 250px",minWidth:"232px",borderRadius:"18px",padding:featured?"24px 20px":"22px 20px",
 background:featured?("linear-gradient(168deg,"+o.color+"14,"+P.panel+" 62%)"):P.panel,
 border:"1px solid "+(featured?(o.color+"66"):P.line),
 boxShadow:featured?("0 14px 44px "+o.color+"1f"):"none",transform:featured?"translateY(-4px)":"none"}},
-featured?i("div",{style:{position:"absolute",top:"-11px",left:"50%",transform:"translateX(-50%)",padding:"4px 13px",borderRadius:"99px",background:o.color,color:"#fff",fontSize:"9.5px",fontWeight:"800",letterSpacing:".12em",textTransform:"uppercase",whiteSpace:"nowrap"}},_T("Le plus demandé")):null,
+featured?i("div",{"data-nx-shine":"1",style:{position:"absolute",top:"-11px",left:"50%",transform:"translateX(-50%)",padding:"4px 13px",borderRadius:"99px",background:"linear-gradient(100deg,"+o.color+","+P.txt+","+o.color+")",color:"#fff",fontSize:"9.5px",fontWeight:"800",letterSpacing:".12em",textTransform:"uppercase",whiteSpace:"nowrap"}},_T("Le plus demandé")):null,
 i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".14em",textTransform:"uppercase",color:o.color,marginBottom:"9px"}},o.badge),
 i("div",{style:{display:"flex",alignItems:"baseline",gap:"6px",marginBottom:"4px"}},
 i("span",{style:{fontFamily:_NXf.disp,fontSize:"29px",fontWeight:"800",color:P.txt,letterSpacing:"-.04em"}},o.price),
@@ -6104,9 +9537,18 @@ f.left>0?_T("Réserver une place"):_T("Réserver dès qu'une place se libère"))
 return i(Kr,null,i("div",{style:{maxWidth:"780px",margin:"0 auto"}},
 
 i("div",{style:{position:"relative",overflow:"hidden",borderRadius:"22px",border:"1px solid "+P.line,background:P.panel,padding:"30px 26px",marginBottom:"14px"}},
-i("div",{style:{position:"absolute",inset:0,background:"radial-gradient(115% 130% at 88% -18%, "+BR+"26, transparent 58%)",pointerEvents:"none"}}),
+i("div",{"data-nx-breathe":"1","aria-hidden":"true",style:{position:"absolute",left:0,top:0,right:0,bottom:0,background:"radial-gradient(115% 130% at 88% -18%, "+BR+"2e, transparent 58%)",pointerEvents:"none"}}),
 i("div",{style:{position:"relative"}},
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".2em",textTransform:"uppercase",color:P.faint,marginBottom:"10px"}},_T("Partenariat Nexium")),
+i("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap",marginBottom:"10px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".2em",textTransform:"uppercase",color:P.faint}},_T("Partenariat Nexium")),
+i("div",{style:{display:"flex",alignItems:"center",gap:"6px",padding:"3px 9px",borderRadius:"99px",
+background:f.left>0?"rgba(87,242,135,.10)":"rgba(240,178,108,.12)",
+border:"1px solid "+(f.left>0?_NXpal.ok:_NXpal.warn)}},
+i("span",{"data-nx-dot":"1","aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",
+background:f.left>0?_NXpal.ok:_NXpal.warn,flexShrink:0}}),
+i("span",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".08em",textTransform:"uppercase",
+color:f.left>0?_NXpal.ok:_NXpal.warn}},
+f.left>0?(f.left+" "+_T(f.left>1?"places libres":"place libre")):_T("complet")))),
 i("div",{style:{fontFamily:_NXf.disp,fontSize:"31px",fontWeight:"800",color:P.txt,letterSpacing:"-.04em",lineHeight:1.12,marginBottom:"11px"}},_T("Ton serveur, devant 6 500 personnes")),
 i("div",{style:{fontSize:"14px",color:P.sub,lineHeight:1.65,marginBottom:"22px",maxWidth:"540px"}},_T("Nexium est installé sur plus de 6 500 machines. L'emplacement sponsorisé s'affiche dans le client lui-même, à chaque ouverture des paramètres — pas dans un flux qu'on fait défiler.")),
 i("div",{style:{display:"flex",flexWrap:"wrap",gap:"20px"}},
@@ -6148,6 +9590,39 @@ i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:P.txt,marginBottom:"6px
 i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6}},_T("Amène 100 nouveaux utilisateurs au client et l'emplacement est à toi gratuitement pendant un mois. Parles-en, c'est tout."))),
 
 _NXcard(i("div",null,
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"13px"}},_T("Ce que voient les 6 500 utilisateurs")),
+i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",borderRadius:"15px",border:"1px solid "+BR+"55",
+background:"linear-gradient(150deg,"+BR+"14,"+P.inset+" 68%)",padding:"16px 17px"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"13px",flexWrap:"wrap"}},
+i("div",{style:{width:"46px",height:"46px",borderRadius:"14px",flexShrink:0,
+background:"linear-gradient(140deg,"+BR+","+P.raise+")",display:"flex",alignItems:"center",justifyContent:"center",
+fontFamily:_NXf.disp,fontSize:"19px",fontWeight:"800",color:"#fff"}},"?"),
+i("div",{style:{flex:1,minWidth:"140px"}},
+i("div",{style:{fontSize:"14px",fontWeight:"800",color:P.txt,letterSpacing:"-.015em"}},_T("Le nom de ton serveur")),
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginTop:"5px"}},
+i("span",{"data-nx-dot":"1","aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",background:_NXpal.ok}}),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.dim}},_T("membres et connectes, en direct")))),
+i("div",{style:{padding:"9px 17px",borderRadius:"10px",background:BR,color:"#fff",
+fontSize:"12.5px",fontWeight:"800",flexShrink:0}},_T("Rejoindre")))),
+i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.6,marginTop:"11px"}},
+_T("Cette carte s affiche dans le client, pas dans un bandeau publicitaire : chiffres reels, bouton qui fonctionne, aucune image a fournir."))),{mb:12}),
+_NXcard(i("div",null,
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"4px"}},_T("Les questions qu on nous pose")),
+[[_T("Combien de temps avant la mise en ligne ?"),_T("Dans la journee, souvent dans l heure. Il suffit d un lien d invitation permanent : la carte se construit toute seule a partir des donnees du serveur.")],
+[_T("Et si ca ne marche pas pour moi ?"),_T("La formule Decouverte existe exactement pour ca : une semaine, dix euros, et un bilan des arrivees a la fin. Si le compte n y est pas, tu t arretes la.")],
+[_T("Pourquoi seulement quatre places ?"),_T("Parce qu au-dela, plus personne ne regarde. Quatre cartes tiennent a l ecran sans defilement et sans rotation : ton serveur est visible en permanence, pas une fois sur douze.")],
+[_T("Qui voit vraiment cet emplacement ?"),_T("Tous les utilisateurs du client, sans exception : la page n est ni masquable ni desactivable. Ce sont des gens qui ouvrent Discord tous les jours, pas des visiteurs de passage.")],
+[_T("Comment on paie ?"),_T("On en parle en message prive. Aucun paiement automatique, aucun abonnement qui se renouvelle tout seul : tu decides a chaque echeance.")]].map(function(o,k,arr){
+var op=ouvQ===k;
+return i("div",{key:k,style:{borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
+i("div",{className:"nx-fx",role:"button","aria-label":o[0],"aria-expanded":op?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){setOuvQ(op?-1:k);},
+style:{display:"flex",alignItems:"center",gap:"12px",padding:"14px 0",cursor:"pointer"}},
+i("div",{style:{flex:1,minWidth:0,fontSize:"13.5px",fontWeight:"600",color:op?P.txt:P.sub}},o[0]),
+i("span",{"aria-hidden":"true",style:{flexShrink:0,color:P.faint,fontSize:"12px",
+transform:op?"rotate(90deg)":"none",transition:"transform .2s ease"}},"\u203a")),
+op?i("div",{"data-nx-fade":"1",style:{fontSize:"12.5px",color:P.dim,lineHeight:1.7,paddingBottom:"15px",paddingRight:"22px"}},o[1]):null);})),{mb:12}),
+_NXcard(i("div",null,
 i("div",{style:{textAlign:"center"}},
 i("div",{style:{fontFamily:_NXf.disp,fontSize:"19px",fontWeight:"800",color:P.txt,letterSpacing:"-.02em",marginBottom:"7px"}},f.left>0?_T("Réserver ta place"):_T("Entrer sur la liste d'attente")),
 i("div",{style:{fontSize:"13px",color:P.sub,lineHeight:1.6,marginBottom:"17px",maxWidth:"430px",margin:"0 auto 17px"}},
@@ -6163,26 +9638,132 @@ _NXfoot(_T("Nexium — projet communautaire indépendant"))));
 
 function Mst(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
-F.useEffect(function(){_NXCL.listeners.push(force);return function(){_NXCL.listeners=_NXCL.listeners.filter(function(f){return f!==force;});};},[]);
+var _q0=F.useState("");var q=_q0[0];var setQ=_q0[1];
+var _o0=F.useState(0);var ouvert=_o0[0];var setOuvert=_o0[1];
+F.useEffect(function(){
+var vivant=true;
+var maj=function(){if(vivant)force();};
+_NXCL.listeners.push(maj);
+return function(){vivant=false;
+try{_NXCL.listeners=_NXCL.listeners.filter(function(f){return f!==maj;});}catch(_){}};},[]);
+var monte=_NXmounted(F);
 var P=_NXpal;
 var st=_NXCL.st;
-function ago(ts){if(!ts)return "jamais";var s=Math.floor((Date.now()-ts)/1000);if(s<60)return "à l'instant";var m=Math.floor(s/60);if(m<60)return "il y a "+m+" min";var h=Math.floor(m/60);if(h<24)return "il y a "+h+" h";return "il y a "+Math.floor(h/24)+" j";}
-function line(l,k){var t=l.replace(/\r$/,"");var s=t.trim();
-if(!s)return i("div",{key:k,style:{height:"10px"}});
-if(/^[=\-_]{3,}\s*$/.test(s))return i("div",{key:k,style:{height:"1px",background:P.hair,margin:"16px 0"}});
-if(/^#{1,3}\s/.test(s)||/^\[.+\]\s*$/.test(s)){var h=s.replace(/^#{1,3}\s*/,"").replace(/^\[/,"").replace(/\]\s*$/,"");return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"10px",margin:"20px 0 9px"}},i("div",{style:{width:"3px",height:"16px",background:P.acc,borderRadius:"2px",flexShrink:0}}),i("div",{style:{fontFamily:_NXf.disp,fontSize:"15px",fontWeight:"800",color:P.txt,letterSpacing:"-.01em"}},h));}
-if(/^[-*•]\s/.test(s))return i("div",{key:k,style:{display:"flex",gap:"11px",fontSize:"13px",color:P.sub,padding:"3px 0 3px 8px",lineHeight:"1.55"}},i("div",{style:{width:"4px",height:"4px",borderRadius:"50%",background:P.dim,marginTop:"9px",flexShrink:0}}),i("span",{style:{flex:1}},s.replace(/^[-*•]\s*/,"")));
-return i("div",{key:k,style:{fontSize:"13px",color:P.sub,padding:"3px 0",lineHeight:"1.6"}},s);}
-var scol=_NXCL.busy?P.dim:(_NXCL.err?_NXpal.dangerSoft:_NXpal.ok);
-var stext=_NXCL.busy?"Actualisation…":(_NXCL.err?"Source injoignable — copie locale":"Synchronisé "+ago(st.ts));
-return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
-_NXhead("Journal","Changelog","Les dernières évolutions du client, synchronisées automatiquement depuis le dépôt GitHub."),
-_NXcard(i("div",null,
-i("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",gap:"12px",marginBottom:st.text?"16px":"0",paddingBottom:st.text?"15px":"0",borderBottom:st.text?"1px solid "+P.hair:"none"}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"9px",minWidth:0}},i("div",{style:{width:"8px",height:"8px",borderRadius:"50%",background:scol,flexShrink:0}}),i("div",{style:{fontSize:"12px",color:P.sub,fontFamily:_NXf.mono,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},stext)),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:function(){if(!_NXCL.busy)_NXCL.refresh();},style:{fontSize:"12px",color:P.sub,cursor:"pointer",padding:"8px 15px",background:"transparent",borderRadius:"9px",border:"1px solid "+P.line,flexShrink:0,fontWeight:"600"}},_NXCL.busy?"…":"Actualiser")),
-st.text?i("div",{style:{maxHeight:"440px",overflowY:"auto",paddingRight:"8px"}},st.text.split("\n").slice(0,400).map(line)):i("div",{style:{fontSize:"13px",color:P.dim,padding:"26px 0",textAlign:"center"}},_NXCL.err?"Impossible de récupérer le changelog distant pour l'instant.":"Chargement du changelog…")),{mb:0}),
-_NXfoot("Changelog synchronisé depuis le dépôt GitHub")));
+function depuis(ts){
+if(!ts)return _T("jamais");
+var sec=Math.floor((Date.now()-ts)/1000);
+if(sec<60)return _T("a l instant");
+var m=Math.floor(sec/60);
+if(m<60)return _T("il y a")+" "+m+" min";
+var h=Math.floor(m/60);
+if(h<24)return _T("il y a")+" "+h+" h";
+return _T("il y a")+" "+Math.floor(h/24)+" j;".slice(0,2);}
+function versions(txt){
+var out=[],cur=null;
+var lignes=String(txt||"").split(/\r?\n/);
+for(var a=0;a<lignes.length;a++){
+var l=lignes[a].replace(/\s+$/,"");
+var t=l.trim();
+var mv=t.match(/^#{1,3}\s*v?(\d+)\s*(?:[-\u2014:]\s*(.*))?$/i);
+if(mv){cur={n:parseInt(mv[1],10),titre:(mv[2]||"").trim(),sections:[],lignes:[]};out.push(cur);continue;}
+if(!cur){
+if(/^#{1,3}\s/.test(t))continue;
+continue;}
+if(/^[=\-_*]{3,}$/.test(t))continue;
+if(/^#{1,4}\s/.test(t)){cur.sections.push({t:t.replace(/^#{1,4}\s*/,""),l:[]});continue;}
+if(!t)continue;
+var texte=t.replace(/^[-*\u2022]\s*/,"");
+if(cur.sections.length)cur.sections[cur.sections.length-1].l.push(texte);
+else cur.lignes.push(texte);}
+return out;}
+var V=versions(st.text);
+var vq=(q||"").trim().toLowerCase();
+if(vq)V=V.filter(function(v){
+var t=("v"+v.n+" "+v.titre+" "+v.lignes.join(" ")+" "+v.sections.map(function(x){return x.t+" "+x.l.join(" ");}).join(" ")).toLowerCase();
+return t.indexOf(vq)>=0;});
+var courante=parseInt((window._NXUP&&_NXUP.VERSION)||"0",10);
+var etatC=_NXCL.busy?{t:_T("Actualisation…"),c:P.dim}
+:(_NXCL.err?{t:_T("Source injoignable — copie locale"),c:_NXpal.warn}
+:{t:_T("Synchronise")+" "+depuis(st.ts),c:_NXpal.ok});
+function ligne(txt,k){
+return i("div",{key:k,style:{display:"flex",gap:"10px",alignItems:"flex-start",padding:"5px 0"}},
+i("div",{style:{width:"4px",height:"4px",borderRadius:"50%",background:P.mute,
+flexShrink:0,marginTop:"8px"}}),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.62}},txt));}
+function carte(v,k){
+var op=(ouvert===v.n)||(!!vq);
+var estCourante=v.n===courante;
+return i("div",{key:v.n,"data-nx-tile":op?null:"1",
+style:{borderRadius:"16px",marginBottom:"9px",overflow:"hidden",
+background:op?P.panel:"transparent",
+border:"1px solid "+(estCourante?P.edge:(op?P.hair:P.line))}},
+i("div",{className:"nx-fx",role:"button","aria-label":"v"+v.n,"aria-expanded":op?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,onClick:function(){setOuvert(op&&!vq?-1:v.n);},
+style:{display:"flex",alignItems:"center",gap:"13px",padding:"15px 17px",cursor:"pointer"}},
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"17px",fontWeight:"800",flexShrink:0,
+color:estCourante?P.txt:P.dim,letterSpacing:"-.03em",width:"46px",
+fontVariantNumeric:"tabular-nums"}},"v"+v.n),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13.5px",fontWeight:op?"700":"600",color:op?P.txt:P.sub,
+letterSpacing:"-.012em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},
+v.titre||_T("Mise a jour")),
+i("div",{style:{fontSize:"10.5px",color:P.faint,marginTop:"3px"}},
+(v.sections.length?(v.sections.length+" "+_T("sections")+" \u00b7 "):"")
++(v.lignes.length+v.sections.reduce(function(x,y){return x+y.l.length;},0))+" "+_T("changements"))),
+estCourante?i("span",{style:{fontSize:"9px",fontWeight:"800",letterSpacing:".1em",
+textTransform:"uppercase",color:_NXpal.ok,border:"1px solid "+_NXpal.ok,
+borderRadius:"99px",padding:"3px 8px",flexShrink:0}},_T("installee")):null,
+i("span",{"aria-hidden":"true",style:{flexShrink:0,color:P.faint,fontSize:"12px",
+transform:op?"rotate(90deg)":"none",transition:"transform .22s ease"}},"\u203a")),
+op?i("div",{"data-nx-fade":"1",style:{padding:"0 17px 16px"}},
+v.lignes.map(ligne),
+v.sections.map(function(sec,k2){
+return i("div",{key:k2,style:{marginTop:k2||v.lignes.length?"15px":"0"}},
+i("div",{style:{fontSize:"10.5px",fontWeight:"800",letterSpacing:".09em",
+textTransform:"uppercase",color:P.dim,marginBottom:"7px",
+paddingBottom:"7px",borderBottom:"1px solid "+P.line}},sec.t),
+sec.l.map(ligne));})):null);}
+return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
+_NXhead(_T("Journal des versions"),"Nexium Changelog",
+_T("Chaque version du client, ce qu elle a change et pourquoi. Le journal est recupere depuis le depot Nexium : rien n est envoye en retour.")),
+i("div",{"data-nx-panel":"1"},
+i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
+borderRadius:"22px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",
+padding:"24px",marginBottom:"14px"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"11px",flexWrap:"wrap"}},
+i("span",{"data-nx-dot":_NXCL.busy?"1":null,"aria-hidden":"true",
+style:{width:"6px",height:"6px",borderRadius:"50%",background:etatC.c,flexShrink:0}}),
+i("span",{style:{fontSize:"11px",color:etatC.c,fontWeight:"700"}},etatC.t)),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"13px",flexWrap:"wrap"}},
+i("div",{key:"v"+courante,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"40px",
+fontWeight:"800",color:P.txt,letterSpacing:"-.05em",lineHeight:1}},"v"+courante),
+i("div",{style:{fontSize:"13px",color:P.sub,fontWeight:"600"}},
+V.length?(V.length+" "+_T("versions au journal")):_T("journal en cours de chargement"))),
+i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap",marginTop:"20px"}},
+_NXbtn(_NXCL.busy?_T("Actualisation…"):_T("Actualiser"),function(){
+if(!_NXCL.busy){_NXCL.refresh();force();}},true),
+_NXbtn(_T("Ouvrir le depot"),function(){
+try{_NXP.open("https://github.com/Omega-devj/nexium-client");}catch(_){}}),
+(window._NXNG)?_NXbtn(_T("Revoir Nexium NEW Gen"),function(){
+try{_NXDB.del(_NXNG.KEY);_NXNG.show();}catch(_){}}):null)),
+i("div",{style:{position:"relative",marginBottom:"12px"}},
+i("input",{value:q,onChange:function(e){setQ(e.target.value);},
+placeholder:_T("Chercher dans le journal…"),spellCheck:false,
+"aria-label":_T("Chercher dans le journal"),
+style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,
+borderRadius:"11px",padding:"11px 13px",color:P.txt,fontSize:"12.5px",
+outline:"none",fontFamily:"inherit"}}),
+q?i("div",{className:"nx-fx",role:"button","aria-label":_T("Effacer"),tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){setQ("");},
+style:{position:"absolute",right:"11px",top:"10px",color:P.faint,fontSize:"14px",
+cursor:"pointer",lineHeight:1}},"\u00d7"):null),
+V.length?i("div",null,V.map(carte))
+:_NXcard(i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.65}},
+q?_T("Aucune version ne correspond a cette recherche.")
+:(_NXCL.busy?_T("Recuperation du journal depuis le depot…")
+:_T("Le journal n a pas pu etre recupere. Verifie ta connexion, puis clique sur Actualiser."))),{mb:0})),
+_NXfoot("Nexium Changelog · lu depuis le dépôt, aucune donnée envoyée")));
+
 }var ST,Gxe=h(()=>{"use strict";d();Uhe();Ft();Rr();gr();Ac();Ke();bt();ra();Ze();Rx();yW();un();bn();uu();T();_v();wxe();zxe();ST=Qr(_NXsafe(Mst,"Notes de version"),"Changelog")});function ca(e){return i("div",{className:Hxe.markup},Bt.defaultRules.codeBlock.react(e,null,{}))}function Ux({children:e}){return i("span",{className:Hxe.markup},i("code",{className:"inline"},e))}var Hxe,cd=h(()=>{"use strict";d();se();T();Hxe=Re("markup","codeContainer")});function jxe({setFind:e,setParsedFind:t,setMatch:n,setReplacement:o}){let[r,a]=D(""),[s,l]=D(""),c=Te(null);function u(){if(r===""){l(""),e(""),t(""),n(""),o("");return}try{let{find:p,replacement:m}=(0,eval)(`([${r}][0])`);if(!p)throw new Error("No 'find' field");if(!m)throw new Error("No 'replacement' field");if(m instanceof Array){if(m.length===0)throw new Error("Invalid replacement");m=m[0]}if(!m.match)throw new Error("No 'replacement.match' field");if(m.replace==null)throw new Error("No 'replacement.replace' field");e(p instanceof RegExp?`/${p.source}/`:p),t(p),n(m.match instanceof RegExp?m.match.source:m.match),o(m.replace),l("")}catch(p){l(p.message)}}return j(()=>{let{current:p}=c;p&&(p.style.height="auto",p.style.height=`${p.scrollHeight}px`)},[r]),i(f,null,i(Za,{inputRef:c,value:r,onChange:a,onBlur:u}),s!==""&&i(U,{style:{color:"var(--text-feedback-critical)"}},s))}var qxe=h(()=>{"use strict";d();Ze();T()});var of=fo(nK=>{"use strict";d();Object.defineProperty(nK,"__esModule",{value:!0});var tK=class{diff(t,n,o={}){let r;typeof o=="function"?(r=o,o={}):"callback"in o&&(r=o.callback);let a=this.castInput(t,o),s=this.castInput(n,o),l=this.removeEmpty(this.tokenize(a,o)),c=this.removeEmpty(this.tokenize(s,o));return this.diffWithOptionsObj(l,c,o,r)}diffWithOptionsObj(t,n,o,r){var a;let s=k=>{if(k=this.postProcess(k,o),r){setTimeout(function(){r(k)},0);return}else return k},l=n.length,c=t.length,u=1,p=l+c;o.maxEditLength!=null&&(p=Math.min(p,o.maxEditLength));let m=(a=o.timeout)!==null&&a!==void 0?a:1/0,g=Date.now()+m,x=[{oldPos:-1,lastComponent:void 0}],y=this.extractCommon(x[0],n,t,0,o);if(x[0].oldPos+1>=c&&y+1>=l)return s(this.buildValues(x[0].lastComponent,n,t));let v=-1/0,b=1/0,S=()=>{for(let k=Math.max(v,-u);k<=Math.min(b,u);k+=2){let I,E=x[k-1],N=x[k+1];E&&(x[k-1]=void 0);let L=!1;if(N){let Z=N.oldPos-k;L=N&&0<=Z&&Z<l}let $=E&&E.oldPos+1<c;if(!L&&!$){x[k]=void 0;continue}if(!$||L&&E.oldPos<N.oldPos?I=this.addToPath(N,!0,!1,0,o):I=this.addToPath(E,!1,!0,1,o),y=this.extractCommon(I,n,t,k,o),I.oldPos+1>=c&&y+1>=l)return s(this.buildValues(I.lastComponent,n,t))||!0;x[k]=I,I.oldPos+1>=c&&(b=Math.min(b,k-1)),y+1>=l&&(v=Math.max(v,k+1))}u++};if(r)(function k(){setTimeout(function(){if(u>p||Date.now()>g)return r(void 0);S()||k()},0)})();else for(;u<=p&&Date.now()<=g;){let k=S();if(k)return k}}addToPath(t,n,o,r,a){let s=t.lastComponent;return s&&!a.oneChangePerToken&&s.added===n&&s.removed===o?{oldPos:t.oldPos+r,lastComponent:{count:s.count+1,added:n,removed:o,previousComponent:s.previousComponent}}:{oldPos:t.oldPos+r,lastComponent:{count:1,added:n,removed:o,previousComponent:s}}}extractCommon(t,n,o,r,a){let s=n.length,l=o.length,c=t.oldPos,u=c-r,p=0;for(;u+1<s&&c+1<l&&this.equals(o[c+1],n[u+1],a);)u++,c++,p++,a.oneChangePerToken&&(t.lastComponent={count:1,previousComponent:t.lastComponent,added:!1,removed:!1});return p&&!a.oneChangePerToken&&(t.lastComponent={count:p,previousComponent:t.lastComponent,added:!1,removed:!1}),t.oldPos=c,u}equals(t,n,o){return o.comparator?o.comparator(t,n):t===n||!!o.ignoreCase&&t.toLowerCase()===n.toLowerCase()}removeEmpty(t){let n=[];for(let o=0;o<t.length;o++)t[o]&&n.push(t[o]);return n}castInput(t,n){return t}tokenize(t,n){return Array.from(t)}join(t){return t.join("")}postProcess(t,n){return t}get useLongestToken(){return!1}buildValues(t,n,o){let r=[],a;for(;t;)r.push(t),a=t.previousComponent,delete t.previousComponent,t=a;r.reverse();let s=r.length,l=0,c=0,u=0;for(;l<s;l++){let p=r[l];if(p.removed)p.value=this.join(o.slice(u,u+p.count)),u+=p.count;else{if(!p.added&&this.useLongestToken){let m=n.slice(c,c+p.count);m=m.map(function(g,x){let y=o[u+x];return y.length>g.length?y:g}),p.value=this.join(m)}else p.value=this.join(n.slice(c,c+p.count));c+=p.count,p.added||(u+=p.count)}}return r}};nK.default=tK});var Wxe=fo(n0=>{"use strict";d();var Bst=n0&&n0.__importDefault||function(e){return e&&e.__esModule?e:{default:e}};Object.defineProperty(n0,"__esModule",{value:!0});n0.characterDiff=void 0;n0.diffChars=Lst;var Rst=Bst(of()),oK=class extends Rst.default{};n0.characterDiff=new oK;function Lst(e,t,n){return n0.characterDiff.diff(e,t,n)}});var iK=fo(ml=>{"use strict";d();Object.defineProperty(ml,"__esModule",{value:!0});ml.longestCommonPrefix=Ost;ml.longestCommonSuffix=_st;ml.replacePrefix=Kxe;ml.replaceSuffix=Qxe;ml.removePrefix=Fst;ml.removeSuffix=Ust;ml.maximumOverlap=zst;ml.hasOnlyWinLineEndings=Gst;ml.hasOnlyUnixLineEndings=Hst;ml.segment=Zxe;ml.trailingWs=Yxe;ml.leadingWs=Jxe;ml.leadingAndTrailingWs=rK;function Ost(e,t){let n;for(n=0;n<e.length&&n<t.length;n++)if(e[n]!=t[n])return e.slice(0,n);return e.slice(0,n)}function _st(e,t){let n;if(!e||!t||e[e.length-1]!=t[t.length-1])return"";for(n=0;n<e.length&&n<t.length;n++)if(e[e.length-(n+1)]!=t[t.length-(n+1)])return e.slice(-n);return e.slice(-n)}function Kxe(e,t,n){if(e.slice(0,t.length)!=t)throw Error(`string ${JSON.stringify(e)} doesn't start with prefix ${JSON.stringify(t)}; this is a bug`);return n+e.slice(t.length)}function Qxe(e,t,n){if(!t)return e+n;if(e.slice(-t.length)!=t)throw Error(`string ${JSON.stringify(e)} doesn't end with suffix ${JSON.stringify(t)}; this is a bug`);return e.slice(0,-t.length)+n}function Fst(e,t){return Kxe(e,t,"")}function Ust(e,t){return Qxe(e,t,"")}function zst(e,t){return t.slice(0,$st(e,t))}function $st(e,t){let n=0;e.length>t.length&&(n=e.length-t.length);let o=t.length;e.length<t.length&&(o=e.length);let r=Array(o),a=0;r[0]=0;for(let s=1;s<o;s++){for(t[s]==t[a]?r[s]=r[a]:r[s]=a;a>0&&t[s]!=t[a];)a=r[a];t[s]==t[a]&&a++}a=0;for(let s=n;s<e.length;s++){for(;a>0&&e[s]!=t[a];)a=r[a];e[s]==t[a]&&a++}return a}function Gst(e){return e.includes(`\r
 `)&&!e.startsWith(`
 `)&&!e.match(/[^\r]\n/)}function Hst(e){return!e.includes(`\r
@@ -6247,7 +9828,7 @@ _NXfoot("Changelog synchronisé depuis le dépôt GitHub")));
     height: calc(1rem + 4px);
     max-height: calc(1rem + 4px)
 }
-`,classNames:{},dom:null});Wye="src/plugins/_api/messageDecorations/style.css"});var QT,Qye=h(()=>{"use strict";d();O();R();Kye();QT=A({name:"MessageDecorationsAPI",description:"API to add decorations to messages",authors:[w.TheSun],managedStyle:Wye,patches:[{find:"#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",replacement:{match:/#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,replace:"$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"}}]})});var ZT,Zye=h(()=>{"use strict";d();O();R();ZT=A({name:"MessageEventsAPI",description:"Api required by anything using message events.",authors:[w.Arjix,w.hunt,w.Ven],patches:[{find:"#{intl::EDIT_TEXTAREA_HELP}",replacement:{match:/(?<=,channel:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,replace:(e,t)=>`async ${e}if(await Vencord.Api.MessageEvents._handlePreEdit(${t}))return Promise.resolve({shouldClear:false,shouldRefocus:true});`}},{find:".handleSendMessage,onResize:",replacement:{match:/let (\i)=\i\.\i\.parse\((\i),.+?\.getSendMessageOptions\(\{.+?\}\)?;(?=.+?(\i)\.flags=)(?<=\)\(({.+?})\)\.then.+?)/,replace:(e,t,n,o,r)=>e+`if(await Vencord.Api.MessageEvents._handlePreSend(${n}.id,${t},${r},${o}))return{shouldClear:false,shouldRefocus:true};`}},{find:'("interactionUsernameProfile',replacement:{match:/let\{id:\i}=(\i),{id:\i}=(\i);return \i\.useCallback\((\i)=>\{/,replace:(e,t,n,o)=>`const vcMsg=${t},vcChan=${n};${e}Vencord.Api.MessageEvents._handleClick(vcMsg,vcChan,${o});`}}]})});var YT,Yye=h(()=>{"use strict";d();O();R();YT=A({name:"MessagePopoverAPI",description:"API to add buttons to message popovers.",authors:[w.KingFish,w.Ven,w.Nuckyz],patches:[{find:"#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",replacement:{match:/(?<=\]\}\)),(.{0,40}togglePopout:.+?\}\))\]\}\):null,(?<=\((\i\.\i),\{label:.+?:null,(\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,replace:(e,t,n,o,r)=>`]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${n},${r}),${o}?${t}:null,`}}]})});var JT,Jye=h(()=>{"use strict";d();O();R();JT=A({name:"MessageUpdaterAPI",description:"API for updating and re-rendering messages.",authors:[w.Nuckyz],patches:[{find:"}renderStickersAccessories(",replacement:{match:/(?<=this.props,\i,\[)"message",/,replace:""}}]})});var XT,Xye=h(()=>{"use strict";d();O();R();XT=A({name:"NicknameIconsAPI",description:"API to add icons to the nickname, in profiles",authors:[w.Nuckyz],patches:[{find:"#{intl::USER_PROFILE_PRONOUNS}",replacement:[{match:/(?<=children:\i\}\):\i,)null!=\i/,replace:"($&||!!Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"},{match:/(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)(?=\}\)\])/,replace:"children:[...Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id}),$1]"}]}]})});var VT,Vye=h(()=>{"use strict";d();O();R();VT=A({name:"NoticesAPI",description:"Fixes notices being automatically dismissed",authors:[w.Ven],required:!0,patches:[{find:'"NoticeStore"',replacement:[{match:/(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,replace:"if(Vencord.Api.Notices.currentNotice)return false;$&"},{match:/(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,replace:(e,t)=>`if(${t}?.id=="EquicordNotice")return(${t}=null,Vencord.Api.Notices.nextNotice(),true);${e}`}]}]})});var e9,eve=h(()=>{"use strict";d();O();R();e9=A({name:"ServerListAPI",authors:[w.kemo],description:"Api required for plugins that modify the server list",patches:[{find:"#{intl::DISCODO_DISABLED}",replacement:{match:/(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:"friends-list".+?}\))(?=}function)/,replace:"[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"}},{find:".setGuildsTree(",replacement:[{match:/(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,replace:"Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"},{match:/lastTargetNode.{0,25}\?null:\i,/,replace:"$&...Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below),"}]}]})});var t9,tve=h(()=>{"use strict";d();O();R();t9=A({name:"UserSettingsAPI",description:"Patches Discord's UserSettings to expose their group and name.",authors:[w.Nuckyz],patches:[{find:",updateSetting:",replacement:[{match:/\.updateAsync\(.+?(?=,useSetting:)/,replace:"$&,userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1]"},{match:/updateSetting:.{0,100}SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"},{match:/updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"}]}]})});var n9,nve=h(()=>{"use strict";d();O();R();T();n9=A({name:"ConcatenatedComponentExtractor",description:"Extract components that have been concatenated by the bundler",authors:[w.sadan],required:!0,patches:[{find:"#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}),focusProps:",replacement:{match:/(?=function (\i)\(\i\)\{let\{onChange:\i,onClose:\i,[^}]+?showEyeDropper:)/,replace:"$self.setColorPicker($1);"}},{find:/="ltr",orientation:\i="vertical"[^}]+?customTheme:/,replacement:{match:/(?=function (\i)\(\i,\i,\i\)\{.{0,20}?return \i\.forwardRef\(function\(\i,\i\)\{let\{[^}]+?="ltr",orientation:)/,replace:"$self.setCreateScroller($1);"}}],setCreateScroller:qH,setColorPicker:jH})});var ove,o9,rve=h(()=>{"use strict";d();q();O();Xe();R();ove=M({disableAnalytics:{type:3,description:"Disable Discord's tracking (analytics/'science')",default:!0,restartNeeded:!0}}),o9=A({name:"NoTrack",description:"Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",authors:[w.Cyn,w.Ven,w.Nuckyz,w.Arrow],required:!0,settings:ove,patches:[{find:"AnalyticsActionHandlers.handle",predicate:()=>ove.store.disableAnalytics,replacement:{match:/\(0,\i\.analyticsTrackingStoreMaker\)/,replace:"(()=>{})"}},{find:".METRICS_V2",replacement:[{match:/this\._intervalId=/,replace:"this._intervalId=void 0&&"},{match:/(?:increment|distribution)\(\i(?:,\i)?\){/g,replace:"$&return;"}]},{find:".BetterDiscord||null!=",replacement:{match:/(?=let \i=window;)/,replace:"return false;"}}],flux:{TRACK(e){e?.resolve?.()}},startAt:"Init",start(){Object.defineProperty(Function.prototype,"d",{configurable:!0,set(e){Object.defineProperty(this,"d",{value:e,configurable:!0,enumerable:!0,writable:!0});let{stack:t}=new Error;if(this.c!=null||!t?.includes("http")||!String(this).includes("exports:{}"))return;let n=t.match(/http.+?(?=:\d+?:\d+?$)/m)?.[0];if(!n)return;let o=new XMLHttpRequest;if(o.open("GET",n,!1),o.send(),!!o.responseText.includes(".DiscordSentry="))throw new ce("NoTrack","#8caaee").info("Disabling Sentry by erroring its WebpackInstance"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry"),new Error("Sentry successfully disabled")}}),Object.defineProperty(window,"DiscordSentry",{configurable:!0,set(){new ce("NoTrack","#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry")}})}})});var Jv,KK,li,lf=h(()=>{"use strict";d();q();bt();Da();Gv();O();Zl();R();se();Jv={SECTION:1,SIDEBAR_ITEM:2,PANEL:3,CATEGORY:5,CUSTOM:19};uo(["SECTION","SIDEBAR_ITEM","PANEL","CUSTOM"],e=>Jv=e);KK=M({settingsLocation:{type:4,description:"Where to put the Nexium Client settings section",options:[{label:"At the very top",value:"top"},{label:"Above the Nitro section",value:"aboveNitro",default:!0},{label:"Below the Nitro section",value:"belowNitro"},{label:"Above Activity Settings",value:"aboveActivity"},{label:"Below Activity Settings",value:"belowActivity"},{label:"At the very bottom",value:"bottom"}]},includeVencordInfoWhenCopying:{type:3,description:"Also copy Nexium info (Nexium, Electron, Chromium) when clicking the version info in the bottom left area of the Settings page",default:!0}}),li=A({name:"Settings",description:"Adds Settings UI and debug info",authors:[w.Ven,w.Megu],required:!0,settings:KK,patches:[{find:"#{intl::COPY_VERSION}",replacement:[{match:/\.RELEASE_CHANNEL/,replace:"$&.replace(/^./, c => c.toUpperCase())"},{match:/"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,replace:(e,t,n,o,r)=>(r=r.replace(/children:\[.+\]/,""),`${e},$self.makeInfoElements(${o},${r}).map(e=>${n}e})),`)},{match:/copyValue:\i\.join\(" "\)/g,replace:"$& + $self.getInfoString()"}]},{find:".buildLayout().map",replacement:{match:/(\i)\.buildLayout\(\)(?=\.map)/,replace:"$self.buildLayout($1)"}}],buildEntry(e){let{key:t,title:n,panelTitle:o=n,Component:r,Icon:a}=e,s={key:t+"_panel",type:Jv.PANEL,useTitle:()=>o,buildLayout:()=>[{type:Jv.CATEGORY,key:t+"_category",buildLayout:()=>[{type:Jv.CUSTOM,key:t+"_custom",Component:r,useSearchTerms:()=>[n]}]}]};return{key:t,type:Jv.SIDEBAR_ITEM,useTitle:()=>n,icon:()=>i(a,{width:20,height:20}),buildLayout:()=>[s]}},buildLayout(e){let t=e.buildLayout();if(e.key!=="$Root"||!Array.isArray(t)||t.some(u=>u?.key==="equicord_section"))return t;let{buildEntry:n}=this,o=[n({key:"equicord_main",title:"Nexium Client",panelTitle:"Nexium Client Settings",Component:zT,Icon:rp}),n({key:"equicord_plugins",title:"Plugins",Component:Gx,Icon:rH}),n({key:"equicord_themes",title:"Themes",Component:_NXthemeWrap(Mx),Icon:Mm}),n({key:"equicord_updater",title:"Mise à jour",panelTitle:"Nexium — Mise à jour",Component:_NXsafe(NexiumUpdateComp,"Mise à jour"),Icon:NexiumUpdateIcon}),n({key:"equicord_changelog",title:"Changelog",Component:ST,Icon:j5}),n({key:"equicord_team",title:"Team",panelTitle:"Nexium — Team",Component:_NXsafe(NexiumTeamComp,"Team"),Icon:NexiumTeamIcon}),n({key:"equicord_sponsor",title:"Sponsor",panelTitle:"Nexium — Sponsor",Component:_NXsafe(NexiumSponsorComp,"Sponsor"),Icon:NexiumSponsorIcon}),n({key:"equicord_music",title:"Nexium Music",panelTitle:"Nexium Music",Component:_NXsafe(NexiumMusicComp,"Nexium Music"),Icon:NexiumMusicIcon}),n({key:"equicord_stats",title:"Nexium Stats",panelTitle:"Nexium Stats",Component:_NXsafe(NexiumStatsComp,"Nexium Stats"),Icon:NexiumStatsIcon}),n({key:"equicord_privacy",title:"Nexium Privacy",panelTitle:"Nexium Privacy",Component:_NXsafe(NexiumPrivacyComp,"Nexium Privacy"),Icon:NexiumPrivacyIcon}),n({key:"equicord_protect",title:"Nexium Protect",panelTitle:"Nexium Protect",Component:_NXsafe(NexiumProtectComp,"Nexium Protect"),Icon:NexiumProtectIcon}),n({key:"equicord_auto",title:"Nexium Auto",panelTitle:"Nexium Auto",Component:_NXsafe(NexiumAutoComp,"Nexium Auto"),Icon:NexiumAutoIcon}),n({key:"equicord_network",title:"Nexium Réseau",panelTitle:"Nexium Réseau",Component:_NXsafe(NexiumNetworkComp,"Nexium Réseau"),Icon:NexiumNetworkIcon}),n({key:"equicord_data",title:"Nexium Données",panelTitle:"Nexium Données",Component:_NXsafe(NexiumDataComp,"Nexium Données"),Icon:NexiumDataIcon}),n({key:"equicord_backup_restore",title:"Backup & Restore",Component:MT,Icon:iH}),VA&&n({key:"equicord_patch_helper",title:"Patch Helper",Component:VA,Icon:aH}),...this.customEntries.map(n)].filter(fl),r={key:"equicord_section",type:Jv.SECTION,useTitle:()=>"Nexium Client Settings",buildLayout:()=>o},{settingsLocation:a}=KK.store,s={top:"user_section",aboveNitro:"billing_section",belowNitro:"billing_section",aboveActivity:"activity_section",belowActivity:"activity_section",bottom:"utility_section"},l=s[a]??s.top,c=t.findIndex(u=>typeof u?.key=="string"&&u.key===l);return c===-1?c=2:a.startsWith("below")&&(c+=1),t.splice(c,0,r),t},customSections:[],customEntries:[],get electronVersion(){return VencordNative.native.getVersions().electron??window.legcord?.electron??null},get chromiumVersion(){try{return VencordNative.native.getVersions().chrome??navigator.userAgentData?.brands?.find(e=>e.brand==="Chromium"||e.brand==="Google Chrome")?.version??null}catch{return null}},getVersionInfo(e=!0){let t="";return e&&t?` (${t})`:t},getInfoRows(){let{electronVersion:e,chromiumVersion:t,getVersionInfo:n}=this,o=[`Nexium Client ${t0}${n()}`];return e&&o.push(`Electron ${e}`),t&&o.push(`Chromium ${t}`),o},getInfoString(){return KK.store.includeVencordInfoWhenCopying?`
+`,classNames:{},dom:null});Wye="src/plugins/_api/messageDecorations/style.css"});var QT,Qye=h(()=>{"use strict";d();O();R();Kye();QT=A({name:"MessageDecorationsAPI",description:"API to add decorations to messages",authors:[w.TheSun],managedStyle:Wye,patches:[{find:"#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",replacement:{match:/#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,replace:"$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"}}]})});var ZT,Zye=h(()=>{"use strict";d();O();R();ZT=A({name:"MessageEventsAPI",description:"Api required by anything using message events.",authors:[w.Arjix,w.hunt,w.Ven],patches:[{find:"#{intl::EDIT_TEXTAREA_HELP}",replacement:{match:/(?<=,channel:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,replace:(e,t)=>`async ${e}if(await Vencord.Api.MessageEvents._handlePreEdit(${t}))return Promise.resolve({shouldClear:false,shouldRefocus:true});`}},{find:".handleSendMessage,onResize:",replacement:{match:/let (\i)=\i\.\i\.parse\((\i),.+?\.getSendMessageOptions\(\{.+?\}\)?;(?=.+?(\i)\.flags=)(?<=\)\(({.+?})\)\.then.+?)/,replace:(e,t,n,o,r)=>e+`if(await Vencord.Api.MessageEvents._handlePreSend(${n}.id,${t},${r},${o}))return{shouldClear:false,shouldRefocus:true};`}},{find:'("interactionUsernameProfile',replacement:{match:/let\{id:\i}=(\i),{id:\i}=(\i);return \i\.useCallback\((\i)=>\{/,replace:(e,t,n,o)=>`const vcMsg=${t},vcChan=${n};${e}Vencord.Api.MessageEvents._handleClick(vcMsg,vcChan,${o});`}}]})});var YT,Yye=h(()=>{"use strict";d();O();R();YT=A({name:"MessagePopoverAPI",description:"API to add buttons to message popovers.",authors:[w.KingFish,w.Ven,w.Nuckyz],patches:[{find:"#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",replacement:{match:/(?<=\]\}\)),(.{0,40}togglePopout:.+?\}\))\]\}\):null,(?<=\((\i\.\i),\{label:.+?:null,(\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,replace:(e,t,n,o,r)=>`]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${n},${r}),${o}?${t}:null,`}}]})});var JT,Jye=h(()=>{"use strict";d();O();R();JT=A({name:"MessageUpdaterAPI",description:"API for updating and re-rendering messages.",authors:[w.Nuckyz],patches:[{find:"}renderStickersAccessories(",replacement:{match:/(?<=this.props,\i,\[)"message",/,replace:""}}]})});var XT,Xye=h(()=>{"use strict";d();O();R();XT=A({name:"NicknameIconsAPI",description:"API to add icons to the nickname, in profiles",authors:[w.Nuckyz],patches:[{find:"#{intl::USER_PROFILE_PRONOUNS}",replacement:[{match:/(?<=children:\i\}\):\i,)null!=\i/,replace:"($&||!!Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"},{match:/(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)(?=\}\)\])/,replace:"children:[...Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id}),$1]"}]}]})});var VT,Vye=h(()=>{"use strict";d();O();R();VT=A({name:"NoticesAPI",description:"Fixes notices being automatically dismissed",authors:[w.Ven],required:!0,patches:[{find:'"NoticeStore"',replacement:[{match:/(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,replace:"if(Vencord.Api.Notices.currentNotice)return false;$&"},{match:/(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,replace:(e,t)=>`if(${t}?.id=="EquicordNotice")return(${t}=null,Vencord.Api.Notices.nextNotice(),true);${e}`}]}]})});var e9,eve=h(()=>{"use strict";d();O();R();e9=A({name:"ServerListAPI",authors:[w.kemo],description:"Api required for plugins that modify the server list",patches:[{find:"#{intl::DISCODO_DISABLED}",replacement:{match:/(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:"friends-list".+?}\))(?=}function)/,replace:"[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"}},{find:".setGuildsTree(",replacement:[{match:/(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,replace:"Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"},{match:/lastTargetNode.{0,25}\?null:\i,/,replace:"$&...Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below),"}]}]})});var t9,tve=h(()=>{"use strict";d();O();R();t9=A({name:"UserSettingsAPI",description:"Patches Discord's UserSettings to expose their group and name.",authors:[w.Nuckyz],patches:[{find:",updateSetting:",replacement:[{match:/\.updateAsync\(.+?(?=,useSetting:)/,replace:"$&,userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1]"},{match:/updateSetting:.{0,100}SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"},{match:/updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"}]}]})});var n9,nve=h(()=>{"use strict";d();O();R();T();n9=A({name:"ConcatenatedComponentExtractor",description:"Extract components that have been concatenated by the bundler",authors:[w.sadan],required:!0,patches:[{find:"#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}),focusProps:",replacement:{match:/(?=function (\i)\(\i\)\{let\{onChange:\i,onClose:\i,[^}]+?showEyeDropper:)/,replace:"$self.setColorPicker($1);"}},{find:/="ltr",orientation:\i="vertical"[^}]+?customTheme:/,replacement:{match:/(?=function (\i)\(\i,\i,\i\)\{.{0,20}?return \i\.forwardRef\(function\(\i,\i\)\{let\{[^}]+?="ltr",orientation:)/,replace:"$self.setCreateScroller($1);"}}],setCreateScroller:qH,setColorPicker:jH})});var ove,o9,rve=h(()=>{"use strict";d();q();O();Xe();R();ove=M({disableAnalytics:{type:3,description:"Disable Discord's tracking (analytics/'science')",default:!0,restartNeeded:!0}}),o9=A({name:"NoTrack",description:"Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",authors:[w.Cyn,w.Ven,w.Nuckyz,w.Arrow],required:!0,settings:ove,patches:[{find:"AnalyticsActionHandlers.handle",predicate:()=>ove.store.disableAnalytics,replacement:{match:/\(0,\i\.analyticsTrackingStoreMaker\)/,replace:"(()=>{})"}},{find:".METRICS_V2",replacement:[{match:/this\._intervalId=/,replace:"this._intervalId=void 0&&"},{match:/(?:increment|distribution)\(\i(?:,\i)?\){/g,replace:"$&return;"}]},{find:".BetterDiscord||null!=",replacement:{match:/(?=let \i=window;)/,replace:"return false;"}}],flux:{TRACK(e){e?.resolve?.()}},startAt:"Init",start(){Object.defineProperty(Function.prototype,"d",{configurable:!0,set(e){Object.defineProperty(this,"d",{value:e,configurable:!0,enumerable:!0,writable:!0});let{stack:t}=new Error;if(this.c!=null||!t?.includes("http")||!String(this).includes("exports:{}"))return;let n=t.match(/http.+?(?=:\d+?:\d+?$)/m)?.[0];if(!n)return;let o=new XMLHttpRequest;if(o.open("GET",n,!1),o.send(),!!o.responseText.includes(".DiscordSentry="))throw new ce("NoTrack","#8caaee").info("Disabling Sentry by erroring its WebpackInstance"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry"),new Error("Sentry successfully disabled")}}),Object.defineProperty(window,"DiscordSentry",{configurable:!0,set(){new ce("NoTrack","#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry")}})}})});var Jv,KK,li,lf=h(()=>{"use strict";d();q();bt();Da();Gv();O();Zl();R();se();Jv={SECTION:1,SIDEBAR_ITEM:2,PANEL:3,CATEGORY:5,CUSTOM:19};uo(["SECTION","SIDEBAR_ITEM","PANEL","CUSTOM"],e=>Jv=e);KK=M({settingsLocation:{type:4,description:"Where to put the Nexium Client settings section",options:[{label:"At the very top",value:"top"},{label:"Above the Nitro section",value:"aboveNitro",default:!0},{label:"Below the Nitro section",value:"belowNitro"},{label:"Above Activity Settings",value:"aboveActivity"},{label:"Below Activity Settings",value:"belowActivity"},{label:"At the very bottom",value:"bottom"}]},includeVencordInfoWhenCopying:{type:3,description:"Also copy Nexium info (Nexium, Electron, Chromium) when clicking the version info in the bottom left area of the Settings page",default:!0}}),li=A({name:"Settings",description:"Adds Settings UI and debug info",authors:[w.Ven,w.Megu],required:!0,settings:KK,patches:[{find:"#{intl::COPY_VERSION}",replacement:[{match:/\.RELEASE_CHANNEL/,replace:"$&.replace(/^./, c => c.toUpperCase())"},{match:/"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,replace:(e,t,n,o,r)=>(r=r.replace(/children:\[.+\]/,""),`${e},$self.makeInfoElements(${o},${r}).map(e=>${n}e})),`)},{match:/copyValue:\i\.join\(" "\)/g,replace:"$& + $self.getInfoString()"}]},{find:".buildLayout().map",replacement:{match:/(\i)\.buildLayout\(\)(?=\.map)/,replace:"$self.buildLayout($1)"}}],buildEntry(e){let{key:t,title:n,panelTitle:o=n,Component:r,Icon:a}=e,s={key:t+"_panel",type:Jv.PANEL,useTitle:()=>o,buildLayout:()=>[{type:Jv.CATEGORY,key:t+"_category",buildLayout:()=>[{type:Jv.CUSTOM,key:t+"_custom",Component:r,useSearchTerms:()=>[n]}]}]};return{key:t,type:Jv.SIDEBAR_ITEM,useTitle:()=>n,icon:()=>i(a,{width:20,height:20}),buildLayout:()=>[s]}},buildLayout(e){let t=e.buildLayout();if(e.key!=="$Root"||!Array.isArray(t)||t.some(u=>u?.key==="equicord_section"))return t;let{buildEntry:n}=this,o=[n({key:"equicord_main",title:"Nexium Client",panelTitle:"Nexium Client",Component:_NXsafe(NexiumHomeComp,"Nexium Client"),Icon:rp}),n({key:"equicord_plugins",title:"Plugins",Component:Gx,Icon:rH}),n({key:"equicord_themes",title:"Themes",Component:_NXthemeWrap(Mx),Icon:Mm}),n({key:"equicord_updater",title:"Mise à jour",panelTitle:"Nexium — Mise à jour",Component:_NXsafe(NexiumUpdateComp,"Mise à jour"),Icon:NexiumUpdateIcon}),n({key:"equicord_changelog",title:"Changelog",Component:ST,Icon:j5}),n({key:"equicord_team",title:"Team",panelTitle:"Nexium — Team",Component:_NXsafe(NexiumTeamComp,"Team"),Icon:NexiumTeamIcon}),n({key:"equicord_sponsor",title:"Sponsor",panelTitle:"Nexium — Sponsor",Component:_NXsafe(NexiumSponsorComp,"Sponsor"),Icon:NexiumSponsorIcon}),n({key:"equicord_music",title:"Nexium Music",panelTitle:"Nexium Music",Component:_NXsafe(NexiumMusicComp,"Nexium Music"),Icon:NexiumMusicIcon}),n({key:"equicord_stats",title:"Nexium Stats",panelTitle:"Nexium Stats",Component:_NXsafe(NexiumStatsComp,"Nexium Stats"),Icon:NexiumStatsIcon}),n({key:"equicord_privacy",title:"Nexium Privacy",panelTitle:"Nexium Privacy",Component:_NXsafe(NexiumPrivacyComp,"Nexium Privacy"),Icon:NexiumPrivacyIcon}),n({key:"equicord_protect",title:"Nexium Protect",panelTitle:"Nexium Protect",Component:_NXsafe(NexiumProtectComp,"Nexium Protect"),Icon:NexiumProtectIcon}),n({key:"equicord_auto",title:"Nexium Auto",panelTitle:"Nexium Auto",Component:_NXsafe(NexiumAutoComp,"Nexium Auto"),Icon:NexiumAutoIcon}),n({key:"equicord_network",title:"Nexium Réseau",panelTitle:"Nexium Réseau",Component:_NXsafe(NexiumNetworkComp,"Nexium Réseau"),Icon:NexiumNetworkIcon}),n({key:"equicord_data",title:"Nexium Données",panelTitle:"Nexium Données",Component:_NXsafe(NexiumDataComp,"Nexium Données"),Icon:NexiumDataIcon}),n({key:"equicord_backup_restore",title:"Backup & Restore",Component:MT,Icon:iH}),VA&&n({key:"equicord_patch_helper",title:"Patch Helper",Component:VA,Icon:aH}),...this.customEntries.map(n)].filter(fl),r={key:"equicord_section",type:Jv.SECTION,useTitle:()=>"Nexium Client Settings",buildLayout:()=>o},{settingsLocation:a}=KK.store,s={top:"user_section",aboveNitro:"billing_section",belowNitro:"billing_section",aboveActivity:"activity_section",belowActivity:"activity_section",bottom:"utility_section"},l=s[a]??s.top,c=t.findIndex(u=>typeof u?.key=="string"&&u.key===l);return c===-1?c=2:a.startsWith("below")&&(c+=1),t.splice(c,0,r),t},customSections:[],customEntries:[],get electronVersion(){return VencordNative.native.getVersions().electron??window.legcord?.electron??null},get chromiumVersion(){try{return VencordNative.native.getVersions().chrome??navigator.userAgentData?.brands?.find(e=>e.brand==="Chromium"||e.brand==="Google Chrome")?.version??null}catch{return null}},getVersionInfo(e=!0){let t="";return e&&t?` (${t})`:t},getInfoRows(){let{electronVersion:e,chromiumVersion:t,getVersionInfo:n}=this,o=[`Nexium Client ${t0}${n()}`];return e&&o.push(`Electron ${e}`),t&&o.push(`Chromium ${t}`),o},getInfoString(){return KK.store.includeVencordInfoWhenCopying?`
 `+this.getInfoRows().join(`
 `):""},makeInfoElements(e,t){return this.getInfoRows().map((n,o)=>i(e,{key:o,...t},n))}})});function Hct(e){C.show({message:e,type:C.Type.FAILURE,id:C.genId(),options:{position:C.Position.BOTTOM}})}function jct(){return new Promise(e=>{Ln.show({title:"Restart Required",body:i(f,null,i("p",{style:{textAlign:"center"}},"Some plugins require a restart to fully disable."),i("p",{style:{textAlign:"center"}},"Would you like to restart now?")),confirmText:"Restart Now",cancelText:"Later",onConfirm:()=>e(!0),onCancel:()=>e(!1)})})}async function _i(e){let t=!1;function n(){t=!0}async function o(u,p){return t?await jct()?(u.enabled=!p,location.reload(),!0):!1:!0}let r=Ge[e],a=Me.plugins[r.name],l=a.enabled??!1;if(!l){let{restartNeeded:u,failures:p}=Nv(r);if(p.length)return console.error(`Failed to start dependencies for ${r.name}: ${p.join(", ")}`),Ma("Failed to start dependencies: "+p.join(", "),"Close",()=>null),!1;if(u)return a.enabled=!0,n(),await o(a,l)}if(r.patches?.length)return n(),await o(a,l);if(l&&!r.started)return a.enabled=!l,await o(a,l);if(!(l?Qm(r):Km(r))){a.enabled=!1;let u=`Error while ${l?"stopping":"starting"} plugin ${r.name}`;return console.error(u),Hct(u),!1}return a.enabled=!l,await o(a,l)}function qct(e){let t=parseInt(e.split(".")[2]);return t>=22e3?"Windows 11":t>=10240?"Windows 10":t>=9200?"Windows 8.1":t>=7600?"Windows 7":`Windows (${e})`}function Wct(e){let t=parseInt(e.split(".")[0]);return t===25?"MacOS 26 (Tahoe)":t===24?"MacOS 15 (Sequoia)":t===23?"MacOS 14 (Sonoma)":t===22?"MacOS 13 (Ventura)":t===21?"MacOS 12 (Monterey)":t===20?"MacOS 11 (Big Sur)":t===19?"MacOS 10.15 (Catalina)":`MacOS (${e})`}function QK(){return typeof DiscordNative>"u"?navigator.platform:DiscordNative.process.platform==="win32"?`${qct(DiscordNative.os.release)}`:DiscordNative.process.platform==="darwin"?`${Wct(DiscordNative.os.release)} (${DiscordNative.process.arch==="arm64"?"Apple Silicon":"Intel Silicon"})`:DiscordNative.process.platform==="linux"?`${navigator.platform} (${DiscordNative.os.release})`:DiscordNative.process.platform}var md=h(()=>{"use strict";d();Vg();Qt();q();T()});var ZK,l0,YK=h(()=>{"use strict";d();Vg();q();O();R();T();ZK=M({idleTimeout:{description:"Minutes before Discord goes idle (0 to disable auto-idle)",type:5,markers:cn(0,60,5),default:10,stickToMarkers:!1,restartNeeded:!0},remainInIdle:{description:"When you come back to Discord, remain idle until you confirm you want to go online",type:3,default:!0}}),l0=A({name:"CustomIdle",description:"Allows you to set the time before Discord goes idle (or disable auto-idle)",tags:["Activity","Customisation"],authors:[w.newwares],settings:ZK,patches:[{find:'type:"IDLE",idle:',replacement:[{match:/(?<=Date\.now\(\)-\i>)\i\.\i\|\|/,replace:"$self.getIdleTimeout()||"},{match:/Math\.min\((\i\*\i\.\i\.\i\.SECOND),\i\.\i\)/,replace:"$1"},{match:/\i\.\i\.dispatch\({type:"IDLE",idle:!1}\)/,replace:"$self.handleOnline()"}]}],handleOnline(){if(!ZK.store.remainInIdle){G.dispatch({type:"IDLE",idle:!1});return}let e="Welcome back! Click the button to go online. Click the X to stay idle until reload.";Ox?.[1]===e||qA.some(([,t])=>t===e)||Ma(e,"Exit idle",()=>{ad(),G.dispatch({type:"IDLE",idle:!1})})},getIdleTimeout(){let{idleTimeout:e}=ZK.store;return e===0?1/0:e*6e4}})});async function ive(){let e=await ql();return e&&(await Ym(),ii()),e}function XK(){return{name:"Discord Desktop",version:DiscordNative.app.getVersion()}}async function ave(){let{RELEASE_CHANNEL:e}=window.GLOBAL_ENV,t=XK(),n=`${t.name}`;n+=`${t.version?` v${t.version}`:""}`,n+=`${t.info?` \u2022 ${t.info}`:""}`,n+=`${t.shortHash?` \u2022 [${t.shortHash}](<https://github.com/Omega-devj/nexium-client/commit/${t.hash}>)`:""}`;let o=null,r=o?.spoofed?`${QK()} (spoofed from ${o.originalPlatform})`:QK(),a={"Nexium Client":`v1.14.13.1 \u2022 [${t0}](<https://github.com/Omega-devj/nexium-client/commit/${Pa}>)${li.getVersionInfo()} - ${Intl.DateTimeFormat("en-US",{dateStyle:"medium"}).format(1780518166381)}`,Client:`${e} ~ ${n}`,Platform:r};a["Last Crash Reason"]=(await TA(()=>DiscordNative.processUtils.getLastCrash(),void 0))?.rendererCrashReason??"N/A";let s=(["NoRPC","NoProfileThemes","NoMosaic","NoRoleHeaders","NoSystemBadge","AlwaysAnimate","ClientTheme","SoundTroll","Ingtoninator","NeverPausePreviews","IdleAutoRestart"].filter(Be)??[]).sort();Be(l0.name)&&l0.settings.store.idleTimeout===0&&s.push(l0.name);let c={"Activity Sharing Disabled":TA(()=>!Yct.getSetting(),!1),"Link Embeds Disabled":TA(()=>!Jct.getSetting(),!1),"Nexium Client DevBuild":!0,"Nexium Desktop DevBuild":!1,"Platform Spoofed":o?.spoofed??!1,"Has UserPlugins":Object.values(la).some(p=>p.userPlugin),">2 Weeks Outdated":1780518166381<Date.now()-12096e5,[`Potentially Problematic Plugins: ${s.join(", ")}
 -# Note: These plugins might not be the cause of your problem. They are simply plugins that cause common issues.`]:s.length},u=`>>> ${Object.entries(a).map(([p,m])=>`**${p}**: ${m}`).join(`
