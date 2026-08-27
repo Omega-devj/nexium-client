@@ -1,5 +1,37 @@
 # Nexium Client — Notes de version
 
+## v151 — Correctifs de la NEW Gen
+
+### Deux bugs bloquants
+
+- Envoyer un message pouvait figer la barre de saisie. La garde avant-envoi rendait une fausse
+  reponse d API : Discord restait en suspens et il fallait relancer le client
+- Elle se declenchait en plus pour rien : un identifiant Discord etait pris pour un numero de
+  telephone, et seize chiffres consecutifs pour une carte bancaire
+- Cliquer une tuile de la page d accueil menait a un ecran gris. La navigation appelait le premier
+  module venu exportant une fonction nommee open, au lieu du routeur de reglages
+
+### Ce qui a ete resserre
+
+- Le telephone exige desormais une vraie forme, la carte exactement seize chiffres non colles a
+  d autres, l IBAN au moins dix chiffres
+- Une requete Discord dont l adresse contenait sentry.io n importe ou etait prise pour de la
+  telemetrie et bloquee : la reconnaissance se fait maintenant sur l hote
+- La modale d avertissement repond sur tous les chemins, meme quand elle ne peut pas s afficher
+- Un filet d une minute laisse partir le message plutot que de bloquer la saisie
+
+### Confort
+
+- Les notifications de latence reseau sont retirees : elles interrompaient sans rien apporter.
+  Un compteur de requetes lentes les remplace dans la page Reseau
+- Zeo et le bloc Support quittent la page Team
+
+### Menage
+
+- Un echantillonneur de performance jamais branche a ete retire
+
+---
+
 ## v150 — Nexium NEW Gen
 
 ### Onze protections qui n existaient pas

@@ -86,33 +86,6 @@ _NXPERF.repos=_NXPERF.repos||function(fn){try{
 if(typeof requestIdleCallback==="function"){requestIdleCallback(fn,{timeout:4000});return;}
 setTimeout(fn,120);}catch(_){try{fn();}catch(__){}}};
 if(!_NXPERF.boot){try{_NXPERF.boot=true;
-_NXPERF.n=0;_NXPERF.us=0;_NXPERF.pics=0;_NXPERF.parts={};
-_NXPERF.ECH=31;
-_NXPERF.now=(function(){
-try{if(typeof performance!=="undefined"&&performance.now)return function(){return performance.now();};}catch(_){}
-return function(){return Date.now();};})();
-_NXPERF.mesure=function(nom,fn){try{
-_NXPERF.n++;
-if((_NXPERF.n&_NXPERF.ECH)!==0)return fn();
-var t0=_NXPERF.now();
-var r=fn();
-var d=(_NXPERF.now()-t0)*1000;
-_NXPERF.us+=d;
-if(d>2000)_NXPERF.pics++;
-var p=_NXPERF.parts[nom]||(_NXPERF.parts[nom]={n:0,us:0});
-p.n++;p.us+=d;
-return r;}catch(e){return fn();}};
-_NXPERF.rapport=function(){try{
-var ech=Math.floor(_NXPERF.n/(_NXPERF.ECH+1))||1;
-var out=[];
-for(var k in _NXPERF.parts){var p=_NXPERF.parts[k];
-out.push({nom:k,moy:p.n?(p.us/p.n):0,n:p.n});}
-out.sort(function(x,y){return y.moy-x.moy;});
-return {appels:_NXPERF.n,echantillons:ech,
-moyenneUs:ech?(_NXPERF.us/ech):0,
-totalMs:_NXPERF.us/1000,
-pics:_NXPERF.pics,parts:out};}catch(_){return {appels:0,echantillons:0,moyenneUs:0,totalMs:0,pics:0,parts:[]};}};
-_NXPERF.reset=function(){try{_NXPERF.n=0;_NXPERF.us=0;_NXPERF.pics=0;_NXPERF.parts={};}catch(_){}};
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXPERF");}catch(_){}}
 }
 var _NXNETX=window._NXNETX||(window._NXNETX={});
@@ -1206,16 +1179,17 @@ _NXV._sInit=true;_NXV.notify();
 }catch(_){}};
 
 _NXV.RXIP=/\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b/;
-_NXV.RXPHONE=/(?:\+\d{1,3}[\s.\-]?)?(?:\(?\d{2,4}\)?[\s.\-]?){3,5}\d{2,4}/;
+_NXV.RXPHONE=/(^|[^\d\w])(?:\+\d{1,3}[ .\-]?\d(?:[ .\-]?\d){6,12}|0[1-9](?:[ .\-]?\d{2}){4})([^\d]|$)/;
 _NXV.RXMAIL=/[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}/i;
 _NXV.RXIBAN=/\b[A-Z]{2}\d{2}[\sA-Z0-9]{10,30}\b/;
 _NXV.RXADDR=/\b\d{1,4}\s+(?:rue|avenue|av\.|boulevard|bd|impasse|chemin|allee|allée|place|route|quai)\s+[a-zà-ÿ]/i;
-_NXV.RXCARD=/\b(?:\d{4}[\s\-]?){3}\d{4}\b/;
+_NXV.RXCARD=/(^|[^\d])((?:\d{4}[ \-]){3}\d{4}|\d{16})([^\d]|$)/;
 _NXV.selfScan=function(txt){try{
 if(!_NXV.cfg.selfGuard)return null;
 var s=String(txt||"");if(s.length<6)return null;
 if(_NXV.RXCARD.test(s))return "un numero de carte bancaire";
-if(_NXV.RXIBAN.test(s))return "un IBAN";
+var mib=s.match(_NXV.RXIBAN);
+if(mib&&String(mib[0]).replace(/\D/g,"").length>=10)return "un IBAN";
 if(_NXV.RXIP.test(s)&&!/\b(?:127\.0\.0\.1|0\.0\.0\.0|192\.168\.|10\.\d|255\.255)/.test(s))return "une adresse IP";
 if(_NXV.RXADDR.test(s))return "une adresse postale";
 if(_NXV.RXMAIL.test(s))return "une adresse e-mail";
@@ -1239,7 +1213,8 @@ row.appendChild(mk("Ne pas envoyer","flex:1;text-align:center;padding:12px;borde
 row.appendChild(mk("Envoyer quand meme","flex:1;text-align:center;padding:12px;border-radius:11px;background:transparent;border:1px solid "+P.line+";color:"+P.sub+";font-size:13px;font-weight:600;cursor:pointer;",function(){close(true);}));
 card.appendChild(row);ov.appendChild(card);
 ov.onclick=function(e){if(e.target===ov)close(false);};
-if(document.body)document.body.appendChild(ov);
+if(!document.body){cb(true);return;}
+document.body.appendChild(ov);
 }catch(_){cb(true);}};
 
 _NXV.RXVERIF=/(verif|verify|verification|captcha|authentif|acces|access|entrer|unlock|debloquer)/i;
@@ -2479,12 +2454,13 @@ _NXP.hourKey=function(){var d=new Date();return d.getFullYear()+"-"+_NXP.pad(d.g
 _NXP.notify=function(){for(var a=0;a<_NXP.listeners.length;a++){try{_NXP.listeners[a]();}catch(_){}}};
 _NXP.tnotify=function(){if(_NXP.nt)return;_NXP.nt=setTimeout(function(){_NXP.nt=null;_NXP.notify();},900);};
 _NXP.pruneHours=function(){try{var ks=Object.keys(_NXP.stats.hours);if(ks.length>72){ks.sort();for(var a=0;a<ks.length-48;a++)delete _NXP.stats.hours[ks[a]];}}catch(_){}};
+_NXP.RXSENTRY=/^(?:https?:)?\/\/(?:[a-z0-9-]+\.)*sentry\.io(?:[\/?#]|$)/i;
 _NXP.RXKIND=/\/(harvest|analytics|errors|error-reporting|crash|quests|outbound-promotions|promotions|science|metrics|track|envelope|experiments|detectable|contacts|friend-suggestions|affinities|scheduled-events|onboarding-responses|country-code|discoverable-guilds|guild-recommendations|member-verification|regions)\b/;
 _NXP.MAPKIND={harvest:"harvest",analytics:"analytics",errors:"errors","error-reporting":"errors",crash:"errors","discoverable-guilds":"recommendations","guild-recommendations":"recommendations","member-verification":"recommendations",regions:"voiceprobe",quests:"promotions","outbound-promotions":"promotions",promotions:"promotions","country-code":"promotions",science:"science",metrics:"science",track:"track",envelope:"sentry",experiments:"experiments",detectable:"detectables",contacts:"contacts","friend-suggestions":"contacts",affinities:"affinities","scheduled-events":"guildevents","onboarding-responses":"guildevents"};
 _NXP.memoKind=null;_NXP.memoN=0;
 _NXP.classify=function(u){try{
 var v=String(u);
-if(v.indexOf("sentry.io")>=0)return "sentry";
+if(_NXP.RXSENTRY.test(v))return "sentry";
 var m=_NXP.RXKIND.exec(v);
 if(!m)return null;
 return _NXP.MAPKIND[m[1]]||null;}catch(_){return null;}};
@@ -2675,7 +2651,6 @@ _NXNET.KEY="nexium_reseau_v1";
 _NXNET.cfg=(function(){var d;try{var raw=_NXDB.get(_NXNET.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}
 if(!d||typeof d!=="object")d={};
 if(typeof d.seuil!=="number"||d.seuil<50)d.seuil=350;
-if(typeof d.alerte!=="boolean")d.alerte=true;
 if(typeof d.historique!=="boolean")d.historique=true;
 if(typeof d.inventaire!=="boolean")d.inventaire=true;
 return d;})();
@@ -2763,12 +2738,9 @@ if(ks.length>200){ks.sort();for(var a=0;a<ks.length-168;a++)delete H[ks[a]];}}
 e.n++;e.sum+=ms;if(ms>e.max)e.max=ms;
 if(ms>=_NXNET.cfg.seuil)e.lent++;
 _NXNET.saveHist();}catch(_){}};
+_NXNET.lents=0;
 _NXNET.alerte=function(ms){try{
-if(!_NXNET.cfg.alerte)return;
-if(ms<_NXNET.cfg.seuil*2)return;
-if(_NXNET._al&&(Date.now()-_NXNET._al)<300000)return;
-_NXNET._al=Date.now();
-if(window._NXPR&&_NXPR.toast)_NXPR.toast("Reseau lent : "+Math.round(ms)+" ms vers Discord.",0);}catch(_){}};
+if(ms>=_NXNET.cfg.seuil)_NXNET.lents++;}catch(_){}};
 _NXNET.coupure=function(){try{
 var ss=_NXNET.samples||[];
 if(ss.length<2)return;
@@ -2840,7 +2812,7 @@ return true;}}catch(_){}
 try{DiscordNative.clipboard.copy(txt);}catch(_){}
 return false;}catch(_){return false;}};
 _NXNET.reset=function(){try{
-_NXNET.samples=[];_NXNET.count=0;
+_NXNET.samples=[];_NXNET.count=0;_NXNET.lents=0;
 _NXNET.hist={h:{},hotes:{},routes:{},coupures:[],depuis:Date.now()};
 _NXNET.saveHistNow();_NXNET.notify();}catch(_){}};
 _NXNET.sample=function(ms,url){try{_NXNET.count++;var v=Math.round(ms);_NXNET.samples.push({t:Date.now(),ms:v});if(_NXNET.samples.length>240)_NXNET.samples.shift();_NXNET.coupure();_NXNET.noteHeure(v);if(url)_NXNET.noteRoute(url,v);_NXNET.alerte(v);_NXNET.tnotify();}catch(_){}};
@@ -3424,8 +3396,7 @@ style:{padding:"10px 16px",borderRadius:"11px",cursor:"pointer",fontFamily:_NXf.
 fontWeight:"700",background:on?P.inset:"transparent",border:"1px solid "+(on?P.txt:P.line),
 color:on?P.txt:P.sub}},v+" ms");}))),{mb:12}),
 _NXcard(i("div",null,_NXch(_T("Comportement")),
-[["alerte",_T("M avertir quand le reseau decroche"),_T("Un message discret quand la latence depasse le double du seuil, au plus une fois par cinq minutes.")],
-["historique",_T("Conserver l historique horaire"),_T("Garde sept jours de latence moyenne pour retrouver les creux.")],
+[["historique",_T("Conserver l historique horaire"),_T("Garde sept jours de latence moyenne pour retrouver les creux.")],
 ["inventaire",_T("Recenser les hotes contactes"),_T("Note chaque serveur joint par le client, sans rien envoyer nulle part.")]].map(function(o,k,arr){
 var on=!!net.cfg[o[0]];
 return i("div",{key:o[0],className:"nx-fx",role:"button","aria-label":o[1],"aria-pressed":on?"true":"false",
@@ -4049,7 +4020,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="150";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="151";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -6120,10 +6091,21 @@ if(_NXV.cfg.selfGuard&&msg&&typeof msg.content==="string"&&!msg.__nxok){
 var what=_NXV.selfScan(msg.content);
 if(what){
 var args=Array.prototype.slice.call(arguments);
-_NXV.confirmSend(what,function(ok){try{
-if(!ok){_NXV.log("envoi","envoi annule : "+what);return;}
-msg.__nxok=true;orig.apply(null,args);}catch(_){}});
-return Promise.resolve({nexium:"pending"});}}
+return new Promise(function(res,rej){
+var repondu=false;
+var fini=function(ok){
+if(repondu)return;
+repondu=true;
+if(!ok){
+try{_NXV.log("envoi","envoi annule : "+what);}catch(_){}
+res({ok:false,status:0,body:null,nexium:"annule"});
+return;}
+try{msg.__nxok=true;
+Promise.resolve(orig.apply(null,args)).then(res,rej);}
+catch(e){rej(e);}};
+try{setTimeout(function(){fini(true);},60000);}catch(_){}
+try{_NXV.confirmSend(what,fini);}catch(_){fini(true);}
+});}}
 }catch(_){}
 return orig.apply(null,arguments);};
 patched.__nx=true;
