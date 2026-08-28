@@ -1,5 +1,33 @@
 # Nexium Client — Notes de version
 
+## v154 — Page de statut et alertes d administration
+
+### Savoir quand quelque chose ne va pas
+
+- Une page de statut publique liste l etat de huit services et l historique des incidents.
+  Une surveillance automatique les interroge toutes les cinq minutes
+- Quand un administrateur ouvre une alerte, un bandeau apparait en haut du client. Il se
+  ferme d un clic et ne revient pas pour la meme alerte
+- Le bandeau renvoie vers la page de statut
+
+### Nexium Admins
+
+- Une page reservee a l equipe, avec une connexion independante de Discord
+- Deux niveaux : le proprietaire peut tout faire, l operateur ouvre et met a jour une alerte
+  mais ne peut ni la supprimer, ni publier en gravite critique, ni toucher aux comptes
+- Chaque ouverture, modification et suppression est inscrite dans un journal d audit
+- Les droits sont verifies par le serveur, jamais par le client : masquer la page ne protege
+  rien puisque le fichier du client est public. Forcer son affichage ne donne qu un ecran de
+  connexion infranchissable
+
+### Sous le capot
+
+- Le jeton de session reste en memoire et n est jamais ecrit sur le disque
+- Les alertes sont lues sans compte, mais la colonne indiquant leur auteur ne l est pas
+- Si le serveur d alertes ne repond pas, la page utilise la derniere copie connue
+
+---
+
 ## v153 — La vraie cause du plantage general
 
 ### Un nom de variable en commun avec Equicord
