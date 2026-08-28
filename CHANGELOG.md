@@ -1,5 +1,43 @@
 # Nexium Client — Notes de version
 
+## v168 — Six niveaux d alerte, une icone, et des boutons qui repondent
+
+### Les boutons de la page Admins ne repondaient plus
+
+- Le panneau d alertes flottait au-dessus de tout, y compris des fenetres de Discord :
+  z-index 2147483000 contre 1002. Il interceptait les clics dans son rectangle
+- Cliquer dessus comptait aussi comme un clic hors de la fenetre de reglages, que Discord
+  refermait aussitot. C etait la meme cause que le menu qui apparaissait puis disparaissait
+- Le panneau et le bandeau d alerte passent sous les fenetres de Discord
+
+### Six niveaux au lieu de quatre
+
+- Alerte de securite, panne critique, incident majeur, incident mineur, maintenance,
+  information. Chacun a sa couleur et sa description
+- Les deux plus lourds sont reserves au proprietaire : un operateur ne peut pas declarer
+  une panne critique ni une alerte de securite a tout le parc
+- Le site les trie du plus grave au moins grave et affiche leur signification
+
+### Le panneau devient permanent
+
+- Une icone dans la barre du haut l ouvre et le referme a tout moment
+- Elle porte le nombre d alertes non lues et n apparait que pour l equipe connectee
+- Cinq actions rapides : actualiser, copier le diagnostic, ouvrir Nexium Admins,
+  ouvrir la page de statut, vider
+
+### La page de statut
+
+- Un bandeau de synthese : services operationnels, disponibilite moyenne sur 90 jours,
+  latence mediane, incidents en cours et resolus
+- La disponibilite sur 90 jours est indiquee pour chaque service
+
+### Menage
+
+- Les alertes et le journal d audit sont repartis de zero
+- Les icones de l accueil et de la page Admins ne sont plus celles d autres pages
+
+---
+
 ## v164 — Des alertes d equipe, dans un panneau
 
 ### Le message d equipe

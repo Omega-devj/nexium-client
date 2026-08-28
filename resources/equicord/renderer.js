@@ -4020,7 +4020,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="164";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="168";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -4211,7 +4211,8 @@ _NXLY.typeLabel=function(t){return t===2?"Écoute":t===1?"Diffuse":t===3?"Regard
 _NXLY.actImgSmall=function(a){try{var as=a&&a.assets;if(as&&as.small_image){var s=as.small_image;if(s.indexOf("mp:external/")===0)return "https://media.discordapp.net/external/"+s.slice(12);if(s.indexOf("http")===0)return s;if(a.application_id)return "https://cdn.discordapp.com/app-assets/"+a.application_id+"/"+s+".png";}}catch(_){}return null;};
 _NXLY.acts=function(){try{var d=_NXLY.data;if(!d)return [];var out=[];if(d.listening_to_spotify&&d.spotify){var sp=d.spotify,ts=(d.activities||[]).filter(function(z){return z.type===2;})[0];var st=ts&&ts.timestamps;out.push({spotify:true,label:"Écoute sur Spotify",name:sp.song,sub:sp.artist,sub2:sp.album,img:sp.album_art_url,imgSmall:null,elapsed:null,start:st&&st.start,end:st&&st.end});}var acts=d.activities||[];for(var a=0;a<acts.length;a++){var x=acts[a];if(x.type===4)continue;if(x.type===2&&x.name==="Spotify"&&d.listening_to_spotify)continue;var tt=x.timestamps||{};out.push({spotify:false,label:_NXLY.typeLabel(x.type)+" "+(x.name||""),name:x.details||x.name||"",sub:x.state||"",sub2:(x.details&&x.name&&x.details!==x.name)?x.name:"",img:_NXLY.actImg(x),imgSmall:_NXLY.actImgSmall(x),elapsed:_NXLY.elapsed(x),start:tt.start,end:tt.end});}return out;}catch(_){return [];}};
 }
-var NexiumAdminIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20,"aria-hidden":"true"},i("path",{d:"M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"}));};
+var NexiumAdminIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20,"aria-hidden":"true"},i("path",{d:"M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"}));};
+var NexiumHomeIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20,"aria-hidden":"true"},i("path",{d:"M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z"}));};
 function NexiumAdminComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 F.useEffect(function(){
@@ -4275,17 +4276,22 @@ i("div",{style:{display:"flex",gap:"9px"}},
 i("div",{style:{flex:1}},champ(compo[0],compo[1],"Composant (client, blocklist...)")),
 i("div",{style:{flex:1}},champ(vers[0],vers[1],"Versions touchees"))),
 i("div",{style:{display:"flex",gap:"6px",marginBottom:"12px",flexWrap:"wrap"}},
-["mineur","majeur","critique","maintenance"].map(function(g){
+_NXSTATUS.NIVEAUX.map(function(nv){
+var g=nv.k;
 var on=grav[0]===g;
-var interdit=(g==="critique"&&!estProp);
+var interdit=!_NXADMIN.peutNiveau(g);
 return i("div",{key:g,className:"nx-fx",role:"button",tabIndex:0,
+title:nv.d+(interdit?" \u2014 r\u00e9serv\u00e9 au propri\u00e9taire":""),
 onClick:function(){if(!interdit)grav[1](g);},
-style:{padding:"7px 13px",borderRadius:"99px",cursor:interdit?"not-allowed":"pointer",
-border:"1px solid "+(on?_NXSTATUS.couleur(g):P.line),
+style:{display:"flex",alignItems:"center",gap:"7px",
+padding:"7px 13px",borderRadius:"99px",cursor:interdit?"not-allowed":"pointer",
+border:"1px solid "+(on?nv.c:P.line),
 background:on?"rgba(255,255,255,.05)":"transparent",
-color:interdit?P.faint:(on?_NXSTATUS.couleur(g):P.sub),
+color:interdit?P.faint:(on?nv.c:P.sub),
 fontSize:"12px",fontWeight:"650",opacity:interdit?.45:1}},
-_NXSTATUS.gravFr(g)+(interdit?" \u00b7 proprietaire":""));})),
+i("span",{style:{width:"7px",height:"7px",borderRadius:"50%",background:interdit?P.faint:nv.c,
+display:"inline-block",flexShrink:0}}),
+nv.n+(interdit?" \u00b7 propri\u00e9taire":""));})),
 i("div",{style:{display:"flex",gap:"9px"}},_NXbtn("Publier l alerte",function(){
 _NXADMIN.ouvrir({titre:titre[0],resume:resume[0],gravite:grav[0],composant:compo[0],versions:vers[0]},function(r){
 if(r&&r.ok){titre[1]("");resume[1]("");vers[1]("");}
@@ -9334,8 +9340,17 @@ _NXSTATUS.PAGE="https://omega-devj.github.io/status-nexium/";
 _NXSTATUS.CHAMPS="id,titre,resume,gravite,etat,composant,versions_touchees,correctif,debut,fin,maj";
 _NXSTATUS.alertes=[];_NXSTATUS.listeners=[];_NXSTATUS.busy=false;_NXSTATUS.err=null;_NXSTATUS.at=0;
 _NXSTATUS.notify=function(){for(var a=0;a<_NXSTATUS.listeners.length;a++){try{_NXSTATUS.listeners[a]();}catch(_){}}};
-_NXSTATUS.gravFr=function(g){return g==="critique"?"Panne critique":(g==="majeur"?"Incident majeur":(g==="maintenance"?"Maintenance":"Incident mineur"));};
-_NXSTATUS.couleur=function(g){return g==="critique"?"#d6484a":(g==="majeur"?"#d9a441":(g==="maintenance"?"#6a8fd6":"#8a8a94"));};
+_NXSTATUS.NIVEAUX=[
+{k:"securite",n:"Alerte de s\u00e9curit\u00e9",c:"#e0426a",p:5,d:"Une faille ou une menace qui vise directement les utilisateurs."},
+{k:"critique",n:"Panne critique",c:"#d6484a",p:4,d:"Le client est inutilisable pour tout le monde."},
+{k:"majeur",n:"Incident majeur",c:"#d9a441",p:3,d:"Une fonction importante ne marche plus."},
+{k:"mineur",n:"Incident mineur",c:"#8a8a94",p:2,d:"Une g\u00eane, sans blocage."},
+{k:"maintenance",n:"Maintenance",c:"#6a8fd6",p:1,d:"Une interruption pr\u00e9vue et annonc\u00e9e."},
+{k:"info",n:"Information",c:"#5fb37a",p:0,d:"Une annonce, sans incident."}];
+_NXSTATUS.niveau=function(g){for(var a=0;a<_NXSTATUS.NIVEAUX.length;a++){if(_NXSTATUS.NIVEAUX[a].k===g)return _NXSTATUS.NIVEAUX[a];}return null;};
+_NXSTATUS.gravFr=function(g){var x=_NXSTATUS.niveau(g);return x?x.n:"Incident";};
+_NXSTATUS.couleur=function(g){var x=_NXSTATUS.niveau(g);return x?x.c:"#8a8a94";};
+_NXSTATUS.poids=function(g){var x=_NXSTATUS.niveau(g);return x?x.p:0;};
 _NXSTATUS.vues=function(){try{var r=_NXDB.get("nexium_alertes_vues");var d=r?JSON.parse(r):null;return (d&&typeof d==="object")?d:{};}catch(_){return {};}};
 _NXSTATUS.marque=function(id){try{var v=_NXSTATUS.vues();v[id]=Date.now();var ks=Object.keys(v);if(ks.length>40){ks.sort(function(x,y){return v[x]-v[y];});for(var a=0;a<ks.length-30;a++)delete v[ks[a]];}_NXDB.set("nexium_alertes_vues",JSON.stringify(v));}catch(_){}};
 _NXSTATUS.charge=function(){try{
@@ -9360,47 +9375,105 @@ if(window._NXP&&_NXP.open){_NXP.open(_NXSTATUS.PAGE);return true;}
 if(typeof VencordNative!=="undefined"&&VencordNative.native&&VencordNative.native.openExternal){VencordNative.native.openExternal(_NXSTATUS.PAGE);return true;}
 }catch(_){}return false;};
 _NXSTATUS.ferme=function(){try{var e=document.getElementById("nx-alerte");if(e&&e.parentNode)e.parentNode.removeChild(e);}catch(_){}};
+_NXSTATUS.JT={
+fond:"var(--bg-surface-overlay,var(--background-floating,#111214))",
+fond2:"var(--bg-surface-raised,var(--background-secondary,#2b2d31))",
+texte:"var(--text-default,var(--text-normal,#dbdee1))",
+doux:"var(--text-muted,#949ba4)",
+bord:"var(--border-normal,rgba(148,155,164,.2))",
+police:"var(--font-primary,'gg sans','Noto Sans',Helvetica,Arial,sans-serif)",
+rayon:"var(--radius-sm,8px)",
+ombre:"var(--elevation-high,0 8px 16px rgba(0,0,0,.24))"};
+_NXSTATUS.styleBandeau=function(){try{
+if(document.getElementById("nx-alerte-style"))return;
+var T=_NXSTATUS.JT;
+var c=document.createElement("style");
+c.id="nx-alerte-style";
+c.textContent=
+"@keyframes nxAlerteEntre{from{opacity:0;transform:translate(-50%,-14px)}to{opacity:1;transform:translate(-50%,0)}}"+
+"#nx-alerte{animation:nxAlerteEntre .28s cubic-bezier(.16,1,.3,1) both;}"+
+"#nx-alerte .nxa-tete{display:flex;align-items:center;gap:8px;margin-bottom:5px;}"+
+"#nx-alerte .nxa-grav{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;}"+
+"#nx-alerte .nxa-compte{font-size:11px;color:"+T.doux+";margin-left:auto;font-variant-numeric:tabular-nums;}"+
+"#nx-alerte .nxa-titre{font-size:15px;font-weight:600;color:"+T.texte+";line-height:1.3;}"+
+"#nx-alerte .nxa-corps{font-size:13.5px;color:"+T.doux+";margin-top:5px;line-height:1.45;}"+
+"#nx-alerte .nxa-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;}"+
+"#nx-alerte .nxa-et{font-size:11px;color:"+T.doux+";border:1px solid "+T.bord+";border-radius:99px;padding:2px 9px;}"+
+"#nx-alerte .nxa-actes{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}"+
+"#nx-alerte .nxa-b{height:30px;padding:0 14px;border-radius:"+T.rayon+";font-size:13px;font-weight:500;"+
+"border:none;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;}"+
+"#nx-alerte .nxa-b1{background:#5865f2;color:#fff;}"+
+"#nx-alerte .nxa-b1:hover{background:#4752c4;}"+
+"#nx-alerte .nxa-b2{background:#4e5058;color:#fff;}"+
+"#nx-alerte .nxa-b2:hover{background:#6d6f78;}"+
+"@media (prefers-reduced-motion: reduce){#nx-alerte{animation:none;}}";
+if(document.head)document.head.appendChild(c);}catch(_){}};
 _NXSTATUS.affiche=function(){try{
 if(!document.body)return;
-var v=_NXSTATUS.vues(),cible=null,a;
-for(a=0;a<_NXSTATUS.alertes.length;a++){if(!v[_NXSTATUS.alertes[a].id]){cible=_NXSTATUS.alertes[a];break;}}
+var v=_NXSTATUS.vues(),restantes=[],a;
+for(a=0;a<_NXSTATUS.alertes.length;a++){if(!v[_NXSTATUS.alertes[a].id])restantes.push(_NXSTATUS.alertes[a]);}
 var vieux=document.getElementById("nx-alerte");
-if(!cible){_NXSTATUS.ferme();return;}
+if(!restantes.length){_NXSTATUS.ferme();return;}
+var cible=restantes[0];
 if(vieux&&vieux.getAttribute("data-id")===String(cible.id))return;
 _NXSTATUS.ferme();
+_NXSTATUS.styleBandeau();
+var T=_NXSTATUS.JT;
 var c=_NXSTATUS.couleur(cible.gravite);
 var box=document.createElement("div");
 box.id="nx-alerte";
 box.setAttribute("data-id",String(cible.id));
-box.style.cssText="position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:2147483000;width:calc(100% - 44px);max-width:560px;box-sizing:border-box;background:rgba(13,13,15,.97);border:1px solid "+c+";border-radius:14px;padding:13px 15px;box-shadow:0 18px 50px rgba(0,0,0,.55);font:13px/1.5 system-ui,-apple-system,sans-serif;color:#ececee;display:flex;gap:12px;align-items:flex-start;pointer-events:auto;";
-var pastille=document.createElement("div");
-pastille.style.cssText="width:9px;height:9px;border-radius:50%;background:"+c+";flex:0 0 auto;margin-top:5px;";
+box.setAttribute("role","status");
+box.style.cssText="position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:1000;"+
+"width:calc(100% - 44px);max-width:580px;box-sizing:border-box;background:"+T.fond+";"+
+"border:1px solid "+T.bord+";border-left:4px solid "+c+";border-radius:"+T.rayon+";"+
+"padding:13px 15px;box-shadow:"+T.ombre+";font-family:"+T.police+";color:"+T.texte+";"+
+"display:flex;gap:12px;align-items:flex-start;pointer-events:auto;";
 var corps=document.createElement("div");
 corps.style.cssText="flex:1;min-width:0;";
-var t1=document.createElement("div");
-t1.style.cssText="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:"+c+";";
-t1.textContent=_NXSTATUS.gravFr(cible.gravite);
+var tete=document.createElement("div");
+tete.className="nxa-tete";
+var g=document.createElement("span");
+g.className="nxa-grav";g.style.color=c;g.textContent=_NXSTATUS.gravFr(cible.gravite);
+tete.appendChild(g);
+if(restantes.length>1){
+var cpt=document.createElement("span");
+cpt.className="nxa-compte";
+cpt.textContent="1 sur "+restantes.length;
+tete.appendChild(cpt);}
+corps.appendChild(tete);
 var t2=document.createElement("div");
-t2.style.cssText="font-weight:650;margin-top:2px;";
-t2.textContent=String(cible.titre||"");
+t2.className="nxa-titre";t2.textContent=String(cible.titre||"");
+corps.appendChild(t2);
 var t3=document.createElement("div");
-t3.style.cssText="color:#9a9aa4;font-size:12.5px;margin-top:4px;";
-t3.textContent=String(cible.resume||"").slice(0,240);
-corps.appendChild(t1);corps.appendChild(t2);corps.appendChild(t3);
-var lien=document.createElement("div");
-lien.style.cssText="margin-top:9px;font-size:12px;color:"+_NXpal.acc+";cursor:pointer;display:inline-block;";
-lien.textContent="Voir la page de statut";
-lien.onclick=function(){_NXSTATUS.ouvrePage();};
-corps.appendChild(lien);
-corps.style.cursor="pointer";
-corps.onclick=function(){_NXSTATUS.ouvrePage();};
+t3.className="nxa-corps";t3.textContent=String(cible.resume||"").slice(0,300);
+corps.appendChild(t3);
+var meta=document.createElement("div");
+meta.className="nxa-meta";
+var etats={enquete:"En cours d\u2019analyse",identifie:"Cause identifi\u00e9e",surveille:"Sous surveillance"};
+if(etats[cible.etat]){var e1=document.createElement("span");e1.className="nxa-et";e1.textContent=etats[cible.etat];meta.appendChild(e1);}
+if(cible.versions_touchees){var e2=document.createElement("span");e2.className="nxa-et";e2.textContent="Versions : "+cible.versions_touchees;meta.appendChild(e2);}
+if(cible.correctif){var e3=document.createElement("span");e3.className="nxa-et";e3.textContent="Corrig\u00e9 en "+cible.correctif;meta.appendChild(e3);}
+if(meta.childNodes.length)corps.appendChild(meta);
+var actes=document.createElement("div");
+actes.className="nxa-actes";
+var b1=document.createElement("button");
+b1.type="button";b1.className="nxa-b nxa-b1";b1.textContent="Voir le statut";
+b1.onclick=function(){_NXSTATUS.ouvrePage();};
+var b2=document.createElement("button");
+b2.type="button";b2.className="nxa-b nxa-b2";
+b2.textContent=restantes.length>1?"Suivante":"J\u2019ai compris";
+b2.onclick=function(){try{_NXSTATUS.marque(cible.id);}catch(_){}_NXSTATUS.ferme();_NXSTATUS.affiche();};
+actes.appendChild(b1);actes.appendChild(b2);
+corps.appendChild(actes);
 var x=document.createElement("div");
 x.setAttribute("role","button");
 x.setAttribute("aria-label","Fermer");
-x.style.cssText="flex:0 0 auto;width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#9a9aa4;cursor:pointer;font-size:16px;line-height:1;";
+x.style.cssText="flex:0 0 auto;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;"+
+"justify-content:center;color:"+T.doux+";cursor:pointer;font-size:17px;line-height:1;";
 x.textContent="\u00d7";
 x.onclick=function(){try{_NXSTATUS.marque(cible.id);}catch(_){}_NXSTATUS.ferme();};
-box.appendChild(pastille);box.appendChild(corps);box.appendChild(x);
+box.appendChild(corps);box.appendChild(x);
 document.body.appendChild(box);}catch(_){}};
 _NXSTATUS.MIN=45000;
 _NXSTATUS.rafraichis=function(force){try{
@@ -9421,7 +9494,9 @@ _NXADMIN.moiId=function(){try{var US=_NXcommon().store("UserStore");var u=US&&US
 _NXADMIN.estEquipe=function(){try{return !!_NXADMIN.EQUIPE[_NXADMIN.moiId()];}catch(_){return false;}};
 _NXADMIN.connecte=function(){return !!(_NXADMIN.jeton&&Date.now()<_NXADMIN.expire);};
 _NXADMIN.peutSupprimer=function(){return _NXADMIN.role==="proprietaire";};
-_NXADMIN.peutCritique=function(){return _NXADMIN.role==="proprietaire";};
+_NXADMIN.peutNiveau=function(g){try{
+if(_NXADMIN.role==="proprietaire")return true;
+return _NXSTATUS.poids(g)<4;}catch(_){return false;}};
 _NXADMIN.deconnexion=function(){try{_NXADMIN.jeton=null;_NXADMIN.role=null;_NXADMIN.pseudo=null;_NXADMIN.expire=0;_NXADMIN.alertes=[];_NXADMIN.journal=[];_NXADMIN.notify();}catch(_){}};
 _NXADMIN.entetes=function(){var h={apikey:_NXSTATUS.CLE,"Content-Type":"application/json",Accept:"application/json"};if(_NXADMIN.connecte())h.Authorization="Bearer "+_NXADMIN.jeton;return h;};
 _NXADMIN.rest=function(chemin,opts,cb){try{
@@ -9456,7 +9531,7 @@ _NXADMIN.expire=Date.now()+(((j.expires_in||3600)*1000)-60000);
 _NXADMIN.pseudo=p;
 _NXADMIN.monRole(function(){
 if(!_NXADMIN.role){_NXADMIN.deconnexion();cb({err:"Ce compte n est pas administrateur."});return;}
-_NXADMIN.charge();cb({ok:true});_NXADMIN.notify();});
+_NXADMIN.charge();try{if(window._NXMP)_NXMP.rafraichisBarre();}catch(_){}cb({ok:true});_NXADMIN.notify();});
 }).catch(function(){_NXADMIN.busy=false;cb({err:"Serveur injoignable."});_NXADMIN.notify();});
 }catch(_){_NXADMIN.busy=false;cb({err:"Erreur interne."});}};
 _NXADMIN.charge=function(cb){_NXADMIN.rest("nx_alertes?select="+_NXSTATUS.CHAMPS+"&order=debut.desc&limit=30",{},function(r){
@@ -9470,7 +9545,7 @@ var titre=String(o.titre||"").trim(),resume=String(o.resume||"").trim();
 if(titre.length<3){cb({err:"Le titre est trop court."});return;}
 if(resume.length<3){cb({err:"Le resume est trop court."});return;}
 var g=o.gravite||"mineur";
-if(g==="critique"&&!_NXADMIN.peutCritique()){cb({err:"La gravite critique est reservee au proprietaire."});return;}
+if(!_NXADMIN.peutNiveau(g)){cb({err:"Le niveau \u00ab "+_NXSTATUS.gravFr(g)+" \u00bb est r\u00e9serv\u00e9 au propri\u00e9taire."});return;}
 var corps={titre:titre.slice(0,140),resume:resume.slice(0,2000),gravite:g,etat:"enquete",
 composant:o.composant?String(o.composant).slice(0,40):null,
 versions_touchees:o.versions?String(o.versions).slice(0,60):null,
@@ -9526,7 +9601,7 @@ var T=_NXMP.T;
 var c=document.createElement("style");
 c.id="nx-panneau-style";
 c.textContent=
-"#"+_NXMP.ID+"{position:fixed;right:20px;bottom:20px;z-index:2147483000;width:440px;max-width:calc(100vw - 40px);"+
+"#"+_NXMP.ID+"{position:fixed;right:20px;bottom:20px;z-index:1000;width:440px;max-width:calc(100vw - 40px);"+
 "max-height:min(70vh,620px);display:flex;flex-direction:column;background:"+T.fond+";border:1px solid "+T.bord2+";"+
 "border-radius:"+T.rayon+";box-shadow:"+T.ombre+";font-family:"+T.police+";color:"+T.texte+";overflow:hidden;}"+
 "#"+_NXMP.ID+" .nx-tete{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid "+T.bord+";flex:0 0 auto;}"+
@@ -9534,7 +9609,13 @@ c.textContent=
 "#"+_NXMP.ID+" .nx-fermer{margin-left:auto;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;"+
 "justify-content:center;color:"+T.doux+";cursor:pointer;font-size:18px;line-height:1;flex:0 0 auto;}"+
 "#"+_NXMP.ID+" .nx-fermer:hover{background:rgba(148,155,164,.12);color:"+T.texte+";}"+
-"#"+_NXMP.ID+" .nx-corps{overflow-y:auto;overflow-x:hidden;padding:8px 0 16px;flex:1 1 auto;}"+
+"#"+_NXMP.ID+" .nx-outils{display:flex;gap:6px;flex-wrap:wrap;padding:9px 14px;border-bottom:1px solid "+T.bord+";flex:0 0 auto;}"+
+"#"+_NXMP.ID+" .nx-o{height:26px;padding:0 10px;border-radius:6px;border:1px solid "+T.bord2+";background:transparent;color:"+T.doux+";font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background-color .15s ease,color .15s ease;}"+
+"#"+_NXMP.ID+" .nx-o:hover{background:rgba(148,155,164,.12);color:"+T.texte+";}"+
+"#"+_NXMP.ID+" .nx-corps{overflow-y:auto;overflow-x:hidden;padding:8px 0 16px;flex:1 1 auto;scrollbar-width:thin;scrollbar-color:rgba(148,155,164,.3) transparent;}"+
+"#"+_NXMP.ID+" .nx-corps::-webkit-scrollbar{width:8px;}"+
+"#"+_NXMP.ID+" .nx-corps::-webkit-scrollbar-thumb{background:rgba(148,155,164,.3);border-radius:4px;}"+
+"#"+_NXMP.ID+" .nx-corps::-webkit-scrollbar-track{background:transparent;}"+
 "#"+_NXMP.ID+" .nx-jour{display:flex;align-items:center;gap:10px;margin:12px 16px 8px;color:"+T.doux+";"+
 "font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;}"+
 "#"+_NXMP.ID+" .nx-jour i{flex:1;height:1px;background:"+T.bord+";display:block;}"+
@@ -9601,7 +9682,7 @@ x.onclick=function(){_NXMP.ferme();};
 tete.appendChild(x);
 var corps=document.createElement("div");
 corps.className="nx-corps";
-p.appendChild(tete);p.appendChild(corps);
+p.appendChild(tete);p.appendChild(_NXMP.rangee());p.appendChild(corps);
 document.body.appendChild(p);
 _NXMP.pose=true;
 for(var a=0;a<_NXMP.messages.length;a++)_NXMP.rend(_NXMP.messages[a]);
@@ -9673,12 +9754,91 @@ msg.appendChild(bloc);
 corps.appendChild(msg);
 try{corps.scrollTop=corps.scrollHeight;}catch(_){}
 return true;}catch(_){return false;}};
+_NXMP.nonLus=0;
+_NXMP.Icone=function(){return i("svg",{width:20,height:20,viewBox:"0 0 24 24",fill:"currentColor","aria-hidden":"true"},
+i("path",{d:"M12 2 3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4zm0 4.2 5 2.2v3.6c0 3.62-2.07 7.02-5 8.12-2.93-1.1-5-4.5-5-8.12V8.4l5-2.2z"}));};
+_NXMP.HB=function(){try{var V=window.Vencord;return (V&&V.Api&&V.Api.HeaderBar)||null;}catch(_){return null;}};
+_NXMP.bascule=function(){try{
+if(document.getElementById(_NXMP.ID)){_NXMP.ferme();_NXMP.rafraichisBarre();return false;}
+_NXMP.nonLus=0;
+var r=_NXMP.monte();
+_NXMP.rafraichisBarre();
+return r;}catch(_){return false;}};
+_NXMP.rafraichisBarre=function(){try{
+var HB=_NXMP.HB();
+if(!HB||!_NXMP._barre)return false;
+HB.removeHeaderBarButton("nexium-alertes");
+_NXMP._barre=false;
+return _NXMP.barre();}catch(_){return false;}};
+_NXMP.barre=function(){try{
+var HB=_NXMP.HB();
+if(!HB||typeof HB.addHeaderBarButton!=="function"||!HB.HeaderBarButton){
+_NXMP._bt=(_NXMP._bt||0)+1;
+if(_NXMP._bt<40)setTimeout(_NXMP.barre,1500);
+return false;}
+if(_NXMP._barre)return true;
+_NXMP._barre=true;
+HB.addHeaderBarButton("nexium-alertes",function(){try{
+if(!_NXMP.autorise())return null;
+var ouvert=!!document.getElementById(_NXMP.ID);
+var n=_NXMP.nonLus;
+return i(HB.HeaderBarButton,{
+icon:_NXMP.Icone,
+tooltip:n?("Nexium \u2014 "+n+" alerte"+(n>1?"s":"")):"Alertes Nexium",
+"aria-label":"Alertes Nexium",
+selected:ouvert,
+onClick:function(){_NXMP.bascule();}});}catch(_){return null;}},5);
+return true;}catch(_){return false;}};
+try{setTimeout(_NXMP.barre,6000);}catch(_){}
+
+_NXMP.diagnostic=function(){try{
+var L=[];
+L.push("Nexium "+((window._NXUP&&_NXUP.VERSION)?("v"+_NXUP.VERSION):"?")+" \u2014 "+new Date().toISOString());
+try{L.push("modules morts : "+((window._NXFAIL&&_NXFAIL.length)?_NXFAIL.join(", "):"aucun"));}catch(_){}
+try{var e=_NXCONN.etat();
+for(var a=0;a<e.length;a++)L.push("  "+e[a].nom+" : score "+e[a].score+(e[a].depasse?" (depasse)":"")+(e[a].detail?" \u2014 "+e[a].detail:""));}catch(_){}
+try{L.push("erreurs recentes :");
+var J=(window._NXERR||[]).slice(-8);
+for(var b=0;b<J.length;b++)L.push("  "+String(J[b]).slice(0,180));}catch(_){}
+return L.join("\n");}catch(_){return "diagnostic indisponible";}};
+_NXMP.copie=function(t){try{
+if(typeof DiscordNative!=="undefined"&&DiscordNative.clipboard&&DiscordNative.clipboard.copy){DiscordNative.clipboard.copy(t);return true;}
+if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t);return true;}
+}catch(_){}return false;};
+_NXMP.ACTIONS=[
+{l:"Actualiser",t:"Relance les connecteurs tout de suite",f:function(){
+try{_NXCONN.dernier={};_NXCONN.scan();
+var e=_NXCONN.etat(),n=0;
+for(var a=0;a<e.length;a++)if(e[a].depasse)n++;
+if(!n)_NXMP.dis("Tout va bien","Les sept connecteurs r\u00e9pondent normalement. Aucun seuil d\u00e9pass\u00e9.",[]);}catch(_){}}},
+{l:"Copier le diagnostic",t:"Colle-le dans un signalement",f:function(){
+var ok=_NXMP.copie(_NXMP.diagnostic());
+_NXMP.dis(ok?"Diagnostic copi\u00e9":"Copie impossible",
+ok?"Il est dans ton presse-papiers : version, modules morts, \u00e9tat des connecteurs et huit derni\u00e8res erreurs.":"Le presse-papiers a refus\u00e9 l acc\u00e8s.",[]);}},
+{l:"Nexium Admins",t:"Ouvre la page d administration",f:function(){
+try{_NXCP.ouvrir("equicord_nexium_admin","Nexium Admins");}catch(_){}}},
+{l:"Page de statut",t:"Ouvre le site public",f:function(){try{_NXSTATUS.ouvrePage();}catch(_){}}},
+{l:"Vider",t:"Efface les messages de ce panneau",f:function(){_NXMP.retire();}}];
+_NXMP.rangee=function(){try{
+var r=document.createElement("div");
+r.className="nx-outils";
+for(var a=0;a<_NXMP.ACTIONS.length;a++){
+(function(x){
+var b=document.createElement("button");
+b.type="button";
+b.className="nx-o";
+b.textContent=x.l;
+b.title=x.t;
+b.onclick=function(){try{x.f();}catch(_){}};
+r.appendChild(b);})(_NXMP.ACTIONS[a]);}
+return r;}catch(_){return document.createElement("div");}};
 _NXMP.dis=function(titre,corps,boutons){try{
 if(!_NXMP.autorise())return false;
 var m={id:_NXMP.cle(),at:Date.now(),titre:String(titre||"").slice(0,240),
 corps:String(corps||"").slice(0,1800),boutons:boutons||[]};
 _NXMP.messages.push(m);
 if(_NXMP.messages.length>20)_NXMP.messages.shift();
+if(!document.getElementById(_NXMP.ID)){_NXMP.nonLus++;_NXMP.rafraichisBarre();}
 var existait=!!document.getElementById(_NXMP.ID);
 if(!_NXMP.monte())return false;
 if(existait)_NXMP.rend(m);
@@ -10393,7 +10553,7 @@ _NXfoot("Nexium Changelog · lu depuis le dépôt, aucune donnée envoyée")));
     height: calc(1rem + 4px);
     max-height: calc(1rem + 4px)
 }
-`,classNames:{},dom:null});Wye="src/plugins/_api/messageDecorations/style.css"});var QT,Qye=h(()=>{"use strict";d();O();R();Kye();QT=A({name:"MessageDecorationsAPI",description:"API to add decorations to messages",authors:[w.TheSun],managedStyle:Wye,patches:[{find:"#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",replacement:{match:/#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,replace:"$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"}}]})});var ZT,Zye=h(()=>{"use strict";d();O();R();ZT=A({name:"MessageEventsAPI",description:"Api required by anything using message events.",authors:[w.Arjix,w.hunt,w.Ven],patches:[{find:"#{intl::EDIT_TEXTAREA_HELP}",replacement:{match:/(?<=,channel:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,replace:(e,t)=>`async ${e}if(await Vencord.Api.MessageEvents._handlePreEdit(${t}))return Promise.resolve({shouldClear:false,shouldRefocus:true});`}},{find:".handleSendMessage,onResize:",replacement:{match:/let (\i)=\i\.\i\.parse\((\i),.+?\.getSendMessageOptions\(\{.+?\}\)?;(?=.+?(\i)\.flags=)(?<=\)\(({.+?})\)\.then.+?)/,replace:(e,t,n,o,r)=>e+`if(await Vencord.Api.MessageEvents._handlePreSend(${n}.id,${t},${r},${o}))return{shouldClear:false,shouldRefocus:true};`}},{find:'("interactionUsernameProfile',replacement:{match:/let\{id:\i}=(\i),{id:\i}=(\i);return \i\.useCallback\((\i)=>\{/,replace:(e,t,n,o)=>`const vcMsg=${t},vcChan=${n};${e}Vencord.Api.MessageEvents._handleClick(vcMsg,vcChan,${o});`}}]})});var YT,Yye=h(()=>{"use strict";d();O();R();YT=A({name:"MessagePopoverAPI",description:"API to add buttons to message popovers.",authors:[w.KingFish,w.Ven,w.Nuckyz],patches:[{find:"#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",replacement:{match:/(?<=\]\}\)),(.{0,40}togglePopout:.+?\}\))\]\}\):null,(?<=\((\i\.\i),\{label:.+?:null,(\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,replace:(e,t,n,o,r)=>`]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${n},${r}),${o}?${t}:null,`}}]})});var JT,Jye=h(()=>{"use strict";d();O();R();JT=A({name:"MessageUpdaterAPI",description:"API for updating and re-rendering messages.",authors:[w.Nuckyz],patches:[{find:"}renderStickersAccessories(",replacement:{match:/(?<=this.props,\i,\[)"message",/,replace:""}}]})});var XT,Xye=h(()=>{"use strict";d();O();R();XT=A({name:"NicknameIconsAPI",description:"API to add icons to the nickname, in profiles",authors:[w.Nuckyz],patches:[{find:"#{intl::USER_PROFILE_PRONOUNS}",replacement:[{match:/(?<=children:\i\}\):\i,)null!=\i/,replace:"($&||!!Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"},{match:/(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)(?=\}\)\])/,replace:"children:[...Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id}),$1]"}]}]})});var VT,Vye=h(()=>{"use strict";d();O();R();VT=A({name:"NoticesAPI",description:"Fixes notices being automatically dismissed",authors:[w.Ven],required:!0,patches:[{find:'"NoticeStore"',replacement:[{match:/(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,replace:"if(Vencord.Api.Notices.currentNotice)return false;$&"},{match:/(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,replace:(e,t)=>`if(${t}?.id=="EquicordNotice")return(${t}=null,Vencord.Api.Notices.nextNotice(),true);${e}`}]}]})});var e9,eve=h(()=>{"use strict";d();O();R();e9=A({name:"ServerListAPI",authors:[w.kemo],description:"Api required for plugins that modify the server list",patches:[{find:"#{intl::DISCODO_DISABLED}",replacement:{match:/(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:"friends-list".+?}\))(?=}function)/,replace:"[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"}},{find:".setGuildsTree(",replacement:[{match:/(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,replace:"Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"},{match:/lastTargetNode.{0,25}\?null:\i,/,replace:"$&...Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below),"}]}]})});var t9,tve=h(()=>{"use strict";d();O();R();t9=A({name:"UserSettingsAPI",description:"Patches Discord's UserSettings to expose their group and name.",authors:[w.Nuckyz],patches:[{find:",updateSetting:",replacement:[{match:/\.updateAsync\(.+?(?=,useSetting:)/,replace:"$&,userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1]"},{match:/updateSetting:.{0,100}SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"},{match:/updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"}]}]})});var n9,nve=h(()=>{"use strict";d();O();R();T();n9=A({name:"ConcatenatedComponentExtractor",description:"Extract components that have been concatenated by the bundler",authors:[w.sadan],required:!0,patches:[{find:"#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}),focusProps:",replacement:{match:/(?=function (\i)\(\i\)\{let\{onChange:\i,onClose:\i,[^}]+?showEyeDropper:)/,replace:"$self.setColorPicker($1);"}},{find:/="ltr",orientation:\i="vertical"[^}]+?customTheme:/,replacement:{match:/(?=function (\i)\(\i,\i,\i\)\{.{0,20}?return \i\.forwardRef\(function\(\i,\i\)\{let\{[^}]+?="ltr",orientation:)/,replace:"$self.setCreateScroller($1);"}}],setCreateScroller:qH,setColorPicker:jH})});var ove,o9,rve=h(()=>{"use strict";d();q();O();Xe();R();ove=M({disableAnalytics:{type:3,description:"Disable Discord's tracking (analytics/'science')",default:!0,restartNeeded:!0}}),o9=A({name:"NoTrack",description:"Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",authors:[w.Cyn,w.Ven,w.Nuckyz,w.Arrow],required:!0,settings:ove,patches:[{find:"AnalyticsActionHandlers.handle",predicate:()=>ove.store.disableAnalytics,replacement:{match:/\(0,\i\.analyticsTrackingStoreMaker\)/,replace:"(()=>{})"}},{find:".METRICS_V2",replacement:[{match:/this\._intervalId=/,replace:"this._intervalId=void 0&&"},{match:/(?:increment|distribution)\(\i(?:,\i)?\){/g,replace:"$&return;"}]},{find:".BetterDiscord||null!=",replacement:{match:/(?=let \i=window;)/,replace:"return false;"}}],flux:{TRACK(e){e?.resolve?.()}},startAt:"Init",start(){Object.defineProperty(Function.prototype,"d",{configurable:!0,set(e){Object.defineProperty(this,"d",{value:e,configurable:!0,enumerable:!0,writable:!0});let{stack:t}=new Error;if(this.c!=null||!t?.includes("http")||!String(this).includes("exports:{}"))return;let n=t.match(/http.+?(?=:\d+?:\d+?$)/m)?.[0];if(!n)return;let o=new XMLHttpRequest;if(o.open("GET",n,!1),o.send(),!!o.responseText.includes(".DiscordSentry="))throw new ce("NoTrack","#8caaee").info("Disabling Sentry by erroring its WebpackInstance"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry"),new Error("Sentry successfully disabled")}}),Object.defineProperty(window,"DiscordSentry",{configurable:!0,set(){new ce("NoTrack","#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry")}})}})});var Jv,KK,li,lf=h(()=>{"use strict";d();q();bt();Da();Gv();O();Zl();R();se();Jv={SECTION:1,SIDEBAR_ITEM:2,PANEL:3,CATEGORY:5,CUSTOM:19};uo(["SECTION","SIDEBAR_ITEM","PANEL","CUSTOM"],e=>Jv=e);KK=M({settingsLocation:{type:4,description:"Where to put the Nexium Client settings section",options:[{label:"At the very top",value:"top"},{label:"Above the Nitro section",value:"aboveNitro",default:!0},{label:"Below the Nitro section",value:"belowNitro"},{label:"Above Activity Settings",value:"aboveActivity"},{label:"Below Activity Settings",value:"belowActivity"},{label:"At the very bottom",value:"bottom"}]},includeVencordInfoWhenCopying:{type:3,description:"Also copy Nexium info (Nexium, Electron, Chromium) when clicking the version info in the bottom left area of the Settings page",default:!0}}),li=A({name:"Settings",description:"Adds Settings UI and debug info",authors:[w.Ven,w.Megu],required:!0,settings:KK,patches:[{find:"#{intl::COPY_VERSION}",replacement:[{match:/\.RELEASE_CHANNEL/,replace:"$&.replace(/^./, c => c.toUpperCase())"},{match:/"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,replace:(e,t,n,o,r)=>(r=r.replace(/children:\[.+\]/,""),`${e},$self.makeInfoElements(${o},${r}).map(e=>${n}e})),`)},{match:/copyValue:\i\.join\(" "\)/g,replace:"$& + $self.getInfoString()"}]},{find:".buildLayout().map",replacement:{match:/(\i)\.buildLayout\(\)(?=\.map)/,replace:"$self.buildLayout($1)"}}],buildEntry(e){let{key:t,title:n,panelTitle:o=n,Component:r,Icon:a}=e,s={key:t+"_panel",type:Jv.PANEL,useTitle:()=>o,buildLayout:()=>[{type:Jv.CATEGORY,key:t+"_category",buildLayout:()=>[{type:Jv.CUSTOM,key:t+"_custom",Component:r,useSearchTerms:()=>[n]}]}]};return{key:t,type:Jv.SIDEBAR_ITEM,useTitle:()=>n,icon:()=>i(a,{width:20,height:20}),buildLayout:()=>[s]}},buildLayout(e){let t=e.buildLayout();if(e.key!=="$Root"||!Array.isArray(t)||t.some(u=>u?.key==="equicord_section"))return t;let{buildEntry:n}=this,o=[n({key:"equicord_main",title:"Nexium Client",panelTitle:"Nexium Client",Component:_NXsafe(NexiumHomeComp,"Nexium Client"),Icon:rp}),n({key:"equicord_plugins",title:"Plugins",Component:Gx,Icon:rH}),n({key:"equicord_themes",title:"Themes",Component:_NXthemeWrap(Mx),Icon:Mm}),n({key:"equicord_updater",title:"Mise à jour",panelTitle:"Nexium — Mise à jour",Component:_NXsafe(NexiumUpdateComp,"Mise à jour"),Icon:NexiumUpdateIcon}),n({key:"equicord_changelog",title:"Changelog",Component:ST,Icon:j5}),n({key:"equicord_team",title:"Team",panelTitle:"Nexium — Team",Component:_NXsafe(NexiumTeamComp,"Team"),Icon:NexiumTeamIcon}),n({key:"equicord_sponsor",title:"Sponsor",panelTitle:"Nexium — Sponsor",Component:_NXsafe(NexiumSponsorComp,"Sponsor"),Icon:NexiumSponsorIcon}),n({key:"equicord_music",title:"Nexium Music",panelTitle:"Nexium Music",Component:_NXsafe(NexiumMusicComp,"Nexium Music"),Icon:NexiumMusicIcon}),...(window._NXADMIN&&_NXADMIN.estEquipe()?[n({key:"equicord_nexium_admin",title:"Nexium Admins",panelTitle:"Nexium Admins",Component:_NXsafe(NexiumAdminComp,"Nexium Admins"),Icon:NexiumAdminIcon})]:[]),n({key:"equicord_stats",title:"Nexium Stats",panelTitle:"Nexium Stats",Component:_NXsafe(NexiumStatsComp,"Nexium Stats"),Icon:NexiumStatsIcon}),n({key:"equicord_privacy",title:"Nexium Privacy",panelTitle:"Nexium Privacy",Component:_NXsafe(NexiumPrivacyComp,"Nexium Privacy"),Icon:NexiumPrivacyIcon}),n({key:"equicord_protect",title:"Nexium Protect",panelTitle:"Nexium Protect",Component:_NXsafe(NexiumProtectComp,"Nexium Protect"),Icon:NexiumProtectIcon}),n({key:"equicord_auto",title:"Nexium Auto",panelTitle:"Nexium Auto",Component:_NXsafe(NexiumAutoComp,"Nexium Auto"),Icon:NexiumAutoIcon}),n({key:"equicord_network",title:"Nexium Réseau",panelTitle:"Nexium Réseau",Component:_NXsafe(NexiumNetworkComp,"Nexium Réseau"),Icon:NexiumNetworkIcon}),n({key:"equicord_data",title:"Nexium Données",panelTitle:"Nexium Données",Component:_NXsafe(NexiumDataComp,"Nexium Données"),Icon:NexiumDataIcon}),n({key:"equicord_backup_restore",title:"Backup & Restore",Component:MT,Icon:iH}),VA&&n({key:"equicord_patch_helper",title:"Patch Helper",Component:VA,Icon:aH}),...this.customEntries.map(n)].filter(fl),r={key:"equicord_section",type:Jv.SECTION,useTitle:()=>"Nexium Client Settings",buildLayout:()=>o},{settingsLocation:a}=KK.store,s={top:"user_section",aboveNitro:"billing_section",belowNitro:"billing_section",aboveActivity:"activity_section",belowActivity:"activity_section",bottom:"utility_section"},l=s[a]??s.top,c=t.findIndex(u=>typeof u?.key=="string"&&u.key===l);return c===-1?c=2:a.startsWith("below")&&(c+=1),t.splice(c,0,r),t},customSections:[],customEntries:[],get electronVersion(){return VencordNative.native.getVersions().electron??window.legcord?.electron??null},get chromiumVersion(){try{return VencordNative.native.getVersions().chrome??navigator.userAgentData?.brands?.find(e=>e.brand==="Chromium"||e.brand==="Google Chrome")?.version??null}catch{return null}},getVersionInfo(e=!0){let t="";return e&&t?` (${t})`:t},getInfoRows(){let{electronVersion:e,chromiumVersion:t,getVersionInfo:n}=this,o=[`Nexium Client ${t0}${n()}`];return e&&o.push(`Electron ${e}`),t&&o.push(`Chromium ${t}`),o},getInfoString(){return KK.store.includeVencordInfoWhenCopying?`
+`,classNames:{},dom:null});Wye="src/plugins/_api/messageDecorations/style.css"});var QT,Qye=h(()=>{"use strict";d();O();R();Kye();QT=A({name:"MessageDecorationsAPI",description:"API to add decorations to messages",authors:[w.TheSun],managedStyle:Wye,patches:[{find:"#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",replacement:{match:/#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,replace:"$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"}}]})});var ZT,Zye=h(()=>{"use strict";d();O();R();ZT=A({name:"MessageEventsAPI",description:"Api required by anything using message events.",authors:[w.Arjix,w.hunt,w.Ven],patches:[{find:"#{intl::EDIT_TEXTAREA_HELP}",replacement:{match:/(?<=,channel:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,replace:(e,t)=>`async ${e}if(await Vencord.Api.MessageEvents._handlePreEdit(${t}))return Promise.resolve({shouldClear:false,shouldRefocus:true});`}},{find:".handleSendMessage,onResize:",replacement:{match:/let (\i)=\i\.\i\.parse\((\i),.+?\.getSendMessageOptions\(\{.+?\}\)?;(?=.+?(\i)\.flags=)(?<=\)\(({.+?})\)\.then.+?)/,replace:(e,t,n,o,r)=>e+`if(await Vencord.Api.MessageEvents._handlePreSend(${n}.id,${t},${r},${o}))return{shouldClear:false,shouldRefocus:true};`}},{find:'("interactionUsernameProfile',replacement:{match:/let\{id:\i}=(\i),{id:\i}=(\i);return \i\.useCallback\((\i)=>\{/,replace:(e,t,n,o)=>`const vcMsg=${t},vcChan=${n};${e}Vencord.Api.MessageEvents._handleClick(vcMsg,vcChan,${o});`}}]})});var YT,Yye=h(()=>{"use strict";d();O();R();YT=A({name:"MessagePopoverAPI",description:"API to add buttons to message popovers.",authors:[w.KingFish,w.Ven,w.Nuckyz],patches:[{find:"#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",replacement:{match:/(?<=\]\}\)),(.{0,40}togglePopout:.+?\}\))\]\}\):null,(?<=\((\i\.\i),\{label:.+?:null,(\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,replace:(e,t,n,o,r)=>`]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${n},${r}),${o}?${t}:null,`}}]})});var JT,Jye=h(()=>{"use strict";d();O();R();JT=A({name:"MessageUpdaterAPI",description:"API for updating and re-rendering messages.",authors:[w.Nuckyz],patches:[{find:"}renderStickersAccessories(",replacement:{match:/(?<=this.props,\i,\[)"message",/,replace:""}}]})});var XT,Xye=h(()=>{"use strict";d();O();R();XT=A({name:"NicknameIconsAPI",description:"API to add icons to the nickname, in profiles",authors:[w.Nuckyz],patches:[{find:"#{intl::USER_PROFILE_PRONOUNS}",replacement:[{match:/(?<=children:\i\}\):\i,)null!=\i/,replace:"($&||!!Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"},{match:/(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)(?=\}\)\])/,replace:"children:[...Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id}),$1]"}]}]})});var VT,Vye=h(()=>{"use strict";d();O();R();VT=A({name:"NoticesAPI",description:"Fixes notices being automatically dismissed",authors:[w.Ven],required:!0,patches:[{find:'"NoticeStore"',replacement:[{match:/(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,replace:"if(Vencord.Api.Notices.currentNotice)return false;$&"},{match:/(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,replace:(e,t)=>`if(${t}?.id=="EquicordNotice")return(${t}=null,Vencord.Api.Notices.nextNotice(),true);${e}`}]}]})});var e9,eve=h(()=>{"use strict";d();O();R();e9=A({name:"ServerListAPI",authors:[w.kemo],description:"Api required for plugins that modify the server list",patches:[{find:"#{intl::DISCODO_DISABLED}",replacement:{match:/(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:"friends-list".+?}\))(?=}function)/,replace:"[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"}},{find:".setGuildsTree(",replacement:[{match:/(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,replace:"Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"},{match:/lastTargetNode.{0,25}\?null:\i,/,replace:"$&...Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below),"}]}]})});var t9,tve=h(()=>{"use strict";d();O();R();t9=A({name:"UserSettingsAPI",description:"Patches Discord's UserSettings to expose their group and name.",authors:[w.Nuckyz],patches:[{find:",updateSetting:",replacement:[{match:/\.updateAsync\(.+?(?=,useSetting:)/,replace:"$&,userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1]"},{match:/updateSetting:.{0,100}SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"},{match:/updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"}]}]})});var n9,nve=h(()=>{"use strict";d();O();R();T();n9=A({name:"ConcatenatedComponentExtractor",description:"Extract components that have been concatenated by the bundler",authors:[w.sadan],required:!0,patches:[{find:"#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}),focusProps:",replacement:{match:/(?=function (\i)\(\i\)\{let\{onChange:\i,onClose:\i,[^}]+?showEyeDropper:)/,replace:"$self.setColorPicker($1);"}},{find:/="ltr",orientation:\i="vertical"[^}]+?customTheme:/,replacement:{match:/(?=function (\i)\(\i,\i,\i\)\{.{0,20}?return \i\.forwardRef\(function\(\i,\i\)\{let\{[^}]+?="ltr",orientation:)/,replace:"$self.setCreateScroller($1);"}}],setCreateScroller:qH,setColorPicker:jH})});var ove,o9,rve=h(()=>{"use strict";d();q();O();Xe();R();ove=M({disableAnalytics:{type:3,description:"Disable Discord's tracking (analytics/'science')",default:!0,restartNeeded:!0}}),o9=A({name:"NoTrack",description:"Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",authors:[w.Cyn,w.Ven,w.Nuckyz,w.Arrow],required:!0,settings:ove,patches:[{find:"AnalyticsActionHandlers.handle",predicate:()=>ove.store.disableAnalytics,replacement:{match:/\(0,\i\.analyticsTrackingStoreMaker\)/,replace:"(()=>{})"}},{find:".METRICS_V2",replacement:[{match:/this\._intervalId=/,replace:"this._intervalId=void 0&&"},{match:/(?:increment|distribution)\(\i(?:,\i)?\){/g,replace:"$&return;"}]},{find:".BetterDiscord||null!=",replacement:{match:/(?=let \i=window;)/,replace:"return false;"}}],flux:{TRACK(e){e?.resolve?.()}},startAt:"Init",start(){Object.defineProperty(Function.prototype,"d",{configurable:!0,set(e){Object.defineProperty(this,"d",{value:e,configurable:!0,enumerable:!0,writable:!0});let{stack:t}=new Error;if(this.c!=null||!t?.includes("http")||!String(this).includes("exports:{}"))return;let n=t.match(/http.+?(?=:\d+?:\d+?$)/m)?.[0];if(!n)return;let o=new XMLHttpRequest;if(o.open("GET",n,!1),o.send(),!!o.responseText.includes(".DiscordSentry="))throw new ce("NoTrack","#8caaee").info("Disabling Sentry by erroring its WebpackInstance"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry"),new Error("Sentry successfully disabled")}}),Object.defineProperty(window,"DiscordSentry",{configurable:!0,set(){new ce("NoTrack","#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry")}})}})});var Jv,KK,li,lf=h(()=>{"use strict";d();q();bt();Da();Gv();O();Zl();R();se();Jv={SECTION:1,SIDEBAR_ITEM:2,PANEL:3,CATEGORY:5,CUSTOM:19};uo(["SECTION","SIDEBAR_ITEM","PANEL","CUSTOM"],e=>Jv=e);KK=M({settingsLocation:{type:4,description:"Where to put the Nexium Client settings section",options:[{label:"At the very top",value:"top"},{label:"Above the Nitro section",value:"aboveNitro",default:!0},{label:"Below the Nitro section",value:"belowNitro"},{label:"Above Activity Settings",value:"aboveActivity"},{label:"Below Activity Settings",value:"belowActivity"},{label:"At the very bottom",value:"bottom"}]},includeVencordInfoWhenCopying:{type:3,description:"Also copy Nexium info (Nexium, Electron, Chromium) when clicking the version info in the bottom left area of the Settings page",default:!0}}),li=A({name:"Settings",description:"Adds Settings UI and debug info",authors:[w.Ven,w.Megu],required:!0,settings:KK,patches:[{find:"#{intl::COPY_VERSION}",replacement:[{match:/\.RELEASE_CHANNEL/,replace:"$&.replace(/^./, c => c.toUpperCase())"},{match:/"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,replace:(e,t,n,o,r)=>(r=r.replace(/children:\[.+\]/,""),`${e},$self.makeInfoElements(${o},${r}).map(e=>${n}e})),`)},{match:/copyValue:\i\.join\(" "\)/g,replace:"$& + $self.getInfoString()"}]},{find:".buildLayout().map",replacement:{match:/(\i)\.buildLayout\(\)(?=\.map)/,replace:"$self.buildLayout($1)"}}],buildEntry(e){let{key:t,title:n,panelTitle:o=n,Component:r,Icon:a}=e,s={key:t+"_panel",type:Jv.PANEL,useTitle:()=>o,buildLayout:()=>[{type:Jv.CATEGORY,key:t+"_category",buildLayout:()=>[{type:Jv.CUSTOM,key:t+"_custom",Component:r,useSearchTerms:()=>[n]}]}]};return{key:t,type:Jv.SIDEBAR_ITEM,useTitle:()=>n,icon:()=>i(a,{width:20,height:20}),buildLayout:()=>[s]}},buildLayout(e){let t=e.buildLayout();if(e.key!=="$Root"||!Array.isArray(t)||t.some(u=>u?.key==="equicord_section"))return t;let{buildEntry:n}=this,o=[n({key:"equicord_main",title:"Nexium Client",panelTitle:"Nexium Client",Component:_NXsafe(NexiumHomeComp,"Nexium Client"),Icon:NexiumHomeIcon}),n({key:"equicord_plugins",title:"Plugins",Component:Gx,Icon:rH}),n({key:"equicord_themes",title:"Themes",Component:_NXthemeWrap(Mx),Icon:Mm}),n({key:"equicord_updater",title:"Mise à jour",panelTitle:"Nexium — Mise à jour",Component:_NXsafe(NexiumUpdateComp,"Mise à jour"),Icon:NexiumUpdateIcon}),n({key:"equicord_changelog",title:"Changelog",Component:ST,Icon:j5}),n({key:"equicord_team",title:"Team",panelTitle:"Nexium — Team",Component:_NXsafe(NexiumTeamComp,"Team"),Icon:NexiumTeamIcon}),n({key:"equicord_sponsor",title:"Sponsor",panelTitle:"Nexium — Sponsor",Component:_NXsafe(NexiumSponsorComp,"Sponsor"),Icon:NexiumSponsorIcon}),n({key:"equicord_music",title:"Nexium Music",panelTitle:"Nexium Music",Component:_NXsafe(NexiumMusicComp,"Nexium Music"),Icon:NexiumMusicIcon}),...(window._NXADMIN&&_NXADMIN.estEquipe()?[n({key:"equicord_nexium_admin",title:"Nexium Admins",panelTitle:"Nexium Admins",Component:_NXsafe(NexiumAdminComp,"Nexium Admins"),Icon:NexiumAdminIcon})]:[]),n({key:"equicord_stats",title:"Nexium Stats",panelTitle:"Nexium Stats",Component:_NXsafe(NexiumStatsComp,"Nexium Stats"),Icon:NexiumStatsIcon}),n({key:"equicord_privacy",title:"Nexium Privacy",panelTitle:"Nexium Privacy",Component:_NXsafe(NexiumPrivacyComp,"Nexium Privacy"),Icon:NexiumPrivacyIcon}),n({key:"equicord_protect",title:"Nexium Protect",panelTitle:"Nexium Protect",Component:_NXsafe(NexiumProtectComp,"Nexium Protect"),Icon:NexiumProtectIcon}),n({key:"equicord_auto",title:"Nexium Auto",panelTitle:"Nexium Auto",Component:_NXsafe(NexiumAutoComp,"Nexium Auto"),Icon:NexiumAutoIcon}),n({key:"equicord_network",title:"Nexium Réseau",panelTitle:"Nexium Réseau",Component:_NXsafe(NexiumNetworkComp,"Nexium Réseau"),Icon:NexiumNetworkIcon}),n({key:"equicord_data",title:"Nexium Données",panelTitle:"Nexium Données",Component:_NXsafe(NexiumDataComp,"Nexium Données"),Icon:NexiumDataIcon}),n({key:"equicord_backup_restore",title:"Backup & Restore",Component:MT,Icon:iH}),VA&&n({key:"equicord_patch_helper",title:"Patch Helper",Component:VA,Icon:aH}),...this.customEntries.map(n)].filter(fl),r={key:"equicord_section",type:Jv.SECTION,useTitle:()=>"Nexium Client Settings",buildLayout:()=>o},{settingsLocation:a}=KK.store,s={top:"user_section",aboveNitro:"billing_section",belowNitro:"billing_section",aboveActivity:"activity_section",belowActivity:"activity_section",bottom:"utility_section"},l=s[a]??s.top,c=t.findIndex(u=>typeof u?.key=="string"&&u.key===l);return c===-1?c=2:a.startsWith("below")&&(c+=1),t.splice(c,0,r),t},customSections:[],customEntries:[],get electronVersion(){return VencordNative.native.getVersions().electron??window.legcord?.electron??null},get chromiumVersion(){try{return VencordNative.native.getVersions().chrome??navigator.userAgentData?.brands?.find(e=>e.brand==="Chromium"||e.brand==="Google Chrome")?.version??null}catch{return null}},getVersionInfo(e=!0){let t="";return e&&t?` (${t})`:t},getInfoRows(){let{electronVersion:e,chromiumVersion:t,getVersionInfo:n}=this,o=[`Nexium Client ${t0}${n()}`];return e&&o.push(`Electron ${e}`),t&&o.push(`Chromium ${t}`),o},getInfoString(){return KK.store.includeVencordInfoWhenCopying?`
 `+this.getInfoRows().join(`
 `):""},makeInfoElements(e,t){return this.getInfoRows().map((n,o)=>i(e,{key:o,...t},n))}})});function Hct(e){C.show({message:e,type:C.Type.FAILURE,id:C.genId(),options:{position:C.Position.BOTTOM}})}function jct(){return new Promise(e=>{Ln.show({title:"Restart Required",body:i(f,null,i("p",{style:{textAlign:"center"}},"Some plugins require a restart to fully disable."),i("p",{style:{textAlign:"center"}},"Would you like to restart now?")),confirmText:"Restart Now",cancelText:"Later",onConfirm:()=>e(!0),onCancel:()=>e(!1)})})}async function _i(e){let t=!1;function n(){t=!0}async function o(u,p){return t?await jct()?(u.enabled=!p,location.reload(),!0):!1:!0}let r=Ge[e],a=Me.plugins[r.name],l=a.enabled??!1;if(!l){let{restartNeeded:u,failures:p}=Nv(r);if(p.length)return console.error(`Failed to start dependencies for ${r.name}: ${p.join(", ")}`),Ma("Failed to start dependencies: "+p.join(", "),"Close",()=>null),!1;if(u)return a.enabled=!0,n(),await o(a,l)}if(r.patches?.length)return n(),await o(a,l);if(l&&!r.started)return a.enabled=!l,await o(a,l);if(!(l?Qm(r):Km(r))){a.enabled=!1;let u=`Error while ${l?"stopping":"starting"} plugin ${r.name}`;return console.error(u),Hct(u),!1}return a.enabled=!l,await o(a,l)}function qct(e){let t=parseInt(e.split(".")[2]);return t>=22e3?"Windows 11":t>=10240?"Windows 10":t>=9200?"Windows 8.1":t>=7600?"Windows 7":`Windows (${e})`}function Wct(e){let t=parseInt(e.split(".")[0]);return t===25?"MacOS 26 (Tahoe)":t===24?"MacOS 15 (Sequoia)":t===23?"MacOS 14 (Sonoma)":t===22?"MacOS 13 (Ventura)":t===21?"MacOS 12 (Monterey)":t===20?"MacOS 11 (Big Sur)":t===19?"MacOS 10.15 (Catalina)":`MacOS (${e})`}function QK(){return typeof DiscordNative>"u"?navigator.platform:DiscordNative.process.platform==="win32"?`${qct(DiscordNative.os.release)}`:DiscordNative.process.platform==="darwin"?`${Wct(DiscordNative.os.release)} (${DiscordNative.process.arch==="arm64"?"Apple Silicon":"Intel Silicon"})`:DiscordNative.process.platform==="linux"?`${navigator.platform} (${DiscordNative.os.release})`:DiscordNative.process.platform}var md=h(()=>{"use strict";d();Vg();Qt();q();T()});var ZK,l0,YK=h(()=>{"use strict";d();Vg();q();O();R();T();ZK=M({idleTimeout:{description:"Minutes before Discord goes idle (0 to disable auto-idle)",type:5,markers:cn(0,60,5),default:10,stickToMarkers:!1,restartNeeded:!0},remainInIdle:{description:"When you come back to Discord, remain idle until you confirm you want to go online",type:3,default:!0}}),l0=A({name:"CustomIdle",description:"Allows you to set the time before Discord goes idle (or disable auto-idle)",tags:["Activity","Customisation"],authors:[w.newwares],settings:ZK,patches:[{find:'type:"IDLE",idle:',replacement:[{match:/(?<=Date\.now\(\)-\i>)\i\.\i\|\|/,replace:"$self.getIdleTimeout()||"},{match:/Math\.min\((\i\*\i\.\i\.\i\.SECOND),\i\.\i\)/,replace:"$1"},{match:/\i\.\i\.dispatch\({type:"IDLE",idle:!1}\)/,replace:"$self.handleOnline()"}]}],handleOnline(){if(!ZK.store.remainInIdle){G.dispatch({type:"IDLE",idle:!1});return}let e="Welcome back! Click the button to go online. Click the X to stay idle until reload.";Ox?.[1]===e||qA.some(([,t])=>t===e)||Ma(e,"Exit idle",()=>{ad(),G.dispatch({type:"IDLE",idle:!1})})},getIdleTimeout(){let{idleTimeout:e}=ZK.store;return e===0?1/0:e*6e4}})});async function ive(){let e=await ql();return e&&(await Ym(),ii()),e}function XK(){return{name:"Discord Desktop",version:DiscordNative.app.getVersion()}}async function ave(){let{RELEASE_CHANNEL:e}=window.GLOBAL_ENV,t=XK(),n=`${t.name}`;n+=`${t.version?` v${t.version}`:""}`,n+=`${t.info?` \u2022 ${t.info}`:""}`,n+=`${t.shortHash?` \u2022 [${t.shortHash}](<https://github.com/Omega-devj/nexium-client/commit/${t.hash}>)`:""}`;let o=null,r=o?.spoofed?`${QK()} (spoofed from ${o.originalPlatform})`:QK(),a={"Nexium Client":`v1.14.13.1 \u2022 [${t0}](<https://github.com/Omega-devj/nexium-client/commit/${Pa}>)${li.getVersionInfo()} - ${Intl.DateTimeFormat("en-US",{dateStyle:"medium"}).format(1780518166381)}`,Client:`${e} ~ ${n}`,Platform:r};a["Last Crash Reason"]=(await TA(()=>DiscordNative.processUtils.getLastCrash(),void 0))?.rendererCrashReason??"N/A";let s=(["NoRPC","NoProfileThemes","NoMosaic","NoRoleHeaders","NoSystemBadge","AlwaysAnimate","ClientTheme","SoundTroll","Ingtoninator","NeverPausePreviews","IdleAutoRestart"].filter(Be)??[]).sort();Be(l0.name)&&l0.settings.store.idleTimeout===0&&s.push(l0.name);let c={"Activity Sharing Disabled":TA(()=>!Yct.getSetting(),!1),"Link Embeds Disabled":TA(()=>!Jct.getSetting(),!1),"Nexium Client DevBuild":!0,"Nexium Desktop DevBuild":!1,"Platform Spoofed":o?.spoofed??!1,"Has UserPlugins":Object.values(la).some(p=>p.userPlugin),">2 Weeks Outdated":1780518166381<Date.now()-12096e5,[`Potentially Problematic Plugins: ${s.join(", ")}
 -# Note: These plugins might not be the cause of your problem. They are simply plugins that cause common issues.`]:s.length},u=`>>> ${Object.entries(a).map(([p,m])=>`**${p}**: ${m}`).join(`
