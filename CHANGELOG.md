@@ -1,5 +1,33 @@
 # Nexium Client — Notes de version
 
+## v158 — Les modules previennent l equipe
+
+### Des connecteurs sur chaque module
+
+- Protect, Privacy, Music, Reseau, les gardes de sortie, le stockage et les alertes ont
+  desormais un connecteur qui surveille leurs compteurs : module qui ne s est pas lance,
+  erreurs au journal, requetes sans reponse, ecriture refusee
+- Au-dela d un seuil, l equipe recoit un message. Un seul par module et par heure
+
+### Un message prive simule, visible de la seule equipe
+
+- Le message arrive dans la liste des conversations, envoye par Nexium Client alert
+- Ce compte n existe pas et n est jamais cree : il est fabrique dans la memoire du client
+- Rien n apparait sans deux conditions reunies : le compte Discord fait partie de l equipe,
+  et la session Nexium Admins est ouverte. Sans ca, aucun envoi
+- Discord ne part jamais chercher ce salon : les requetes qui le concernent sont interceptees
+  et recoivent une reponse valide sur place
+- Tout se retire, et un salon oublie est nettoye au demarrage suivant
+
+### Des boutons pour aller vite
+
+- Sous le message : publier une alerte publique, voir le diagnostic, ouvrir la page de statut,
+  ignorer pendant 24 heures
+- Publier depuis ce bouton envoie l alerte a tout le parc et sur le site en un clic
+- Les clics ne sortent pas du client : ils sont interceptes avant d atteindre Discord
+
+---
+
 ## v156 — Six pieges du meme type que la panne du 28
 
 ### Ce qui a ete trouve
