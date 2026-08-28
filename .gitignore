@@ -3,3 +3,6 @@ discord_krisp.1.log
 discord_krisp.log
 discord_utils.log
 .nexium-dev
+resources/equicord/renderer.js.bak-*
+resources/equicord/.nexium-update.log
+resources/modules/discord_dispatch/dispatch.log

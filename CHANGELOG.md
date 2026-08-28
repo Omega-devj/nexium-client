@@ -7,20 +7,20 @@
 - Ouvrir un serveur ou un message prive faisait tomber le client entier sur l ecran de
   plantage de Discord. Barre de serveurs vide, liste de conversations vide, plus rien
 - Le journal d erreurs de Nexium gardait la fonction d origine de console.error dans une
-  variable nommee `_ce`. Le zod embarque d Equicord declare `_ce` au meme niveau de portee,
-  pour `$ZodUnknown`, et l ecrase
+  variable nommee _ce. Le zod embarque d Equicord declare _ce au meme niveau de portee,
+  pour $ZodUnknown, et l ecrase
 - A partir de la, chaque appel a console.error appelait un constructeur zod avec le texte
   du message. Toute ecriture dans la console levait une exception
 - Elle tombait au pire endroit : dans le rattrapage d erreur de React. Une erreur benigne,
   que React aurait absorbee seul, detruisait l arbre entier de l interface
-- Les trois variables passent dans l espace de noms : `_NXce`, `_NXce0`, `_NXpce`
-- Verifie : plus aucune declaration de premier niveau du bloc Nexium hors de `_NX*`
+- Les trois variables passent dans l espace de noms : _NXce, _NXce0, _NXpce
+- Verifie : plus aucune declaration de premier niveau du bloc Nexium hors de _NX*
 
 Mesure sur un client reel, sans correctif en memoire : 0 serveur, 0 message, ecran de
 plantage present, puis 18 serveurs, 30 messages, ecran de plantage absent.
 
 Pourquoi maintenant et chez tout le monde : Discord a change de build, la minification
-d Equicord a reattribue le nom `_ce`, et la collision est apparue chez tous les clients
+d Equicord a reattribue le nom _ce, et la collision est apparue chez tous les clients
 le meme jour.
 
 ---
