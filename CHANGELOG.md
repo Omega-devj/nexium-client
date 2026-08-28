@@ -1,5 +1,23 @@
 # Nexium Client — Notes de version
 
+## v152 — Le client ne se saborde plus sur une erreur
+
+### Le plantage general
+
+- Ouvrir un serveur ou un message prive faisait tomber tout le client sur l ecran de
+  plantage de Discord. Plus de barre de serveurs, plus de liste de conversations, plus rien
+- La cause : le journal d erreurs de Nexium remplace console.error, et renvoyait vers la
+  fonction d origine sans filet. Quand Discord lui passait un objet dont la lecture echoue,
+  l exception repartait depuis ce renvoi
+- Elle tombait au pire endroit : dans le rattrapage d erreur de React. Une erreur benigne,
+  que React aurait absorbee seul, detruisait l arbre entier de l interface
+- Le renvoi est desormais protege. Une ligne de journal ne peut plus emporter le client
+
+Mesure avant / apres sur le meme client : 0 serveur, 0 message, ecran de plantage present
+puis 18 serveurs, 10 messages, ecran de plantage absent.
+
+---
+
 ## v151 — Correctifs de la NEW Gen
 
 ### Deux bugs bloquants

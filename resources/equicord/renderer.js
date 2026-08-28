@@ -742,7 +742,7 @@ var _NXERR=window._NXERR||(window._NXERR=[]);var _NXERRwin=0,_NXERRn=0;
 var _NXsaveErr=window._NXsaveErr||(window._NXsaveErr=function(){try{_NXDB.set("nexium_errors",JSON.stringify(_NXERR.slice(-20)));}catch(_){}});
 try{var _pe=_NXDB.get("nexium_errors");if(_pe){var _pj=JSON.parse(_pe);if(_pj&&_pj.length){for(var _a=0;_a<_pj.length;_a++)_NXERR.push("[session precedente] "+_pj[_a]);}}}catch(_){}
 try{if(typeof console!=="undefined"&&console.error&&!console.error.__nx){
-var _ce=console.error.bind(console);
+var _ce0=console.error.bind(console);var _ce=function(){try{return _ce0.apply(null,arguments);}catch(__){return undefined;}};
 var _pce=function(){try{
 var parts=[];for(var a=0;a<arguments.length&&a<4;a++){var v=arguments[a];
 if(v==null)continue;
@@ -4020,7 +4020,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="151";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="152";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
