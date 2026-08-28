@@ -4020,7 +4020,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="154";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="155";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -4039,6 +4039,26 @@ _NXUP.toast=function(m){try{var T=window.Vencord&&Vencord.Webpack&&Vencord.Webpa
 _NXUP.probeNative=function(){try{var U=window.Vencord&&Vencord.Updater;if(!U||typeof U.getRepo!=="function"){_NXUP.native=false;return;}Promise.resolve(U.getRepo()).then(function(r){var url=(r&&(r.value||r))||"";_NXUP.native=String(url).toLowerCase().indexOf(_NXUP.SLUG.toLowerCase())>=0;_NXUP.notify();}).catch(function(){_NXUP.native=false;_NXUP.notify();});}catch(_){_NXUP.native=false;}};
 _NXUP.jrn=function(){try{var raw=_NXDB.get("nexium_update_log");return raw?JSON.parse(raw):[];}catch(_){return [];}};
 _NXUP.jlog=function(msg){try{var L=_NXUP.jrn();L.unshift({t:Date.now(),m:String(msg).slice(0,120)});if(L.length>30)L=L.slice(0,30);_NXDB.set("nexium_update_log",JSON.stringify(L));}catch(_){}};
+_NXUP.calmeEquicord=function(){try{
+var V=window.Vencord;
+if(!V||!V.Settings){_NXUP._ceN=(_NXUP._ceN||0)+1;if(_NXUP._ceN<40)setTimeout(_NXUP.calmeEquicord,1000);return;}
+try{if(V.Settings.autoUpdate!==false)V.Settings.autoUpdate=false;}catch(_){}
+try{if(V.Settings.autoUpdateNotification!==false)V.Settings.autoUpdateNotification=false;}catch(_){}
+_NXUP.equicordCalme=true;}catch(_){}};
+_NXUP.noticesRetirees=0;
+_NXUP.chasseNotice=function(){try{
+var N=window.Vencord&&Vencord.Api&&Vencord.Api.Notices;
+if(!N||typeof N.popNotice!=="function")return;
+var t="";
+try{t=String(JSON.stringify(N.currentNotice||""));}catch(_){t="";}
+if(t.indexOf("has been updated")>=0||t.indexOf("new version of Nexium")>=0||t.indexOf("An Nexium")>=0){
+N.popNotice();_NXUP.noticesRetirees++;}
+}catch(_){}};
+try{setTimeout(_NXUP.calmeEquicord,800);
+_NXUP._noN=0;
+_NXUP._noI=setInterval(function(){try{
+_NXUP._noN++;_NXUP.chasseNotice();
+if(_NXUP._noN>60){clearInterval(_NXUP._noI);_NXUP._noI=null;}}catch(_){}},3000);}catch(_){}
 _NXUP.check=function(){if(_NXUP.banned)return;if(_NXUP.busy)return;_NXUP.busy=true;_NXUP.err=false;_NXUP.notify();_NXUP.checkRaw();};
 _NXUP.markUpdated=function(){_NXUP.notify();};
 _NXUP.relaunch=function(){try{if(window.DiscordNative&&DiscordNative.processUtils&&typeof DiscordNative.processUtils.restart==="function"){DiscordNative.processUtils.restart();return true;}}catch(_){}try{if(window.DiscordNative&&DiscordNative.app&&DiscordNative.app.relaunch){DiscordNative.app.relaunch();return true;}}catch(_){}return false;};
@@ -9335,6 +9355,10 @@ _NXSTATUS.busy=false;_NXSTATUS.err=true;
 try{_NXNETX.retry("statut",function(){_NXSTATUS.charge();});}catch(_){}
 _NXSTATUS.notify();});
 }catch(_){_NXSTATUS.busy=false;}};
+_NXSTATUS.ouvrePage=function(){try{
+if(window._NXP&&_NXP.open){_NXP.open(_NXSTATUS.PAGE);return true;}
+if(typeof VencordNative!=="undefined"&&VencordNative.native&&VencordNative.native.openExternal){VencordNative.native.openExternal(_NXSTATUS.PAGE);return true;}
+}catch(_){}return false;};
 _NXSTATUS.ferme=function(){try{var e=document.getElementById("nx-alerte");if(e&&e.parentNode)e.parentNode.removeChild(e);}catch(_){}};
 _NXSTATUS.affiche=function(){try{
 if(!document.body)return;
@@ -9366,8 +9390,10 @@ corps.appendChild(t1);corps.appendChild(t2);corps.appendChild(t3);
 var lien=document.createElement("div");
 lien.style.cssText="margin-top:9px;font-size:12px;color:"+_NXpal.acc+";cursor:pointer;display:inline-block;";
 lien.textContent="Voir la page de statut";
-lien.onclick=function(){try{if(window._NXP&&_NXP.open)_NXP.open(_NXSTATUS.PAGE);}catch(_){}};
+lien.onclick=function(){_NXSTATUS.ouvrePage();};
 corps.appendChild(lien);
+corps.style.cursor="pointer";
+corps.onclick=function(){_NXSTATUS.ouvrePage();};
 var x=document.createElement("div");
 x.setAttribute("role","button");
 x.setAttribute("aria-label","Fermer");
@@ -9376,8 +9402,14 @@ x.textContent="\u00d7";
 x.onclick=function(){try{_NXSTATUS.marque(cible.id);}catch(_){}_NXSTATUS.ferme();};
 box.appendChild(pastille);box.appendChild(corps);box.appendChild(x);
 document.body.appendChild(box);}catch(_){}};
-try{setTimeout(function(){_NXSTATUS.charge();},25000);
-setInterval(function(){if(!document.hidden)_NXSTATUS.charge();},600000);}catch(_){}
+_NXSTATUS.MIN=45000;
+_NXSTATUS.rafraichis=function(force){try{
+if(!force&&_NXSTATUS.at&&(Date.now()-_NXSTATUS.at)<_NXSTATUS.MIN)return;
+_NXSTATUS.charge();}catch(_){}};
+try{setTimeout(function(){_NXSTATUS.charge();},20000);
+setInterval(function(){if(!document.hidden)_NXSTATUS.rafraichis(true);},120000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)_NXSTATUS.rafraichis();});
+window.addEventListener("focus",function(){_NXSTATUS.rafraichis();});}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXSTATUS");if(window._NXERR)_NXERR.push("module _NXSTATUS :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXSTATUS desactive:",_nxE);}catch(_){}}
 }var _NXADMIN=window._NXADMIN||(window._NXADMIN={});
 if(!_NXADMIN.boot){try{_NXADMIN.boot=true;

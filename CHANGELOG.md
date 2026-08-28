@@ -1,5 +1,24 @@
 # Nexium Client — Notes de version
 
+## v155 — La banderole de mise a jour, et des alertes plus reactives
+
+### La banderole qui ne partait jamais
+
+- Un bandeau vert  Nexium Client has been updated  restait affiche en permanence en haut de
+  la fenetre, sans moyen de le fermer autrement qu en redemarrant
+- Il venait de l updater d Equicord, pas de celui de Nexium. A chaque lancement il croyait
+  avoir mis le client a jour et reposait son bandeau
+- Il est desormais desactive : Nexium a son propre updater, et celui d Equicord pointait
+  ailleurs. Un bandeau deja affiche est retire automatiquement
+
+### Alertes
+
+- Les alertes sont relues toutes les deux minutes au lieu de dix, et des que la fenetre
+  revient au premier plan
+- Le bandeau d alerte entier est cliquable et mene a la page de statut
+
+---
+
 ## v154 — Page de statut et alertes d administration
 
 ### Savoir quand quelque chose ne va pas
