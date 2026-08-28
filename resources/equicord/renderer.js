@@ -2636,7 +2636,7 @@ try{_NXP.applyHardware();_NXP.wireRtc();_NXP.wireClip();}catch(_){}
 try{_NXP.quietTick();setInterval(function(){try{_NXP.quietTick();}catch(_){}},60000);}catch(_){}
 try{window.addEventListener("beforeunload",function(){try{_NXP.purgeTraces();}catch(_){}});}catch(_){}
 try{document.addEventListener("visibilitychange",function(){if(document.hidden)_NXP.saveStatsNow();});}catch(_){}
-try{(function(){if(window.fetch&&!window.fetch.__nx){var _of=window.fetch.bind(window);var pf=function(input,opts){try{var _mpu=typeof input==="string"?input:(input&&input.url)?input.url:"";var _mpr=window._NXMP&&_NXMP.faux&&_NXMP.faux(_mpu,opts);if(_mpr)return Promise.resolve(new Response(_mpr.corps,{status:_mpr.code,headers:{"Content-Type":"application/json"}}));}catch(_){}try{var url=typeof input==="string"?input:(input&&input.url)?input.url:"";if(url&&window._NXV&&_NXV.checkOut(url,opts||(input&&typeof input==="object"?input:null),"requete"))return Promise.resolve(new Response("",{status:403,statusText:"Blocked by Nexium"}));
+try{(function(){if(window.fetch&&!window.fetch.__nx){var _of=window.fetch.bind(window);var pf=function(input,opts){try{var url=typeof input==="string"?input:(input&&input.url)?input.url:"";if(url&&window._NXV&&_NXV.checkOut(url,opts||(input&&typeof input==="object"?input:null),"requete"))return Promise.resolve(new Response("",{status:403,statusText:"Blocked by Nexium"}));
 if(url&&_NXP.shouldBlock(url))return Promise.resolve(new Response("",{status:204,statusText:"No Content"}));if(url)opts=_NXP.prepare(url,opts);}catch(_){}return _of(input,opts);};pf.__nx=true;window.fetch=pf;}})();}catch(_){}
 try{(function(){if(navigator.sendBeacon&&!navigator.sendBeacon.__nx){var _ob=navigator.sendBeacon.bind(navigator);var pb=function(url,data){try{if(url&&window._NXV&&_NXV.checkOut(url,{body:data},"balise"))return true;if(url&&_NXP.shouldBlock(url))return true;}catch(_){}return _ob(url,data);};pb.__nx=true;navigator.sendBeacon=pb;}})();}catch(_){}
 try{(function(){if(window.XMLHttpRequest&&!window.XMLHttpRequest.prototype.__nx){var _open=window.XMLHttpRequest.prototype.open;var _send=window.XMLHttpRequest.prototype.send;window.XMLHttpRequest.prototype.open=function(m,u){try{this.__nxurl=u;this.__nxh={};}catch(_){}return _open.apply(this,arguments);};
@@ -2820,7 +2820,7 @@ _NXNET.logConn=function(type){try{_NXNET.conn.unshift({t:Date.now(),type:type});
 _NXNET.isApi=function(u){return /discord(app)?\.com\/api\//.test(u)||/^\/api\/v\d+\//.test(u);};
 _NXNET.wireConn=function(){try{var C=_NXcommon();var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));if(!FX||!FX.subscribe){_NXNET.tr=(_NXNET.tr||0)+1;if(_NXNET.tr<25)setTimeout(_NXNET.wireConn,1500);return;}FX.subscribe("CONNECTION_OPEN",function(){_NXNET.logConn("Connexion ouverte");});FX.subscribe("RESUMED",function(){_NXNET.logConn("Session reprise");});FX.subscribe("GATEWAY_CONNECTED",function(){_NXNET.logConn("Gateway connectée");});FX.subscribe("CONNECTION_CLOSED",function(){_NXNET.logConn("Connexion fermée");});}catch(_){}};
 _NXNET.logConn("Client démarré");_NXNET.wireConn();}
-try{(function(){if(window.fetch&&!window.fetch.__nxlat){var _lf=window.fetch.bind(window);var lf=function(input,opts){try{var _mpu2=typeof input==="string"?input:(input&&input.url)?input.url:"";if(window._NXMP&&_NXMP.faux&&_NXMP.faux(_mpu2,opts))return _lf(input,opts);}catch(_){}if(_NXNET.paused)return _lf(input,opts);var u="";try{u=typeof input==="string"?input:(input&&input.url)?input.url:"";}catch(_){}try{if(u)_NXNET.noteHost(u);}catch(_){}if(u&&_NXNET.isApi(u)){var t0=(typeof performance!=="undefined"&&performance.now)?performance.now():Date.now();return _lf(input,opts).then(function(r){try{_NXNET.sample(((typeof performance!=="undefined"&&performance.now)?performance.now():Date.now())-t0,u);}catch(_){}return r;},function(e){throw e;});}return _lf(input,opts);};lf.__nxlat=true;window.fetch=lf;}})();}catch(_){}
+try{(function(){if(window.fetch&&!window.fetch.__nxlat){var _lf=window.fetch.bind(window);var lf=function(input,opts){if(_NXNET.paused)return _lf(input,opts);var u="";try{u=typeof input==="string"?input:(input&&input.url)?input.url:"";}catch(_){}try{if(u)_NXNET.noteHost(u);}catch(_){}if(u&&_NXNET.isApi(u)){var t0=(typeof performance!=="undefined"&&performance.now)?performance.now():Date.now();return _lf(input,opts).then(function(r){try{_NXNET.sample(((typeof performance!=="undefined"&&performance.now)?performance.now():Date.now())-t0,u);}catch(_){}return r;},function(e){throw e;});}return _lf(input,opts);};lf.__nxlat=true;window.fetch=lf;}})();}catch(_){}
 try{(function(){var XP=window.XMLHttpRequest&&window.XMLHttpRequest.prototype;if(XP&&!XP.__nxlat){var _xo=XP.open;XP.open=function(m,u){try{this.__nxlu=u;}catch(_){}return _xo.apply(this,arguments);};var _xs=XP.send;XP.send=function(){try{var self=this;if(self.__nxlu&&_NXNET.isApi(self.__nxlu)){var t0=(typeof performance!=="undefined"&&performance.now)?performance.now():Date.now();self.addEventListener("loadend",function(){try{_NXNET.sample(((typeof performance!=="undefined"&&performance.now)?performance.now():Date.now())-t0,self.__nxlu);}catch(_){}});}}catch(_){}return _xs.apply(this,arguments);};XP.__nxlat=true;}})();}catch(_){}var _NXCL=window._NXCL||(window._NXCL={});
 if(!_NXCL.boot){_NXCL.boot=true;_NXCL.KEY="nexium_changelog_v1";
 _NXCL.URL="https://raw.githubusercontent.com/Omega-devj/changelog-client-nexium/refs/heads/main/changelog.txt";
@@ -4020,7 +4020,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="158";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="162";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -4211,7 +4211,8 @@ _NXLY.typeLabel=function(t){return t===2?"Écoute":t===1?"Diffuse":t===3?"Regard
 _NXLY.actImgSmall=function(a){try{var as=a&&a.assets;if(as&&as.small_image){var s=as.small_image;if(s.indexOf("mp:external/")===0)return "https://media.discordapp.net/external/"+s.slice(12);if(s.indexOf("http")===0)return s;if(a.application_id)return "https://cdn.discordapp.com/app-assets/"+a.application_id+"/"+s+".png";}}catch(_){}return null;};
 _NXLY.acts=function(){try{var d=_NXLY.data;if(!d)return [];var out=[];if(d.listening_to_spotify&&d.spotify){var sp=d.spotify,ts=(d.activities||[]).filter(function(z){return z.type===2;})[0];var st=ts&&ts.timestamps;out.push({spotify:true,label:"Écoute sur Spotify",name:sp.song,sub:sp.artist,sub2:sp.album,img:sp.album_art_url,imgSmall:null,elapsed:null,start:st&&st.start,end:st&&st.end});}var acts=d.activities||[];for(var a=0;a<acts.length;a++){var x=acts[a];if(x.type===4)continue;if(x.type===2&&x.name==="Spotify"&&d.listening_to_spotify)continue;var tt=x.timestamps||{};out.push({spotify:false,label:_NXLY.typeLabel(x.type)+" "+(x.name||""),name:x.details||x.name||"",sub:x.state||"",sub2:(x.details&&x.name&&x.details!==x.name)?x.name:"",img:_NXLY.actImg(x),imgSmall:_NXLY.actImgSmall(x),elapsed:_NXLY.elapsed(x),start:tt.start,end:tt.end});}return out;}catch(_){return [];}};
 }
-var NexiumAdminIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20,"aria-hidden":"true"},i("path",{d:"M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"}));};
+var NexiumAdminIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20,"aria-hidden":"true"},i("path",{d:"M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"}));};
+var NexiumHomeIcon=function(){return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:20,height:20,"aria-hidden":"true"},i("path",{d:"M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z"}));};
 function NexiumAdminComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 F.useEffect(function(){
@@ -9495,113 +9496,205 @@ if(r.ok)_NXADMIN.charge();cb(r);});
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXADMIN");if(window._NXERR)_NXERR.push("module _NXADMIN :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXADMIN desactive:",_nxE);}catch(_){}}
 }var _NXMP=window._NXMP||(window._NXMP={});
 if(!_NXMP.boot){try{_NXMP.boot=true;
-_NXMP.UID="5900000000000000041";
-_NXMP.CID="5900000000000000042";
 _NXMP.NOM="Nexium Client alert";
+_NXMP.ID="nx-panneau";
 _NXMP.pose=false;
 _NXMP.messages=[];
 _NXMP.actions={};
 _NXMP.seq=0;
-_NXMP.FX=function(){try{var C=_NXcommon();return C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"))||null;}catch(_){return null;}};
+_NXMP.J=function(n,r){return "var("+n+","+r+")";};
+_NXMP.T={
+fond:_NXMP.J("--bg-surface-overlay",_NXMP.J("--background-floating","#111214")),
+fond2:_NXMP.J("--bg-surface-raised",_NXMP.J("--background-secondary","#2b2d31")),
+texte:_NXMP.J("--text-default",_NXMP.J("--text-normal","#dbdee1")),
+doux:_NXMP.J("--text-muted","#949ba4"),
+bord:_NXMP.J("--border-subtle","rgba(148,155,164,.12)"),
+bord2:_NXMP.J("--border-normal","rgba(148,155,164,.2)"),
+police:_NXMP.J("--font-primary","'gg sans','Noto Sans',Helvetica,Arial,sans-serif"),
+rayon:_NXMP.J("--radius-sm","8px"),
+ombre:_NXMP.J("--elevation-high","0 8px 16px rgba(0,0,0,.24)"),
+marque:"#5865f2",danger:"#da373c",or:"#e6c48a"};
 _NXMP.autorise=function(){try{return !!(window._NXADMIN&&_NXADMIN.estEquipe()&&_NXADMIN.connecte());}catch(_){return false;}};
-_NXMP.flocon=function(){try{
-var t=Math.max(0,Date.now()-1420070400000);
-_NXMP.seq=(_NXMP.seq+1)%4096;
-return String(t*4194304+_NXMP.seq);}catch(_){return String(Date.now());}};
-
-_NXMP.faux=function(u,opts){try{
-var v=String(u||"");
-if(v.indexOf("/interactions")>=0){
-var b="";try{b=(opts&&typeof opts.body==="string")?opts.body:"";}catch(_){b="";}
-if(b&&b.indexOf("nx_")>=0){
-var m=b.match(/"custom_id"\s*:\s*"(nx_\d+)"/);
-if(m){
-try{setTimeout(function(){_NXMP.clic(m[1]);},0);}catch(_){}
-return {corps:"",code:204};}}
-return null;}
-if(v.indexOf(_NXMP.CID)<0&&v.indexOf(_NXMP.UID)<0)return null;
-if(/\/messages/.test(v))return {corps:"[]",code:200};
-if(/\/ack/.test(v))return {corps:'{"token":null}',code:200};
-if(/\/typing/.test(v))return {corps:"",code:204};
-if(/\/interactions/.test(v))return {corps:"",code:204};
-return {corps:"{}",code:200};}catch(_){return null;}};
-
-_NXMP.utilisateur=function(){return {
-id:_NXMP.UID,username:"nexium-alert",global_name:_NXMP.NOM,discriminator:"0000",
-avatar:null,bot:true,system:true,publicFlags:0,flags:0,
-avatarDecorationData:null,banner:null,accentColor:null};};
-
-_NXMP.salon=function(){var moi="";
-try{var US=_NXcommon().store("UserStore");var u=US&&US.getCurrentUser&&US.getCurrentUser();moi=(u&&u.id)||"";}catch(_){}
-return {id:_NXMP.CID,type:1,name:null,guild_id:null,
-recipients:[_NXMP.UID],recipient_ids:[_NXMP.UID],
-owner_id:moi,last_message_id:null,flags:0,is_message_request:false,
-is_spam:false,rawRecipients:[_NXMP.utilisateur()]};};
-
+_NXMP.cle=function(){_NXMP.seq=(_NXMP.seq+1)%100000;return "nx_"+Date.now()+"_"+_NXMP.seq;};
+_NXMP.heure=function(d){try{
+var h=d.getHours(),m=d.getMinutes();
+return (h<10?"0":"")+h+":"+(m<10?"0":"")+m;}catch(_){return "";}};
+_NXMP.aujourdhui=function(d){try{
+return d.toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"});}catch(_){return "";}};
+_NXMP.style=function(){try{
+if(document.getElementById("nx-panneau-style"))return;
+var T=_NXMP.T;
+var c=document.createElement("style");
+c.id="nx-panneau-style";
+c.textContent=
+"#"+_NXMP.ID+"{position:fixed;right:20px;bottom:20px;z-index:2147483000;width:440px;max-width:calc(100vw - 40px);"+
+"max-height:min(70vh,620px);display:flex;flex-direction:column;background:"+T.fond+";border:1px solid "+T.bord2+";"+
+"border-radius:"+T.rayon+";box-shadow:"+T.ombre+";font-family:"+T.police+";color:"+T.texte+";overflow:hidden;}"+
+"#"+_NXMP.ID+" .nx-tete{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid "+T.bord+";flex:0 0 auto;}"+
+"#"+_NXMP.ID+" .nx-tete b{font-size:15px;font-weight:600;letter-spacing:-.01em;}"+
+"#"+_NXMP.ID+" .nx-fermer{margin-left:auto;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;"+
+"justify-content:center;color:"+T.doux+";cursor:pointer;font-size:18px;line-height:1;flex:0 0 auto;}"+
+"#"+_NXMP.ID+" .nx-fermer:hover{background:rgba(148,155,164,.12);color:"+T.texte+";}"+
+"#"+_NXMP.ID+" .nx-corps{overflow-y:auto;overflow-x:hidden;padding:8px 0 16px;flex:1 1 auto;}"+
+"#"+_NXMP.ID+" .nx-jour{display:flex;align-items:center;gap:10px;margin:12px 16px 8px;color:"+T.doux+";"+
+"font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;}"+
+"#"+_NXMP.ID+" .nx-jour i{flex:1;height:1px;background:"+T.bord+";display:block;}"+
+"#"+_NXMP.ID+" .nx-msg{display:flex;gap:14px;padding:8px 16px;}"+
+"#"+_NXMP.ID+" .nx-msg:hover{background:rgba(148,155,164,.05);}"+
+"#"+_NXMP.ID+" .nx-av{width:40px;height:40px;border-radius:50%;flex:0 0 auto;background:#101013;"+
+"display:flex;align-items:center;justify-content:center;}"+
+"#"+_NXMP.ID+" .nx-bloc{flex:1;min-width:0;}"+
+"#"+_NXMP.ID+" .nx-ligne{display:flex;align-items:center;gap:6px;margin-bottom:2px;}"+
+"#"+_NXMP.ID+" .nx-nom{font-size:16px;font-weight:500;color:"+T.texte+";}"+
+"#"+_NXMP.ID+" .nx-tag{background:"+T.marque+";color:#fff;font-size:10px;font-weight:500;line-height:1;"+
+"padding:3px 4px;border-radius:3px;text-transform:uppercase;letter-spacing:.02em;}"+
+"#"+_NXMP.ID+" .nx-h{font-size:12px;color:"+T.doux+";margin-left:2px;}"+
+"#"+_NXMP.ID+" .nx-embed{border-left:4px solid "+T.or+";background:"+T.fond2+";border-radius:4px;"+
+"padding:9px 14px 12px 12px;margin-top:6px;max-width:420px;}"+
+"#"+_NXMP.ID+" .nx-et{font-size:15px;font-weight:600;color:"+T.texte+";margin-bottom:5px;}"+
+"#"+_NXMP.ID+" .nx-ed{font-size:14px;line-height:1.42;color:"+T.doux+";white-space:pre-wrap;word-break:break-word;}"+
+"#"+_NXMP.ID+" .nx-ef{font-size:12px;color:"+T.doux+";margin-top:9px;display:flex;align-items:center;gap:6px;}"+
+"#"+_NXMP.ID+" .nx-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px;}"+
+"#"+_NXMP.ID+" .nx-b{height:32px;min-width:60px;padding:2px 16px;border-radius:"+T.rayon+";font-size:14px;"+
+"font-weight:500;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;border:none;"+
+"font-family:inherit;transition:background-color .17s ease;}"+
+"#"+_NXMP.ID+" .nx-b1{background:"+T.marque+";color:#fff;}"+
+"#"+_NXMP.ID+" .nx-b1:hover{background:#4752c4;}"+
+"#"+_NXMP.ID+" .nx-b2{background:#4e5058;color:#fff;}"+
+"#"+_NXMP.ID+" .nx-b2:hover{background:#6d6f78;}"+
+"#"+_NXMP.ID+" .nx-b4{background:"+T.danger+";color:#fff;}"+
+"#"+_NXMP.ID+" .nx-b4:hover{background:#a12828;}"+
+"#"+_NXMP.ID+" .nx-vide{padding:26px 16px;text-align:center;color:"+T.doux+";font-size:13px;}"+
+"@media (prefers-reduced-motion: reduce){#"+_NXMP.ID+" .nx-b{transition:none;}}";
+if(document.head)document.head.appendChild(c);}catch(_){}};
+_NXMP.avatar=function(){try{
+var d=document.createElement("div");
+d.className="nx-av";
+d.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">'+
+'<path fill="'+_NXMP.T.or+'" d="M12 2 3 6v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V6l-9-4zm0 4.2 5 2.2v3.6c0 3.6-2.1 7-5 8.1-2.9-1.1-5-4.5-5-8.1V8.4l5-2.2z"/></svg>';
+return d;}catch(_){return document.createElement("div");}};
 _NXMP.monte=function(){try{
-if(_NXMP.pose)return true;
 if(!_NXMP.autorise())return false;
-var FX=_NXMP.FX();if(!FX||!FX.dispatch)return false;
-try{FX.dispatch({type:"USER_UPDATE",user:_NXMP.utilisateur()});}catch(_){}
-try{FX.dispatch({type:"CHANNEL_CREATE",channel:_NXMP.salon()});}catch(_){}
+if(document.getElementById(_NXMP.ID)){_NXMP.pose=true;return true;}
+if(!document.body)return false;
+_NXMP.style();
+var T=_NXMP.T;
+var p=document.createElement("div");
+p.id=_NXMP.ID;
+p.setAttribute("role","dialog");
+p.setAttribute("aria-label",_NXMP.NOM);
+var tete=document.createElement("div");
+tete.className="nx-tete";
+tete.appendChild(_NXMP.avatar());
+var nom=document.createElement("b");
+nom.textContent=_NXMP.NOM;
+tete.appendChild(nom);
+var tag=document.createElement("span");
+tag.className="nx-tag";
+tag.textContent="BOT";
+tete.appendChild(tag);
+var x=document.createElement("div");
+x.className="nx-fermer";
+x.setAttribute("role","button");
+x.setAttribute("aria-label","Fermer");
+x.textContent="\u00d7";
+x.onclick=function(){_NXMP.ferme();};
+tete.appendChild(x);
+var corps=document.createElement("div");
+corps.className="nx-corps";
+p.appendChild(tete);p.appendChild(corps);
+document.body.appendChild(p);
 _NXMP.pose=true;
+for(var a=0;a<_NXMP.messages.length;a++)_NXMP.rend(_NXMP.messages[a]);
+if(!_NXMP.messages.length){
+var v=document.createElement("div");
+v.className="nx-vide";
+v.textContent="Aucune alerte pour le moment.";
+corps.appendChild(v);}
 return true;}catch(_){return false;}};
-
-_NXMP.retire=function(){try{
-var FX=_NXMP.FX();
-if(FX&&FX.dispatch){
-for(var a=0;a<_NXMP.messages.length;a++){
-try{FX.dispatch({type:"MESSAGE_DELETE",channelId:_NXMP.CID,id:_NXMP.messages[a],mlDeleted:true});}catch(_){}}
-try{FX.dispatch({type:"CHANNEL_DELETE",channel:{id:_NXMP.CID,type:1}});}catch(_){}}
-_NXMP.messages=[];_NXMP.actions={};_NXMP.pose=false;
+_NXMP.rend=function(m){try{
+var p=document.getElementById(_NXMP.ID);
+if(!p)return false;
+var corps=p.querySelector(".nx-corps");
+if(!corps)return false;
+var vide=corps.querySelector(".nx-vide");
+if(vide&&vide.parentNode)vide.parentNode.removeChild(vide);
+var d=new Date(m.at);
+if(corps.getAttribute("data-jour")!==_NXMP.aujourdhui(d)){
+corps.setAttribute("data-jour",_NXMP.aujourdhui(d));
+var j=document.createElement("div");
+j.className="nx-jour";
+j.appendChild(document.createElement("i"));
+var jt=document.createElement("span");
+jt.textContent=_NXMP.aujourdhui(d);
+j.appendChild(jt);
+j.appendChild(document.createElement("i"));
+corps.appendChild(j);}
+var msg=document.createElement("div");
+msg.className="nx-msg";
+msg.setAttribute("data-nx-msg",m.id);
+msg.appendChild(_NXMP.avatar());
+var bloc=document.createElement("div");
+bloc.className="nx-bloc";
+var ligne=document.createElement("div");
+ligne.className="nx-ligne";
+var nm=document.createElement("span");
+nm.className="nx-nom";nm.textContent=_NXMP.NOM;
+var tg=document.createElement("span");
+tg.className="nx-tag";tg.textContent="BOT";
+var hh=document.createElement("span");
+hh.className="nx-h";hh.textContent="Aujourd hui a "+_NXMP.heure(d);
+ligne.appendChild(nm);ligne.appendChild(tg);ligne.appendChild(hh);
+bloc.appendChild(ligne);
+var emb=document.createElement("div");
+emb.className="nx-embed";
+var et=document.createElement("div");
+et.className="nx-et";et.textContent=m.titre;
+var ed=document.createElement("div");
+ed.className="nx-ed";ed.textContent=m.corps;
+emb.appendChild(et);emb.appendChild(ed);
+var ef=document.createElement("div");
+ef.className="nx-ef";
+ef.textContent="Nexium \u00b7 connecteurs";
+emb.appendChild(ef);
+bloc.appendChild(emb);
+if(m.boutons&&m.boutons.length){
+var bs=document.createElement("div");
+bs.className="nx-btns";
+for(var a=0;a<m.boutons.length&&a<5;a++){
+(function(b){
+var el=document.createElement("button");
+el.type="button";
+el.className="nx-b nx-b"+(b.style||2);
+el.textContent=b.libelle;
+el.onclick=function(){try{if(typeof b.run==="function")b.run();}catch(_){}};
+bs.appendChild(el);})(m.boutons[a]);}
+bloc.appendChild(bs);}
+msg.appendChild(bloc);
+corps.appendChild(msg);
+try{corps.scrollTop=corps.scrollHeight;}catch(_){}
 return true;}catch(_){return false;}};
-
-_NXMP.boutons=function(liste){try{
-var out=[],a;
-for(a=0;a<liste.length&&a<5;a++){
-var b=liste[a];
-var id="nx_"+_NXMP.flocon();
-_NXMP.actions[id]=b.run;
-out.push({type:2,style:b.style||2,label:String(b.libelle).slice(0,60),custom_id:id});}
-return out.length?[{type:1,components:out}]:[];}catch(_){return [];}};
-
-_NXMP.dis=function(titre,corps,liste){try{
+_NXMP.dis=function(titre,corps,boutons){try{
 if(!_NXMP.autorise())return false;
+var m={id:_NXMP.cle(),at:Date.now(),titre:String(titre||"").slice(0,240),
+corps:String(corps||"").slice(0,1800),boutons:boutons||[]};
+_NXMP.messages.push(m);
+if(_NXMP.messages.length>20)_NXMP.messages.shift();
+var existait=!!document.getElementById(_NXMP.ID);
 if(!_NXMP.monte())return false;
-var FX=_NXMP.FX();if(!FX||!FX.dispatch)return false;
-var id=_NXMP.flocon();
-var msg={
-id:id,type:0,channel_id:_NXMP.CID,
-author:_NXMP.utilisateur(),
-content:"",
-timestamp:new Date().toISOString(),edited_timestamp:null,
-tts:false,mention_everyone:false,mentions:[],mention_roles:[],
-attachments:[],reactions:[],pinned:false,flags:0,
-embeds:[{type:"rich",title:String(titre).slice(0,240),
-description:String(corps).slice(0,1800),
-color:14468234,footer:{text:"Nexium — connecteurs"},
-timestamp:new Date().toISOString()}],
-components:_NXMP.boutons(liste||[])};
-FX.dispatch({type:"MESSAGE_CREATE",channelId:_NXMP.CID,message:msg,optimistic:false,isPushNotification:false});
-_NXMP.messages.push(id);
-if(_NXMP.messages.length>20){
-var vieux=_NXMP.messages.shift();
-try{FX.dispatch({type:"MESSAGE_DELETE",channelId:_NXMP.CID,id:vieux,mlDeleted:true});}catch(_){}}
+if(existait)_NXMP.rend(m);
 return true;}catch(_){return false;}};
-
-_NXMP.clic=function(id){try{
-var f=_NXMP.actions[id];
-if(typeof f==="function"){f();return true;}
-return false;}catch(_){return false;}};
-
-_NXMP.ouvre=function(){try{
-if(!_NXMP.monte())return false;
-if(window._NXCP&&_NXCP.routeur){}
-var FX=_NXMP.FX();
-if(FX&&FX.dispatch)FX.dispatch({type:"CHANNEL_SELECT",channelId:_NXMP.CID,guildId:null});
+_NXMP.ferme=function(){try{
+var p=document.getElementById(_NXMP.ID);
+if(p&&p.parentNode)p.parentNode.removeChild(p);
+_NXMP.pose=false;
 return true;}catch(_){return false;}};
-
-try{setTimeout(function(){try{if(!_NXMP.autorise())_NXMP.retire();}catch(_){}},12000);}catch(_){}
+_NXMP.retire=function(){try{
+_NXMP.ferme();
+_NXMP.messages=[];_NXMP.actions={};
+return true;}catch(_){return false;}};
+_NXMP.ouvre=function(){try{return _NXMP.monte();}catch(_){return false;}};
+try{setTimeout(function(){try{if(!_NXMP.autorise())_NXMP.ferme();}catch(_){}},12000);}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXMP");if(window._NXERR)_NXERR.push("module _NXMP :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXMP desactive:",_nxE);}catch(_){}}
 }var _NXCONN=window._NXCONN||(window._NXCONN={});
 if(!_NXCONN.boot){try{_NXCONN.boot=true;
@@ -10301,7 +10394,7 @@ _NXfoot("Nexium Changelog · lu depuis le dépôt, aucune donnée envoyée")));
     height: calc(1rem + 4px);
     max-height: calc(1rem + 4px)
 }
-`,classNames:{},dom:null});Wye="src/plugins/_api/messageDecorations/style.css"});var QT,Qye=h(()=>{"use strict";d();O();R();Kye();QT=A({name:"MessageDecorationsAPI",description:"API to add decorations to messages",authors:[w.TheSun],managedStyle:Wye,patches:[{find:"#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",replacement:{match:/#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,replace:"$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"}}]})});var ZT,Zye=h(()=>{"use strict";d();O();R();ZT=A({name:"MessageEventsAPI",description:"Api required by anything using message events.",authors:[w.Arjix,w.hunt,w.Ven],patches:[{find:"#{intl::EDIT_TEXTAREA_HELP}",replacement:{match:/(?<=,channel:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,replace:(e,t)=>`async ${e}if(await Vencord.Api.MessageEvents._handlePreEdit(${t}))return Promise.resolve({shouldClear:false,shouldRefocus:true});`}},{find:".handleSendMessage,onResize:",replacement:{match:/let (\i)=\i\.\i\.parse\((\i),.+?\.getSendMessageOptions\(\{.+?\}\)?;(?=.+?(\i)\.flags=)(?<=\)\(({.+?})\)\.then.+?)/,replace:(e,t,n,o,r)=>e+`if(await Vencord.Api.MessageEvents._handlePreSend(${n}.id,${t},${r},${o}))return{shouldClear:false,shouldRefocus:true};`}},{find:'("interactionUsernameProfile',replacement:{match:/let\{id:\i}=(\i),{id:\i}=(\i);return \i\.useCallback\((\i)=>\{/,replace:(e,t,n,o)=>`const vcMsg=${t},vcChan=${n};${e}Vencord.Api.MessageEvents._handleClick(vcMsg,vcChan,${o});`}}]})});var YT,Yye=h(()=>{"use strict";d();O();R();YT=A({name:"MessagePopoverAPI",description:"API to add buttons to message popovers.",authors:[w.KingFish,w.Ven,w.Nuckyz],patches:[{find:"#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",replacement:{match:/(?<=\]\}\)),(.{0,40}togglePopout:.+?\}\))\]\}\):null,(?<=\((\i\.\i),\{label:.+?:null,(\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,replace:(e,t,n,o,r)=>`]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${n},${r}),${o}?${t}:null,`}}]})});var JT,Jye=h(()=>{"use strict";d();O();R();JT=A({name:"MessageUpdaterAPI",description:"API for updating and re-rendering messages.",authors:[w.Nuckyz],patches:[{find:"}renderStickersAccessories(",replacement:{match:/(?<=this.props,\i,\[)"message",/,replace:""}}]})});var XT,Xye=h(()=>{"use strict";d();O();R();XT=A({name:"NicknameIconsAPI",description:"API to add icons to the nickname, in profiles",authors:[w.Nuckyz],patches:[{find:"#{intl::USER_PROFILE_PRONOUNS}",replacement:[{match:/(?<=children:\i\}\):\i,)null!=\i/,replace:"($&||!!Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"},{match:/(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)(?=\}\)\])/,replace:"children:[...Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id}),$1]"}]}]})});var VT,Vye=h(()=>{"use strict";d();O();R();VT=A({name:"NoticesAPI",description:"Fixes notices being automatically dismissed",authors:[w.Ven],required:!0,patches:[{find:'"NoticeStore"',replacement:[{match:/(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,replace:"if(Vencord.Api.Notices.currentNotice)return false;$&"},{match:/(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,replace:(e,t)=>`if(${t}?.id=="EquicordNotice")return(${t}=null,Vencord.Api.Notices.nextNotice(),true);${e}`}]}]})});var e9,eve=h(()=>{"use strict";d();O();R();e9=A({name:"ServerListAPI",authors:[w.kemo],description:"Api required for plugins that modify the server list",patches:[{find:"#{intl::DISCODO_DISABLED}",replacement:{match:/(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:"friends-list".+?}\))(?=}function)/,replace:"[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"}},{find:".setGuildsTree(",replacement:[{match:/(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,replace:"Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"},{match:/lastTargetNode.{0,25}\?null:\i,/,replace:"$&...Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below),"}]}]})});var t9,tve=h(()=>{"use strict";d();O();R();t9=A({name:"UserSettingsAPI",description:"Patches Discord's UserSettings to expose their group and name.",authors:[w.Nuckyz],patches:[{find:",updateSetting:",replacement:[{match:/\.updateAsync\(.+?(?=,useSetting:)/,replace:"$&,userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1]"},{match:/updateSetting:.{0,100}SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"},{match:/updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"}]}]})});var n9,nve=h(()=>{"use strict";d();O();R();T();n9=A({name:"ConcatenatedComponentExtractor",description:"Extract components that have been concatenated by the bundler",authors:[w.sadan],required:!0,patches:[{find:"#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}),focusProps:",replacement:{match:/(?=function (\i)\(\i\)\{let\{onChange:\i,onClose:\i,[^}]+?showEyeDropper:)/,replace:"$self.setColorPicker($1);"}},{find:/="ltr",orientation:\i="vertical"[^}]+?customTheme:/,replacement:{match:/(?=function (\i)\(\i,\i,\i\)\{.{0,20}?return \i\.forwardRef\(function\(\i,\i\)\{let\{[^}]+?="ltr",orientation:)/,replace:"$self.setCreateScroller($1);"}}],setCreateScroller:qH,setColorPicker:jH})});var ove,o9,rve=h(()=>{"use strict";d();q();O();Xe();R();ove=M({disableAnalytics:{type:3,description:"Disable Discord's tracking (analytics/'science')",default:!0,restartNeeded:!0}}),o9=A({name:"NoTrack",description:"Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",authors:[w.Cyn,w.Ven,w.Nuckyz,w.Arrow],required:!0,settings:ove,patches:[{find:"AnalyticsActionHandlers.handle",predicate:()=>ove.store.disableAnalytics,replacement:{match:/\(0,\i\.analyticsTrackingStoreMaker\)/,replace:"(()=>{})"}},{find:".METRICS_V2",replacement:[{match:/this\._intervalId=/,replace:"this._intervalId=void 0&&"},{match:/(?:increment|distribution)\(\i(?:,\i)?\){/g,replace:"$&return;"}]},{find:".BetterDiscord||null!=",replacement:{match:/(?=let \i=window;)/,replace:"return false;"}}],flux:{TRACK(e){e?.resolve?.()}},startAt:"Init",start(){Object.defineProperty(Function.prototype,"d",{configurable:!0,set(e){Object.defineProperty(this,"d",{value:e,configurable:!0,enumerable:!0,writable:!0});let{stack:t}=new Error;if(this.c!=null||!t?.includes("http")||!String(this).includes("exports:{}"))return;let n=t.match(/http.+?(?=:\d+?:\d+?$)/m)?.[0];if(!n)return;let o=new XMLHttpRequest;if(o.open("GET",n,!1),o.send(),!!o.responseText.includes(".DiscordSentry="))throw new ce("NoTrack","#8caaee").info("Disabling Sentry by erroring its WebpackInstance"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry"),new Error("Sentry successfully disabled")}}),Object.defineProperty(window,"DiscordSentry",{configurable:!0,set(){new ce("NoTrack","#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry")}})}})});var Jv,KK,li,lf=h(()=>{"use strict";d();q();bt();Da();Gv();O();Zl();R();se();Jv={SECTION:1,SIDEBAR_ITEM:2,PANEL:3,CATEGORY:5,CUSTOM:19};uo(["SECTION","SIDEBAR_ITEM","PANEL","CUSTOM"],e=>Jv=e);KK=M({settingsLocation:{type:4,description:"Where to put the Nexium Client settings section",options:[{label:"At the very top",value:"top"},{label:"Above the Nitro section",value:"aboveNitro",default:!0},{label:"Below the Nitro section",value:"belowNitro"},{label:"Above Activity Settings",value:"aboveActivity"},{label:"Below Activity Settings",value:"belowActivity"},{label:"At the very bottom",value:"bottom"}]},includeVencordInfoWhenCopying:{type:3,description:"Also copy Nexium info (Nexium, Electron, Chromium) when clicking the version info in the bottom left area of the Settings page",default:!0}}),li=A({name:"Settings",description:"Adds Settings UI and debug info",authors:[w.Ven,w.Megu],required:!0,settings:KK,patches:[{find:"#{intl::COPY_VERSION}",replacement:[{match:/\.RELEASE_CHANNEL/,replace:"$&.replace(/^./, c => c.toUpperCase())"},{match:/"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,replace:(e,t,n,o,r)=>(r=r.replace(/children:\[.+\]/,""),`${e},$self.makeInfoElements(${o},${r}).map(e=>${n}e})),`)},{match:/copyValue:\i\.join\(" "\)/g,replace:"$& + $self.getInfoString()"}]},{find:".buildLayout().map",replacement:{match:/(\i)\.buildLayout\(\)(?=\.map)/,replace:"$self.buildLayout($1)"}}],buildEntry(e){let{key:t,title:n,panelTitle:o=n,Component:r,Icon:a}=e,s={key:t+"_panel",type:Jv.PANEL,useTitle:()=>o,buildLayout:()=>[{type:Jv.CATEGORY,key:t+"_category",buildLayout:()=>[{type:Jv.CUSTOM,key:t+"_custom",Component:r,useSearchTerms:()=>[n]}]}]};return{key:t,type:Jv.SIDEBAR_ITEM,useTitle:()=>n,icon:()=>i(a,{width:20,height:20}),buildLayout:()=>[s]}},buildLayout(e){let t=e.buildLayout();if(e.key!=="$Root"||!Array.isArray(t)||t.some(u=>u?.key==="equicord_section"))return t;let{buildEntry:n}=this,o=[n({key:"equicord_main",title:"Nexium Client",panelTitle:"Nexium Client",Component:_NXsafe(NexiumHomeComp,"Nexium Client"),Icon:rp}),n({key:"equicord_plugins",title:"Plugins",Component:Gx,Icon:rH}),n({key:"equicord_themes",title:"Themes",Component:_NXthemeWrap(Mx),Icon:Mm}),n({key:"equicord_updater",title:"Mise à jour",panelTitle:"Nexium — Mise à jour",Component:_NXsafe(NexiumUpdateComp,"Mise à jour"),Icon:NexiumUpdateIcon}),n({key:"equicord_changelog",title:"Changelog",Component:ST,Icon:j5}),n({key:"equicord_team",title:"Team",panelTitle:"Nexium — Team",Component:_NXsafe(NexiumTeamComp,"Team"),Icon:NexiumTeamIcon}),n({key:"equicord_sponsor",title:"Sponsor",panelTitle:"Nexium — Sponsor",Component:_NXsafe(NexiumSponsorComp,"Sponsor"),Icon:NexiumSponsorIcon}),n({key:"equicord_music",title:"Nexium Music",panelTitle:"Nexium Music",Component:_NXsafe(NexiumMusicComp,"Nexium Music"),Icon:NexiumMusicIcon}),...(window._NXADMIN&&_NXADMIN.estEquipe()?[n({key:"equicord_nexium_admin",title:"Nexium Admins",panelTitle:"Nexium Admins",Component:_NXsafe(NexiumAdminComp,"Nexium Admins"),Icon:NexiumAdminIcon})]:[]),n({key:"equicord_stats",title:"Nexium Stats",panelTitle:"Nexium Stats",Component:_NXsafe(NexiumStatsComp,"Nexium Stats"),Icon:NexiumStatsIcon}),n({key:"equicord_privacy",title:"Nexium Privacy",panelTitle:"Nexium Privacy",Component:_NXsafe(NexiumPrivacyComp,"Nexium Privacy"),Icon:NexiumPrivacyIcon}),n({key:"equicord_protect",title:"Nexium Protect",panelTitle:"Nexium Protect",Component:_NXsafe(NexiumProtectComp,"Nexium Protect"),Icon:NexiumProtectIcon}),n({key:"equicord_auto",title:"Nexium Auto",panelTitle:"Nexium Auto",Component:_NXsafe(NexiumAutoComp,"Nexium Auto"),Icon:NexiumAutoIcon}),n({key:"equicord_network",title:"Nexium Réseau",panelTitle:"Nexium Réseau",Component:_NXsafe(NexiumNetworkComp,"Nexium Réseau"),Icon:NexiumNetworkIcon}),n({key:"equicord_data",title:"Nexium Données",panelTitle:"Nexium Données",Component:_NXsafe(NexiumDataComp,"Nexium Données"),Icon:NexiumDataIcon}),n({key:"equicord_backup_restore",title:"Backup & Restore",Component:MT,Icon:iH}),VA&&n({key:"equicord_patch_helper",title:"Patch Helper",Component:VA,Icon:aH}),...this.customEntries.map(n)].filter(fl),r={key:"equicord_section",type:Jv.SECTION,useTitle:()=>"Nexium Client Settings",buildLayout:()=>o},{settingsLocation:a}=KK.store,s={top:"user_section",aboveNitro:"billing_section",belowNitro:"billing_section",aboveActivity:"activity_section",belowActivity:"activity_section",bottom:"utility_section"},l=s[a]??s.top,c=t.findIndex(u=>typeof u?.key=="string"&&u.key===l);return c===-1?c=2:a.startsWith("below")&&(c+=1),t.splice(c,0,r),t},customSections:[],customEntries:[],get electronVersion(){return VencordNative.native.getVersions().electron??window.legcord?.electron??null},get chromiumVersion(){try{return VencordNative.native.getVersions().chrome??navigator.userAgentData?.brands?.find(e=>e.brand==="Chromium"||e.brand==="Google Chrome")?.version??null}catch{return null}},getVersionInfo(e=!0){let t="";return e&&t?` (${t})`:t},getInfoRows(){let{electronVersion:e,chromiumVersion:t,getVersionInfo:n}=this,o=[`Nexium Client ${t0}${n()}`];return e&&o.push(`Electron ${e}`),t&&o.push(`Chromium ${t}`),o},getInfoString(){return KK.store.includeVencordInfoWhenCopying?`
+`,classNames:{},dom:null});Wye="src/plugins/_api/messageDecorations/style.css"});var QT,Qye=h(()=>{"use strict";d();O();R();Kye();QT=A({name:"MessageDecorationsAPI",description:"API to add decorations to messages",authors:[w.TheSun],managedStyle:Wye,patches:[{find:"#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",replacement:{match:/#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,replace:"$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"}}]})});var ZT,Zye=h(()=>{"use strict";d();O();R();ZT=A({name:"MessageEventsAPI",description:"Api required by anything using message events.",authors:[w.Arjix,w.hunt,w.Ven],patches:[{find:"#{intl::EDIT_TEXTAREA_HELP}",replacement:{match:/(?<=,channel:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,replace:(e,t)=>`async ${e}if(await Vencord.Api.MessageEvents._handlePreEdit(${t}))return Promise.resolve({shouldClear:false,shouldRefocus:true});`}},{find:".handleSendMessage,onResize:",replacement:{match:/let (\i)=\i\.\i\.parse\((\i),.+?\.getSendMessageOptions\(\{.+?\}\)?;(?=.+?(\i)\.flags=)(?<=\)\(({.+?})\)\.then.+?)/,replace:(e,t,n,o,r)=>e+`if(await Vencord.Api.MessageEvents._handlePreSend(${n}.id,${t},${r},${o}))return{shouldClear:false,shouldRefocus:true};`}},{find:'("interactionUsernameProfile',replacement:{match:/let\{id:\i}=(\i),{id:\i}=(\i);return \i\.useCallback\((\i)=>\{/,replace:(e,t,n,o)=>`const vcMsg=${t},vcChan=${n};${e}Vencord.Api.MessageEvents._handleClick(vcMsg,vcChan,${o});`}}]})});var YT,Yye=h(()=>{"use strict";d();O();R();YT=A({name:"MessagePopoverAPI",description:"API to add buttons to message popovers.",authors:[w.KingFish,w.Ven,w.Nuckyz],patches:[{find:"#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",replacement:{match:/(?<=\]\}\)),(.{0,40}togglePopout:.+?\}\))\]\}\):null,(?<=\((\i\.\i),\{label:.+?:null,(\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,replace:(e,t,n,o,r)=>`]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${n},${r}),${o}?${t}:null,`}}]})});var JT,Jye=h(()=>{"use strict";d();O();R();JT=A({name:"MessageUpdaterAPI",description:"API for updating and re-rendering messages.",authors:[w.Nuckyz],patches:[{find:"}renderStickersAccessories(",replacement:{match:/(?<=this.props,\i,\[)"message",/,replace:""}}]})});var XT,Xye=h(()=>{"use strict";d();O();R();XT=A({name:"NicknameIconsAPI",description:"API to add icons to the nickname, in profiles",authors:[w.Nuckyz],patches:[{find:"#{intl::USER_PROFILE_PRONOUNS}",replacement:[{match:/(?<=children:\i\}\):\i,)null!=\i/,replace:"($&||!!Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"},{match:/(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)(?=\}\)\])/,replace:"children:[...Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id}),$1]"}]}]})});var VT,Vye=h(()=>{"use strict";d();O();R();VT=A({name:"NoticesAPI",description:"Fixes notices being automatically dismissed",authors:[w.Ven],required:!0,patches:[{find:'"NoticeStore"',replacement:[{match:/(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,replace:"if(Vencord.Api.Notices.currentNotice)return false;$&"},{match:/(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,replace:(e,t)=>`if(${t}?.id=="EquicordNotice")return(${t}=null,Vencord.Api.Notices.nextNotice(),true);${e}`}]}]})});var e9,eve=h(()=>{"use strict";d();O();R();e9=A({name:"ServerListAPI",authors:[w.kemo],description:"Api required for plugins that modify the server list",patches:[{find:"#{intl::DISCODO_DISABLED}",replacement:{match:/(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:"friends-list".+?}\))(?=}function)/,replace:"[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"}},{find:".setGuildsTree(",replacement:[{match:/(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,replace:"Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"},{match:/lastTargetNode.{0,25}\?null:\i,/,replace:"$&...Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below),"}]}]})});var t9,tve=h(()=>{"use strict";d();O();R();t9=A({name:"UserSettingsAPI",description:"Patches Discord's UserSettings to expose their group and name.",authors:[w.Nuckyz],patches:[{find:",updateSetting:",replacement:[{match:/\.updateAsync\(.+?(?=,useSetting:)/,replace:"$&,userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1]"},{match:/updateSetting:.{0,100}SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"},{match:/updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"}]}]})});var n9,nve=h(()=>{"use strict";d();O();R();T();n9=A({name:"ConcatenatedComponentExtractor",description:"Extract components that have been concatenated by the bundler",authors:[w.sadan],required:!0,patches:[{find:"#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}),focusProps:",replacement:{match:/(?=function (\i)\(\i\)\{let\{onChange:\i,onClose:\i,[^}]+?showEyeDropper:)/,replace:"$self.setColorPicker($1);"}},{find:/="ltr",orientation:\i="vertical"[^}]+?customTheme:/,replacement:{match:/(?=function (\i)\(\i,\i,\i\)\{.{0,20}?return \i\.forwardRef\(function\(\i,\i\)\{let\{[^}]+?="ltr",orientation:)/,replace:"$self.setCreateScroller($1);"}}],setCreateScroller:qH,setColorPicker:jH})});var ove,o9,rve=h(()=>{"use strict";d();q();O();Xe();R();ove=M({disableAnalytics:{type:3,description:"Disable Discord's tracking (analytics/'science')",default:!0,restartNeeded:!0}}),o9=A({name:"NoTrack",description:"Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",authors:[w.Cyn,w.Ven,w.Nuckyz,w.Arrow],required:!0,settings:ove,patches:[{find:"AnalyticsActionHandlers.handle",predicate:()=>ove.store.disableAnalytics,replacement:{match:/\(0,\i\.analyticsTrackingStoreMaker\)/,replace:"(()=>{})"}},{find:".METRICS_V2",replacement:[{match:/this\._intervalId=/,replace:"this._intervalId=void 0&&"},{match:/(?:increment|distribution)\(\i(?:,\i)?\){/g,replace:"$&return;"}]},{find:".BetterDiscord||null!=",replacement:{match:/(?=let \i=window;)/,replace:"return false;"}}],flux:{TRACK(e){e?.resolve?.()}},startAt:"Init",start(){Object.defineProperty(Function.prototype,"d",{configurable:!0,set(e){Object.defineProperty(this,"d",{value:e,configurable:!0,enumerable:!0,writable:!0});let{stack:t}=new Error;if(this.c!=null||!t?.includes("http")||!String(this).includes("exports:{}"))return;let n=t.match(/http.+?(?=:\d+?:\d+?$)/m)?.[0];if(!n)return;let o=new XMLHttpRequest;if(o.open("GET",n,!1),o.send(),!!o.responseText.includes(".DiscordSentry="))throw new ce("NoTrack","#8caaee").info("Disabling Sentry by erroring its WebpackInstance"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry"),new Error("Sentry successfully disabled")}}),Object.defineProperty(window,"DiscordSentry",{configurable:!0,set(){new ce("NoTrack","#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry")}})}})});var Jv,KK,li,lf=h(()=>{"use strict";d();q();bt();Da();Gv();O();Zl();R();se();Jv={SECTION:1,SIDEBAR_ITEM:2,PANEL:3,CATEGORY:5,CUSTOM:19};uo(["SECTION","SIDEBAR_ITEM","PANEL","CUSTOM"],e=>Jv=e);KK=M({settingsLocation:{type:4,description:"Where to put the Nexium Client settings section",options:[{label:"At the very top",value:"top"},{label:"Above the Nitro section",value:"aboveNitro",default:!0},{label:"Below the Nitro section",value:"belowNitro"},{label:"Above Activity Settings",value:"aboveActivity"},{label:"Below Activity Settings",value:"belowActivity"},{label:"At the very bottom",value:"bottom"}]},includeVencordInfoWhenCopying:{type:3,description:"Also copy Nexium info (Nexium, Electron, Chromium) when clicking the version info in the bottom left area of the Settings page",default:!0}}),li=A({name:"Settings",description:"Adds Settings UI and debug info",authors:[w.Ven,w.Megu],required:!0,settings:KK,patches:[{find:"#{intl::COPY_VERSION}",replacement:[{match:/\.RELEASE_CHANNEL/,replace:"$&.replace(/^./, c => c.toUpperCase())"},{match:/"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,replace:(e,t,n,o,r)=>(r=r.replace(/children:\[.+\]/,""),`${e},$self.makeInfoElements(${o},${r}).map(e=>${n}e})),`)},{match:/copyValue:\i\.join\(" "\)/g,replace:"$& + $self.getInfoString()"}]},{find:".buildLayout().map",replacement:{match:/(\i)\.buildLayout\(\)(?=\.map)/,replace:"$self.buildLayout($1)"}}],buildEntry(e){let{key:t,title:n,panelTitle:o=n,Component:r,Icon:a}=e,s={key:t+"_panel",type:Jv.PANEL,useTitle:()=>o,buildLayout:()=>[{type:Jv.CATEGORY,key:t+"_category",buildLayout:()=>[{type:Jv.CUSTOM,key:t+"_custom",Component:r,useSearchTerms:()=>[n]}]}]};return{key:t,type:Jv.SIDEBAR_ITEM,useTitle:()=>n,icon:()=>i(a,{width:20,height:20}),buildLayout:()=>[s]}},buildLayout(e){let t=e.buildLayout();if(e.key!=="$Root"||!Array.isArray(t)||t.some(u=>u?.key==="equicord_section"))return t;let{buildEntry:n}=this,o=[n({key:"equicord_main",title:"Accueil",panelTitle:"Nexium Client",Component:_NXsafe(NexiumHomeComp,"Nexium Client"),Icon:NexiumHomeIcon}),n({key:"equicord_protect",title:"Protect",panelTitle:"Nexium Protect",Component:_NXsafe(NexiumProtectComp,"Nexium Protect"),Icon:NexiumProtectIcon}),n({key:"equicord_privacy",title:"Privacy",panelTitle:"Nexium Privacy",Component:_NXsafe(NexiumPrivacyComp,"Nexium Privacy"),Icon:NexiumPrivacyIcon}),n({key:"equicord_network",title:"Réseau",panelTitle:"Nexium Réseau",Component:_NXsafe(NexiumNetworkComp,"Nexium Réseau"),Icon:NexiumNetworkIcon}),n({key:"equicord_stats",title:"Stats",panelTitle:"Nexium Stats",Component:_NXsafe(NexiumStatsComp,"Nexium Stats"),Icon:NexiumStatsIcon}),n({key:"equicord_auto",title:"Auto",panelTitle:"Nexium Auto",Component:_NXsafe(NexiumAutoComp,"Nexium Auto"),Icon:NexiumAutoIcon}),n({key:"equicord_music",title:"Music",panelTitle:"Nexium Music",Component:_NXsafe(NexiumMusicComp,"Nexium Music"),Icon:NexiumMusicIcon}),n({key:"equicord_data",title:"Données",panelTitle:"Nexium Données",Component:_NXsafe(NexiumDataComp,"Nexium Données"),Icon:NexiumDataIcon}),n({key:"equicord_updater",title:"Mise à jour",panelTitle:"Nexium — Mise à jour",Component:_NXsafe(NexiumUpdateComp,"Mise à jour"),Icon:NexiumUpdateIcon}),n({key:"equicord_changelog",title:"Changelog",Component:ST,Icon:j5}),n({key:"equicord_plugins",title:"Plugins",Component:Gx,Icon:rH}),n({key:"equicord_themes",title:"Themes",Component:_NXthemeWrap(Mx),Icon:Mm}),n({key:"equicord_backup_restore",title:"Backup & Restore",Component:MT,Icon:iH}),VA&&n({key:"equicord_patch_helper",title:"Patch Helper",Component:VA,Icon:aH}),...(window._NXADMIN&&_NXADMIN.estEquipe()?[n({key:"equicord_nexium_admin",title:"Admins",panelTitle:"Nexium Admins",Component:_NXsafe(NexiumAdminComp,"Nexium Admins"),Icon:NexiumAdminIcon})]:[]),n({key:"equicord_team",title:"Team",panelTitle:"Nexium — Team",Component:_NXsafe(NexiumTeamComp,"Team"),Icon:NexiumTeamIcon}),n({key:"equicord_sponsor",title:"Sponsor",panelTitle:"Nexium — Sponsor",Component:_NXsafe(NexiumSponsorComp,"Sponsor"),Icon:NexiumSponsorIcon}),...this.customEntries.map(n)].filter(fl),r={key:"equicord_section",type:Jv.SECTION,useTitle:()=>"Nexium Client Settings",buildLayout:()=>o},{settingsLocation:a}=KK.store,s={top:"user_section",aboveNitro:"billing_section",belowNitro:"billing_section",aboveActivity:"activity_section",belowActivity:"activity_section",bottom:"utility_section"},l=s[a]??s.top,c=t.findIndex(u=>typeof u?.key=="string"&&u.key===l);return c===-1?c=2:a.startsWith("below")&&(c+=1),t.splice(c,0,r),t},customSections:[],customEntries:[],get electronVersion(){return VencordNative.native.getVersions().electron??window.legcord?.electron??null},get chromiumVersion(){try{return VencordNative.native.getVersions().chrome??navigator.userAgentData?.brands?.find(e=>e.brand==="Chromium"||e.brand==="Google Chrome")?.version??null}catch{return null}},getVersionInfo(e=!0){let t="";return e&&t?` (${t})`:t},getInfoRows(){let{electronVersion:e,chromiumVersion:t,getVersionInfo:n}=this,o=[`Nexium Client ${t0}${n()}`];return e&&o.push(`Electron ${e}`),t&&o.push(`Chromium ${t}`),o},getInfoString(){return KK.store.includeVencordInfoWhenCopying?`
 `+this.getInfoRows().join(`
 `):""},makeInfoElements(e,t){return this.getInfoRows().map((n,o)=>i(e,{key:o,...t},n))}})});function Hct(e){C.show({message:e,type:C.Type.FAILURE,id:C.genId(),options:{position:C.Position.BOTTOM}})}function jct(){return new Promise(e=>{Ln.show({title:"Restart Required",body:i(f,null,i("p",{style:{textAlign:"center"}},"Some plugins require a restart to fully disable."),i("p",{style:{textAlign:"center"}},"Would you like to restart now?")),confirmText:"Restart Now",cancelText:"Later",onConfirm:()=>e(!0),onCancel:()=>e(!1)})})}async function _i(e){let t=!1;function n(){t=!0}async function o(u,p){return t?await jct()?(u.enabled=!p,location.reload(),!0):!1:!0}let r=Ge[e],a=Me.plugins[r.name],l=a.enabled??!1;if(!l){let{restartNeeded:u,failures:p}=Nv(r);if(p.length)return console.error(`Failed to start dependencies for ${r.name}: ${p.join(", ")}`),Ma("Failed to start dependencies: "+p.join(", "),"Close",()=>null),!1;if(u)return a.enabled=!0,n(),await o(a,l)}if(r.patches?.length)return n(),await o(a,l);if(l&&!r.started)return a.enabled=!l,await o(a,l);if(!(l?Qm(r):Km(r))){a.enabled=!1;let u=`Error while ${l?"stopping":"starting"} plugin ${r.name}`;return console.error(u),Hct(u),!1}return a.enabled=!l,await o(a,l)}function qct(e){let t=parseInt(e.split(".")[2]);return t>=22e3?"Windows 11":t>=10240?"Windows 10":t>=9200?"Windows 8.1":t>=7600?"Windows 7":`Windows (${e})`}function Wct(e){let t=parseInt(e.split(".")[0]);return t===25?"MacOS 26 (Tahoe)":t===24?"MacOS 15 (Sequoia)":t===23?"MacOS 14 (Sonoma)":t===22?"MacOS 13 (Ventura)":t===21?"MacOS 12 (Monterey)":t===20?"MacOS 11 (Big Sur)":t===19?"MacOS 10.15 (Catalina)":`MacOS (${e})`}function QK(){return typeof DiscordNative>"u"?navigator.platform:DiscordNative.process.platform==="win32"?`${qct(DiscordNative.os.release)}`:DiscordNative.process.platform==="darwin"?`${Wct(DiscordNative.os.release)} (${DiscordNative.process.arch==="arm64"?"Apple Silicon":"Intel Silicon"})`:DiscordNative.process.platform==="linux"?`${navigator.platform} (${DiscordNative.os.release})`:DiscordNative.process.platform}var md=h(()=>{"use strict";d();Vg();Qt();q();T()});var ZK,l0,YK=h(()=>{"use strict";d();Vg();q();O();R();T();ZK=M({idleTimeout:{description:"Minutes before Discord goes idle (0 to disable auto-idle)",type:5,markers:cn(0,60,5),default:10,stickToMarkers:!1,restartNeeded:!0},remainInIdle:{description:"When you come back to Discord, remain idle until you confirm you want to go online",type:3,default:!0}}),l0=A({name:"CustomIdle",description:"Allows you to set the time before Discord goes idle (or disable auto-idle)",tags:["Activity","Customisation"],authors:[w.newwares],settings:ZK,patches:[{find:'type:"IDLE",idle:',replacement:[{match:/(?<=Date\.now\(\)-\i>)\i\.\i\|\|/,replace:"$self.getIdleTimeout()||"},{match:/Math\.min\((\i\*\i\.\i\.\i\.SECOND),\i\.\i\)/,replace:"$1"},{match:/\i\.\i\.dispatch\({type:"IDLE",idle:!1}\)/,replace:"$self.handleOnline()"}]}],handleOnline(){if(!ZK.store.remainInIdle){G.dispatch({type:"IDLE",idle:!1});return}let e="Welcome back! Click the button to go online. Click the X to stay idle until reload.";Ox?.[1]===e||qA.some(([,t])=>t===e)||Ma(e,"Exit idle",()=>{ad(),G.dispatch({type:"IDLE",idle:!1})})},getIdleTimeout(){let{idleTimeout:e}=ZK.store;return e===0?1/0:e*6e4}})});async function ive(){let e=await ql();return e&&(await Ym(),ii()),e}function XK(){return{name:"Discord Desktop",version:DiscordNative.app.getVersion()}}async function ave(){let{RELEASE_CHANNEL:e}=window.GLOBAL_ENV,t=XK(),n=`${t.name}`;n+=`${t.version?` v${t.version}`:""}`,n+=`${t.info?` \u2022 ${t.info}`:""}`,n+=`${t.shortHash?` \u2022 [${t.shortHash}](<https://github.com/Omega-devj/nexium-client/commit/${t.hash}>)`:""}`;let o=null,r=o?.spoofed?`${QK()} (spoofed from ${o.originalPlatform})`:QK(),a={"Nexium Client":`v1.14.13.1 \u2022 [${t0}](<https://github.com/Omega-devj/nexium-client/commit/${Pa}>)${li.getVersionInfo()} - ${Intl.DateTimeFormat("en-US",{dateStyle:"medium"}).format(1780518166381)}`,Client:`${e} ~ ${n}`,Platform:r};a["Last Crash Reason"]=(await TA(()=>DiscordNative.processUtils.getLastCrash(),void 0))?.rendererCrashReason??"N/A";let s=(["NoRPC","NoProfileThemes","NoMosaic","NoRoleHeaders","NoSystemBadge","AlwaysAnimate","ClientTheme","SoundTroll","Ingtoninator","NeverPausePreviews","IdleAutoRestart"].filter(Be)??[]).sort();Be(l0.name)&&l0.settings.store.idleTimeout===0&&s.push(l0.name);let c={"Activity Sharing Disabled":TA(()=>!Yct.getSetting(),!1),"Link Embeds Disabled":TA(()=>!Jct.getSetting(),!1),"Nexium Client DevBuild":!0,"Nexium Desktop DevBuild":!1,"Platform Spoofed":o?.spoofed??!1,"Has UserPlugins":Object.values(la).some(p=>p.userPlugin),">2 Weeks Outdated":1780518166381<Date.now()-12096e5,[`Potentially Problematic Plugins: ${s.join(", ")}
 -# Note: These plugins might not be the cause of your problem. They are simply plugins that cause common issues.`]:s.length},u=`>>> ${Object.entries(a).map(([p,m])=>`**${p}**: ${m}`).join(`

@@ -1,5 +1,36 @@
 # Nexium Client — Notes de version
 
+## v162 — Un menu qui se comprend, et des alertes d equipe
+
+### Les pages sont rangees par usage
+
+- L ordre etait arbitraire : Protect, le coeur du client, arrivait en douzieme position,
+  et les titres melangeaient ceux prefixes Nexium et les autres
+- Elles suivent maintenant six groupes : l accueil, la securite, l usage, la gestion du
+  client, les pages Equicord, puis l equipe
+- Les titres sont courts et uniformes. Le nom complet reste en tete de chaque page
+- Admins portait le meme bouclier que Protect : il a sa propre icone, et l accueil aussi
+
+### Le message d equipe
+
+- Quand un module accumule les erreurs, l equipe recoit un message presente comme une
+  conversation, avec des boutons pour agir : publier une alerte publique, voir le
+  diagnostic, ouvrir la page de statut, ignorer pendant 24 heures
+- Rien ne s affiche sans deux conditions reunies : le compte fait partie de l equipe, et
+  la session Nexium Admins est ouverte
+- Il est dessine par Nexium et reprend les couleurs de ton theme Discord. Il ne touche a
+  rien du cote de Discord : aucune donnee ajoutee, aucune requete envoyee
+
+### Pourquoi pas une vraie conversation
+
+- La premiere version inserait un vrai salon dans la liste des messages prives. Essayee
+  sur un client reel, elle a ete abandonnee : Discord refusait le salon, puis partait le
+  chercher sur le reseau et recevait une erreur
+- La faire tenir aurait demande de modifier la couche reseau de Discord elle-meme. Pour un
+  affichage, le risque etait sans rapport avec le gain
+
+---
+
 ## v158 — Les modules previennent l equipe
 
 ### Des connecteurs sur chaque module
