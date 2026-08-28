@@ -1,0 +1,96 @@
+[2025-01-24][00:25:51][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][00:25:51][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][00:25:51][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][01:31:52][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][01:31:52][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][01:31:52][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][01:39:28][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][01:39:28][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][01:39:28][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][01:39:50][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][01:39:50][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][01:39:50][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][01:43:12][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][01:43:12][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][01:43:12][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][01:46:29][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][01:46:29][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][01:46:29][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][01:48:28][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][01:48:28][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][01:48:28][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][01:50:07][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][01:50:07][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][01:50:07][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][01:58:24][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][01:58:24][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][01:58:24][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][01:59:41][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][01:59:41][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][01:59:41][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:00:05][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:00:05][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:00:05][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:00:35][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:00:35][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:00:35][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:01:01][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:01:01][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:01:01][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:01:48][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:01:48][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:01:48][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:03:18][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:03:18][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:03:18][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:03:54][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:03:54][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:03:54][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:04:24][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:04:24][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:04:24][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:09:47][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:09:47][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:09:47][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:13:23][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:13:23][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:13:23][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:13:59][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:13:59][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:13:59][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:15:16][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:15:16][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:15:16][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:15:29][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:15:29][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:15:29][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:16:15][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:16:15][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:16:15][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:17:45][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:17:45][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:17:45][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:19:39][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:19:39][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:19:39][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:21:56][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:21:56][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:21:56][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][02:24:55][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][02:24:55][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][02:24:55][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][04:51:50][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][04:51:50][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][04:51:50][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][04:54:28][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][04:54:28][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][04:54:28][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][04:56:08][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][04:56:08][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][04:56:08][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][04:56:59][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][04:56:59][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][04:56:59][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
+[2025-01-24][17:33:17][DEBUG][discord_dispatch::application_manager:195] App started. version="1.10.5"
+[2025-01-24][17:33:17][DEBUG][discord_dispatch::application_manager:1029] Searching for applications. install_path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" }
+[2025-01-24][17:33:17][WARN][discord_dispatch::application_manager:1033] Failed to read install path. path=AbsolutePath { path_buf: "D:\\Users\\dontd\\AppData\\Local\\DiscordGames" } error=Os { code: 3, kind: NotFound, message: "The system cannot find the path specified." }
