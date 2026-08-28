@@ -1,5 +1,28 @@
 # Nexium Client — Notes de version
 
+## v156 — Six pieges du meme type que la panne du 28
+
+### Ce qui a ete trouve
+
+- Le plantage du 28 aout venait d un nom de variable partage avec Equicord : le bloc Nexium
+  et le bundle vivent dans la meme portee, et l un ecrasait l autre
+- Un controle a ete ecrit pour detecter ce cas. Mis a l epreuve sur la version fautive, il la
+  refuse et nomme la variable coupable
+- Applique a la version actuelle, il a trouve six autres variables dans la meme situation :
+  celles des raccordements au demarrage, dont les greffons reseau et le suivi de latence
+
+### Ce qui a ete fait
+
+- Aucune n avait encore de consequence : elles ne servent qu au demarrage. Mais chacune
+  devenait dangereuse a la prochaine reconstruction d Equicord
+- Les neuf blocs de demarrage concernes sont desormais enfermes dans une fonction. Leurs
+  variables ne peuvent plus rencontrer celles du bundle
+- Le controle tourne maintenant a chaque verification et refuse toute nouvelle collision
+
+Declarations exposees : 154 avant, 137 apres. Collisions : six avant, aucune apres.
+
+---
+
 ## v155 — La banderole de mise a jour, et des alertes plus reactives
 
 ### La banderole qui ne partait jamais
