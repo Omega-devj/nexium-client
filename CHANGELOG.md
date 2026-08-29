@@ -1,5 +1,91 @@
 # Nexium Client — Notes de version
 
+## v173 - Deux pages neuves, la base de menaces reparee, et une fuite fermee
+
+### Securite
+
+- La liste des identifiants Discord de tous les utilisateurs vus depuis 90 jours
+  etait recuperable par quiconque possede la cle publiable, qui vit dans le
+  client et dans un depot public. Le client ne demande plus la base entiere : il
+  demande si les quelques profils affiches a l ecran utilisent Nexium, 200 au
+  maximum. Un appelant ne peut plus que confirmer des comptes qu il connait deja
+- Trois fonctions serveur qui n avaient aucune raison d etre ouvertes au public
+  ont ete fermees, et le chemin de recherche de nx_poids fige
+
+### Base de menaces
+
+- Le fichier du depot compte 438 867 domaines. Le client s arretait a 250 000 :
+  188 867 domaines, soit 43 % de la protection, n etaient jamais charges
+- La reserve locale exigeait moins de 2 Mo, la liste compactee en faisait 6,60 :
+  la condition etait toujours fausse, la reserve n etait donc jamais ecrite, et
+  les 11,3 Mo repartaient a chaque lancement
+- La liste est desormais gardee sous forme d empreintes de 53 bits triees,
+  cherchees par dichotomie, dans IndexedDB. Mesure sur la vraie liste : la
+  totalite des domaines retenus, 3,35 Mo en memoire, aucune collision, aucune
+  fausse alerte sur 200 000 tirages
+
+### Nexium Comptes
+
+- Nouvelle page. Plusieurs comptes Discord dans un coffre chiffre, et une
+  bascule de l un a l autre sans se reconnecter, depuis la page ou depuis la
+  barre du haut
+- Le coffre est chiffre en AES-GCM 256, avec une cle derivee par PBKDF2-SHA256
+  a 210 000 iterations depuis une phrase qui n est jamais enregistree
+- Un jeton de session ouvre un compte sans mot de passe et sans double
+  authentification : la page le dit, plutot que de le taire
+
+### Nexium Labo
+
+- Nouvelle page. Les fonctions en cours d essai, eteintes par defaut, chacune
+  avec ce qu elle change et ce qu elle coute
+- Un bouton qui coupe tous les essais d un coup : c est le premier reflexe
+  quand le client se comporte mal
+- Une section qui affiche les chiffres reels du client, utile pour un
+  signalement : domaines surveilles, memoire, age de la base, modules en panne
+
+### Nexium Music
+
+- La page est refaite autour d un principe : la platine vit dans la collection,
+  a la place de la piste jouee, au lieu d occuper un onglet separe. On ne perd
+  plus sa place en changeant de morceau
+- Chaque piste porte sa couleur, tiree de son rang, et la page entiere s y
+  accorde. Onde de 72 barres avec tete de lecture, deplacement en glissant,
+  bulle de temps au survol, anneau de progression, coupure du son d un clic
+- Le mini-lecteur suit la meme couleur que la piste en cours
+
+### Alertes
+
+- Une alerte de statut part maintenant sur le Discord de l equipe, en embed,
+  avec une mention a l ouverture et a l aggravation. L envoi se fait cote
+  serveur : l adresse du webhook ne descend jamais dans le client
+- La page Admins montre l etat de diffusion de chaque alerte et permet de la
+  renvoyer, ou de faire un essai sans mention
+
+### Demarrage et stabilite
+
+- 57 Ko d historique de statistiques etaient analyses a chaque lancement pour
+  des donnees dont rien n a besoin avant le premier message compte : la lecture
+  est reportee au premier acces. Le travail de demarrage passe de 66 626 a
+  9 615 octets analyses
+- Neuf branchements tombaient dans la meme image a 1,5 s. Ils partent
+  maintenant un par un dans les creux du navigateur, avec une echeance ferme
+- Le mode securise ne coupait que la restauration des icones. Il coupe
+  desormais tout ce qui ecrit dans l interface de Discord, ecrit au journal ce
+  qu il a coupe, et surtout se leve : une carte dans Nexium Donnees explique
+  l etat et propose de repasser en marche normale
+- Les deux ecouteurs d erreurs globaux n avaient aucun frein, contrairement a
+  console.error, et ecrivaient sur le disque a chaque evenement. Budget partage
+  de 25 par minute, et ecriture groupee : la premiere erreur d une rafale part
+  tout de suite, les suivantes sont regroupees
+
+### Ailleurs
+
+- Le masque de partage se pose a la main, par Ctrl+Maj+M ou depuis la recherche
+  rapide, au lieu d attendre le partage d ecran
+- La recherche rapide ignorait Comptes, Auto et Labo
+- La pastille Nexium redevient ce qu elle etait : toujours active, reservee a
+  l equipe, sans interrupteur
+
 ## v172 - Le menu range les pages, et trois d entre elles respirent
 
 - Les pages du client etaient toutes empilees dans une seule section, dans un

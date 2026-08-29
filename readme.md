@@ -10,7 +10,7 @@ coupe la télémétrie, et t'explique ce qu'il fait au lieu de te demander de le
 <br>
 
 ![Officiel](https://img.shields.io/badge/dépôt-officiel-e6c48a?style=for-the-badge&labelColor=17171a)
-![Version](https://img.shields.io/badge/version-v172-e6c48a?style=for-the-badge&labelColor=17171a)
+![Version](https://img.shields.io/badge/version-v173-e6c48a?style=for-the-badge&labelColor=17171a)
 ![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011-6a8fd6?style=for-the-badge&labelColor=17171a)
 ![Licence](https://img.shields.io/badge/open--source-gratuit-5fb37a?style=for-the-badge&labelColor=17171a)
 
