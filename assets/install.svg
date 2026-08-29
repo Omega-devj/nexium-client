@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 258" width="1000" height="258" role="img" aria-label="Installation en une commande PowerShell">
+  <defs>
+    <clipPath id="frappe"><rect x="90" y="66" width="0" height="24">
+      <animate attributeName="width" values="0;0;745;745;745;0" keyTimes="0;0.04;0.34;0.94;0.97;1" dur="10s" repeatCount="indefinite"/>
+    </rect></clipPath>
+    <linearGradient id="oret" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e6c48a"/><stop offset="100%" stop-color="#c79a4e"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="1" y="1" width="998" height="256" rx="14" fill="#0d0d10" stroke="#2a2a31" stroke-width="2"/>
+  <path d="M1 15 A14 14 0 0 1 15 1 L985 1 A14 14 0 0 1 999 15 L999 42 L1 42 Z" fill="#17171b"/>
+  <line x1="1" y1="42" x2="999" y2="42" stroke="#2a2a31" stroke-width="1.5"/>
+  <circle cx="26" cy="21" r="6" fill="#d6484a"/><circle cx="48" cy="21" r="6" fill="#F5B303"/><circle cx="70" cy="21" r="6" fill="#5fb37a"/>
+  <text x="500" y="26" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" fill="#7a7a84">Windows PowerShell</text>
+
+  <text x="24" y="84" font-family="Consolas, Menlo, monospace" font-size="14" fill="#5fb37a">PS C:\&gt;</text>
+  <g clip-path="url(#frappe)">
+    <text x="90" y="84" font-family="Consolas, Menlo, monospace" font-size="14" fill="#e8e8ea">irm https://raw.githubusercontent.com/Omega-devj/nexium-client/main/install-nexium.ps1 | iex</text>
+  </g>
+  <rect y="70" width="8" height="18" fill="#e6c48a">
+    <animate attributeName="x" values="90;90;835;835;835;90" keyTimes="0;0.04;0.34;0.94;0.97;1" dur="10s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;1;0.15;1;0.15;1;0.15;1" keyTimes="0;0.34;0.42;0.5;0.58;0.66;0.74;1" dur="10s" repeatCount="indefinite"/>
+  </rect>
+
+  <g font-family="Consolas, Menlo, monospace" font-size="14" stroke-linecap="round" stroke-linejoin="round">
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.40;0.44;0.93;0.96;1" dur="10s" repeatCount="indefinite"/>
+      <path d="M26 122 l6 7 l12 -15" fill="none" stroke="#5fb37a" stroke-width="2.4"/>
+      <text x="56" y="127" fill="#a5a6ab">Discord ferme proprement</text>
+    </g>
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.50;0.54;0.93;0.96;1" dur="10s" repeatCount="indefinite"/>
+      <path d="M26 152 l6 7 l12 -15" fill="none" stroke="#5fb37a" stroke-width="2.4"/>
+      <text x="56" y="157" fill="#a5a6ab">Client telecharge, somme de controle verifiee</text>
+    </g>
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.60;0.64;0.93;0.96;1" dur="10s" repeatCount="indefinite"/>
+      <path d="M26 182 l6 7 l12 -15" fill="none" stroke="#5fb37a" stroke-width="2.4"/>
+      <text x="56" y="187" fill="#a5a6ab">Lanceur pose, raccourci cree sur le Bureau</text>
+    </g>
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.70;0.74;0.93;0.96;1" dur="10s" repeatCount="indefinite"/>
+      <text x="26" y="217" fill="url(#oret)" font-weight="700">Nexium est pret.</text>
+      <text x="176" y="217" fill="#7a7a84">Aucun droit administrateur. Rien dans le registre.</text>
+    </g>
+  </g>
+</svg>

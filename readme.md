@@ -1,24 +1,32 @@
 <div align="center">
 
-# Nexium Client
+<img src="assets/banner.svg" width="100%" alt="Nexium Client — Discord, repris en main">
 
-### Discord, repris en main.
+<br>
 
-Un client Discord complet, en français, qui te protège des liens piégés,
-coupe la télémétrie, et t'explique ce qu'il fait au lieu de te demander de le croire.
+**Un client Discord complet, en français, qui bloque les liens piégés avant que tu cliques,<br>
+coupe la télémétrie, et t'explique ce qu'il fait au lieu de te demander de le croire.**
 
-![Officiel](https://img.shields.io/badge/dépôt-officiel-e6c48a?style=flat-square)
-![Version](https://img.shields.io/badge/version-v171-2b2b2b?style=flat-square)
-![Windows](https://img.shields.io/badge/plateforme-Windows-2b2b2b?style=flat-square)
-![Licence](https://img.shields.io/badge/licence-open--source-2b2b2b?style=flat-square)
+<br>
 
-[Site officiel](https://nexium-client.netlify.app/) · [**État des services**](https://omega-devj.github.io/status-nexium/) · [Signaler un problème](../../issues)
+![Officiel](https://img.shields.io/badge/dépôt-officiel-e6c48a?style=for-the-badge&labelColor=17171a)
+![Version](https://img.shields.io/badge/version-v171-e6c48a?style=for-the-badge&labelColor=17171a)
+![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011-6a8fd6?style=for-the-badge&labelColor=17171a)
+![Licence](https://img.shields.io/badge/open--source-gratuit-5fb37a?style=for-the-badge&labelColor=17171a)
+
+[**Site officiel**](https://nexium-client.netlify.app/) &nbsp;·&nbsp; [**État des services**](https://omega-devj.github.io/status-nexium/) &nbsp;·&nbsp; [**Signaler un problème**](../../issues)
 
 </div>
 
+<br>
+
 ---
 
-## Installation
+<div align="center">
+
+## Installation — une commande, trente secondes
+
+</div>
 
 Ouvre **PowerShell** (touche Windows → tape `powershell` → Entrée) et colle :
 
@@ -26,12 +34,15 @@ Ouvre **PowerShell** (touche Windows → tape `powershell` → Entrée) et colle
 irm https://raw.githubusercontent.com/Omega-devj/nexium-client/main/install-nexium.ps1 | iex
 ```
 
-C'est tout. Le script ferme Discord, télécharge le client, pose le lanceur, crée un
-raccourci sur le Bureau et propose de démarrer. **Aucun droit administrateur**, rien
-dans la base de registre, rien ailleurs que dans ton dossier utilisateur.
+<div align="center">
+<img src="assets/install.svg" width="100%" alt="Le script ferme Discord, télécharge le client, vérifie la somme de contrôle et pose le raccourci">
+</div>
+
+C'est tout. **Aucun droit administrateur**, rien dans la base de registre, rien ailleurs
+que dans ton dossier utilisateur. Pour désinstaller : supprime le dossier.
 
 <details>
-<summary>Installation manuelle, si tu préfères tout poser toi-même</summary>
+<summary><b>Installation manuelle, si tu préfères tout poser toi-même</b></summary>
 
 <br>
 
@@ -42,38 +53,62 @@ dans la base de registre, rien ailleurs que dans ton dossier utilisateur.
 
 </details>
 
----
-
-## Ce que ça change, concrètement
-
-**Un lien piégé ne s'ouvre pas.** Loggers d'IP, faux serveurs officiels, domaines qui
-imitent une marque, liens masqués dont le texte affiché ment sur la destination : tout
-est analysé **avant** que tu cliques, contre une base distante de plus de 250 000
-domaines. Un `.exe` renommé en `.png` est repéré à son contenu réel, pas à son nom.
-
-**Rien ne sort sans que tu le saches.** Vingt-quatre réglages de confidentialité, du
-blocage de la télémétrie jusqu'à l'empreinte matérielle normalisée et aux noms de
-fichiers anonymisés à l'envoi. Cinq gardes de sortie surveillent ce qui quitte ta
-machine — webhooks, requêtes vers des serveurs inconnus, balises invisibles, scripts
-injectés dans la fenêtre, code qu'un thème voudrait exécuter.
-
-**Tes statistiques restent chez toi.** Nexium Stats calcule tout localement. Aucune
-analytique, aucun profilage, aucune régie publicitaire. La page **Nexium Données** te
-montre exactement ce qui est stocké sur ta machine, et te laisse tout effacer.
-
-**Quand quelque chose casse, tu es prévenu.** Une [page de statut publique](https://omega-devj.github.io/status-nexium/)
-vérifie les services en direct, et un bandeau apparaît dans le client si un incident
-est déclaré. Plus besoin de deviner si le problème vient de toi.
+<br>
 
 ---
+
+<div align="center">
+
+## Un lien piégé ne s'ouvre pas
+
+<img src="assets/protect.svg" width="100%" alt="Nexium Protect bloque un domaine qui imite discord.com">
+
+</div>
+
+Loggers d'IP, faux serveurs officiels, domaines qui imitent une marque, liens masqués
+dont le texte affiché ment sur la destination : tout est analysé **avant** que tu
+cliques, contre une base distante de plus de 250 000 domaines. Un `.exe` renommé en
+`.png` est repéré à son contenu réel, pas à son nom.
+
+Protect détecte aussi l'usurpation d'amis, les vagues de messages privés coordonnées,
+les fuites de jeton ou de webhook, et l'arnaque « colle ce code dans la console ».
+Trois profils au choix : **strict**, **équilibré**, **minimal**.
+
+<br>
+
+---
+
+<div align="center">
+
+## Rien ne sort sans que tu le saches
+
+<img src="assets/privacy.svg" width="100%" alt="Nexium Privacy — 24 réglages de confidentialité">
+
+</div>
+
+Vingt-quatre réglages, du blocage de la télémétrie jusqu'à l'empreinte matérielle
+normalisée et aux noms de fichiers anonymisés à l'envoi. Cinq gardes de sortie
+surveillent ce qui quitte ta machine — webhooks, requêtes vers des serveurs inconnus,
+balises invisibles, scripts injectés dans la fenêtre, code qu'un thème voudrait exécuter.
+
+Des **heures discrètes** basculent le profil toutes seules, un **bilan de la semaine**
+résume ce qui a été arrêté, et le **journal** liste chaque blocage, un par un.
+
+<br>
+
+---
+
+<div align="center">
 
 ## Les modules
 
+</div>
+
 | | Module | Ce qu'il fait |
 |---|---|---|
-| 🛡️ | **Protect** | Analyse des liens, des pièces jointes, des aperçus et des invitations. Détecte l'usurpation d'amis, les vagues de messages privés coordonnées, les fuites de jeton ou de webhook, et l'arnaque « colle ce code dans la console ». Trois profils : strict, équilibré, minimal. |
-| 🔒 | **Privacy** | 24 réglages, trois profils d'ensemble, des heures discrètes qui basculent toutes seules, un bilan de la semaine et le journal de tout ce qui a été arrêté. |
-| 📡 | **Réseau** | Latence, gigue, stabilité, inventaire des hôtes contactés. |
+| 🛡️ | **Protect** | Analyse des liens, des pièces jointes, des aperçus et des invitations. Usurpation d'amis, vagues de MP, fuites de jeton, arnaque à la console. |
+| 🔒 | **Privacy** | 24 réglages, trois profils, heures discrètes, bilan hebdomadaire et journal complet. |
+| 📡 | **Réseau** | Latence, gigue, stabilité, inventaire en direct des hôtes contactés. |
 | 📊 | **Stats** | Ton activité, calculée et gardée **uniquement sur ta machine**. |
 | ⚡ | **Auto** | Automatisations et mode focus, avec sessions minutées. |
 | 🎧 | **Music** | Lecteur intégré, playlist, mini-lecteur déplaçable. |
@@ -82,18 +117,22 @@ est déclaré. Plus besoin de deviner si le problème vient de toi.
 
 Tout suit **ton thème Discord** — clair, sombre, thèmes personnalisés et QuickCSS.
 
+<br>
+
 ---
+
+<div align="center">
 
 ## Ce qui sort de ta machine
 
-Plutôt que de promettre « zéro donnée », voici la liste exacte.
+*Plutôt que de promettre « zéro donnée », voici la liste exacte.*
 
-**Envoyé**
+</div>
 
-| Quoi | Quand | Contenu |
+| | Quand | Contenu |
 |---|---|---|
-| Enregistrement | Au démarrage, une fois par heure au plus | Ton identifiant Discord et la version du client |
-| Signalement | **Seulement si tu cliques sur « Signaler »** | Le domaine signalé, son type, ton identifiant et ton pseudo |
+| **Enregistrement** | Au démarrage, une fois par heure au plus | Ton identifiant Discord et la version du client |
+| **Signalement** | **Seulement si tu cliques sur « Signaler »** | Le domaine signalé, son type, ton identifiant et ton pseudo |
 
 **Jamais envoyé** — aucun message, aucun contenu de conversation, aucun jeton, aucun
 mot de passe, aucune statistique d'usage, aucun traceur tiers.
@@ -104,11 +143,17 @@ bannissement, les notes de version et les mises à jour.
 > Tout est vérifiable : le code est intégralement lisible ici, rien n'est compilé en
 > boîte noire, et Nexium Réseau te montre en direct les requêtes que le client émet.
 
+<br>
+
 ---
+
+<div align="center">
 
 ## À savoir avant d'installer
 
-Ce sont de vraies contraintes, pas des formalités.
+*Ce sont de vraies contraintes, pas des formalités.*
+
+</div>
 
 - **Ce client modifie Discord**, ce qui va à l'encontre de ses conditions d'utilisation.
   Un bannissement reste théoriquement possible. En pratique c'est rare, mais le risque
@@ -119,6 +164,23 @@ Ce sont de vraies contraintes, pas des formalités.
 - **Le `.exe` n'est pas signé.** SmartScreen et certains antivirus le signaleront.
   C'est attendu pour ce type d'outil — à toi d'en juger.
 - **Windows uniquement.**
+
+<br>
+
+---
+
+<div align="center">
+
+## Quand quelque chose casse, tu es prévenu
+
+</div>
+
+Une [**page de statut publique**](https://omega-devj.github.io/status-nexium/) vérifie
+les services en direct, avec six niveaux d'alerte et 90 jours d'historique. Si un
+incident est déclaré, un bandeau apparaît dans le client. Plus besoin de deviner si le
+problème vient de toi.
+
+<br>
 
 ---
 
@@ -136,6 +198,8 @@ fichier est corrompu, et **retour arrière** depuis Nexium Mise à jour.
 
 Pour figer ta copie (utile si tu bricoles le code) : crée un fichier vide
 `.nexium-dev` dans `resources/equicord`. Supprime-le pour réactiver.
+
+<br>
 
 ---
 
@@ -167,6 +231,8 @@ coupe les fonctions à risque.
 
 **Désinstaller** : ferme Discord, supprime le dossier. Rien n'est installé ailleurs.
 Pour effacer aussi tes réglages : Nexium Données → *Tout effacer*, avant de supprimer.
+
+<br>
 
 ---
 
@@ -239,6 +305,8 @@ version réellement publiée.
 
 </details>
 
+<br>
+
 ---
 
 ## Astuces
@@ -249,6 +317,8 @@ version réellement publiée.
 
 Toutes les pages se parcourent au clavier (Tab, Entrée, Échap) et respectent le
 réglage système « réduire les animations ».
+
+<br>
 
 ---
 
@@ -263,11 +333,25 @@ réglage système « réduire les animations ».
 Un bug, une question, une idée ? Ouvre une [issue](../../issues), ou rejoins la
 communauté depuis la page **Nexium Sponsor** du client.
 
+<br>
+
 ---
 
 <div align="center">
 
-**Nexium Collective** · [nexium-client.netlify.app](https://nexium-client.netlify.app/) · [État des services](https://omega-devj.github.io/status-nexium/)
+### Prêt ?
+
+</div>
+
+```powershell
+irm https://raw.githubusercontent.com/Omega-devj/nexium-client/main/install-nexium.ps1 | iex
+```
+
+<div align="center">
+
+<br>
+
+**Nexium Collective** &nbsp;·&nbsp; [nexium-client.netlify.app](https://nexium-client.netlify.app/) &nbsp;·&nbsp; [État des services](https://omega-devj.github.io/status-nexium/)
 
 Gratuit et open-source. Basé sur [Equicord](https://github.com/Equicord/Equicord).
 
