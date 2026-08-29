@@ -8,7 +8,7 @@ Un client Discord complet, en français, qui te protège des liens piégés,
 coupe la télémétrie, et t'explique ce qu'il fait au lieu de te demander de le croire.
 
 ![Officiel](https://img.shields.io/badge/dépôt-officiel-e6c48a?style=flat-square)
-![Version](https://img.shields.io/badge/version-v169-2b2b2b?style=flat-square)
+![Version](https://img.shields.io/badge/version-v170-2b2b2b?style=flat-square)
 ![Windows](https://img.shields.io/badge/plateforme-Windows-2b2b2b?style=flat-square)
 ![Licence](https://img.shields.io/badge/licence-open--source-2b2b2b?style=flat-square)
 

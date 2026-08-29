@@ -4020,7 +4020,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="169";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="170";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -9086,9 +9086,11 @@ var raw=_NXDB.get(_NXBAN.KEY);if(!raw)return null;
 var j=JSON.parse(raw);if(!j||typeof j!=="object")return null;
 if(j.v!==2)return {legacy:true,id:j.id||null};
 return j;}catch(_){return null;}};
+_NXBAN.GRACE=86400000;
 _NXBAN.lockHits=function(){try{
 var j=_NXBAN.readLock();if(!j)return "";
 if(j.legacy)return "";
+if(!j.at||(Date.now()-j.at)>_NXBAN.GRACE){try{_NXDB.del(_NXBAN.KEY);}catch(_){}return "";}
 if(j.fp&&j.fp===_NXBAN.fp())return "appareil";
 if(j["in"]&&j["in"]===_NXBAN.install())return "installation";
 return "";}catch(_){return "";}};
@@ -9170,18 +9172,29 @@ try{_NXDB.del(_NXBAN.KEY);}catch(_){}
 try{if(window._NXPR&&_NXPR.reload)_NXPR.reload();}catch(_){}
 try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Acces Nexium retabli. Redemarre Discord pour reactiver toutes les fonctions.",1);}catch(_){}
 }catch(_){}};
+_NXBAN.deverrouille=function(){try{
+_NXDB.del(_NXBAN.KEY);
+_NXBAN.echecs=0;
+_NXBAN.lift();
+return true;}catch(_){return false;}};
 _NXBAN.check=function(){try{
 var id=_NXBAN.myId();
 if(!id){setTimeout(_NXBAN.check,4000);return;}
 _NXBAN.remember(id);
 var localWhy=_NXBAN.lockHits();
+_NXBAN.local=!!localWhy;
 if(localWhy)_NXBAN.enforce(id,localWhy);
-_NXNETX.go(_NXBAN.URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw 0;return r.text();}).then(function(t){
+_NXNETX.go(_NXBAN.URL+"?nx="+Date.now(),{cache:"no-store"},20000).then(function(r){if(!r||!r.ok)throw 0;return r.text();}).then(function(t){
+_NXBAN.echecs=0;
 var list=_NXBAN.parse(t);
 var why=_NXBAN.match(list,id);
 if(why){_NXBAN.enforce(id,why);_NXBAN.lock(why,id);}
 else{try{_NXDB.del(_NXBAN.KEY);}catch(_){}_NXBAN.lift();}
-}).catch(function(){});
+try{_NXNETX.ok("ban");}catch(_){}
+}).catch(function(){
+_NXBAN.echecs=(_NXBAN.echecs||0)+1;
+if(_NXBAN.echecs>=3&&_NXBAN.local){try{_NXDB.del(_NXBAN.KEY);}catch(_){}_NXBAN.lift();}
+try{_NXNETX.retry("ban",function(){_NXBAN.check();});}catch(_){}});
 }catch(_){}};
 _NXBAN.refs=function(){return {compte:_NXBAN.myId(),appareil:_NXBAN.fp(),installation:_NXBAN.install(),comptesVus:_NXBAN.seenIds(),actif:_NXBAN.active,motif:_NXBAN.reason};};
 try{setTimeout(_NXBAN.check,2000);setInterval(function(){if(!document.hidden)_NXBAN.check();},300000);}catch(_){}

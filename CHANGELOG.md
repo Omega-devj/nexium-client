@@ -1,5 +1,29 @@
 # Nexium Client — Notes de version
 
+## v170 — Un bannissement retire doit pouvoir etre leve
+
+### Le probleme
+
+- Retirer un identifiant de la liste ne suffisait pas toujours a lever le bannissement
+- Le client garde un verrou local sur l empreinte de la machine. Il sert a ne pas
+  afficher une interface utilisable pendant la seconde ou la liste est interrogee
+- Ce verrou n etait efface que si le telechargement de la liste reussissait. En cas
+  d echec, l erreur etait avalee en silence et le bannissement restait, definitivement
+- Une coupure reseau de trente secondes pouvait donc bannir quelqu un a vie, sans
+  aucun moyen d en sortir : l interface etant deja coupee, il n y avait plus de recours
+
+### Ce qui change
+
+- Le verrou local expire au bout de vingt-quatre heures. Si la liste bannit toujours,
+  il est repose au premier demarrage qui aboutit
+- Trois echecs de telechargement de suite et un verrou local seul ne suffit plus
+- Un echec est desormais reessaye au lieu d etre ignore
+- Une fonction de deverrouillage manuel existe pour les cas desesperes
+
+Le verrou reste un cache, il ne fait plus office de jugement. La liste seule decide.
+
+---
+
 ## v169 — Presentation du depot
 
 - Le readme est refait : ce que le client fait en premier, les mises en garde ensuite,
