@@ -1,5 +1,47 @@
 # Nexium Client — Notes de version
 
+## v172 - Le menu range les pages, et trois d entre elles respirent
+
+- Les pages du client etaient toutes empilees dans une seule section, dans un
+  ordre herite : Plugins, Themes et Changelog passaient avant Protect et Privacy.
+  Elles sont maintenant reparties en cinq sections nommees - Nexium, Protection,
+  Ton espace, Personnalisation, Donnees et aide - avec la meme presentation que
+  les sections de Discord
+- Les icones de la barre laterale n avaient pas toutes le meme gabarit : sept
+  etaient dessinees en 18 px, cinq en 20. Elles acceptent desormais une taille et
+  s alignent partout, barre laterale comme tuiles de l accueil
+- L icone de Nexium Reseau reprenait le glyphe "partager", qu on lit comme un
+  partage et pas comme une mesure de liaison : remplacee par un signal
+
+- Nexium Auto : l en-tete montre un anneau des regles actives et le chemin
+  d une automatisation - quand, seulement si, alors - avec un point qui le
+  parcourt tant que le moteur tourne. Les quatre capacites s incrementent a
+  l ouverture et portent chacune sa couleur
+- Nexium Auto : les 26 modeles etaient une seule colonne de cartes identiques.
+  Ils sont ranges par famille, sur deux colonnes, avec un glyphe et une couleur
+  par famille. Les taches suivent la meme grille, avec un liseret qui dit d un
+  coup d oeil si la regle tourne, dort ou est indisponible
+- L action "changer le statut" etait rangee dans la famille Vocal, qui ne la
+  decrit pas : elle a maintenant sa propre famille, Presence
+
+- Nexium Protect : l anneau de posture etait gris et ne disait rien. Il prend
+  la couleur de ce qu il mesure - vert, ambre ou rouge - et les quatre compteurs
+  montent a l ouverture. Une protection allumee se teinte au lieu de rester
+  grise, ce qui rend visible d un regard ce qui est reellement actif
+
+- Nexium Donnees : la repartition du stockage se lisait en sept nuances de gris
+  indistinguables. Chaque module a sa couleur, reprise dans la legende et dans la
+  barre de sa ligne. Le quota s affiche en anneau, le total monte a l ouverture,
+  et une ligne ouverte se signale par un fond et un liseret
+- Nexium Donnees : la sante des modules gagne son anneau, et le journal distingue
+  les erreurs de la session en cours de celles heritees du lancement precedent
+
+- Un chiffre anime etait remonte a chaque valeur pour rejouer son apparition :
+  avec un compteur qui monte image par image, il repartait a zero d opacite
+  soixante fois par seconde et restait invisible
+- Les compteurs animes retombent sur leur valeur finale si la fenetre est en
+  arriere-plan et que le navigateur ne rend plus d images
+
 ## v171 — L icone des alertes ne disparait plus
 
 - L icone du panneau d alertes n apparaissait qu une fois connecte a Nexium Admins.
