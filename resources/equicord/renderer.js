@@ -4020,7 +4020,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="170";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="171";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -9510,7 +9510,7 @@ _NXADMIN.peutSupprimer=function(){return _NXADMIN.role==="proprietaire";};
 _NXADMIN.peutNiveau=function(g){try{
 if(_NXADMIN.role==="proprietaire")return true;
 return _NXSTATUS.poids(g)<4;}catch(_){return false;}};
-_NXADMIN.deconnexion=function(){try{_NXADMIN.jeton=null;_NXADMIN.role=null;_NXADMIN.pseudo=null;_NXADMIN.expire=0;_NXADMIN.alertes=[];_NXADMIN.journal=[];_NXADMIN.notify();}catch(_){}};
+_NXADMIN.deconnexion=function(){try{_NXADMIN.jeton=null;_NXADMIN.role=null;_NXADMIN.pseudo=null;_NXADMIN.expire=0;_NXADMIN.alertes=[];_NXADMIN.journal=[];try{if(window._NXMP){_NXMP.ferme();_NXMP.rafraichisBarre();}}catch(_){}_NXADMIN.notify();}catch(_){}};
 _NXADMIN.entetes=function(){var h={apikey:_NXSTATUS.CLE,"Content-Type":"application/json",Accept:"application/json"};if(_NXADMIN.connecte())h.Authorization="Bearer "+_NXADMIN.jeton;return h;};
 _NXADMIN.rest=function(chemin,opts,cb){try{
 var o=opts||{};var h=_NXADMIN.entetes();
@@ -9792,15 +9792,19 @@ return false;}
 if(_NXMP._barre)return true;
 _NXMP._barre=true;
 HB.addHeaderBarButton("nexium-alertes",function(){try{
-if(!_NXMP.autorise())return null;
+if(!window._NXADMIN||!_NXADMIN.estEquipe())return null;
+var pret=_NXMP.autorise();
 var ouvert=!!document.getElementById(_NXMP.ID);
 var n=_NXMP.nonLus;
 return i(HB.HeaderBarButton,{
 icon:_NXMP.Icone,
-tooltip:n?("Nexium \u2014 "+n+" alerte"+(n>1?"s":"")):"Alertes Nexium",
+tooltip:pret?(n?("Nexium \u2014 "+n+" alerte"+(n>1?"s":"")):"Alertes Nexium")
+:"Alertes Nexium \u2014 connexion requise",
 "aria-label":"Alertes Nexium",
-selected:ouvert,
-onClick:function(){_NXMP.bascule();}});}catch(_){return null;}},5);
+selected:pret&&ouvert,
+onClick:function(){
+if(_NXMP.autorise()){_NXMP.bascule();return;}
+try{_NXCP.ouvrir("equicord_nexium_admin","Nexium Admins");}catch(_){}}});}catch(_){return null;}},5);
 return true;}catch(_){return false;}};
 try{setTimeout(_NXMP.barre,6000);}catch(_){}
 

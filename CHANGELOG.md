@@ -1,5 +1,18 @@
 # Nexium Client — Notes de version
 
+## v171 — L icone des alertes ne disparait plus
+
+- L icone du panneau d alertes n apparaissait qu une fois connecte a Nexium Admins.
+  La session vivant en memoire, elle disparaissait a chaque redemarrage de Discord :
+  presente un lancement, absente le suivant
+- Plus genant : le seul chemin vers le panneau exigeait d etre deja connecte, sans
+  que rien n indique ou le faire
+- Elle est desormais visible pour l equipe meme deconnectee. Un clic ouvre alors la
+  page de connexion, et l infobulle le dit
+- Elle disparait proprement a la deconnexion
+
+---
+
 ## v170 — Un bannissement retire doit pouvoir etre leve
 
 ### Le probleme
