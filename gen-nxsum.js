@@ -27,6 +27,17 @@ if (BUMP) {
   src = src.replace(m[0], '_NXUP.VERSION="' + next + '"');
   fs.writeFileSync(JS, src);
   console.log("version " + m[1] + " -> " + next);
+
+  // Le badge du readme annonce la version : sans ca il ment des la publication suivante.
+  const RM = path.join(__dirname, "readme.md");
+  if (fs.existsSync(RM)) {
+    const avant = fs.readFileSync(RM, "utf8");
+    const apres = avant.replace(/badge\/version-v\d+-/g, "badge/version-v" + next + "-");
+    if (apres !== avant) {
+      fs.writeFileSync(RM, apres);
+      console.log("readme : badge de version mis a jour");
+    }
+  }
 }
 
 let bad = null;

@@ -1,5 +1,15 @@
 # Nexium Client — Notes de version
 
+## v169 — Presentation du depot
+
+- Le readme est refait : ce que le client fait en premier, les mises en garde ensuite,
+  et la liste exacte de ce qui sort de ta machine
+- Le badge de version se met desormais a jour tout seul a chaque publication, il ne
+  peut plus annoncer une version perimee
+- Aucune modification du client lui-meme dans cette version
+
+---
+
 ## v168 — Six niveaux d alerte, une icone, et des boutons qui repondent
 
 ### Les boutons de la page Admins ne repondaient plus
