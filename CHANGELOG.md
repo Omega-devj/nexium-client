@@ -1,5 +1,21 @@
 # Nexium Client — Notes de version
 
+## v174 - Nexium demarre avec Windows
+
+- L installateur pose desormais un raccourci dans le dossier Demarrage de
+  l utilisateur : Nexium se lance avec Windows, en fenetre reduite. Ca vaut
+  pour toute nouvelle installation, et pour toute mise a jour faite avec le
+  script d installation
+- Le dossier Demarrage vit dans %AppData%, donc dans le dossier utilisateur :
+  rien n est ecrit dans la base de registre, aucun droit administrateur n est
+  demande, et les autres comptes de l ordinateur ne sont pas touches
+- Nexium Donnees explique ce raccourci, dit ou il se trouve, et donne la
+  commande qui le retire. Le client n a aucun acces au disque : il ne peut ni
+  verifier ni supprimer ce fichier lui-meme, et il le dit
+- Le readme annoncait que rien n etait installe ailleurs que dans le dossier
+  du client. Ce n est plus vrai : il le dit maintenant, avant l installation
+  et dans la marche a suivre pour desinstaller
+
 ## v173 - Deux pages neuves, la base de menaces reparee, et une fuite fermee
 
 ### Securite

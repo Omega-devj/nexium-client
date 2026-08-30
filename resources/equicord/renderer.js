@@ -3954,6 +3954,29 @@ if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Copie dans le presse-papiers."),1);
 _NXbtn(_T("Effacer cette donnee"),function(){
 if(window.confirm(_T("Effacer")+" \u00ab "+r.libelle+" \u00bb ?")){effacer(r.k);setOuvert("");force();}}))):null);})
 :i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},_T("Aucune donnee ne correspond a ce filtre."))),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Demarrage avec Windows"),
+_T("La seule chose que Nexium ecrit hors de son propre dossier.")),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.7}},
+_T("A l installation, un raccourci est pose dans ton dossier Demarrage. Nexium se lance donc avec Windows, reduit. Rien n est ecrit dans la base de registre, et les autres comptes de l ordinateur ne sont pas touches.")),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.faint,lineHeight:1.6,
+marginTop:"11px",padding:"10px 12px",background:P.inset,border:"1px solid "+P.line,
+borderRadius:"9px",wordBreak:"break-all"}},
+"%AppData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Nexium Client.lnk"),
+i("div",{style:{fontSize:"12px",color:P.dim,lineHeight:1.65,marginTop:"11px"}},
+_T("Supprime ce raccourci et Nexium ne demarrera plus tout seul. Le client n a pas acces au disque : il ne peut ni le verifier ni le retirer lui-meme.")),
+i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap",marginTop:"13px"}},
+_NXbtn(_T("Copier la commande qui le retire"),function(){try{
+var cmd="Remove-Item \"$env:AppData" +
+"\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Nexium Client.lnk\" -Force";
+var ok=false;
+try{if(typeof DiscordNative!=="undefined"&&DiscordNative.clipboard&&DiscordNative.clipboard.copy){DiscordNative.clipboard.copy(cmd);ok=true;}}catch(_){}
+if(!ok)try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(cmd);ok=true;}}catch(_){}
+if(window._NXPR&&_NXPR.toast)_NXPR.toast(ok
+?_T("Commande copiee. Colle-la dans PowerShell."):_T("Le presse-papiers a refuse l acces."),ok?1:0);
+}catch(_){}}),
+_NXbtn(_T("Ouvrir le dossier Demarrage"),function(){try{
+if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Touche Windows + R, puis tape : shell:startup"),1);}catch(_){}}))),{mb:12}),
 _NXcard(i("div",null,_NXch(_T("Tout exporter, tout effacer"),
 _T("L export rassemble reglages et compteurs de tous les modules dans un seul fichier.")),
 i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
@@ -4347,7 +4370,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="173";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="174";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 

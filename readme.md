@@ -10,7 +10,7 @@ coupe la télémétrie, et t'explique ce qu'il fait au lieu de te demander de le
 <br>
 
 ![Officiel](https://img.shields.io/badge/dépôt-officiel-e6c48a?style=for-the-badge&labelColor=17171a)
-![Version](https://img.shields.io/badge/version-v173-e6c48a?style=for-the-badge&labelColor=17171a)
+![Version](https://img.shields.io/badge/version-v174-e6c48a?style=for-the-badge&labelColor=17171a)
 ![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011-6a8fd6?style=for-the-badge&labelColor=17171a)
 ![Licence](https://img.shields.io/badge/open--source-gratuit-5fb37a?style=for-the-badge&labelColor=17171a)
 
@@ -39,7 +39,11 @@ irm https://raw.githubusercontent.com/Omega-devj/nexium-client/main/install-nexi
 </div>
 
 C'est tout. **Aucun droit administrateur**, rien dans la base de registre, rien ailleurs
-que dans ton dossier utilisateur. Pour désinstaller : supprime le dossier.
+que dans ton dossier utilisateur.
+
+Nexium **démarre avec Windows**, réduit, via un raccourci posé dans ton dossier Démarrage
+(`shell:startup`). Supprime ce raccourci et il ne se lancera plus tout seul — Nexium
+Données te donne la commande qui le fait.
 
 <details>
 <summary><b>Installation manuelle, si tu préfères tout poser toi-même</b></summary>
@@ -50,6 +54,7 @@ que dans ton dossier utilisateur. Pour désinstaller : supprime le dossier.
 2. Récupère le lanceur `.exe` dans l'onglet [Releases](../../releases).
 3. Pose le `.exe` **à la racine** du dossier, à côté des autres fichiers — pas dans un sous-dossier.
 4. Lance-le.
+5. Pour qu'il démarre avec Windows : `Windows + R`, tape `shell:startup`, et glisse un raccourci du `.exe` dans le dossier qui s'ouvre.
 
 </details>
 
@@ -229,7 +234,9 @@ coupe les fonctions à risque.
 | Discord classique déjà ouvert | Ferme-le complètement (clic droit près de l'horloge → Quitter) |
 | Rien ne se met à jour | Ouvre `resources/equicord/.nexium-update.log` : il dit à chaque lancement ce qui s'est passé |
 
-**Désinstaller** : ferme Discord, supprime le dossier. Rien n'est installé ailleurs.
+**Désinstaller** : ferme Discord, supprime le dossier, puis les deux raccourcis — celui
+du Bureau et celui du dossier Démarrage (`Windows + R`, tape `shell:startup`). Rien
+d'autre n'est posé ailleurs.
 Pour effacer aussi tes réglages : Nexium Données → *Tout effacer*, avant de supprimer.
 
 <br>

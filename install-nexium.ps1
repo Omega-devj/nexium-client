@@ -125,13 +125,14 @@ if (-not $exeUrl) {
     Start-Process "https://github.com/$Repo/releases"
 }
 
-# --- 5) Raccourci sur le Bureau ---
+# --- 5) Raccourcis ---
 Titre "5/5  Finalisation"
 $exeLocal = Get-ChildItem $Dossier -Filter *.exe -ErrorAction SilentlyContinue | Select-Object -First 1
 if ($exeLocal) {
+    $sh = New-Object -ComObject WScript.Shell
+
     try {
         $lien = Join-Path ([Environment]::GetFolderPath("Desktop")) "Nexium Client.lnk"
-        $sh   = New-Object -ComObject WScript.Shell
         $sc   = $sh.CreateShortcut($lien)
         $sc.TargetPath       = $exeLocal.FullName
         $sc.WorkingDirectory = $Dossier
@@ -139,6 +140,23 @@ if ($exeLocal) {
         $sc.Save()
         Bon "Raccourci cree sur le Bureau"
     } catch { Souci "Raccourci non cree (sans consequence)" }
+
+    # Demarrage avec Windows : un raccourci dans le dossier Demarrage de
+    # l utilisateur. Rien dans le registre, rien pour les autres comptes,
+    # aucun droit administrateur.
+    try {
+        $demarrage = [Environment]::GetFolderPath("Startup")
+        $lienD = Join-Path $demarrage "Nexium Client.lnk"
+        $sd = $sh.CreateShortcut($lienD)
+        $sd.TargetPath       = $exeLocal.FullName
+        $sd.WorkingDirectory = $Dossier
+        $sd.Description      = "Nexium Client - demarre avec Windows"
+        $sd.WindowStyle      = 7
+        $sd.Save()
+        Bon "Nexium demarrera avec Windows"
+        Info "Pour l en retirer, supprime le raccourci dans :"
+        Info "  $demarrage"
+    } catch { Souci "Demarrage automatique non configure (sans consequence)" }
 }
 
 Write-Host ""
