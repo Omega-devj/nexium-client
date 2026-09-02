@@ -1,5 +1,69 @@
 # Nexium Client — Notes de version
 
+## v175 - Protect et Privacy agissent, et le prouvent
+
+### Une requete de telemetrie sur deux ne partait pas : elle partait toutes
+
+- Le blocage de la telemetrie repondait a Discord par une reponse vide construite
+  au statut 204. Un navigateur refuse de construire cette reponse : un statut 204
+  ne peut pas porter de contenu. La construction levait donc une
+  exception, l exception etait avalee, et la requete partait quand meme. Pendant
+  ce temps le compteur, lui, montait : la page annoncait des requetes arretees
+  qui ne l etaient pas. Corrige et verifie sur un vrai navigateur
+
+### Banc de preuve
+
+- Nouvel onglet dans Protect et dans Privacy, et la liste complete dans le Labo.
+  35 verifications qui executent la vraie protection sur du vrai contenu et
+  affichent ce qui s est reellement passe : le lien pris pour cible, l en-tete
+  retire, le nombre de pixels que l avertissement occupe a l ecran
+- Chaque ligne dit agit, eteint dans tes reglages, hors sujet ici, ou n agit pas.
+  Aucune valeur n est inventee, aucun resultat n est simule
+- Un test qui touche les compteurs les remet ensuite exactement ou ils etaient
+
+### Masquage des liens dangereux
+
+- Nouveau bouclier. Le lien n est plus seulement bloque au clic : il est recouvert
+  dans le message. Le texte d origine n est plus lisible, plus copiable, plus
+  cliquable par erreur. A la place, une etiquette dit ce qui a ete masque
+- Un second reglage etend le masquage aux liens raccourcis et aux liens que
+  l analyse trouve inhabituels sans certitude
+- Autoriser un domaine leve son masque immediatement, le retirer le repose
+- Si Discord redessine le message, le masque se repose tout seul
+
+### Le meme lien n est plus analyse en boucle
+
+- Un lien deja vu n est plus recompte ni reannonce, meme envoye par dix personnes
+  differentes. Le blocage au clic, lui, reste actif a chaque fois
+- Un message modifie n est relu que si son texte a vraiment change. Discord emet
+  une mise a jour a chaque apercu, chaque reaction, chaque epinglage : le client
+  relisait le message a chaque fois
+- Toutes les alertes repetables passent par un meme frein de trente minutes
+
+### Les protections tiennent, et le disent quand elles tombent
+
+- Les six points d interception (fetch, XHR, balises, WebSocket, pair-a-pair,
+  presse-papiers) sont verifies toutes les 45 secondes. Si une extension ou une
+  mise a jour de Discord en ecrase un, il est remis en place et tu es prevenu
+- WebSocket est desormais surveille : une connexion permanente vers un point de
+  collecte est refusee. Les connexions de Discord ne sont jamais touchees
+- L effacement des traces a la fermeture ne dependait que de beforeunload, qui
+  n est pas fiable dans Electron. Il passe aussi par pagehide et par la mise en
+  arriere-plan
+
+### Ailleurs
+
+- Un avertissement de Protect qui ne trouvait pas le module d affichage de
+  Discord disparaissait sans bruit. Il existe maintenant un affichage propre a
+  Nexium qui prend le relais : vingt-six avertissements pouvaient etre perdus
+- La normalisation des caracteristiques materielles se retire vraiment quand on
+  l eteint, au lieu de rester en place jusqu au prochain lancement
+- Une seule fonction absente dans un module voisin faisait echouer en silence
+  toute la classification des liens en dessous de la liste noire. Elle est
+  desormais isolee
+- Dans Auto, un modele que Discord ne permet pas d executer ne restait muet au
+  clic : il dit maintenant pourquoi
+
 ## v174 - Nexium demarre avec Windows
 
 - L installateur pose desormais un raccourci dans le dossier Demarrage de
