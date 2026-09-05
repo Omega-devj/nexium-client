@@ -3936,6 +3936,12 @@ for(var a=0;a<_NXIA.msgs.length;a++)if(_NXIA.msgs[a].flux)_NXIA.msgs[a].flux=fal
 else _NXIA.erreur=m;
 }).then(function(){
 _NXIA.busy=false;_NXIA.pense=false;_NXIA.ctl=null;_NXIA.notify();});};
+_NXIA.copie=function(t){try{
+var x=String(t||"");
+if(window.DiscordNative&&DiscordNative.clipboard&&DiscordNative.clipboard.copy)DiscordNative.clipboard.copy(x);
+else if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(x);
+try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Copie.",1);}catch(_){}
+return true;}catch(_){return false;}};
 _NXIA.inline=function(txt,cle){
 var out=[],reste=String(txt),n=0;
 var RX=/(\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|(?:^|[^*])\*[^*\n]+\*|`[^`]+`|~~[^~]+~~|\[[^\]]+\]\([^)\s]+\))/;
@@ -3951,7 +3957,10 @@ var c0=jeton.charAt(0),k=cle+"-"+(n++);
 if(c0==="`")
 out.push(i("code",{key:k,style:{fontFamily:_NXf.mono,fontSize:"11px",padding:"1.5px 5px",
 borderRadius:"5px",background:_NXpal.raise,border:"1px solid "+_NXpal.hair,
-color:_NXpal.pale,wordBreak:"break-all"}},jeton.slice(1,-1)));
+// normal + break-word : un mot n est coupe que s il ne tient pas seul
+// sur une ligne. getImageData() reste entier ; un jeton demesure passe
+// a la ligne au lieu de deborder.
+color:_NXpal.pale,wordBreak:"normal",overflowWrap:"break-word"}},jeton.slice(1,-1)));
 else if(jeton.slice(0,3)==="***")
 out.push(i("strong",{key:k,style:{fontWeight:"700",fontStyle:"italic",color:_NXpal.txt}},jeton.slice(3,-3)));
 else if(jeton.slice(0,2)==="**")
@@ -4002,13 +4011,26 @@ var corps=[],lang=f[1]||"";
 a++;
 while(a<L.length&&!/^\s*```\s*$/.test(L[a])){corps.push(L[a]);a++;}
 a++;
+var brut=corps.join("\n");
 out.push(i("div",{key:out.length,style:{margin:"10px 0",borderRadius:"10px",overflow:"hidden",
 border:"1px solid "+P.line,background:P.bg}},
-lang?i("div",{style:{padding:"6px 12px",fontSize:"9.5px",fontWeight:"800",
-letterSpacing:".1em",textTransform:"uppercase",color:P.faint,
-borderBottom:"1px solid "+P.line,background:P.inset}},lang):null,
+i("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",
+gap:"10px",padding:"6px 8px 6px 12px",borderBottom:"1px solid "+P.line,background:P.inset}},
+i("span",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".1em",
+textTransform:"uppercase",color:P.faint}},lang||"code"),
+i("span",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+"aria-label":"Copier le code",
+onClick:(function(t){return function(){_NXIA.copie(t);};})(brut),
+style:{display:"inline-flex",alignItems:"center",gap:"5px",padding:"4px 9px",
+borderRadius:"7px",cursor:"pointer",background:"transparent",
+border:"1px solid "+P.line,color:P.dim,fontSize:"10px",fontWeight:"700",
+userSelect:"none"}},
+i("svg",{viewBox:"0 0 24 24",width:10,height:10,fill:"currentColor","aria-hidden":"true"},
+i("path",{d:"M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"})),
+"Copier")),
 i("pre",{style:{margin:0,padding:"12px",overflowX:"auto",fontFamily:_NXf.mono,
-fontSize:"11px",lineHeight:1.65,color:P.pale,whiteSpace:"pre"}},corps.join("\n"))));
+fontSize:"11.5px",lineHeight:1.7,color:P.pale,whiteSpace:"pre",
+userSelect:"text",WebkitUserSelect:"text",cursor:"text"}},brut)));
 continue;}
 
 // tableau : au moins une ligne d en-tete suivie d un separateur
@@ -4058,47 +4080,74 @@ out.push(i("div",{key:out.length,style:{margin:"1px 0"}},_NXIA.inline(l,"p"+a)))
 a++;}
 return out;};
 // --- Bouton dans la barre du champ de message -----------------------------
-// On passe par l API de Vencord plutot que d injecter dans le DOM : le bouton
-// est alors un vrai element de l interface, redessine par Discord comme les
-// siens, sans surveillance ni risque de casser la mise en page.
-_NXIA.BTN="NexiumIA";
+// L API de Vencord n est pas utilisable ici : ses correctifs ne s appliquent
+// que si le greffon ChatInputButtonAPI est actif, ce qui n arrive que si un
+// greffon le declare en dependance. Nexium n en est pas un. On pose donc le
+// bouton nous-memes, en copiant la classe d un bouton voisin pour heriter de
+// sa taille, de ses marges et de son survol.
+_NXIA.BTNID="nx-ia-chatbtn";
 _NXIA.ouvrePage=function(){try{
 if(window._NXCP&&_NXCP.ouvrir)return _NXCP.ouvrir("equicord_ia","Nexium IA");}catch(_){}
 return false;};
-_NXIA.api=function(){try{
-var A=window.Vencord&&Vencord.Api&&Vencord.Api.ChatButtons;
-if(A&&typeof A.addChatBarButton==="function"&&A.ChatBarButton)return A;}catch(_){}
-return null;};
+_NXIA.SELZONE=[
+'[class*="channelTextArea_"] [class*="buttons_"]',
+'[class*="channelTextArea"] [class*="buttons"]',
+'form [class*="buttons_"]'];
+_NXIA.zone=function(){try{
+for(var a=0;a<_NXIA.SELZONE.length;a++){try{
+var e=document.querySelector(_NXIA.SELZONE[a]);
+if(e&&e.children)return e;}catch(_){}}
+return null;}catch(_){return null;}};
 _NXIA.poseBouton=function(){try{
-if(_NXIA._btn)return true;
-var A=_NXIA.api();
-if(!A)return false;
-var Btn=A.ChatBarButton;
-A.addChatBarButton(_NXIA.BTN,function(p){try{
-// Uniquement dans la zone de saisie principale : ni les fils, ni les
-// fenetres detachees, ou le bouton n aurait pas de sens.
-if(p&&p.isMainChat===false)return null;
-return i(Btn,{tooltip:"Nexium IA",onClick:function(){_NXIA.ouvrePage();}},
-i("svg",{viewBox:"0 0 24 24",width:24,height:24,fill:"currentColor","aria-hidden":"true",
-style:{transform:"scale(.86)"}},
-i("path",{d:"M12 2.5 13.7 8l5.5 1.7-5.5 1.7L12 17l-1.7-5.6L4.8 9.7 10.3 8 12 2.5z"}),
-i("path",{opacity:".55",d:"M18.7 14.6l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3z"})));
-}catch(_){return null;}});
-_NXIA._btn=true;
+var vieux=document.getElementById(_NXIA.BTNID);
+if(vieux){
+var vivant=(typeof vieux.isConnected==="boolean")?vieux.isConnected:!!vieux.parentNode;
+if(vivant)return true;
+try{if(vieux.parentNode)vieux.parentNode.removeChild(vieux);}catch(_){}}
+var zone=_NXIA.zone();
+if(!zone)return false;
+var b=document.createElement("div");
+b.id=_NXIA.BTNID;
+b.setAttribute("role","button");
+b.setAttribute("tabindex","0");
+b.setAttribute("aria-label","Nexium IA");
+b.title="Nexium IA";
+// On copie la classe d un bouton deja en place : c est Discord qui dicte
+// alors la taille et l espacement, donc rien ne bouge autour.
+var modele=null;
+try{for(var k=0;k<zone.children.length;k++){
+var c=zone.children[k];
+if(c&&c.id!==_NXIA.BTNID&&c.className&&typeof c.className==="string"){modele=c;break;}}}catch(_){}
+if(modele)b.className=modele.className;
+b.style.display="flex";
+b.style.alignItems="center";
+b.style.justifyContent="center";
+b.style.cursor="pointer";
+b.style.color="currentColor";
+b.style.opacity=".7";
+b.style.transition="opacity .16s ease";
+if(!modele){b.style.width="32px";b.style.height="32px";}
+b.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">'+
+'<path d="M12 2.5 13.7 8l5.5 1.7-5.5 1.7L12 17l-1.7-5.6L4.8 9.7 10.3 8 12 2.5z"></path>'+
+'<path opacity=".55" d="M18.7 14.6l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3z"></path></svg>';
+b.onmouseenter=function(){b.style.opacity="1";};
+b.onmouseleave=function(){b.style.opacity=".7";};
+b.onclick=function(e){try{e.preventDefault();e.stopPropagation();}catch(_){}_NXIA.ouvrePage();};
+b.onkeydown=function(e){
+try{e.stopPropagation();}catch(_){}
+if(e.key==="Enter"||e.key===" "){try{e.preventDefault();}catch(_){}_NXIA.ouvrePage();}};
+try{zone.insertBefore(b,zone.firstChild);}catch(_){try{zone.appendChild(b);}catch(__){return false;}}
 return true;}catch(_){return false;}};
 _NXIA.retireBouton=function(){try{
-var A=_NXIA.api();
-if(A&&typeof A.removeChatBarButton==="function")A.removeChatBarButton(_NXIA.BTN);
-_NXIA._btn=false;return true;}catch(_){return false;}};
-// Vencord n est pas forcement pret au chargement du module : on retente
-// quelques fois, puis on abandonne au lieu de sonder indefiniment.
-try{(function(){
-var essais=0;
-var pose=function(){
-if(_NXIA.poseBouton())return;
-if(++essais>12)return;
-setTimeout(pose,essais<4?1200:4000);};
-setTimeout(pose,1500);})();}catch(_){}
+var e=document.getElementById(_NXIA.BTNID);
+if(e&&e.parentNode)e.parentNode.removeChild(e);
+return true;}catch(_){return false;}};
+// Discord redessine la zone de saisie a chaque changement de salon. Le
+// controle courant est une lecture de isConnected, sans requete DOM tant que
+// le bouton tient : c est le meme cout que la verification des icones de
+// plugins, mesuree comme negligeable.
+try{setTimeout(_NXIA.poseBouton,2500);setTimeout(_NXIA.poseBouton,6000);
+setInterval(function(){try{if(!document.hidden)_NXIA.poseBouton();}catch(_){}},4000);}catch(_){}
 _NXIA.VERSION="1.0";
 _NXIA.aVu=function(){try{return _NXIA.cfg.bienvenue===_NXIA.VERSION;}catch(_){return true;}};
 _NXIA.marqueVu=function(){try{_NXIA.cfg.bienvenue=_NXIA.VERSION;_NXIA.save();}catch(_){}};
@@ -6163,8 +6212,10 @@ if(m.role==="user")
 return i("div",{key:k,style:{display:"flex",justifyContent:"flex-end",marginBottom:"16px"}},
 i("div",{style:{maxWidth:"82%",padding:"10px 15px",borderRadius:"16px 16px 5px 16px",
 background:"linear-gradient(158deg,#17171b,#101013)",border:"1px solid "+P.hair,
-color:P.txt,fontSize:"12.5px",lineHeight:1.7,whiteSpace:"pre-wrap",
-wordBreak:"break-word",boxShadow:"0 2px 10px rgba(0,0,0,.28)"}},m.content));
+color:P.txt,fontSize:"13px",lineHeight:1.7,whiteSpace:"pre-wrap",
+wordBreak:"normal",overflowWrap:"break-word",
+userSelect:"text",WebkitUserSelect:"text",cursor:"text",
+boxShadow:"0 2px 10px rgba(0,0,0,.28)"}},m.content));
 if(m.role==="outil"){
 var res=m.res||{};
 var souci=res.erreur||res.refuse;
@@ -6190,7 +6241,9 @@ i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginBottom:"8px"}
 i("span",{style:{color:P.mute,display:"flex"}},i(NexiumIAIcon,{width:12,height:12})),
 i("span",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".14em",
 textTransform:"uppercase",color:P.faint}},"Nexium IA")),
-i("div",{style:{fontSize:"12.5px",lineHeight:1.75,color:P.pale,wordBreak:"break-word"}},
+i("div",{style:{fontSize:"13px",lineHeight:1.8,color:P.pale,
+wordBreak:"normal",overflowWrap:"break-word",
+userSelect:"text",WebkitUserSelect:"text",cursor:"text"}},
 _NXIA.riche(m.content),
 m.flux?i("span",{"aria-hidden":"true",style:{display:"inline-block",width:"7px",height:"13px",
 marginLeft:"3px",verticalAlign:"text-bottom",background:P.mute,borderRadius:"1px",
@@ -6213,11 +6266,7 @@ i("svg",{viewBox:"0 0 24 24",width:11,height:11,fill:"currentColor","aria-hidden
 i("path",{d:"M17.65 6.35A8 8 0 1 0 19.73 14h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"})),
 _T("Relancer")):null)));};
 
-var copie=function(t){try{
-if(window.DiscordNative&&DiscordNative.clipboard&&DiscordNative.clipboard.copy)
-DiscordNative.clipboard.copy(String(t||""));
-else if(navigator.clipboard)navigator.clipboard.writeText(String(t||""));
-if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Reponse copiee."),1);}catch(_){}};
+var copie=function(t){_NXIA.copie(t);};
 var suggestions=[
 _T("Quelles protections me manquent ?"),
 _T("Explique-moi l empreinte du canvas"),
@@ -6226,7 +6275,7 @@ _T("Passe-moi en profil renforce")];
 var quotaTxt=(reste<0)?"\u2014":String(reste);
 var quotaCol=(reste<0)?P.txt:(reste===0?_NXpal.danger:(reste<=2?_NXpal.warn:P.txt));
 
-return i(Kr,null,i("div",{style:{maxWidth:"680px",margin:"0 auto",opacity:monte?1:0,
+return i(Kr,null,i("div",{style:{maxWidth:"900px",margin:"0 auto",opacity:monte?1:0,
 transform:monte?"none":"translateY(6px)",transition:"opacity .32s ease,transform .32s ease"}},
 _NXhead("IA","Nexium IA",_T("Un assistant qui connait ton client, et rien d autre")),
 
@@ -6269,8 +6318,9 @@ M.length?i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
 onClick:function(){_NXIA.effacer();},
 style:{padding:"6px 11px",borderRadius:"8px",cursor:"pointer",background:"transparent",
 border:"1px solid "+P.line,color:P.sub,fontSize:"11px",fontWeight:"700"}},_T("Effacer")):null),
-i("div",{style:{minHeight:"200px",maxHeight:"440px",overflowY:"auto",
-padding:"6px 4px 2px",marginBottom:"14px"}},
+i("div",{style:{minHeight:"340px",height:"min(62vh,660px)",overflowY:"auto",
+padding:"8px 6px 2px",marginBottom:"14px",
+userSelect:"text",WebkitUserSelect:"text"}},
 M.length?M.map(bulle):i("div",{style:{padding:"42px 12px",textAlign:"center"}},
 i("div",{style:{display:"inline-flex",alignItems:"center",justifyContent:"center",
 width:"46px",height:"46px",borderRadius:"16px",marginBottom:"16px",color:P.mute,

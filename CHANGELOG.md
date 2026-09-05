@@ -37,9 +37,9 @@ et ne garde rien.
 ### Integration dans le client
 
 - Un bouton Nexium IA dans la barre du champ de message, a cote des cadeaux et
-  des emojis. Il passe par l interface que Vencord prevoit pour cela : c est un
-  vrai element de Discord, redessine par lui, sans surveillance du DOM ni
-  risque de deranger la mise en page
+  des emojis. Il reprend la classe d un bouton voisin, donc sa taille et son
+  espacement viennent de Discord : rien ne bouge autour. Il se repose tout seul
+  quand Discord redessine la zone de saisie
 - Nexium IA figure dans la palette de commandes, en tete de liste
 - Onze outils, dont six nouveaux : journal des requetes arretees et des menaces,
   etat du reseau et latence, versions installee et publiee, liste complete des
