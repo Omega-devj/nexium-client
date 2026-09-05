@@ -36,8 +36,10 @@ et ne garde rien.
 
 ### Integration dans le client
 
-- Un bouton dans la barre de titre ouvre Nexium IA d un clic, depuis n importe
-  ou. Il se repose tout seul si Discord redessine sa barre
+- Un bouton Nexium IA dans la barre du champ de message, a cote des cadeaux et
+  des emojis. Il passe par l interface que Vencord prevoit pour cela : c est un
+  vrai element de Discord, redessine par lui, sans surveillance du DOM ni
+  risque de deranger la mise en page
 - Nexium IA figure dans la palette de commandes, en tete de liste
 - Onze outils, dont six nouveaux : journal des requetes arretees et des menaces,
   etat du reseau et latence, versions installee et publiee, liste complete des

@@ -4057,41 +4057,48 @@ if(!l.trim()){out.push(i("div",{key:out.length,style:{height:"7px"}}));a++;conti
 out.push(i("div",{key:out.length,style:{margin:"1px 0"}},_NXIA.inline(l,"p"+a)));
 a++;}
 return out;};
-_NXIA.BTNID="nx-ia-btn";
-_NXIA.barre=function(){try{
-var sels=['[class*="toolbar_"]','[class*="toolbar"]','section[class*="title_"] [class*="toolbar"]'];
-for(var a=0;a<sels.length;a++){try{
-var e=document.querySelector(sels[a]);
-if(e)return e;}catch(_){}}
-return null;}catch(_){return null;}};
+// --- Bouton dans la barre du champ de message -----------------------------
+// On passe par l API de Vencord plutot que d injecter dans le DOM : le bouton
+// est alors un vrai element de l interface, redessine par Discord comme les
+// siens, sans surveillance ni risque de casser la mise en page.
+_NXIA.BTN="NexiumIA";
+_NXIA.ouvrePage=function(){try{
+if(window._NXCP&&_NXCP.ouvrir)return _NXCP.ouvrir("equicord_ia","Nexium IA");}catch(_){}
+return false;};
+_NXIA.api=function(){try{
+var A=window.Vencord&&Vencord.Api&&Vencord.Api.ChatButtons;
+if(A&&typeof A.addChatBarButton==="function"&&A.ChatBarButton)return A;}catch(_){}
+return null;};
 _NXIA.poseBouton=function(){try{
-var vieux=document.getElementById(_NXIA.BTNID);
-if(vieux&&vieux.isConnected)return true;
-var barre=_NXIA.barre();
-if(!barre)return false;
-var b=document.createElement("div");
-b.id=_NXIA.BTNID;
-b.setAttribute("role","button");
-b.setAttribute("tabindex","0");
-b.setAttribute("aria-label","Nexium IA");
-b.title="Nexium IA";
-b.style.cssText="display:inline-flex;align-items:center;justify-content:center;"+
-"width:24px;height:24px;margin:0 4px;cursor:pointer;opacity:.62;"+
-"transition:opacity .16s ease,transform .16s ease;color:currentColor;";
-b.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">'+
-'<path d="M12 2.5 13.7 8l5.5 1.7-5.5 1.7L12 17l-1.7-5.6L4.8 9.7 10.3 8 12 2.5z"></path>'+
-'<path opacity=".55" d="M18.5 14.5l.8 2.6 2.6.8-2.6.8-.8 2.6-.8-2.6-2.6-.8 2.6-.8.8-2.6z"></path></svg>';
-b.onmouseenter=function(){b.style.opacity="1";b.style.transform="scale(1.08)";};
-b.onmouseleave=function(){b.style.opacity=".62";b.style.transform="none";};
-var va=function(){try{if(window._NXCP&&_NXCP.ouvrir)_NXCP.ouvrir("equicord_ia","Nexium IA");}catch(_){}};
-b.onclick=va;
-b.onkeydown=function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();va();}};
-barre.insertBefore(b,barre.firstChild);
+if(_NXIA._btn)return true;
+var A=_NXIA.api();
+if(!A)return false;
+var Btn=A.ChatBarButton;
+A.addChatBarButton(_NXIA.BTN,function(p){try{
+// Uniquement dans la zone de saisie principale : ni les fils, ni les
+// fenetres detachees, ou le bouton n aurait pas de sens.
+if(p&&p.isMainChat===false)return null;
+return i(Btn,{tooltip:"Nexium IA",onClick:function(){_NXIA.ouvrePage();}},
+i("svg",{viewBox:"0 0 24 24",width:24,height:24,fill:"currentColor","aria-hidden":"true",
+style:{transform:"scale(.86)"}},
+i("path",{d:"M12 2.5 13.7 8l5.5 1.7-5.5 1.7L12 17l-1.7-5.6L4.8 9.7 10.3 8 12 2.5z"}),
+i("path",{opacity:".55",d:"M18.7 14.6l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3z"})));
+}catch(_){return null;}});
+_NXIA._btn=true;
 return true;}catch(_){return false;}};
-// Discord redessine sa barre : on verifie que le bouton est encore la.
-// Le controle est une lecture de isConnected, sans requete DOM tant qu il tient.
-try{setTimeout(_NXIA.poseBouton,3500);setTimeout(_NXIA.poseBouton,8000);
-setInterval(function(){try{if(!document.hidden)_NXIA.poseBouton();}catch(_){}},6000);}catch(_){}
+_NXIA.retireBouton=function(){try{
+var A=_NXIA.api();
+if(A&&typeof A.removeChatBarButton==="function")A.removeChatBarButton(_NXIA.BTN);
+_NXIA._btn=false;return true;}catch(_){return false;}};
+// Vencord n est pas forcement pret au chargement du module : on retente
+// quelques fois, puis on abandonne au lieu de sonder indefiniment.
+try{(function(){
+var essais=0;
+var pose=function(){
+if(_NXIA.poseBouton())return;
+if(++essais>12)return;
+setTimeout(pose,essais<4?1200:4000);};
+setTimeout(pose,1500);})();}catch(_){}
 _NXIA.VERSION="1.0";
 _NXIA.aVu=function(){try{return _NXIA.cfg.bienvenue===_NXIA.VERSION;}catch(_){return true;}};
 _NXIA.marqueVu=function(){try{_NXIA.cfg.bienvenue=_NXIA.VERSION;_NXIA.save();}catch(_){}};
