@@ -1,0 +1,13 @@
+# Le renderer est verifie par somme de controle a l octet pres (renderer.js.nxsum,
+# et validRenderer() dans resources/app.asar/index.js). Sur Windows, core.autocrlf
+# convertit les fins de ligne au checkout : le fichier pose sur le disque ne
+# correspond alors plus a sa somme, et le client se croit altere. Les utilisateurs
+# ne le voyaient pas -- ils recoivent le fichier par curl, toujours en LF -- mais
+# tout git pull cassait la copie du poste de developpement.
+# -text : aucune conversion, dans aucun sens.
+resources/equicord/renderer.js        -text
+resources/equicord/renderer.js.nxsum  -text
+resources/equicord/renderer.css       -text
+resources/equicord/patcher.js         -text
+resources/equicord/preload.js         -text
+resources/app.asar/index.js           -text
