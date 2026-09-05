@@ -1,5 +1,66 @@
 # Nexium Client — Notes de version
 
+## v177 - dix nouvelles facons de ne pas etre reconnu
+
+Nexium Privacy arretait ce qui PART de ta machine. Il sait maintenant aussi
+brouiller ce qui permet de te RECONNAITRE d une fois sur l autre, meme sans
+compte, sans cookie et sans adresse IP stable. Vingt-quatre protections
+deviennent trente-quatre. Tout est eteint par defaut, tout se retire.
+
+### Ce qui rend une machine reconnaissable
+
+- Empreinte du canvas. Une page peut faire dessiner une image invisible et lire
+  le resultat : les ecarts de rendu entre machines suffisent a identifier la
+  tienne. Ce qui est relu est brouille, ce qui s affiche ne change pas
+- Modele de carte graphique. Le nom exact du materiel, lisible par toute page,
+  est remplace par un modele courant
+- Empreinte audio. Le calcul du son laisse des ecarts propres a chaque machine.
+  Un bruit mille fois plus faible que le seuil de l oreille les couvre. La voix
+  et les sons ne changent pas
+- Dimensions de l ecran. La taille exacte et la profondeur de couleur sont
+  annoncees comme un ecran courant
+- Liste des greffons. Presentee vide, comme sur une installation neuve
+- Etat de la batterie. Le niveau de charge est assez fin pour relier deux
+  visites : il est annonce comme un appareil branche et plein
+- Indices de client. Les reponses detaillees du navigateur sur sa version, son
+  architecture et le systeme sont normalisees
+
+### Ce qui sort de la machine
+
+- Adresse IP locale. Pour etablir un appel, le client annonce l adresse de ta
+  machine sur ton reseau local. Elle est retiree des candidats envoyes ; ceux
+  qui font passer la voix par Discord sont gardes, l appel fonctionne
+- Metadonnees des images. Une photo prise au telephone porte la date, le modele
+  de l appareil et souvent les coordonnees GPS du lieu. Ces blocs sont retires
+  avant l envoi, octet par octet : ni recompression, ni perte de qualite. Le
+  profil de couleurs et l en-tete necessaires au rendu sont gardes
+- Liens que tu envoies. Un lien copie depuis un site porte souvent un parametre
+  qui identifie qui l a partage. Le nettoyage existait pour les liens que tu
+  ouvres ; il s applique desormais aussi a ceux que tu envoies
+
+### Ce que ca change a l usage
+
+- Les trois profils sont etendus. Discret prend les deux protections sans effet
+  de bord. Renforce ajoute le brouillage d empreinte, invisible a l usage.
+  Maximal ajoute les deux reglages qui peuvent gener, et le dit
+- Le brouillage utilise une graine tiree au demarrage : stable pendant la
+  session, sinon deux lectures se contredisent et trahissent la parade ;
+  differente a chaque session, sinon elle devient elle-meme un identifiant
+- Une protection qui ne peut pas s appliquer refuse de s allumer plutot que
+  d afficher un interrupteur actif qui ne protege rien
+- 52 verifications automatiques executent le vrai code : elles envoient une
+  photo avec de vraies coordonnees GPS et relisent le fichier produit, passent
+  un vrai SDP d appel, comparent la lecture du canvas avant et apres
+
+### Deux idees ecartees, et pourquoi
+
+- Anonymiser la liste du materiel audio et video : Discord a besoin des noms et
+  des identifiants pour te laisser choisir ton micro. La protection aurait casse
+  le choix du peripherique
+- Normaliser l en-tete d identification client : Discord s en sert pour valider
+  ses propres requetes, et une valeur inhabituelle expose a un signalement du
+  compte. Le risque pour l utilisateur depassait le gain
+
 ## v176 - le client se fatigue moins, et la traduction anglaise fonctionne
 
 ### Le masquage des liens ne relisait plus la fenetre entiere
