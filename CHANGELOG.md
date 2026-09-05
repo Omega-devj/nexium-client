@@ -1,5 +1,60 @@
 # Nexium Client — Notes de version
 
+## v178 - Nexium IA, et Privacy repense
+
+### Nexium IA 1.0
+
+Un assistant integre au client. Il connait ton installation, peut agir dessus,
+et ne garde rien.
+
+- Il lit ton etat reel quand tu l y autorises : protections actives, menaces
+  bloquees, place occupee, statistiques d usage. Plus de reponse au hasard
+- Il agit : allumer une protection, appliquer un profil de confidentialite.
+  Chaque geste est ecrit dans la conversation, en clair
+- Quatre acces separes, tous refuses au depart. Un outil dont l acces manque
+  n est meme pas propose au modele : il ne peut pas demander ce que tu n as
+  pas donne. Un second verrou refuse l execution cote client
+- Les outils tournent SUR TA MACHINE. Le relais ne voit que ce qu ils
+  renvoient, le temps d un aller-retour
+- Aucune conversation n est enregistree, ni chez toi ni sur le serveur. Elle
+  disparait quand tu fermes le client. Seuls tes consentements sont gardes
+- Le texte s ecrit au fil de l eau. Tu peux couper en cours, copier une
+  reponse, relancer la derniere question
+- Markdown complet : gras, italique, listes, titres, citations, blocs de code
+  et tableaux. Les liens passent par l analyse de Nexium Protect avant de
+  s ouvrir. Rien n est rendu en HTML : une reponse ne peut pas devenir du code
+- Dix messages par sept heures, compte cote serveur. Le compteur est affiche
+- Un panneau de bienvenue s ouvre une fois apres la mise a jour
+
+### Nexium Privacy repense
+
+- Le niveau de discretion n est plus une barre unique mais quatre anneaux
+  concentriques, un par famille : telemetrie, social, empreinte, donnees. On
+  voit d un coup d oeil laquelle est a la traine, ce qu une barre cachait
+- Les reglages passent de la liste a la grille de tuiles. Chaque tuile porte
+  son icone, son etat et son explication, et s allume quand elle agit
+
+### Integration dans le client
+
+- Un bouton dans la barre de titre ouvre Nexium IA d un clic, depuis n importe
+  ou. Il se repose tout seul si Discord redessine sa barre
+- Nexium IA figure dans la palette de commandes, en tete de liste
+- Onze outils, dont six nouveaux : journal des requetes arretees et des menaces,
+  etat du reseau et latence, versions installee et publiee, liste complete des
+  cles de reglage avec leur etat, bascule des protections de Nexium Protect,
+  et sante du stockage
+- Un outil qui visait une fonction inexistante a ete retire plutot que laisse
+  en place : il repondait que le module n avait pas demarre
+
+### Details
+
+- La frappe dans un champ ne declenche plus les raccourcis du client. Le
+  correctif porte sur les gestionnaires globaux : il protege toutes les zones
+  de saisie, pas seulement le chat
+- Le relais choisit son modele en interrogeant la liste reelle du fournisseur.
+  Un modele retire ne casse plus rien : le suivant prend le relais
+- L assistant ne se fait passer pour personne. Il repond qu il est Nexium IA
+
 ## v177 - dix nouvelles facons de ne pas etre reconnu
 
 Nexium Privacy arretait ce qui PART de ta machine. Il sait maintenant aussi
