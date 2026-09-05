@@ -1,5 +1,60 @@
 # Nexium Client — Notes de version
 
+## v176 - le client se fatigue moins, et la traduction anglaise fonctionne
+
+### Le masquage des liens ne relisait plus la fenetre entiere
+
+- A chaque fois que Discord touchait au DOM, le masquage repassait sur tous les
+  liens de la page. Dans un salon qui defile, cela revenait a relire la fenetre
+  quatre fois par seconde. Il ne relit plus que ce qui vient d etre insere, et ne
+  repasse sur l ensemble qu au ralenti, pour rattraper les liens dont l adresse
+  change sans que le message soit reinsere
+- Mesure sur une minute de salon actif : 231 relectures completes ramenees a 15,
+  et 172 788 liens parcourus ramenes a 11 085
+
+### Le panneau des icones ne mesurait plus la fenetre chaque seconde
+
+- Le panneau qui porte les icones de plugins recalculait sa position toutes les
+  secondes, indefiniment. Comme Discord modifie sa fenetre en permanence, chacune
+  de ces mesures obligeait le navigateur a refaire sa mise en page
+- Il ralentit maintenant quand rien ne bouge, jusqu a une mesure toutes les quatre
+  secondes, et reprend le rythme plein des que sa position change ou que la
+  fenetre est redimensionnee : 63 pour cent de mises en page forcees en moins,
+  sans que le panneau tarde a suivre
+
+### L ecran de connexion continuait d etre surveille apres la connexion
+
+- La surveillance s arretait seulement si l ecran de connexion n avait jamais ete
+  vu. Une fois connecte, elle continuait donc pour toujours a interroger la
+  fenetre toutes les trois secondes pour un ecran qui ne revient pas
+- Elle passe la main a une veille lente qui la reveille si l ecran reapparait :
+  vingt interrogations par minute ramenees a deux, sans rien perdre
+
+### La page Privacy se redessinait pour rien
+
+- La page se redessinait entierement toutes les deux secondes et demie, meme
+  quand aucun compteur n avait bouge. Elle ne se redessine plus que sur un
+  changement reel
+
+### La traduction anglaise ne partait pas sur 89 libelles
+
+- Le texte francais du client s ecrit sans apostrophes, mais 26 cles de traduction
+  en portaient une. La correspondance etant exacte, ces traductions ne partaient
+  jamais : un anglophone lisait un titre en anglais suivi d une description en
+  francais. Le delai avant action irreversible etait dans ce cas
+- 63 autres cles ne correspondaient plus a aucun texte affiche : restes de
+  renommages, dont toute la section Retrospective devenue Bilan, et libelles
+  dessines sur l image du bilan, qui ne passent pas par la traduction. Retirees
+- Cinq cles etaient ecrites deux fois avec la meme traduction. Dedoublonnees
+
+### Connu
+
+- Le mot Apercu porte deux sens dans le client : les onglets d entree des pages
+  Stats, Privacy et Protect, et la legende d un nuancier de couleurs. La table de
+  traduction ne peut en servir qu un seul, et c est aujourd hui Preview qui gagne,
+  donc les trois onglets s affichent mal en anglais. Trancher demande de renommer
+  du texte francais visible : rien n a ete change sans decision
+
 ## v175 - Protect et Privacy agissent, et le prouvent
 
 ### Une requete de telemetrie sur deux ne partait pas : elle partait toutes
