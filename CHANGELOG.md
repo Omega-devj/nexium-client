@@ -1,5 +1,79 @@
 # Nexium Client — Notes de version
 
+## v181 - Nexium IA 1.3
+
+### Il ne repete plus un chiffre qu il vient de rendre faux
+
+Defaut de la 1.2 : l assistant lisait "11 protections sur 34", en activait
+une, puis continuait a annoncer 11 pour le reste de la conversation. Une
+horloge d etat avance desormais des qu une action change quelque chose, et
+tout ce qui a ete lu avant devient perime. Ce qui ne bouge pas -- la version,
+les notes de mise a jour -- reste valable. Chaque lecture a par ailleurs sa
+duree de vie : deux minutes pour des statistiques, dix pour le reste.
+
+Il retient aussi ce qui a echoue, et ne le retente plus a l identique.
+
+### Ce que seul ce client peut faire
+
+N importe quel assistant sait discuter. Aucun autre ne connait les tentatives
+de pistage bloquees sur cette machine.
+
+- Le journal de traque : ce qui a essaye de te suivre, de quelle sorte, vers
+  quels hotes, et quand. Un recit, pas un compteur
+- L audit de confidentialite : ce qui est eteint, ce que ca couvre, et ce que
+  ca change pour toi
+- Les extensions a risque : celles qui lisent ton jeton de session ET
+  envoient vers l exterieur, expliquees en francais
+- La verification d un lien : est-ce un domaine Discord officiel, un sosie a
+  une ou deux lettres pres, une adresse numerique, un raccourcisseur. Des
+  faits, jamais un verdict -- c est l assistant qui conclut, avec le message
+  qui accompagne le lien
+- L etat des gardes reseau
+
+### L assistant n est plus enferme dans une page
+
+- /nx dans la barre de message Discord : ecris /nx resume ce salon, et la
+  question part a l assistant au lieu de partir sur Discord. Elle passe par
+  le module d envoi du client, donc elle ne peut pas cesser de marcher a la
+  prochaine mise a jour de Discord
+- Cinq entrees dans la palette de commandes : poser une question, resumer un
+  salon, savoir qui a essaye de te pister, verifier ta confidentialite,
+  verifier tes extensions
+- Un menu au clic droit sur un message : expliquer, verifier si c est une
+  arnaque, traduire, proposer une reponse. Le message lu est encadre comme
+  une donnee et caviarde avant tout envoi
+
+### Moins cher, sans rien perdre
+
+Mesure de depart : chaque tour envoyait 2 830 jetons de schema d outils avant
+meme la question. On les payait pour "il est quelle heure".
+
+Seuls les outils que la question rend plausibles partent maintenant, plus
+deux passe-partout : un catalogue complet, et un appel par nom. Rien n est
+donc hors de portee -- au pire l assistant demande le catalogue et paie un
+tour de plus, au lieu de payer le catalogue entier a chaque tour. Verifie sur
+le vrai service : prive de l outil dont il avait besoin, le modele demande le
+catalogue puis appelle l outil par son nom.
+
+Mesure d arrivee : 906 jetons en moyenne, soit 68 % de moins, a chaque tour.
+Le passe-partout ne contourne aucun verrou : l acces est verifie sur l outil
+reellement vise, et une action reste soumise a l utilisateur, sous son vrai
+nom.
+
+Deux autres economies : certaines questions ont une reponse exacte sur la
+machine et n atteignent plus le relais du tout ; et la meme question posee
+deux fois, sans que rien n ait change entre les deux, rejoue la premiere
+reponse. Les deux sont annoncees dans la bulle -- une reponse gratuite qui se
+ferait passer pour une reponse du modele serait un mensonge par omission.
+
+### La reflexion, rendue lisible
+
+- Le premier temps du mode profond s affiche comme une demarche, etape par
+  etape, au lieu d un pave
+- Chaque reponse dit sur quels outils elle s appuie. Un chiffre sans outil
+  derriere est un chiffre invente : ca se voit maintenant sans avoir a le
+  chercher
+
 ## v180 - Nexium IA 1.2
 
 ### Trois defauts qui rendaient l assistant inutilisable
