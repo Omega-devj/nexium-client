@@ -1,5 +1,89 @@
 # Nexium Client — Notes de version
 
+## v180 - Nexium IA 1.2
+
+### Trois defauts qui rendaient l assistant inutilisable
+
+- Les actions ne partaient jamais. Le schema d outils declarait TOUS les
+  parametres comme obligatoires. "Mets de la musique" appelait l outil sans
+  le volume, qui est facultatif : le fournisseur refusait alors la generation
+  entiere, en plein milieu du flux. Le chat affichait "Le modele n a rien
+  renvoye" sans autre explication. Chaque outil declare desormais ce qu il
+  exige vraiment, et rien de plus
+- L assistant devenait injoignable au bout de quelques messages. Le fil
+  envoyait au modele des bulles qui ne sont pas des messages : un resultat
+  d outil, une demande de confirmation, une etape d analyse. Une seule
+  suffisait a faire rejeter la demande, et toutes les suivantes avec elle
+- Les messages disaient "envoye" sans l etre. L envoi ne regardait jamais
+  la reponse de Discord. La bulle verte s affichait, la conversation restait
+  vide. On attend desormais la confirmation, on ajoute l identifiant unique
+  sans lequel Discord perd le message, et on bascule sur la voie directe si
+  la premiere echoue. Quand rien ne marche, on le dit
+
+### L assistant sait ou il est
+
+Il demarrait aveugle a chaque question et devait depenser un appel d outil
+pour apprendre ce qu on pouvait lui dire gratuitement.
+
+- Il connait la date, l heure, et a qui il parle
+- Il connait ton etat reel : protections actives, profil de confidentialite,
+  menaces bloquees, musique, mode economie
+- Il retient ce que ses outils ont renvoye pendant la conversation. Avant, il
+  relisait tes statistiques a chaque tour -- ou les inventait
+- Il retient ce que tu lui demandes de retenir, et ce que tu as refuse
+  plusieurs fois. Les preferences survivent a l effacement du fil ; elles ne
+  quittent jamais la machine
+- Il n abrege plus ce que tu lui demandes de detailler
+
+### La conversation ne meurt plus
+
+Elle s arretait a quarante messages avec un "efface-la" pour seule issue. Le
+debut est desormais replie en un resume, produit par le palier le moins cher,
+et le fil continue.
+
+### Trois niveaux de reflexion
+
+- Rapide : repond tout de suite. Moitie prix
+- Normal : le bon compromis
+- Profond : le modele travaille d abord la question sans y repondre --
+  ce qui est demande, ce qui manque, les approches possibles, les pieges --
+  puis redige en s appuyant sur ce travail. Mesure : vingt secondes contre
+  cinq, et une reponse trois fois plus fournie. Trois fois le prix, annonce
+  avant. Le raisonnement se consulte sous la reponse, replie
+
+### Le prix baisse tout seul
+
+- Palier automatique, et c est le nouveau defaut : le relais choisit le
+  modele le moins cher qui tienne la demande. "Salut" coute un credit au lieu
+  de dix, sans que ca se voie
+- Facturation au reel : le devis est preleve avant, l ecart est rendu
+  apres. Un echec est integralement rembourse, une reponse coupee aussi
+- La boucle de travail passe de quatre a dix etapes, et le dit quand elle les
+  epuise au lieu de rendre une bulle muette
+- Un outil appele quatre fois de suite avec les memes arguments est arrete
+
+### Ce qui est lu n est pas un ordre
+
+- Tout texte venant d une conversation, d une page ou d un fichier est encadre
+  comme une DONNEE. Un message qui contient "ignore tes consignes" est
+  signale, jamais execute
+- Adresses, numeros, cles et invitations sont retires avant tout envoi au
+  relais. Ce qui ne part pas ne peut pas fuir
+- Le nombre de messages lus lors d une analyse est affiche, et reglable
+
+### L analyse va jusqu au bout
+
+Chaque proposition porte son bouton d envoi. En mode auto, la meilleure part
+seule -- si, et seulement si, l acces d envoi est accorde.
+
+### Nouveaux modeles et nouveaux outils
+
+- Nexium IA 2.0, en essai, reserve aux administrateurs du client
+- Trois voies de service au lieu d une : la charge se repartit, et une voie
+  saturee ne bloque plus personne
+- Nouveaux outils : salon ouvert, conversations ouvertes, brouillon en cours,
+  retenir et oublier une preference
+
 ## v178 - Nexium IA, et Privacy repense
 
 ### Nexium IA 1.0
