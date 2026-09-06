@@ -850,6 +850,7 @@ _NXMO.CSS=[
 '@keyframes nx-pulse{0%,100%{opacity:.35;transform:scale(1)}50%{opacity:1;transform:scale(1.35)}}',
 '@keyframes nx-ia-point{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}',
 '@keyframes nx-ia-curseur{0%,50%{opacity:1}51%,100%{opacity:0}}',
+'@keyframes nx-ia-monte{from{opacity:0;transform:translate3d(0,12px,0) scale(.98)}to{opacity:1;transform:none}}',
 '.nx-anim [data-nx-rise]{animation:nx-rise .34s cubic-bezier(.22,.8,.28,1) both;will-change:transform,opacity}',
 '.nx-anim [data-nx-rise="1"]{animation-delay:.02s}',
 '.nx-anim [data-nx-rise="2"]{animation-delay:.05s}',
@@ -3569,6 +3570,75 @@ _NXIA.erreur="";
 // Ce qu il reste avant la limite. -1 tant que le relais ne l a pas dit.
 _NXIA.restant=-1;
 _NXIA.reprise=null;
+// -2 signifie "sans limite" : c est ce que renvoie le relais a un admin.
+_NXIA.admin=false;
+_NXIA.nomModele="";
+_NXIA.repli="";
+// Les paliers tels que le relais les nomme. Le libelle est une version de
+// Nexium IA : l assistant ne se reclame d aucun constructeur.
+// Les six paliers. `base` est le cout en credits d une demande simple ; le
+// relais garde la meme grille et refait le calcul de son cote -- le client
+// ne fait qu afficher une estimation.
+_NXIA.PALIERS=[
+{k:"S", rang:"S",nom:"Nexium IA 1.2",       base:10,role:"Principal",   d:"Le plus capable. A privilegier."},
+{k:"A2",rang:"A",nom:"Nexium IA 1.0.2",     base:7, role:"Repli puissant",d:"Solide et plus direct."},
+{k:"A1",rang:"A",nom:"Nexium IA 1.0",       base:5, role:"Repli",       d:"La premiere generation."},
+{k:"B", rang:"B",nom:"Nexium IA 0.9",       base:3, role:"Rapide",      d:"Leger et economique."}];
+// Les deux paliers agents ont ete retires : ils dependent de modeles que
+// le compte du fournisseur ne propose pas au catalogue, donc ils ne
+// peuvent pas fonctionner. Mieux vaut quatre choix qui marchent que six
+// dont deux sont morts.
+// Disponibilite reelle, apprise du relais. Tant qu on ne l a pas, on ne
+// prejuge de rien : un palier inconnu est propose, pas grise a tort.
+_NXIA.dispo={};
+_NXIA.chargeDispo=function(){try{
+if(_NXIA._dispoAt&&(Date.now()-_NXIA._dispoAt)<300000)return;
+_NXIA._dispoAt=Date.now();
+fetch(_NXIA.URL,{method:"GET"}).then(function(r){return r.json();}).then(function(j){
+if(!j||!j.paliers)return;
+var d={};
+for(var a=0;a<j.paliers.length;a++)d[j.paliers[a].cle]={
+utilisable:j.paliers[a].utilisable!==false,bloque:j.paliers[a].bloque||null};
+_NXIA.dispo=d;
+if(j.credits&&typeof j.credits.max==="number")_NXIA.CREDITS_MAX=j.credits.max;
+_NXIA.notify();}).catch(function(){});
+}catch(_){}};
+_NXIA.CREDITS_MAX=100;
+_NXIA.dernierCout=0;
+_NXIA.utilisable=function(k){try{
+var d=_NXIA.dispo[k];
+return !d||d.utilisable!==false;}catch(_){return true;}};
+_NXIA.info=function(k){try{
+for(var a=0;a<_NXIA.PALIERS.length;a++)if(_NXIA.PALIERS[a].k===k)return _NXIA.PALIERS[a];
+return _NXIA.PALIERS[0];}catch(_){return _NXIA.PALIERS[0];}};
+// Estimation du cout, avec la meme grille que le relais.
+_NXIA.cout=function(o){try{
+o=o||{};
+var c=_NXIA.info(_NXIA.palier()).base;
+if(o.reflexion===undefined?_NXIA.reflexion():o.reflexion)c*=3;
+c+=Math.floor(Math.max(0,o.caracteres||0)/2500);
+if(_NXIA.nbCaps())c+=1;
+if(o.analyse)c*=2;
+return Math.max(1,Math.round(c));}catch(_){return 1;}};
+_NXIA.reflexion=function(){try{return !!_NXIA.cfg.reflexion;}catch(_){return false;}};
+_NXIA.setReflexion=function(v){try{_NXIA.cfg.reflexion=!!v;_NXIA.save();_NXIA.notify();}catch(_){}};
+_NXIA.palier=function(){try{
+var k=_NXIA.cfg.palier;
+for(var a=0;a<_NXIA.PALIERS.length;a++)if(_NXIA.PALIERS[a].k===k)return k;
+return "S";}catch(_){return "S";}};
+_NXIA.setPalier=function(k){try{_NXIA.cfg.palier=String(k||"S");_NXIA.save();_NXIA.notify();}catch(_){}};
+_NXIA.palierNom=function(){try{
+var k=_NXIA.palier();
+for(var a=0;a<_NXIA.PALIERS.length;a++)if(_NXIA.PALIERS[a].k===k)return _NXIA.PALIERS[a].nom;
+return "Nexium IA";}catch(_){return "Nexium IA";}};
+// Le relais verifie cet identifiant contre SA liste : le client ne peut
+// pas s auto-declarer admin, il peut seulement dire qui il est.
+_NXIA.moi=function(){try{
+if(window._NXADMIN&&typeof _NXADMIN.moiId==="function")return String(_NXADMIN.moiId()||"");
+}catch(_){}
+try{var C=_NXcommon();var U=C.C.UserStore||(C.WP.findByProps&&C.WP.findByProps("getCurrentUser"));
+var u=U&&U.getCurrentUser&&U.getCurrentUser();
+return (u&&u.id)?String(u.id):"";}catch(_){return "";}};
 _NXIA.listeners=[];
 _NXIA.notify=function(){for(var a=0;a<_NXIA.listeners.length;a++){try{_NXIA.listeners[a]();}catch(_){}}};
 
@@ -3580,7 +3650,10 @@ _NXIA.CAPS=[
 {k:"lecture",n:"Lire l etat du client",d:"Version, modules demarres, protections actives et leurs compteurs."},
 {k:"stats",n:"Lire tes statistiques",d:"Messages, temps en vocal, jours actifs. Ces chiffres restent calcules sur ta machine."},
 {k:"stockage",n:"Voir ce qui est stocke",d:"La place occupee par chaque module Nexium, sans le contenu."},
-{k:"reglages",n:"Changer tes reglages",d:"Allumer ou eteindre une protection, appliquer un profil. Chaque changement est ecrit dans la conversation."}
+{k:"reglages",n:"Changer tes reglages",d:"Allumer ou eteindre une protection, appliquer un profil. Chaque changement est ecrit dans la conversation."},
+{k:"actions",n:"Piloter les modules",d:"Lancer la musique, changer de piste, demarrer ou arreter une session de concentration."},
+{k:"envoi",n:"Envoyer des messages a ta place",d:"L assistant peut ecrire dans une conversation privee en ton nom. En mode manuel il demande avant chaque envoi ; en mode auto il envoie seul."},
+{k:"conversations",n:"Lire une conversation privee",d:"Uniquement quand tu ecris @ et choisis toi-meme la personne. Les derniers messages partent alors au relais pour qu il propose des suites. Ton correspondant n a rien demande : a n activer qu en connaissance de cause."}
 ];
 _NXIA.cfg=(function(){try{var r=_NXDB.get(_NXIA.KEY);var d=r?JSON.parse(r):null;
 if(!d||typeof d!=="object")d={};
@@ -3589,6 +3662,9 @@ for(var a=0;a<_NXIA.CAPS.length;a++){var k=_NXIA.CAPS[a].k;
 if(typeof d.consent[k]!=="boolean")d.consent[k]=false;}
 if(typeof d.vu!=="boolean")d.vu=false;
 if(typeof d.bienvenue!=="string")d.bienvenue="";
+if(typeof d.palier!=="string")d.palier="S";
+if(typeof d.reflexion!=="boolean")d.reflexion=false;
+if(d.mode!=="auto"&&d.mode!=="manuel")d.mode="manuel";
 return d;}catch(_){return {consent:{},vu:false};}})();
 _NXIA.save=function(){try{_NXDB.set(_NXIA.KEY,JSON.stringify(_NXIA.cfg));}catch(_){}};
 _NXIA.accorde=function(k){try{return !!_NXIA.cfg.consent[k];}catch(_){return false;}};
@@ -3598,6 +3674,59 @@ _NXIA.nbCaps=function(){try{var n2=0;for(var a=0;a<_NXIA.CAPS.length;a++)if(_NXI
 // --- Outils ----------------------------------------------------------------
 // Ils s executent sur cette machine. Le relais ne recoit que ce qu ils
 // renvoient, et seulement quand le modele en a fait la demande.
+// Le modele emploie indifferemment le francais et l anglais, et parfois
+// un synonyme. Refuser "play" quand on attend "lire" ferait echouer une
+// demande parfaitement claire : constate en usage reel.
+_NXIA.SYNO={
+lire:"lire",play:"lire",jouer:"lire",start:"lire",lecture:"lire",reprendre:"lire",resume:"lire",
+pause:"pause",stop:"pause",arreter:"pause",couper:"pause",arret:"pause",
+suivant:"suivant",next:"suivant",suivante:"suivant",passer:"suivant",skip:"suivant",
+precedent:"precedent",prev:"precedent",previous:"precedent",precedente:"precedent",retour:"precedent",
+volume:"volume",vol:"volume",son:"volume",
+etat:"etat",status:"etat",state:"etat",info:"etat",
+lancer:"lancer",begin:"lancer",commencer:"lancer",demarrer:"lancer"};
+_NXIA.action=function(x,defaut){try{
+var k=String(x||"").trim().toLowerCase();
+if(!k)return defaut||"etat";
+return _NXIA.SYNO[k]||k;}catch(_){return defaut||"etat";}};
+// --- Mode d execution ------------------------------------------------------
+// En manuel, toute action qui CHANGE quelque chose demande confirmation.
+// Lire l etat du client n en demande jamais : ce n est pas une action.
+// Le manuel est le defaut : agir sans demander doit etre un choix, pas une
+// surprise.
+_NXIA.mode=function(){try{return _NXIA.cfg.mode==="auto"?"auto":"manuel";}catch(_){return "manuel";}};
+_NXIA.setMode=function(m){try{_NXIA.cfg.mode=(m==="auto")?"auto":"manuel";_NXIA.save();_NXIA.notify();}catch(_){}};
+// Les capacites qui modifient l etat ou touchent autrui.
+_NXIA.CAPACTION={reglages:1,actions:1,envoi:1};
+_NXIA.estAction=function(nom){try{
+for(var a=0;a<_NXIA.OUTILS.length;a++)
+if(_NXIA.OUTILS[a].nom===nom)return !!_NXIA.CAPACTION[_NXIA.OUTILS[a].cap];
+return false;}catch(_){return false;}};
+// File des demandes en attente de reponse de l utilisateur.
+_NXIA.attentes=[];
+_NXIA.repondre=function(id,ok){try{
+for(var a=0;a<_NXIA.attentes.length;a++){
+if(_NXIA.attentes[a].id!==id)continue;
+var d=_NXIA.attentes.splice(a,1)[0];
+for(var b=0;b<_NXIA.msgs.length;b++){
+var m=_NXIA.msgs[b];
+if(m.role==="confirm"&&m.id===id){m.repondu=ok?"accepte":"refuse";break;}}
+_NXIA.notify();
+d.suite(ok);
+return true;}
+return false;}catch(_){return false;}};
+// Demande l execution d un outil, en passant par la confirmation si besoin.
+_NXIA.demande=function(nom,args){try{
+if(!_NXIA.estAction(nom)||_NXIA.mode()==="auto")
+return Promise.resolve(_NXIA.executer(nom,args));
+var id="c"+(++_NXIA._nid||(_NXIA._nid=1));
+return new Promise(function(res){
+_NXIA.msgs.push({role:"confirm",id:id,outil:nom,args:args||{}});
+_NXIA.notify();
+_NXIA.attentes.push({id:id,suite:function(ok){
+res(ok?_NXIA.executer(nom,args)
+:{refuse:_T("Tu as refuse cette action.")});}});});
+}catch(e){return Promise.resolve({erreur:String(e&&e.message)});}};
 _NXIA.oui=function(x){return x?"oui":"non";};
 _NXIA.OUTILS=[
 {nom:"etat_du_client",cap:"lecture",
@@ -3736,11 +3865,229 @@ _NXIA.OUTILS=[
  try{if(typeof D.sauvegardes==="function")out.sauvegardes=(D.sauvegardes()||[]).length;}catch(_){}
  return out;}catch(e){return {erreur:String(e&&e.message)};}}}
 
+
+,{nom:"musique",cap:"actions",
+ desc:"Pilote le lecteur Nexium Music : lire ou mettre en pause, piste suivante ou precedente, regler le volume. Sans action, renvoie l etat courant.",
+ params:{action:{type:"string",description:"lire, pause, suivant, precedent, volume ou etat"},
+         volume:{type:"number",description:"de 0 a 100, seulement pour l action volume"}},
+ run:function(a){try{
+ var M=window._NXM;if(!M)return {erreur:"Nexium Music n a pas demarre"};
+ var act=_NXIA.action(a&&a.action,"etat");
+ var etat=function(){return {en_lecture:!!M.playing,
+ pistes:((M.cfg&&M.cfg.tracks)||[]).length,
+ volume:(M.cfg&&typeof M.cfg.vol==="number")?Math.round(M.cfg.vol*100):null};};
+ if(act==="etat")return etat();
+ if(act==="lire"||act==="pause"){if(typeof M.toggle==="function")M.toggle();return etat();}
+ if(act==="suivant"){if(typeof M.next==="function")M.next();return etat();}
+ if(act==="precedent"){if(typeof M.prev==="function")M.prev();return etat();}
+ if(act==="volume"){
+ var v=Math.max(0,Math.min(100,parseInt(a&&a.volume,10)||0));
+ if(typeof M.setVol==="function")M.setVol(v/100);
+ return etat();}
+ return {erreur:"action inconnue : "+act+". Attendu : lire, pause, suivant, precedent, volume ou etat."};}catch(e){return {erreur:String(e&&e.message)};}}}
+
+,{nom:"automatisations",cap:"lecture",
+ desc:"Les regles de Nexium Auto : combien il y en a, lesquelles sont actives, et ce qu elles font.",
+ params:{},
+ run:function(){try{
+ var A=window._NXAU;if(!A||!A.data)return {erreur:"Nexium Auto n a pas demarre"};
+ var T=A.data.tasks||[],out=[];
+ for(var a=0;a<T.length&&a<20;a++)out.push({
+ nom:T[a].n||T[a].nom||("regle "+(a+1)),
+ active:T[a].on!==false,
+ declencheur:T[a].t||T[a].trig||null,
+ action:T[a].a||T[a].act||null});
+ var n2=0;for(var b=0;b<T.length;b++)if(T[b].on!==false)n2++;
+ return {total:T.length,actives:n2,regles:out};}catch(e){return {erreur:String(e&&e.message)};}}}
+
+,{nom:"concentration",cap:"actions",
+ desc:"Le mode concentration de Nexium Focus : le lancer, l arreter, ou lire l etat courant.",
+ params:{action:{type:"string",description:"lancer, arreter ou etat"}},
+ run:function(a){try{
+ var F2=window._NXFO;if(!F2)return {erreur:"Nexium Focus n a pas demarre"};
+ var act=_NXIA.action(a&&a.action,"etat");
+ var etat=function(){return {actif:!!(F2.state&&F2.state.on),
+ phase:(F2.state&&F2.state.phase)||null,
+ cycle:(F2.state&&F2.state.cycle)||0,
+ minutes_restantes:(typeof F2.left==="function")?Math.max(0,Math.round(F2.left()/60000)):null};};
+ if(act==="lire")act="lancer";
+ if(act==="pause")act="arreter";
+ if(act==="lancer"){if(typeof F2.start==="function")F2.start();return etat();}
+ if(act==="arreter"){if(typeof F2.stop==="function")F2.stop();return etat();}
+ return etat();}catch(e){return {erreur:String(e&&e.message)};}}}
+
+,{nom:"test_reseau",cap:"lecture",
+ desc:"Mesure la latence vers Discord et rend les hotes les plus contactes. Utile quand l utilisateur se plaint de lenteur.",
+ params:{},
+ run:function(){try{
+ var N=window._NXNET;if(!N)return {erreur:"Nexium Reseau n a pas demarre"};
+ // On declenche une mesure si le module sait le faire, et on rend la
+ // derniere connue : le resultat frais arrivera au tour suivant.
+ try{if(typeof N.ping==="function")N.ping();}catch(_){}
+ var st=(typeof N.stats==="function")?N.stats():null;
+ var hotes=null;
+ try{if(typeof N.topHotes==="function")hotes=(N.topHotes()||[]).slice(0,8);}catch(_){}
+ return {latence_ms:(typeof N.dernierPing==="number")?N.dernierPing:null,
+ mesure_en_cours:!!N.pinging,
+ hotes_contactes:(st&&st.hotes)||null,
+ requetes_vues:(st&&st.total)||null,
+ principaux_hotes:hotes,
+ connexions_passerelle:(Array.isArray(N.conn)?N.conn.length:0)};}catch(e){return {erreur:String(e&&e.message)};}}}
+
+,{nom:"notes_de_version",cap:"lecture",
+ desc:"Les nouveautes de la derniere version de Nexium, telles que publiees.",
+ params:{},
+ run:function(){try{
+ var C=window._NXCL;if(!C||!C.KEY)return {erreur:"le module de notes de version n a pas demarre"};
+ var brut="";try{brut=String(_NXDB.get(C.KEY)||"");}catch(_){}
+ if(!brut)return {vide:true,note:"les notes n ont pas encore ete telechargees",
+ version:(window._NXUP&&_NXUP.VERSION)||null};
+ var txt=brut;
+ try{var j=JSON.parse(brut);txt=j.texte||j.text||j.contenu||brut;}catch(_){}
+ return {version:(window._NXUP&&_NXUP.VERSION)||null,
+ notes:String(txt).slice(0,2500)};}catch(e){return {erreur:String(e&&e.message)};}}}
+
+
+,{nom:"apparence",cap:"actions",
+ desc:"Lit ou change l apparence du client : theme, couleur d accent, couleur de fond. Sans argument, renvoie l apparence courante.",
+ params:{variante:{type:"string",description:"nom du theme, par exemple encre"},
+         accent:{type:"string",description:"couleur d accent, par exemple ivoire"},
+         fond:{type:"string",description:"couleur de fond en hexadecimal, par exemple #1e2124"}},
+ run:function(a){try{
+ var S2=window._NXSKIN,B=window._NXBG,fait=[];
+ if(!S2&&!B)return {erreur:"les modules d apparence n ont pas demarre"};
+ if(a&&a.variante&&S2&&typeof S2.set==="function"){
+ if(S2.VARIANTES&&!S2.VARIANTES[a.variante])
+ return {erreur:"theme inconnu : "+a.variante,themes:Object.keys(S2.VARIANTES||{})};
+ S2.set("variante",String(a.variante));fait.push("theme");}
+ if(a&&a.accent&&S2&&typeof S2.set==="function"){
+ S2.set("accent",String(a.accent));fait.push("accent");}
+ if(a&&a.fond&&B&&typeof B.set==="function"){
+ var h=String(a.fond).trim();
+ if(!/^#?[0-9a-f]{3}([0-9a-f]{3})?$/i.test(h))return {erreur:"couleur invalide : "+h};
+ B.set(h.charAt(0)==="#"?h:("#"+h));fait.push("fond");}
+ var etat={};
+ try{if(S2&&typeof S2.status==="function")etat.theme=S2.status();}catch(_){}
+ try{if(S2&&S2.cfg)etat.variante=S2.cfg.variante,etat.accent=S2.cfg.accent;}catch(_){}
+ try{if(B&&B.cfg)etat.fond=B.cfg.color||null;}catch(_){}
+ try{if(S2&&S2.VARIANTES)etat.themes_possibles=Object.keys(S2.VARIANTES);}catch(_){}
+ etat.modifie=fait;
+ return etat;}catch(e){return {erreur:String(e&&e.message)};}}}
+
+,{nom:"mode_economie",cap:"actions",
+ desc:"Le mode economie coupe les animations et les effets pour menager la machine. Permet de le lire, l allumer ou l eteindre.",
+ params:{actif:{type:"boolean",description:"true pour allumer, false pour eteindre. Omettre pour seulement lire l etat."}},
+ run:function(a){try{
+ var E=window._NXECO;if(!E)return {erreur:"le mode economie n a pas demarre"};
+ if(a&&typeof a.actif==="boolean"&&typeof E.set==="function")E.set(a.actif);
+ var out={};
+ try{out.actif=(typeof E.actif==="function")?!!E.actif():null;}catch(_){}
+ try{if(typeof E.status==="function")out.detail=E.status();}catch(_){}
+ try{out.machine_faible=(typeof E.faible==="function")?!!E.faible():null;}catch(_){}
+ return out;}catch(e){return {erreur:String(e&&e.message)};}}}
+
+,{nom:"diagnostic",cap:"lecture",
+ desc:"Etat de sante du client : modules en echec, anomalies detectees, gardes tombees. A utiliser quand l utilisateur dit que quelque chose ne marche pas.",
+ params:{},
+ run:function(){try{
+ var out={};
+ try{if(window._NXHEALTH&&typeof _NXHEALTH.check==="function")out.sante=_NXHEALTH.check();}catch(_){}
+ try{if(window._NXDIAG&&typeof _NXDIAG.list==="function")out.anomalies=(_NXDIAG.list()||[]).slice(0,12);}catch(_){}
+ try{out.modules_en_echec=(window._NXFAIL||[]).slice(0,10);}catch(_){}
+ try{out.erreurs_recentes=(window._NXERR||[]).slice(-6);}catch(_){}
+ try{if(window._NXP&&typeof _NXP.gardesTombees==="function")out.gardes_tombees=_NXP.gardesTombees();}catch(_){}
+ try{out.mode_securise=!!(window._NXV&&_NXV.safeMode);}catch(_){}
+ if(!out.modules_en_echec||!out.modules_en_echec.length)
+ out.resume="aucun module en echec";
+ return out;}catch(e){return {erreur:String(e&&e.message)};}}}
+
+,{nom:"ouvrir_page",cap:"actions",
+ desc:"Ouvre une page de Nexium dans les reglages. Utile pour montrer a l utilisateur ou se trouve un reglage plutot que de le lui decrire.",
+ params:{page:{type:"string",description:"protect, privacy, reseau, stats, donnees, music, auto, ia, comptes, labo ou team"}},
+ run:function(a){try{
+ var P2={protect:"equicord_protect",privacy:"equicord_privacy",vie_privee:"equicord_privacy",
+ reseau:"equicord_network",network:"equicord_network",stats:"equicord_stats",
+ donnees:"equicord_data",data:"equicord_data",music:"equicord_music",musique:"equicord_music",
+ auto:"equicord_auto",ia:"equicord_ia",comptes:"equicord_comptes",labo:"equicord_labo",
+ team:"equicord_team",accueil:"equicord_main"};
+ var k=String((a&&a.page)||"").trim().toLowerCase();
+ var cle=P2[k];
+ if(!cle)return {erreur:"page inconnue : "+k,pages:Object.keys(P2)};
+ if(!window._NXCP||typeof _NXCP.ouvrir!=="function")return {erreur:"la navigation n est pas disponible"};
+ var ok=_NXCP.ouvrir(cle,k);
+ return {page:k,ouverte:!!ok};}catch(e){return {erreur:String(e&&e.message)};}}}
+
+,{nom:"coffre_comptes",cap:"lecture",
+ desc:"Etat du coffre de comptes : est-il configure, ouvert, combien de comptes. Ne donne JAMAIS un jeton, un mot de passe ni un identifiant.",
+ params:{},
+ run:function(){try{
+ var C2=window._NXCPT;if(!C2)return {erreur:"le coffre n a pas demarre"};
+ var out={};
+ try{out.chiffrement_disponible=(typeof C2.dispo==="function")?!!C2.dispo():null;}catch(_){}
+ try{out.coffre_configure=(typeof C2.existe==="function")?!!C2.existe():null;}catch(_){}
+ try{out.coffre_ouvert=!!C2.ouvert;}catch(_){}
+ try{var L=(typeof C2.autres==="function")?C2.autres():null;
+ if(L&&L.length!==undefined)out.comptes_enregistres=L.length;}catch(_){}
+ // On s arrete la : le contenu du coffre ne sort pas, meme resume.
+ out.note="le contenu du coffre n est jamais lu ni transmis";
+ return out;}catch(e){return {erreur:String(e&&e.message)};}}}
+
+,{nom:"creer_taches",cap:"*",
+ desc:"Pose la liste des etapes d un travail en plusieurs temps, pour ne pas s y perdre. A appeler AVANT de commencer un travail long, puis avancer_tache au fil de l eau.",
+ params:{taches:{type:"array",items:{type:"string"},description:"les etapes, dans l ordre"}},
+ run:function(a){try{
+ var L=(a&&a.taches)||[];
+ if(!L.length)return {erreur:"aucune etape fournie"};
+ _NXIA.taches=[];
+ for(var b=0;b<L.length&&b<12;b++)
+ _NXIA.taches.push({id:b+1,texte:String(L[b]).slice(0,160),etat:b===0?"en_cours":"a_faire"});
+ _NXIA.notify();
+ return {posees:_NXIA.taches.length,taches:_NXIA.taches};}catch(e){return {erreur:String(e&&e.message)};}}}
+
+,{nom:"avancer_tache",cap:"*",
+ desc:"Change l etat d une etape : a_faire, en_cours, fait ou abandonne. Marque une etape faite des qu elle l est, et passe la suivante en cours.",
+ params:{id:{type:"number",description:"numero de l etape"},
+         etat:{type:"string",description:"a_faire, en_cours, fait ou abandonne"}},
+ run:function(a){try{
+ var id=parseInt(a&&a.id,10);
+ var et=String((a&&a.etat)||"fait").toLowerCase().replace(/[ -]/g,"_");
+ if(!_NXIA.ETATS[et])return {erreur:"etat inconnu : "+et,etats:Object.keys(_NXIA.ETATS)};
+ for(var b=0;b<_NXIA.taches.length;b++){
+ if(_NXIA.taches[b].id!==id)continue;
+ _NXIA.taches[b].etat=et;
+ _NXIA.notify();
+ var reste=0;
+ for(var c=0;c<_NXIA.taches.length;c++)if(_NXIA.taches[c].etat==="a_faire"||_NXIA.taches[c].etat==="en_cours")reste++;
+ return {id:id,etat:et,restantes:reste,taches:_NXIA.taches};}
+ return {erreur:"etape introuvable : "+id};}catch(e){return {erreur:String(e&&e.message)};}}}
+
+,{nom:"lister_taches",cap:"*",
+ desc:"Rappelle ou en est le travail en cours.",
+ params:{},
+ run:function(){try{
+ if(!_NXIA.taches.length)return {aucune:true,note:"aucun travail en cours"};
+ return {taches:_NXIA.taches};}catch(e){return {erreur:String(e&&e.message)};}}}
+
+,{nom:"envoyer_message",cap:"envoi",
+ desc:"Envoie un message dans une conversation privee, au nom de l utilisateur. A n utiliser que sur demande explicite, et jamais pour autre chose que le texte demande.",
+ params:{salon:{type:"string",description:"identifiant du salon prive"},
+         texte:{type:"string",description:"le message a envoyer, tel quel"}},
+ run:function(a){try{
+ var cid=String((a&&a.salon)||"").replace(/[^0-9]/g,"");
+ var txt=String((a&&a.texte)||"").trim();
+ if(!cid)return {erreur:"aucun salon indique"};
+ if(!txt)return {erreur:"aucun texte a envoyer"};
+ if(txt.length>1800)return {erreur:"message trop long"};
+ var C2=_NXcommon();
+ var MA=C2.WP.findByProps&&C2.WP.findByProps("sendMessage","_sendMessage");
+ if(!MA||typeof MA.sendMessage!=="function")return {erreur:"l envoi de messages n est pas disponible"};
+ MA.sendMessage(cid,{content:txt,tts:false,invalidEmojis:[],validNonShortcutEmojis:[]});
+ return {envoye:true,salon:cid,texte:txt.slice(0,160)};}catch(e){return {erreur:String(e&&e.message)};}}}
 ];
 _NXIA.outilsAccordes=function(){try{
 var out=[];
 for(var a=0;a<_NXIA.OUTILS.length;a++){var o=_NXIA.OUTILS[a];
-if(_NXIA.accorde(o.cap))out.push(o);}
+if(o.cap==="*"||_NXIA.accorde(o.cap))out.push(o);}
 return out;}catch(_){return [];}};
 _NXIA.schema=function(){try{
 var L=_NXIA.outilsAccordes(),out=[];
@@ -3754,14 +4101,18 @@ for(var a=0;a<_NXIA.OUTILS.length;a++){var o=_NXIA.OUTILS[a];
 if(o.nom!==nom)continue;
 // Deuxieme verrou : meme si le modele inventait un appel, la capacite
 // non accordee le bloque ici.
-if(!_NXIA.accorde(o.cap))return {refuse:"capacite non accordee : "+o.cap};
+if(o.cap!=="*"&&!_NXIA.accorde(o.cap))return {refuse:"capacite non accordee : "+o.cap};
 return o.run(args||{});}
 return {erreur:"outil inconnu : "+nom};}catch(e){return {erreur:String(e&&e.message)};}};
 
 // --- Consigne ---------------------------------------------------------------
 _NXIA.consigne=function(){try{
-var L=_NXIA.outilsAccordes(),noms=[];
-for(var a=0;a<L.length;a++)noms.push(L[a].nom);
+var L=_NXIA.outilsAccordes(),noms=[],travail=[];
+for(var a=0;a<L.length;a++){
+// Les outils de travail ne lisent rien de l utilisateur : ils ne comptent
+// pas comme un acces, et ne doivent pas laisser croire a l assistant
+// qu il voit l etat du client.
+if(L[a].cap==="*")travail.push(L[a].nom);else noms.push(L[a].nom);}
 return "Tu es Nexium IA, l assistant integre a Nexium Client, un client Discord francais centre sur la vie privee et la securite.\n"+
 "IDENTITE, regle absolue : tu t appelles Nexium IA. Tu n es ni ChatGPT, ni Claude, ni Gemini, "+
 "et tu ne dis JAMAIS que tu as ete developpe par OpenAI, Anthropic, Google ou Meta. "+
@@ -3772,6 +4123,7 @@ return "Tu es Nexium IA, l assistant integre a Nexium Client, un client Discord 
 "pas de repetition de la question. Va au fait. Tu peux utiliser du Markdown : gras, listes, "+
 "tableaux et blocs de code sont rendus correctement dans l interface.\n"+
 "CONTEXTE : tu tournes dans le client de l utilisateur, sur sa machine.\n"+
+(travail.length?("ORGANISATION : "+travail.join(", ")+". Sers-t en des qu un travail demande plusieurs etapes : pose la liste, puis marque chaque etape faite. Ces outils ne touchent pas aux donnees de l utilisateur. "):"")+
 (noms.length
 ?("OUTILS a ta disposition, executes sur SA machine : "+noms.join(", ")+".\n"+
 "Appelle-les des que la reponse depend de son etat reel plutot que de suppositions. "+
@@ -3780,11 +4132,13 @@ return "Tu es Nexium IA, l assistant integre a Nexium Client, un client Discord 
 :"ACCES : l utilisateur ne t a accorde aucun acces a ses donnees. Tu ne peux donc rien lire de son client. "+
 "Reponds de maniere generale, et rappelle-lui qu il peut t accorder des acces dans le bandeau en haut de la page "+
 "si tu as besoin de son etat reel.")+
+"\nMODE : "+(_NXIA.mode()==="auto"?"automatique. Tu agis sans demander, mais tu annonces ce que tu fais.":"manuel. Chaque action est soumise a l utilisateur avant d etre faite : propose-la sans hesiter, c est lui qui tranche.")+
 "\nVersion du client : "+((window._NXUP&&_NXUP.VERSION)||"?")+".";}catch(_){return "Tu es Nexium IA, l assistant de Nexium Client. Reponds en francais.";}};
 
 // --- Transport --------------------------------------------------------------
 _NXIA.poste=function(messages){try{
-var corps={messages:messages};
+var corps={messages:messages,palier:_NXIA.palier(),
+moi:_NXIA.moi(),reflexion:_NXIA.reflexion(),analyse:!!_NXIA._analyse};
 var sc=_NXIA.schema();
 if(sc.length)corps.tools=sc;
 return fetch(_NXIA.URL,{method:"POST",
@@ -3794,6 +4148,10 @@ return r.text().then(function(t){
 var j=null;try{j=JSON.parse(t);}catch(_){}
 if(j&&typeof j.restant==="number")_NXIA.restant=j.restant;
 if(j&&j.reprise)_NXIA.reprise=j.reprise;
+if(j&&typeof j.admin==="boolean")_NXIA.admin=j.admin;
+if(j&&j.nom)_NXIA.nomModele=j.nom;
+if(j&&typeof j.cout==="number")_NXIA.dernierCout=j.cout;
+if(j)_NXIA.repli=j.repli||"";
 if(!r.ok){var d=(j&&(j.detail||j.erreur))||("HTTP "+r.status);
 throw new Error(d);}
 return j;});});}catch(e){return Promise.reject(e);}};
@@ -3808,7 +4166,8 @@ _NXIA.ctl=null;}catch(_){}};
 
 // Lit un flux "server-sent events" et rappelle a chaque morceau de texte.
 _NXIA.postFlux=function(messages,onTexte){try{
-var corps={messages:messages,flux:true};
+var corps={messages:messages,flux:true,palier:_NXIA.palier(),
+moi:_NXIA.moi(),reflexion:_NXIA.reflexion(),analyse:!!_NXIA._analyse};
 var sc=_NXIA.schema();
 if(sc.length)corps.tools=sc;
 var ctl=null;
@@ -3823,9 +4182,14 @@ return r.text().then(function(t){
 var j=null;try{j=JSON.parse(t);}catch(_){}
 if(j&&typeof j.restant==="number")_NXIA.restant=j.restant;
 if(j&&j.reprise)_NXIA.reprise=j.reprise;
+if(j&&typeof j.admin==="boolean")_NXIA.admin=j.admin;
+if(j&&j.nom)_NXIA.nomModele=j.nom;
+if(j&&typeof j.cout==="number")_NXIA.dernierCout=j.cout;
+if(j)_NXIA.repli=j.repli||"";
 if(!r.ok)throw new Error((j&&(j.detail||j.erreur))||("HTTP "+r.status));
-if(j&&j.content&&onTexte)onTexte(j.content,j.content);
-return {content:(j&&j.content)||"",tool_calls:(j&&j.tool_calls)||null};});}
+var propre=_NXIA.sansPensee((j&&j.content)||"");
+if(propre&&onTexte)onTexte(propre,propre);
+return {content:propre,tool_calls:(j&&j.tool_calls)||null};});}
 
 var lec=r.body.getReader(),dec=new TextDecoder(),tampon="";
 var acc={content:"",tool_calls:[]};
@@ -3838,6 +4202,10 @@ var j=null;try{j=JSON.parse(d);}catch(_){return;}
 if(j.nexium){
 if(typeof j.restant==="number")_NXIA.restant=j.restant;
 if(j.reprise)_NXIA.reprise=j.reprise;
+if(typeof j.admin==="boolean")_NXIA.admin=j.admin;
+if(j.nom)_NXIA.nomModele=j.nom;
+if(typeof j.cout==="number")_NXIA.dernierCout=j.cout;
+_NXIA.repli=j.repli||"";
 return;}
 var ch=(j.choices&&j.choices[0])||null;
 var dl=ch&&ch.delta;
@@ -3846,9 +4214,11 @@ if(!dl)return;
 // que le modele travaille encore.
 if(dl.reasoning&&!dl.content){_NXIA.pense=true;_NXIA.notify();}
 if(typeof dl.content==="string"&&dl.content){
-_NXIA.pense=false;
 acc.content+=dl.content;
-if(onTexte)onTexte(dl.content,acc.content);}
+// Tant que le brouillon n est pas referme, on montre l attente plutot
+// qu un monologue interne qui disparaitra ensuite.
+_NXIA.pense=_NXIA.pensee(acc.content);
+if(onTexte)onTexte(dl.content,_NXIA.sansPensee(acc.content));}
 if(dl.tool_calls&&dl.tool_calls.length){
 for(var a=0;a<dl.tool_calls.length;a++){
 var t=dl.tool_calls[a],ix=(typeof t.index==="number")?t.index:a;
@@ -3871,9 +4241,11 @@ return pompe();});};
 return pompe().then(function(x){
 var tc=[];
 for(var a=0;a<x.tool_calls.length;a++)if(x.tool_calls[a])tc.push(x.tool_calls[a]);
-return {content:x.content,tool_calls:tc.length?tc:null};});});
+return {content:_NXIA.sansPensee(x.content),tool_calls:tc.length?tc:null};});});
 }catch(e){return Promise.reject(e);}};
 
+// Les seuls roles que le modele accepte de nous.
+_NXIA.ROLES={user:1,assistant:1,system:1};
 _NXIA.envoyer=function(texte){try{
 if(_NXIA.busy)return Promise.resolve();
 var t=String(texte||"").trim();
@@ -3898,8 +4270,15 @@ return _NXIA.tourner();}catch(_){return Promise.resolve();}};
 _NXIA.tourner=function(){
 var fil=[{role:"system",content:_NXIA.consigne()}];
 for(var a=0;a<_NXIA.msgs.length;a++){var m=_NXIA.msgs[a];
-if(m.role==="outil")continue;
-fil.push({role:m.role,content:m.content});}
+// Liste blanche, et non liste noire : le fil ne contient que des roles de
+// conversation. Les bulles internes -- resultat d outil, demande de
+// confirmation, etape d analyse -- n en sont pas. Envoyees quand meme,
+// elles font rejeter la demande entiere par le modele, et l assistant
+// reste injoignable jusqu a ce que la conversation soit effacee.
+if(!_NXIA.ROLES[m.role])continue;
+var c=String(m.content||"").trim();
+if(!c)continue;
+fil.push({role:m.role,content:c});}
 
 var tour=function(f,reste){
 // La bulle est creee vide puis remplie : le texte apparait au fil de l eau.
@@ -3908,7 +4287,11 @@ var onTexte=function(_bout,total){
 if(!bulle){bulle={role:"assistant",content:"",flux:true};_NXIA.msgs.push(bulle);}
 bulle.content=total;_NXIA.notify();};
 return _NXIA.postFlux(f,onTexte).then(function(rep){
-if(bulle)bulle.flux=false;
+if(bulle){bulle.flux=false;
+if(!String(bulle.content||"").trim()&&!(rep.tool_calls&&rep.tool_calls.length)){
+var ix0=_NXIA.msgs.indexOf(bulle);
+if(ix0>=0)_NXIA.msgs.splice(ix0,1);
+bulle=null;}}
 var tc=rep.tool_calls;
 if(tc&&tc.length&&reste>0){
 if(bulle&&!bulle.content){
@@ -3917,15 +4300,19 @@ var ix=_NXIA.msgs.indexOf(bulle);
 if(ix>=0)_NXIA.msgs.splice(ix,1);
 bulle=null;}
 f.push({role:"assistant",content:(bulle&&bulle.content)||"",tool_calls:tc});
-for(var b=0;b<tc.length;b++){
-var appel=tc[b],nom=(appel.function&&appel.function.name)||"";
+// Les outils sont enchaines l un apres l autre : une confirmation
+// attend la reponse de l utilisateur avant de passer a la suivante.
+var suite=Promise.resolve();
+for(var b=0;b<tc.length;b++)(function(appel){
+suite=suite.then(function(){
+var nom=(appel.function&&appel.function.name)||"";
 var args={};try{args=JSON.parse((appel.function&&appel.function.arguments)||"{}");}catch(_){}
-var res=_NXIA.executer(nom,args);
+return Promise.resolve(_NXIA.demande(nom,args)).then(function(res){
 _NXIA.msgs.push({role:"outil",outil:nom,args:args,res:res});
 _NXIA.notify();
-f.push({role:"tool",tool_call_id:appel.id,name:nom,content:JSON.stringify(res)});}
-return tour(f,reste-1);}
-if(!bulle)_NXIA.msgs.push({role:"assistant",content:rep.content||"(reponse vide)"});
+f.push({role:"tool",tool_call_id:appel.id,name:nom,content:JSON.stringify(res)});});});})(tc[b]);
+return suite.then(function(){return tour(f,reste-1);});}
+if(!bulle)_NXIA.msgs.push({role:"assistant",content:_NXIA.faute(rep.content)});
 return true;});};
 
 return tour(fil,_NXIA.MAXTOURS).catch(function(e){
@@ -3942,6 +4329,19 @@ if(window.DiscordNative&&DiscordNative.clipboard&&DiscordNative.clipboard.copy)D
 else if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(x);
 try{if(window._NXPR&&_NXPR.toast)_NXPR.toast("Copie.",1);}catch(_){}
 return true;}catch(_){return false;}};
+_NXIA.RXPENSEE=/<think>[\s\S]*?<\/think>/gi;
+_NXIA.sansPensee=function(t){try{
+var x=String(t||"").replace(_NXIA.RXPENSEE,"");
+// Bloc encore ouvert : tout ce qui suit est du brouillon, pas la reponse.
+var o=x.toLowerCase().lastIndexOf("<think>");
+if(o>=0)x=x.slice(0,o);
+return x.replace(/^\s+/,"");}catch(_){return String(t||"");}};
+_NXIA.pensee=function(t){try{
+// Vrai tant que le modele redige encore son brouillon.
+var x=String(t||"").toLowerCase();
+var o=x.lastIndexOf("<think>");
+if(o<0)return false;
+return x.indexOf("</think>",o)<0;}catch(_){return false;}};
 _NXIA.inline=function(txt,cle){
 var out=[],reste=String(txt),n=0;
 var RX=/(\*\*\*[^*]+\*\*\*|\*\*[^*]+\*\*|(?:^|[^*])\*[^*\n]+\*|`[^`]+`|~~[^~]+~~|\[[^\]]+\]\([^)\s]+\))/;
@@ -4085,19 +4485,106 @@ return out;};
 // greffon le declare en dependance. Nexium n en est pas un. On pose donc le
 // bouton nous-memes, en copiant la classe d un bouton voisin pour heriter de
 // sa taille, de ses marges et de son survol.
+_NXIA.PANID="nx-ia-panneau";
+// Le panneau flottant : un conteneur pose sur la fenetre, dans lequel on
+// monte le meme composant de chat que la page. Il n existe que tant qu il
+// est ouvert -- fermer le demonte vraiment, il ne dort pas en arriere-plan.
+_NXIA.panneauOuvert=function(){try{
+return !!document.getElementById(_NXIA.PANID);}catch(_){return false;}};
+_NXIA.fermerPanneau=function(){try{
+var el=document.getElementById(_NXIA.PANID);
+if(!el)return false;
+try{if(_NXIA._racine&&typeof _NXIA._racine.unmount==="function")_NXIA._racine.unmount();
+else if(_NXIA._racine&&_NXIA._racine.legacy){
+var C=Vencord.Webpack.Common;
+if(C.ReactDOM&&C.ReactDOM.unmountComponentAtNode)C.ReactDOM.unmountComponentAtNode(_NXIA._racine.el);}}catch(_){}
+_NXIA._racine=null;
+try{if(el.parentNode)el.parentNode.removeChild(el);}catch(_){}
+try{if(_NXIA._echap){document.removeEventListener("keydown",_NXIA._echap,true);_NXIA._echap=null;}}catch(_){}
+return true;}catch(_){return false;}};
+_NXIA.ouvrirPanneau=function(){try{
+if(_NXIA.panneauOuvert())return true;
+if(!document.body)return false;
+var C=(window.Vencord&&Vencord.Webpack&&Vencord.Webpack.Common)||{};
+var box=document.createElement("div");
+box.id=_NXIA.PANID;
+box.style.cssText="position:fixed;right:18px;bottom:78px;z-index:99998;"+
+"animation:nx-ia-monte .2s cubic-bezier(.22,.8,.28,1) both;";
+document.body.appendChild(box);
+var noeud=i(NexiumIAPanneau,null);
+try{
+if(typeof C.createRoot==="function"){_NXIA._racine=C.createRoot(box);_NXIA._racine.render(noeud);}
+else if(C.ReactDOM&&typeof C.ReactDOM.createRoot==="function"){_NXIA._racine=C.ReactDOM.createRoot(box);_NXIA._racine.render(noeud);}
+else if(C.ReactDOM&&typeof C.ReactDOM.render==="function"){C.ReactDOM.render(noeud,box);_NXIA._racine={legacy:true,el:box};}
+else {try{box.parentNode.removeChild(box);}catch(_){}return false;}
+}catch(e){try{box.parentNode.removeChild(box);}catch(_){}return false;}
+// Echap ferme le panneau, comme toute fenetre de Discord.
+_NXIA._echap=function(e){try{
+if(e.key!=="Escape")return;
+if(!_NXIA.panneauOuvert())return;
+e.stopPropagation();_NXIA.fermerPanneau();}catch(_){}};
+try{document.addEventListener("keydown",_NXIA._echap,true);}catch(_){}
+return true;}catch(_){return false;}};
+_NXIA.basculerPanneau=function(){try{
+return _NXIA.panneauOuvert()?(_NXIA.fermerPanneau(),false):(_NXIA.ouvrirPanneau(),true);
+}catch(_){return false;}};
 _NXIA.BTNID="nx-ia-chatbtn";
 _NXIA.ouvrePage=function(){try{
 if(window._NXCP&&_NXCP.ouvrir)return _NXCP.ouvrir("equicord_ia","Nexium IA");}catch(_){}
 return false;};
+// Trouver la rangee de boutons du champ de message.
+//
+// Les noms de classes de Discord sont haches et changent a chaque version :
+// s y fier, c est se garantir une panne. On part donc de l editeur, repere
+// par data-slate-editor, un attribut stable et non traduit ; puis on remonte
+// et on cherche, a cote de lui, le conteneur qui porte plusieurs boutons.
 _NXIA.SELZONE=[
 '[class*="channelTextArea_"] [class*="buttons_"]',
-'[class*="channelTextArea"] [class*="buttons"]',
-'form [class*="buttons_"]'];
+'[class*="channelTextArea"] [class*="buttons"]'];
+_NXIA.compteBoutons=function(e){try{
+var n=0,K=e.children||[];
+for(var a=0;a<K.length;a++){var c=K[a];
+if(!c||!c.tagName)continue;
+if(c.id===_NXIA.BTNID)continue;
+if(c.tagName==="BUTTON")     {n++;continue;}
+if(c.getAttribute&&c.getAttribute("role")==="button"){n++;continue;}
+try{if(c.querySelector&&c.querySelector("button")){n++;continue;}}catch(_){}}
+return n;}catch(_){return 0;}};
+_NXIA.zoneParEditeur=function(){try{
+var ed=document.querySelector('[data-slate-editor="true"]')
+||document.querySelector('[role="textbox"]');
+if(!ed)return null;
+var p=ed;
+for(var d=0;d<8;d++){
+p=p.parentElement||p.parentNode;
+if(!p||!p.children)break;
+for(var k=0;k<p.children.length;k++){
+var c=p.children[k];
+if(!c||c===ed)continue;
+try{if(c.contains&&c.contains(ed))continue;}catch(_){}
+// Deux boutons ou plus cote a cote a cote de l editeur : c est la rangee.
+if(_NXIA.compteBoutons(c)>=2)return c;}}
+return null;}catch(_){return null;}};
 _NXIA.zone=function(){try{
+// D abord les classes connues, plus rapides quand elles marchent.
+// La correspondance de classe est deja une preuve solide : exiger en plus
+// un compte de boutons ferait rejeter un conteneur valide si Discord
+// enveloppe ses boutons autrement. On ne compte que pour la recherche par
+// l editeur, ou il faut vraiment discriminer.
 for(var a=0;a<_NXIA.SELZONE.length;a++){try{
 var e=document.querySelector(_NXIA.SELZONE[a]);
 if(e&&e.children)return e;}catch(_){}}
-return null;}catch(_){return null;}};
+return _NXIA.zoneParEditeur();}catch(_){return null;}};
+// Diagnostic a coller dans la console si le bouton reste invisible.
+_NXIA.diag=function(){try{
+var z=_NXIA.zone();
+return {zoneTrouvee:!!z,
+classe:z?String(z.className).slice(0,120):null,
+boutonsVoisins:z?_NXIA.compteBoutons(z):0,
+editeurTrouve:!!document.querySelector('[data-slate-editor="true"]'),
+boutonPose:!!document.getElementById(_NXIA.BTNID),
+parClasse:!!document.querySelector(_NXIA.SELZONE[0]),
+parEditeur:!!_NXIA.zoneParEditeur()};}catch(e){return {erreur:String(e&&e.message)};}};
 _NXIA.poseBouton=function(){try{
 var vieux=document.getElementById(_NXIA.BTNID);
 if(vieux){
@@ -4123,19 +4610,25 @@ b.style.display="flex";
 b.style.alignItems="center";
 b.style.justifyContent="center";
 b.style.cursor="pointer";
-b.style.color="currentColor";
-b.style.opacity=".7";
-b.style.transition="opacity .16s ease";
+// Les variables de Discord donnent exactement l intensite de ses propres
+// icones. Les valeurs de repli servent si le theme ne les definit pas.
+b.style.color="var(--interactive-normal, #b5bac1)";
+b.style.opacity="1";
+b.style.transition="color .16s ease,transform .16s ease";
 if(!modele){b.style.width="32px";b.style.height="32px";}
 b.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">'+
 '<path d="M12 2.5 13.7 8l5.5 1.7-5.5 1.7L12 17l-1.7-5.6L4.8 9.7 10.3 8 12 2.5z"></path>'+
 '<path opacity=".55" d="M18.7 14.6l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3z"></path></svg>';
-b.onmouseenter=function(){b.style.opacity="1";};
-b.onmouseleave=function(){b.style.opacity=".7";};
-b.onclick=function(e){try{e.preventDefault();e.stopPropagation();}catch(_){}_NXIA.ouvrePage();};
+b.onmouseenter=function(){
+b.style.color="var(--interactive-hover, #f2f3f5)";
+b.style.transform="scale(1.06)";};
+b.onmouseleave=function(){
+b.style.color="var(--interactive-normal, #b5bac1)";
+b.style.transform="none";};
+b.onclick=function(e){try{e.preventDefault();e.stopPropagation();}catch(_){}_NXIA.basculerPanneau();};
 b.onkeydown=function(e){
 try{e.stopPropagation();}catch(_){}
-if(e.key==="Enter"||e.key===" "){try{e.preventDefault();}catch(_){}_NXIA.ouvrePage();}};
+if(e.key==="Enter"||e.key===" "){try{e.preventDefault();}catch(_){}_NXIA.basculerPanneau();}};
 try{zone.insertBefore(b,zone.firstChild);}catch(_){try{zone.appendChild(b);}catch(__){return false;}}
 return true;}catch(_){return false;}};
 _NXIA.retireBouton=function(){try{
@@ -4148,7 +4641,7 @@ return true;}catch(_){return false;}};
 // plugins, mesuree comme negligeable.
 try{setTimeout(_NXIA.poseBouton,2500);setTimeout(_NXIA.poseBouton,6000);
 setInterval(function(){try{if(!document.hidden)_NXIA.poseBouton();}catch(_){}},4000);}catch(_){}
-_NXIA.VERSION="1.0";
+_NXIA.VERSION="1.1";
 _NXIA.aVu=function(){try{return _NXIA.cfg.bienvenue===_NXIA.VERSION;}catch(_){return true;}};
 _NXIA.marqueVu=function(){try{_NXIA.cfg.bienvenue=_NXIA.VERSION;_NXIA.save();}catch(_){}};
 _NXIA.accueil=function(force){try{
@@ -4166,22 +4659,24 @@ c.style.cssText="width:min(560px,100%);max-height:86vh;overflow-y:auto;border-ra
 "background:linear-gradient(158deg,"+P.panel+","+P.bg+");border:1px solid "+P.hair+";"+
 "box-shadow:0 30px 90px rgba(0,0,0,.6);padding:30px 30px 24px;";
 var POINTS=[
-["Il connait ton client","Il lit ton etat reel : protections actives, menaces bloquees, place occupee, statistiques d usage. Plus de reponse au hasard."],
-["Il agit, si tu le veux","Il peut allumer une protection ou appliquer un profil de confidentialite. Chaque geste est ecrit dans la conversation."],
-["Tu decides de ce qu il voit","Quatre acces separes, tous refuses au depart. Un outil dont l acces manque n est meme pas propose au modele."],
-["Rien n est garde","Aucune conversation n est enregistree, ni chez toi ni ailleurs. Elle disparait quand tu fermes le client."],
-["Dix messages par sept heures","La limite du service. Le compteur est affiche dans la page."]];
+["Il connait ton client","Protections actives, menaces bloquees, reseau, stockage, musique, apparence, sante des modules : il lit ton etat reel avant de repondre."],
+["Auto ou manuel, c est toi qui choisis","En manuel il demande avant chaque action ; en auto il agit seul et annonce ce qu il fait. Lire ton etat ne demande jamais rien."],
+["Il reflechit quand la question le merite","Le mode reflexion lui laisse le temps de raisonner en profondeur. Il coute davantage, et il le dit avant."],
+["Il ne se perd plus","Sur un travail en plusieurs etapes, il pose sa liste de taches et la tient a jour sous tes yeux."],
+["Il sait lire une conversation privee","Ecris @ dans le chat, choisis la personne : il analyse le ton, ce qui est attendu, et propose des reponses dans le meme registre."],
+["Des credits, plus des messages","Cent credits toutes les sept heures. Une question simple en coute peu, un modele plus grand ou la reflexion en coutent plus. Le compte est affiche."],
+["Rien n est garde","Aucune conversation n est enregistree, ni chez toi ni ailleurs. Elle disparait quand tu fermes le client."]];
 var html=""+
 '<div style="display:flex;align-items:center;gap:13px;margin-bottom:6px;">'+
 '<div style="width:42px;height:42px;border-radius:14px;display:flex;align-items:center;'+
 'justify-content:center;background:linear-gradient(160deg,#17171a,#0d0d0f);border:1px solid '+P.hair+';color:'+P.pale+';">'+
 '<svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor"><path d="M12 2.5 13.7 8l5.5 1.7-5.5 1.7L12 17l-1.7-5.6L4.8 9.7 10.3 8 12 2.5z"/></svg></div>'+
 '<div><div style="font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:'+P.faint+';">'+
-esc(_T("Nouveau dans cette version"))+'</div>'+
+esc(_T("Nouvelle ere"))+'</div>'+
 '<div style="font-size:21px;font-weight:800;color:'+P.txt+';letter-spacing:-.02em;margin-top:3px;">'+
 esc(_T("Bienvenue dans Nexium IA"))+' '+_NXIA.VERSION+'</div></div></div>'+
 '<div style="font-size:12.5px;color:'+P.sub+';line-height:1.7;margin:14px 0 20px;">'+
-esc(_T("Un assistant integre au client, qui connait ton installation et peut agir dessus. Voici ce qu il sait faire."))+'</div>';
+esc(_T("Quatre modeles, un mode reflexion, des taches, et la main sur chaque action. Voici ce qui change."))+'</div>';
 for(var a=0;a<POINTS.length;a++){
 html+='<div style="display:flex;gap:12px;padding:11px 0;border-top:1px solid '+P.line+';">'+
 '<div style="flex-shrink:0;width:6px;height:6px;border-radius:50%;margin-top:6px;background:'+P.mute+';"></div>'+
@@ -4203,15 +4698,155 @@ ferme();
 // On ouvre la page : le panneau de consentement s affichera de lui-meme.
 // _NXCP.ouvrir sait ouvrir la section, et previent l utilisateur
 // par un message s il n y arrive pas. Pas de bouton mort.
-try{if(window._NXCP&&_NXCP.ouvrir)_NXCP.ouvrir("equicord_ia","Nexium IA");}catch(_){}};
+try{_NXIA.ouvrirPanneau();}catch(_){}};
 ov.onclick=function(e){if(e.target===ov)ferme();};
 document.body.appendChild(ov);
 return true;}catch(_){return false;}};
 try{setTimeout(function(){try{_NXIA.accueil(false);}catch(_){}},6500);}catch(_){}
-_NXIA.effacer=function(){try{_NXIA.msgs=[];_NXIA.erreur="";_NXIA.notify();}catch(_){}};
+// --- Conversations privees ------------------------------------------------
+// Rien n est lu tant que l utilisateur n a pas ecrit @ ET choisi la personne.
+// La capacite seule ne declenche aucune lecture.
+_NXIA.mpOuverts=function(){try{
+if(!_NXIA.accorde("conversations"))return [];
+var C=_NXcommon();
+var CS=C.store("ChannelStore"),US=C.store("UserStore");
+if(!CS||!US)return [];
+var L=[];
+try{L=(CS.getSortedPrivateChannels&&CS.getSortedPrivateChannels())||[];}catch(_){L=[];}
+var out=[];
+for(var a=0;a<L.length&&out.length<12;a++){
+var ch=L[a];
+if(!ch||!ch.id)continue;
+// Seulement les tete-a-tete : un salon de groupe engage plusieurs tiers.
+if(ch.type!==1)continue;
+var uid=(ch.recipients&&ch.recipients[0])||null;
+var u=null;try{u=uid&&US.getUser&&US.getUser(uid);}catch(_){}
+out.push({id:ch.id,
+nom:(u&&(u.globalName||u.global_name||u.username))||String(uid||"?")});}
+return out;}catch(_){return [];}};
+_NXIA.lireMP=function(cid,combien){try{
+if(!_NXIA.accorde("conversations"))return [];
+var C=_NXcommon();
+var MS=C.store("MessageStore"),US=C.store("UserStore");
+if(!MS)return [];
+var moi=null;try{moi=US&&US.getCurrentUser&&US.getCurrentUser();}catch(_){}
+var col=null;try{col=MS.getMessages&&MS.getMessages(cid);}catch(_){}
+var A=[];
+try{A=(col&&col.toArray)?col.toArray():((col&&col._array)||[]);}catch(_){A=[];}
+var max=Math.max(1,Math.min(30,combien||20));
+var out=[];
+for(var a=Math.max(0,A.length-max);a<A.length;a++){
+var m=A[a];
+if(!m||!m.content)continue;
+var mien=!!(moi&&m.author&&String(m.author.id)===String(moi.id));
+out.push({de:mien?"moi":((m.author&&(m.author.globalName||m.author.global_name||m.author.username))||"lui"),
+texte:String(m.content).slice(0,400)});}
+return out;}catch(_){return [];}};
+// Analyser une conversation, pour de vrai.
+//
+// Un seul message demandant "propose-moi des reponses" produit des banalites.
+// On procede en deux temps, comme le ferait quelqu un : d abord comprendre
+// la situation, ensuite seulement proposer. Chaque etape est visible dans la
+// conversation, et la seconde s appuie sur la premiere.
+_NXIA.ETAPES=[
+{k:"lecture", n:"Lecture des messages"},
+{k:"analyse", n:"Analyse de la situation"},
+{k:"propositions",n:"Redaction des propositions"}];
+_NXIA.etape="";
+_NXIA.majEtape=function(k){try{_NXIA.etape=k||"";_NXIA.notify();}catch(_){}};
+_NXIA.analyserMP=function(cid,nom){try{
+if(_NXIA.busy)return Promise.resolve();
+if(!_NXIA.accorde("conversations")){
+_NXIA.erreur=_T("Accorde d abord la lecture des conversations privees dans les reglages.");
+_NXIA.notify();return Promise.resolve();}
+var L=_NXIA.lireMP(cid,25);
+if(!L.length){
+_NXIA.erreur=_T("Aucun message lisible dans cette conversation. Ouvre-la une fois dans Discord, puis reessaie.");
+_NXIA.notify();return Promise.resolve();}
+
+_NXIA.erreur="";_NXIA._analyse=true;
+_NXIA.busy=true;_NXIA.majEtape("lecture");
+
+var lignes=[];
+for(var a=0;a<L.length;a++)lignes.push((L[a].de==="moi"?"moi":nom)+" : "+L[a].texte);
+var conv=lignes.join("\n");
+
+_NXIA.msgs.push({role:"user",content:_T("Analyse ma conversation avec")+" "+nom+
+" ("+L.length+" "+_T("messages")+")"});
+_NXIA.notify();
+
+var fini=function(){
+_NXIA._analyse=false;_NXIA.busy=false;_NXIA.majEtape("");_NXIA.notify();};
+
+// --- premier temps : comprendre ----------------------------------------
+var sysA="Tu es Nexium IA. Tu analyses une conversation privee pour aider "+
+"l utilisateur a y repondre. Sois factuel et bref.";
+var demA="Voici les derniers messages de ma conversation avec "+nom+" :\n\n"+conv+
+"\n\nAnalyse la situation en quatre lignes, sans preambule :\n"+
+"TON : le registre employe (familier, professionnel, tendu, affectueux...)\n"+
+"ATTENTE : ce que "+nom+" attend de moi, s il attend quelque chose\n"+
+"DERNIER : qui a parle en dernier, et si une question reste sans reponse\n"+
+"PIEGE : ce qu il vaut mieux eviter de repondre ici";
+
+return _NXIA.postFlux([{role:"system",content:sysA},{role:"user",content:demA}],null)
+.then(function(r1){
+var lecture=String((r1&&r1.content)||"").trim();
+if(!lecture)throw new Error(_T("L analyse n a rien donne."));
+_NXIA.msgs.push({role:"etape",titre:_T("Analyse de la situation"),content:lecture});
+_NXIA.majEtape("propositions");
+
+// --- second temps : proposer, en s appuyant sur l analyse -------------
+var sysB="Tu es Nexium IA. Tu proposes des reponses a envoyer, en francais, "+
+"dans le ton exact de la conversation. Pas de commentaire, pas de preambule.";
+var demB="Conversation avec "+nom+" :\n\n"+conv+"\n\n"+
+"Analyse de la situation :\n"+lecture+"\n\n"+
+"Propose trois reponses que je pourrais envoyer maintenant. Formate ainsi, "+
+"sans rien ajouter autour :\n"+
+"1. <la reponse>\n_pourquoi : <une ligne>_\n"+
+"2. <la reponse>\n_pourquoi : <une ligne>_\n"+
+"3. <la reponse>\n_pourquoi : <une ligne>_\n"+
+"Varie les registres : une reponse courte, une engageante, une qui gagne du temps.";
+return _NXIA.postFlux([{role:"system",content:sysB},{role:"user",content:demB}],
+function(_b,total){
+var d=_NXIA.msgs[_NXIA.msgs.length-1];
+if(!d||d.role!=="assistant"||!d.flux){
+d={role:"assistant",content:"",flux:true};_NXIA.msgs.push(d);}
+d.content=total;_NXIA.notify();});})
+.then(function(r2){
+var d=_NXIA.msgs[_NXIA.msgs.length-1];
+if(d&&d.flux)d.flux=false;
+if(d&&d.role==="assistant"&&!d.content)d.content=String((r2&&r2.content)||"");
+else if(!d||d.role!=="assistant")_NXIA.msgs.push({role:"assistant",content:String((r2&&r2.content)||"")});
+fini();})
+.catch(function(e){
+var m=String((e&&e.message)||e);
+if(!/abort/i.test(m))_NXIA.erreur=m;
+fini();});
+}catch(e){_NXIA._analyse=false;_NXIA.busy=false;_NXIA.majEtape("");
+_NXIA.erreur=String(e&&e.message);_NXIA.notify();return Promise.resolve();}};
+// Une reponse vide vient presque toujours du modele qui a tout depense
+// en raisonnement. On le dit, et on indique la sortie, plutot que de
+// laisser une bulle muette.
+_NXIA.faute=function(t){try{
+var x=String(t||"").trim();
+if(x)return x;
+return _NXIA.reflexion()
+?_T("Le modele a epuise sa place en reflechissant sans rediger de reponse. Reessaie sans le mode reflexion, ou pose une question plus precise.")
+:_T("Le modele n a rien renvoye. Reessaie, ou choisis un autre modele dans le selecteur.");
+}catch(_){return "";}};
+// --- Taches ---------------------------------------------------------------
+// Sur un travail en plusieurs etapes, un assistant sans memoire de structure
+// oublie ou il en est. Cette liste lui sert de fil : elle vit en memoire,
+// disparait avec la conversation, et s affiche a l ecran.
+_NXIA.taches=[];
+_NXIA.ETATS={a_faire:"a faire",en_cours:"en cours",fait:"fait",abandonne:"abandonne"};
+_NXIA.videTaches=function(){try{_NXIA.taches=[];_NXIA.notify();}catch(_){}};
+_NXIA.effacer=function(){try{_NXIA.msgs=[];_NXIA.erreur="";_NXIA.taches=[];
+_NXIA.attentes=[];_NXIA.notify();}catch(_){}};
 // Un rechargement de la fenetre suffit deja a tout perdre ; on l ecrit
 // quand meme, pour que ce soit vrai par construction et pas par accident.
 try{window.addEventListener("beforeunload",function(){_NXIA.msgs=[];});}catch(_){}
+try{setTimeout(function(){_NXIA.chargeDispo();},4000);}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXIA");if(window._NXERR)_NXERR.push("module _NXIA :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXIA desactive:",_nxE);}catch(_){}}
 }
 var _NXCL=window._NXCL||(window._NXCL={});
@@ -5609,7 +6244,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="178";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="179";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -6160,23 +6795,25 @@ i("path",{d:"M12 2.5 13.7 8l5.5 1.7-5.5 1.7L12 17l-1.7-5.6L4.8 9.7 10.3 8 12 2.5
 i("path",{d:"M18.5 14.5l.8 2.6 2.6.8-2.6.8-.8 2.6-.8-2.6-2.6-.8 2.6-.8.8-2.6z",opacity:".55"}),
 i("path",{d:"M5 15l.6 2 2 .6-2 .6L5 20.2 4.4 18.2l-2-.6 2-.6L5 15z",opacity:".35"}));};
 
-function NexiumIAComp(){
+// ---------------------------------------------------------------- le chat
+// Un seul composant pour les deux emplacements. `compact` resserre la mise
+// en page pour le panneau flottant ; tout le reste est identique.
+function NexiumIAChat(props){
+var compact=!!(props&&props.compact);
 var force=F.useReducer(function(x){return x+1;},0)[1];
 var _s0=F.useState("");var saisie=_s0[0];var setSaisie=_s0[1];
-var _s1=F.useState(false);var panneau=_s1[0];var setPanneau=_s1[1];
+var _s1=F.useState(false);var choix=_s1[0];var setChoix=_s1[1];
+var _s2=F.useState(false);var mp=_s2[0];var setMp=_s2[1];
 var bas=F.useRef?F.useRef(null):{current:null};
 F.useEffect(function(){
 _NXIA.listeners.push(force);
-// L accord se demande a la premiere visite, pas au demarrage du client.
-if(!_NXIA.cfg.vu)setPanneau(true);
 return function(){try{_NXIA.listeners=_NXIA.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
 F.useEffect(function(){try{
 if(bas&&bas.current&&bas.current.scrollIntoView)bas.current.scrollIntoView({block:"end",behavior:"smooth"});}catch(_){}});
-var monte=_NXmounted(F);
 var P=_NXpal;
 var M=_NXIA.msgs;
-var nCaps=_NXIA.nbCaps();
 var reste=_NXIA.restant;
+var illimite=_NXIA.admin||reste===-2;
 
 var envoyer=function(){
 var t=saisie.trim();
@@ -6190,23 +6827,6 @@ var touche=function(e){
 arrete(e);
 if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();envoyer();}};
 
-// --- une capacite, en pastille ------------------------------------------
-var pastille=function(c){
-var on=_NXIA.accorde(c.k);
-return i("div",{key:c.k,className:"nx-fx",role:"switch","aria-checked":on?"true":"false",
-tabIndex:0,onKeyDown:_NXkey,title:_T(c.d),
-onClick:function(){_NXIA.setCap(c.k,!on);},
-style:{display:"inline-flex",alignItems:"center",gap:"7px",padding:"7px 12px",
-borderRadius:"99px",cursor:"pointer",fontSize:"11.5px",fontWeight:"600",
-background:on?"rgba(143,209,158,.09)":P.inset,
-border:"1px solid "+(on?"rgba(143,209,158,.34)":P.line),
-color:on?_NXpal.ok:P.dim,
-transition:"background .2s ease,border-color .2s ease,color .2s ease"}},
-i("div",{"aria-hidden":"true",style:{width:"5px",height:"5px",borderRadius:"50%",
-background:on?_NXpal.ok:P.faint}}),
-_T(c.n));};
-
-// --- une bulle -----------------------------------------------------------
 var bulle=function(m,k){
 if(m.role==="user")
 return i("div",{key:k,style:{display:"flex",justifyContent:"flex-end",marginBottom:"16px"}},
@@ -6216,12 +6836,51 @@ color:P.txt,fontSize:"13px",lineHeight:1.7,whiteSpace:"pre-wrap",
 wordBreak:"normal",overflowWrap:"break-word",
 userSelect:"text",WebkitUserSelect:"text",cursor:"text",
 boxShadow:"0 2px 10px rgba(0,0,0,.28)"}},m.content));
+if(m.role==="confirm"){
+var rep=m.repondu;
+return i("div",{key:k,style:{marginBottom:"16px",padding:"12px 14px",borderRadius:"12px",
+background:rep?P.inset:"linear-gradient(158deg,#1a1710,#121011)",
+border:"1px solid "+(rep?P.line:"rgba(232,196,138,.30)")}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}},
+i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor","aria-hidden":"true",
+style:{color:rep?P.faint:_NXpal.warn}},
+i("path",{d:"M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"})),
+i("span",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".14em",
+textTransform:"uppercase",color:rep?P.faint:_NXpal.warn}},
+rep==="accepte"?_T("Action autorisee"):rep==="refuse"?_T("Action refusee"):_T("Autoriser cette action ?"))),
+i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.6,marginBottom:rep?0:"12px"}},
+i("span",{style:{fontFamily:_NXf.mono,color:P.pale}},m.outil),
+(m.args&&Object.keys(m.args).length)
+?i("span",{style:{color:P.dim}}," "+JSON.stringify(m.args).slice(0,140)):null),
+rep?null:i("div",{style:{display:"flex",gap:"8px"}},
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){_NXIA.repondre(m.id,true);},
+style:{flex:1,textAlign:"center",padding:"9px",borderRadius:"9px",cursor:"pointer",
+background:P.acc,color:P.ink,fontSize:"11.5px",fontWeight:"800"}},_T("Autoriser")),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){_NXIA.repondre(m.id,false);},
+style:{flex:1,textAlign:"center",padding:"9px",borderRadius:"9px",cursor:"pointer",
+background:"transparent",border:"1px solid "+P.line,color:P.sub,
+fontSize:"11.5px",fontWeight:"700"}},_T("Refuser"))));}
+if(m.role==="etape")
+return i("div",{key:k,style:{marginBottom:"16px",padding:"12px 14px",borderRadius:"12px",
+background:P.inset,border:"1px solid "+P.line}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginBottom:"8px"}},
+i("svg",{viewBox:"0 0 24 24",width:11,height:11,fill:"currentColor","aria-hidden":"true",
+style:{color:P.mute}},
+i("path",{d:"M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"})),
+i("span",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".14em",
+textTransform:"uppercase",color:P.faint}},m.titre||_T("Etape"))),
+i("div",{style:{fontSize:"12px",lineHeight:1.7,color:P.sub,
+userSelect:"text",WebkitUserSelect:"text"}},_NXIA.riche(m.content)));
 if(m.role==="outil"){
 var res=m.res||{};
 var souci=res.erreur||res.refuse;
 var dit=souci?(res.erreur||res.refuse)
 :(m.outil==="changer_reglage"&&res.reglage)?(res.reglage+" : "+(res.maintenant?_T("allume"):_T("eteint")))
-:(m.outil==="appliquer_profil_privacy"&&res.profil)?(_T("profil")+" "+res.profil+" \u2014 "+res.protections_actives+"/"+res.sur)
+:(m.outil==="changer_reglage_protect"&&res.reglage)?(res.reglage+" : "+(res.maintenant?_T("allume"):_T("eteint")))
+:(m.outil==="appliquer_profil_privacy"&&res.profil)?(_T("profil")+" "+res.profil)
+:(m.outil==="musique"&&typeof res.en_lecture==="boolean")?(res.en_lecture?_T("lecture"):_T("pause"))
 :_T("consulte");
 return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"9px",
 margin:"0 0 14px 14px",padding:"7px 12px",borderRadius:"99px",
@@ -6240,7 +6899,7 @@ i("div",{style:{flex:1,minWidth:0}},
 i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginBottom:"8px"}},
 i("span",{style:{color:P.mute,display:"flex"}},i(NexiumIAIcon,{width:12,height:12})),
 i("span",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".14em",
-textTransform:"uppercase",color:P.faint}},"Nexium IA")),
+textTransform:"uppercase",color:P.faint}},_NXIA.nomModele||"Nexium IA")),
 i("div",{style:{fontSize:"13px",lineHeight:1.8,color:P.pale,
 wordBreak:"normal",overflowWrap:"break-word",
 userSelect:"text",WebkitUserSelect:"text",cursor:"text"}},
@@ -6250,10 +6909,10 @@ marginLeft:"3px",verticalAlign:"text-bottom",background:P.mute,borderRadius:"1px
 animation:"nx-ia-curseur 1s steps(2) infinite"}}):null),
 (m.flux||!m.content)?null:i("div",{style:{display:"flex",gap:"6px",marginTop:"10px"}},
 i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
-"aria-label":_T("Copier la reponse"),onClick:function(){copie(m.content);},
+"aria-label":_T("Copier la reponse"),onClick:function(){_NXIA.copie(m.content);},
 style:{display:"flex",alignItems:"center",gap:"6px",padding:"5px 10px",borderRadius:"8px",
 cursor:"pointer",background:"transparent",border:"1px solid "+P.line,
-color:P.faint,fontSize:"10.5px",fontWeight:"600"}},
+color:P.faint,fontSize:"10.5px",fontWeight:"600",userSelect:"none"}},
 i("svg",{viewBox:"0 0 24 24",width:11,height:11,fill:"currentColor","aria-hidden":"true"},
 i("path",{d:"M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"})),
 _T("Copier")),
@@ -6261,67 +6920,125 @@ _T("Copier")),
 "aria-label":_T("Relancer"),onClick:function(){_NXIA.relancer();},
 style:{display:"flex",alignItems:"center",gap:"6px",padding:"5px 10px",borderRadius:"8px",
 cursor:"pointer",background:"transparent",border:"1px solid "+P.line,
-color:P.faint,fontSize:"10.5px",fontWeight:"600"}},
+color:P.faint,fontSize:"10.5px",fontWeight:"600",userSelect:"none"}},
 i("svg",{viewBox:"0 0 24 24",width:11,height:11,fill:"currentColor","aria-hidden":"true"},
 i("path",{d:"M17.65 6.35A8 8 0 1 0 19.73 14h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"})),
 _T("Relancer")):null)));};
 
-var copie=function(t){_NXIA.copie(t);};
+// --- choix du modele -----------------------------------------------------
+var selecteur=function(){
+var courant=_NXIA.info(_NXIA.palier());
+return i("div",{style:{position:"relative"}},
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){setChoix(!choix);},
+style:{display:"flex",alignItems:"center",gap:"7px",padding:"6px 11px",
+borderRadius:"9px",cursor:"pointer",background:P.inset,
+border:"1px solid "+(choix?P.edge:P.line),color:P.sub,fontSize:"11px",fontWeight:"700"}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint}},courant.rang),
+courant.nom,
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint}},
+courant.base+" cr"),
+i("svg",{viewBox:"0 0 24 24",width:10,height:10,fill:"currentColor","aria-hidden":"true",
+style:{opacity:.6,transform:choix?"rotate(180deg)":"none",transition:"transform .18s ease"}},
+i("path",{d:"M7 10l5 5 5-5z"}))),
+choix?i("div",{style:{position:"absolute",bottom:"calc(100% + 6px)",left:0,zIndex:5,
+minWidth:"320px",maxHeight:"340px",overflowY:"auto",padding:"6px",borderRadius:"12px",
+background:P.panel,border:"1px solid "+P.hair,boxShadow:"0 16px 44px rgba(0,0,0,.55)"}},
+_NXIA.PALIERS.map(function(p){
+var on=_NXIA.palier()===p.k;
+var libre=_NXIA.utilisable(p.k);
+return i("div",{key:p.k,className:libre?"nx-fx":"",role:"button",
+tabIndex:libre?0:-1,onKeyDown:libre?_NXkey:null,
+"aria-disabled":libre?"false":"true",
+title:libre?"":_T("Indisponible sur ce compte"),
+onClick:libre?function(){_NXIA.setPalier(p.k);setChoix(false);}:null,
+style:{display:"flex",alignItems:"flex-start",gap:"10px",padding:"9px 10px",
+borderRadius:"9px",cursor:libre?"pointer":"not-allowed",
+opacity:libre?1:.42,background:on?P.raise:"transparent"}},
+i("span",{style:{flexShrink:0,marginTop:"1px",width:"20px",height:"20px",borderRadius:"6px",
+display:"flex",alignItems:"center",justifyContent:"center",
+fontSize:"9px",fontWeight:"800",fontFamily:_NXf.mono,
+background:p.rang==="S"?"rgba(232,196,138,.16)":(p.rang==="B"?"rgba(255,255,255,.06)":"rgba(143,209,158,.13)"),
+color:p.rang==="S"?_NXpal.warn:(p.rang==="B"?P.sub:_NXpal.ok)}},p.rang),
+i("span",{style:{flex:1,minWidth:0}},
+i("span",{style:{display:"flex",alignItems:"center",gap:"7px"}},
+i("span",{style:{fontSize:"12px",fontWeight:"700",color:on?P.txt:P.sub}},p.nom),
+i("span",{style:{fontSize:"9px",fontWeight:"800",letterSpacing:".08em",
+textTransform:"uppercase",color:P.faint}},_T(p.role))),
+i("span",{style:{display:"block",fontSize:"10.5px",color:P.dim,marginTop:"2px",lineHeight:1.5}},
+libre?_T(p.d):_T("Indisponible sur ce compte."))),
+i("span",{style:{flexShrink:0,display:"flex",alignItems:"center",gap:"7px",marginTop:"1px"}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint}},p.base+" cr"),
+on?i("span",{style:{color:_NXpal.ok,fontSize:"12px"}},"\u2713"):null));})):null);};
+
+// --- mode reflexion --------------------------------------------------------
+var boutonReflexion=function(){
+var on=_NXIA.reflexion();
+return i("div",{className:"nx-fx",role:"switch","aria-checked":on?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,
+title:_T("Reflechit plus longuement avant de repondre. Coute trois fois plus."),
+onClick:function(){_NXIA.setReflexion(!on);},
+style:{display:"flex",alignItems:"center",gap:"6px",padding:"6px 11px",
+borderRadius:"9px",cursor:"pointer",fontSize:"11px",fontWeight:"700",
+background:on?"rgba(232,196,138,.12)":P.inset,
+border:"1px solid "+(on?"rgba(232,196,138,.36)":P.line),
+color:on?_NXpal.warn:P.dim,
+transition:"background .2s ease,border-color .2s ease,color .2s ease"}},
+i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor","aria-hidden":"true"},
+i("path",{d:"M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2zM9 20h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-1z"})),
+_T("Reflexion"),
+on?i("span",{style:{fontFamily:_NXf.mono,fontSize:"9.5px",opacity:.8}},"x3"):null);};
+
+// --- auto ou manuel ------------------------------------------------------
+var boutonMode=function(){
+var auto=_NXIA.mode()==="auto";
+return i("div",{className:"nx-fx",role:"switch","aria-checked":auto?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,
+title:auto?_T("Agit sans demander. Les lectures comme les actions.")
+:_T("Demande avant toute action. Les lectures de ton etat restent libres."),
+onClick:function(){_NXIA.setMode(auto?"manuel":"auto");},
+style:{display:"flex",alignItems:"center",gap:"6px",padding:"6px 11px",
+borderRadius:"9px",cursor:"pointer",fontSize:"11px",fontWeight:"700",
+background:auto?"rgba(143,209,158,.12)":P.inset,
+border:"1px solid "+(auto?"rgba(143,209,158,.36)":P.line),
+color:auto?_NXpal.ok:P.dim,
+transition:"background .2s ease,border-color .2s ease,color .2s ease"}},
+i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor","aria-hidden":"true"},
+i("path",{d:auto
+?"M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4zm-1.2 14L7 12.2l1.4-1.4 2.4 2.4 5-5L17.2 9l-6.4 6.9z"
+:"M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"})),
+auto?_T("Auto"):_T("Manuel"));};
+
 var suggestions=[
 _T("Quelles protections me manquent ?"),
-_T("Explique-moi l empreinte du canvas"),
-_T("Passe-moi en profil renforce")];
+_T("Lance la musique"),
+_T("Teste ma latence reseau")];
 
-var quotaTxt=(reste<0)?"\u2014":String(reste);
-var quotaCol=(reste<0)?P.txt:(reste===0?_NXpal.danger:(reste<=2?_NXpal.warn:P.txt));
-
-return i(Kr,null,i("div",{style:{maxWidth:"900px",margin:"0 auto",opacity:monte?1:0,
-transform:monte?"none":"translateY(6px)",transition:"opacity .32s ease,transform .32s ease"}},
-_NXhead("IA","Nexium IA",_T("Un assistant qui connait ton client, et rien d autre")),
-
-// --- etat en un coup d oeil -------------------------------------------
-_NXcard(i("div",null,
-_NXstrip([
-{v:nCaps+"/"+_NXIA.CAPS.length,label:_T("Acces accordes"),color:nCaps?_NXpal.ok:P.txt},
-{v:quotaTxt,label:_T("Messages restants"),color:quotaCol},
-{v:_T("Locale"),label:_T("Execution des outils")}]),
-i("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px",marginTop:"18px"}},
-_NXIA.CAPS.map(pastille)),
-i("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",
-gap:"12px",flexWrap:"wrap",marginTop:"14px",paddingTop:"13px",
-borderTop:"1px solid "+P.line}},
-i("div",{style:{flex:1,minWidth:"200px",fontSize:"10.5px",color:P.faint,lineHeight:1.65}},
-nCaps?_T("Un outil dont l acces manque n est meme pas propose au modele.")
-:_T("Sans acces, l assistant ne voit rien de ton client et repond de maniere generale.")),
-i("div",{style:{display:"flex",gap:"7px",flexShrink:0}},
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
-onClick:function(){
-for(var a=0;a<_NXIA.CAPS.length;a++)_NXIA.cfg.consent[_NXIA.CAPS[a].k]=true;
-_NXIA.cfg.vu=true;_NXIA.save();_NXIA.notify();},
-style:{padding:"7px 12px",borderRadius:"9px",cursor:"pointer",fontSize:"11px",
-fontWeight:"700",background:P.raise,border:"1px solid "+P.edge,color:P.pale}},
-_T("Tout accorder")),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
-onClick:function(){
-for(var a=0;a<_NXIA.CAPS.length;a++)_NXIA.cfg.consent[_NXIA.CAPS[a].k]=false;
-_NXIA.cfg.vu=true;_NXIA.save();_NXIA.notify();},
-style:{padding:"7px 12px",borderRadius:"9px",cursor:"pointer",fontSize:"11px",
-fontWeight:"700",background:"transparent",border:"1px solid "+P.line,color:P.sub}},
-_T("Tout refuser"))))),
-{mb:14}),
-
-// --- la conversation ---------------------------------------------------
-_NXcard(i("div",null,
-_NXch(_T("Conversation"),
-_T("Rien n est enregistre : elle disparait quand tu fermes le client."),
-M.length?i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
-onClick:function(){_NXIA.effacer();},
-style:{padding:"6px 11px",borderRadius:"8px",cursor:"pointer",background:"transparent",
-border:"1px solid "+P.line,color:P.sub,fontSize:"11px",fontWeight:"700"}},_T("Effacer")):null),
-i("div",{style:{minHeight:"340px",height:"min(62vh,660px)",overflowY:"auto",
-padding:"8px 6px 2px",marginBottom:"14px",
+var hauteur=compact?"min(46vh,420px)":"min(62vh,660px)";
+return i("div",null,
+i("div",{style:{minHeight:compact?"220px":"340px",height:hauteur,overflowY:"auto",
+padding:"8px 6px 2px",marginBottom:"12px",
 userSelect:"text",WebkitUserSelect:"text"}},
-M.length?M.map(bulle):i("div",{style:{padding:"42px 12px",textAlign:"center"}},
+_NXIA.taches.length?i("div",{style:{marginBottom:"16px",padding:"12px 14px",
+borderRadius:"12px",background:P.inset,border:"1px solid "+P.line}},
+i("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",
+gap:"10px",marginBottom:"9px"}},
+i("span",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".14em",
+textTransform:"uppercase",color:P.faint}},_T("Travail en cours")),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint}},
+_NXIA.taches.filter(function(x){return x.etat==="fait";}).length+"/"+_NXIA.taches.length)),
+_NXIA.taches.map(function(x){
+var fini=x.etat==="fait",cours=x.etat==="en_cours",laisse=x.etat==="abandonne";
+return i("div",{key:x.id,style:{display:"flex",alignItems:"flex-start",gap:"9px",
+padding:"4px 0",fontSize:"11.5px",lineHeight:1.55,
+color:fini?P.dim:(cours?P.txt:P.sub),
+textDecoration:(fini||laisse)?"line-through":"none",
+opacity:laisse?.5:1}},
+i("span",{style:{flexShrink:0,width:"13px",marginTop:"1px",
+color:fini?_NXpal.ok:(cours?_NXpal.warn:P.faint)}},
+fini?"\u2713":(cours?"\u203a":(laisse?"\u00d7":"\u00b7"))),
+i("span",{style:{flex:1,minWidth:0}},x.texte));})):null,
+M.length?M.map(bulle):i("div",{style:{padding:(compact?"26px":"42px")+" 12px",textAlign:"center"}},
 i("div",{style:{display:"inline-flex",alignItems:"center",justifyContent:"center",
 width:"46px",height:"46px",borderRadius:"16px",marginBottom:"16px",color:P.mute,
 background:"linear-gradient(160deg,#141417,#0c0c0e)",border:"1px solid "+P.hair,
@@ -6329,7 +7046,7 @@ boxShadow:"0 10px 30px rgba(0,0,0,.35)"}},
 i(NexiumIAIcon,{width:21,height:21})),
 i("div",{style:{fontSize:"13px",color:P.sub,fontWeight:"600",marginBottom:"6px"}},
 _T("Pose une question sur ton client.")),
-i("div",{style:{fontSize:"11px",color:P.faint,marginBottom:"20px"}},
+i("div",{style:{fontSize:"11px",color:P.faint,marginBottom:"18px"}},
 _T("Il repond a partir de ton etat reel, pas de suppositions.")),
 i("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px",justifyContent:"center"}},
 suggestions.map(function(sg,k){
@@ -6342,25 +7059,57 @@ i("div",{style:{display:"flex",gap:"4px"}},[0,1,2].map(function(p){
 return i("div",{key:p,style:{width:"5px",height:"5px",borderRadius:"50%",background:P.mute,
 animation:"nx-ia-point 1.15s ease-in-out "+(p*0.16)+"s infinite"}});})),
 i("span",{style:{fontSize:"11px",color:P.faint}},
-_NXIA.pense?_T("L assistant reflechit"):_T("L assistant repond")),
+_NXIA.attentes.length?_T("En attente de ton accord")
+:_NXIA.etape==="lecture"?_T("Lecture de la conversation")
+:_NXIA.etape==="propositions"?_T("Redaction des propositions")
+:(_NXIA.pense?_T("L assistant reflechit"):_T("L assistant repond"))),
 i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
 onClick:function(){_NXIA.stop();},
 style:{marginLeft:"4px",padding:"4px 10px",borderRadius:"8px",cursor:"pointer",
 background:"transparent",border:"1px solid "+P.line,color:P.sub,
 fontSize:"10.5px",fontWeight:"700"}},_T("Arreter"))):null,
 i("div",{ref:bas})),
-_NXIA.erreur?i("div",{style:{padding:"11px 13px",borderRadius:"11px",marginBottom:"13px",
+_NXIA.repli?i("div",{style:{padding:"8px 11px",borderRadius:"9px",marginBottom:"10px",
+background:P.inset,border:"1px solid "+P.line,fontSize:"10.5px",color:_NXpal.warnSoft}},
+_NXIA.repli):null,
+_NXIA.erreur?i("div",{style:{padding:"11px 13px",borderRadius:"11px",marginBottom:"12px",
 background:"linear-gradient(160deg,#1a0d0d,#120909)",border:"1px solid #2c1414",
 fontSize:"11.5px",color:_NXpal.dangerSoft,lineHeight:1.6}},
 i("div",{style:{fontWeight:"700",marginBottom:"4px"}},
 (reste===0)?_T("Limite de messages atteinte"):_T("L assistant est injoignable")),
 i("div",{style:{color:P.sub,fontFamily:_NXf.mono,fontSize:"10.5px",wordBreak:"break-word"}},
 _NXIA.erreur)):null,
+mp?(function(){
+var L=_NXIA.mpOuverts();
+var filtre=saisie.slice(1).toLowerCase();
+var V=L.filter(function(x){return !filtre||x.nom.toLowerCase().indexOf(filtre)>=0;}).slice(0,6);
+return i("div",{style:{marginBottom:"9px",padding:"7px",borderRadius:"12px",
+background:P.inset,border:"1px solid "+P.line}},
+i("div",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".12em",
+textTransform:"uppercase",color:P.faint,padding:"3px 6px 7px"}},
+_NXIA.accorde("conversations")
+?(_T("Analyser une conversation")+" \u00b7 "+_T("coute 2 messages"))
+:_T("Acces aux conversations privees non accorde")),
+_NXIA.accorde("conversations")
+?(V.length?V.map(function(x){
+return i("div",{key:x.id,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){setSaisie("");setMp(false);_NXIA.analyserMP(x.id,x.nom);},
+style:{display:"flex",alignItems:"center",gap:"9px",padding:"8px 10px",
+borderRadius:"9px",cursor:"pointer",fontSize:"12px",color:P.sub}},
+i("span",{style:{color:P.faint,fontFamily:_NXf.mono,fontSize:"11px"}},"@"),
+x.nom);})
+:i("div",{style:{padding:"8px 10px",fontSize:"11px",color:P.dim}},
+_T("Aucune conversation privee ouverte. Ouvre-en une dans Discord, puis reessaie.")))
+:i("div",{style:{padding:"8px 10px",fontSize:"11px",color:P.dim,lineHeight:1.6}},
+_T("Cette lecture envoie les derniers messages au relais. Accorde-la dans les reglages si tu le souhaites.")));})():null,
 i("div",{style:{display:"flex",gap:"9px",alignItems:"flex-end"}},
-i("textarea",{value:saisie,rows:1,placeholder:_T("Ecris ton message"),
+i("textarea",{value:saisie,rows:1,placeholder:_T("Ecris ton message, ou @ pour analyser une conversation"),
 onChange:function(e){
-setSaisie(e.target.value);
-// Le champ suit la hauteur du texte, sans jamais devenir un mur.
+var v=e.target.value;
+setSaisie(v);
+// Un @ en tete ouvre la liste des conversations : c est un geste explicite,
+// et rien n est lu tant qu une personne n est pas choisie.
+setMp(v.charAt(0)==="@");
 try{e.target.style.height="auto";
 e.target.style.height=Math.min(132,Math.max(44,e.target.scrollHeight))+"px";}catch(_){}},
 onKeyDown:touche,onKeyUp:arrete,onKeyPress:arrete,
@@ -6381,11 +7130,120 @@ transition:"background .18s ease,color .18s ease,border-color .18s ease"}},
 i("svg",{viewBox:"0 0 24 24",width:_NXIA.busy?13:17,height:_NXIA.busy?13:17,
 fill:"currentColor","aria-hidden":"true"},
 i("path",{d:_NXIA.busy?"M6 6h12v12H6z":"M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2v6.4z"})))),
-i("div",{style:{display:"flex",justifyContent:"space-between",gap:"12px",
-marginTop:"9px",fontSize:"10px",color:P.faint}},
-i("span",null,_T("Entree pour envoyer, Maj+Entree pour aller a la ligne")),
-(reste>=0)?i("span",{style:{fontFamily:_NXf.mono,color:quotaCol}},
-reste+" "+_T("restant(s)")):null)),
+i("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",
+gap:"10px",marginTop:"10px",flexWrap:"wrap"}},
+i("div",{style:{display:"flex",gap:"7px",alignItems:"center",flexWrap:"wrap"}},
+selecteur(),boutonReflexion(),boutonMode(),
+// Le rappel clavier n a pas sa place dans le panneau compact.
+compact?null:i("span",{style:{fontSize:"10px",color:P.faint}},
+_T("Entree pour envoyer, Maj+Entree pour aller a la ligne"))),
+i("div",{style:{display:"flex",gap:"10px",alignItems:"center",fontFamily:_NXf.mono,fontSize:"10px"}},
+saisie.trim()?i("span",{style:{color:P.faint},
+title:_T("Cout estime de cette demande")},
+"\u2248 "+_NXIA.cout({caracteres:saisie.length})+" cr"):null,
+i("span",{style:{color:illimite?_NXpal.ok:((reste>=0&&reste<=15)?_NXpal.warn:P.faint)}},
+illimite?_T("sans limite")
+:(reste>=0?(reste+"/"+_NXIA.CREDITS_MAX+" "+_T("credits")):"\u2014")))));
+}
+
+// ------------------------------------------------------- panneau flottant
+function NexiumIAPanneau(){
+var force=F.useReducer(function(x){return x+1;},0)[1];
+F.useEffect(function(){
+_NXIA.listeners.push(force);
+return function(){try{_NXIA.listeners=_NXIA.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
+var P=_NXpal;
+var nCaps=_NXIA.nbCaps();
+return i("div",{style:{width:"420px",maxWidth:"calc(100vw - 32px)",
+borderRadius:"18px",overflow:"hidden",
+background:"linear-gradient(160deg,"+P.panel+","+P.bg+")",
+border:"1px solid "+P.hair,boxShadow:"0 24px 70px rgba(0,0,0,.62)"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"13px 14px",
+borderBottom:"1px solid "+P.line}},
+i("span",{style:{color:P.mid,display:"flex"}},i(NexiumIAIcon,{width:15,height:15})),
+i("span",{style:{flex:1,minWidth:0,fontSize:"12.5px",fontWeight:"800",color:P.txt}},"Nexium IA"),
+i("span",{style:{fontSize:"10px",color:P.faint,fontFamily:_NXf.mono}},
+nCaps+"/"+_NXIA.CAPS.length),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+"aria-label":_T("Ouvrir la page complete"),
+onClick:function(){_NXIA.fermerPanneau();_NXIA.ouvrePage();},
+style:{padding:"5px 9px",borderRadius:"7px",cursor:"pointer",fontSize:"10.5px",
+fontWeight:"700",background:"transparent",border:"1px solid "+P.line,color:P.sub}},
+_T("Reglages")),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+"aria-label":_T("Fermer"),onClick:function(){_NXIA.fermerPanneau();},
+style:{width:"24px",height:"24px",borderRadius:"7px",cursor:"pointer",
+display:"flex",alignItems:"center",justifyContent:"center",color:P.dim,fontSize:"15px"}},
+"\u00d7")),
+i("div",{style:{padding:"12px 14px 14px"}},
+nCaps?null:i("div",{style:{padding:"9px 11px",borderRadius:"9px",marginBottom:"11px",
+background:P.inset,border:"1px solid "+P.line,fontSize:"10.5px",color:P.dim,lineHeight:1.6}},
+_T("Aucun acces accorde : l assistant ne voit rien de ton client. Ouvre les reglages pour lui en donner.")),
+i(NexiumIAChat,{compact:true})));
+}
+
+// --------------------------------------------------------------- la page
+function NexiumIAComp(){
+var force=F.useReducer(function(x){return x+1;},0)[1];
+var _s1=F.useState(false);var panneau=_s1[0];var setPanneau=_s1[1];
+F.useEffect(function(){
+_NXIA.listeners.push(force);
+if(!_NXIA.cfg.vu)setPanneau(true);
+return function(){try{_NXIA.listeners=_NXIA.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
+var monte=_NXmounted(F);
+var P=_NXpal;
+var nCaps=_NXIA.nbCaps();
+var reste=_NXIA.restant;
+var illimite=_NXIA.admin||reste===-2;
+
+var ligneCap=function(c,dernier){
+var on=_NXIA.accorde(c.k);
+return i("div",{key:c.k,style:{display:"flex",alignItems:"flex-start",gap:"12px",
+padding:"12px 0",borderBottom:dernier?"none":"1px solid "+P.line}},
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:on?P.txt:P.sub,marginBottom:"3px"}},_T(c.n)),
+i("div",{style:{fontSize:"11px",color:P.dim,lineHeight:1.6}},_T(c.d))),
+i("div",{className:"nx-fx",role:"switch","aria-checked":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){_NXIA.setCap(c.k,!on);},
+style:{flexShrink:0,width:"38px",height:"22px",borderRadius:"99px",cursor:"pointer",marginTop:"2px",
+background:on?_NXpal.ok:P.raise,border:"1px solid "+(on?_NXpal.ok:P.edge),
+transition:"background .18s ease,border-color .18s ease",position:"relative"}},
+i("div",{style:{position:"absolute",top:"2px",left:on?"18px":"2px",width:"16px",height:"16px",
+borderRadius:"50%",background:on?P.ink:P.mute,transition:"left .18s cubic-bezier(.4,0,.2,1)"}})));};
+
+return i(Kr,null,i("div",{style:{maxWidth:"900px",margin:"0 auto",opacity:monte?1:0,
+transform:monte?"none":"translateY(6px)",transition:"opacity .32s ease,transform .32s ease"}},
+_NXhead("IA","Nexium IA",_T("Un assistant qui connait ton client, et rien d autre")),
+
+_NXcard(i("div",null,
+_NXstrip([
+{v:nCaps+"/"+_NXIA.CAPS.length,label:_T("Acces accordes"),color:nCaps?_NXpal.ok:P.txt},
+{v:illimite?_T("Illimite"):(reste>=0?(reste+"/"+_NXIA.CREDITS_MAX):"\u2014"),
+label:_T("Credits restants"),
+color:illimite?_NXpal.ok:((reste>=0&&reste<=15)?_NXpal.warn:P.txt)},
+{v:_NXIA.palierNom().replace("Nexium IA ",""),label:_T("Modele")},
+{v:_T("Locale"),label:_T("Execution des outils")}]),
+i("div",{style:{marginTop:"18px",paddingTop:"4px"}},
+_NXIA.CAPS.map(function(c,k){return ligneCap(c,k===_NXIA.CAPS.length-1);})),
+i("div",{style:{display:"flex",gap:"8px",marginTop:"14px"}},
+_NXbtn(_T("Tout accorder"),function(){
+for(var a=0;a<_NXIA.CAPS.length;a++)_NXIA.cfg.consent[_NXIA.CAPS[a].k]=true;
+_NXIA.cfg.vu=true;_NXIA.save();_NXIA.notify();}),
+_NXbtn(_T("Tout refuser"),function(){
+for(var a=0;a<_NXIA.CAPS.length;a++)_NXIA.cfg.consent[_NXIA.CAPS[a].k]=false;
+_NXIA.cfg.vu=true;_NXIA.save();_NXIA.notify();})),
+i("div",{style:{marginTop:"12px",fontSize:"10.5px",color:P.faint,lineHeight:1.65}},
+_T("Un outil dont l acces manque n est meme pas propose au modele."))),
+{mb:14}),
+
+_NXcard(i("div",null,
+_NXch(_T("Conversation"),
+_T("Rien n est enregistre : elle disparait quand tu fermes le client."),
+_NXIA.msgs.length?i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){_NXIA.effacer();},
+style:{padding:"6px 11px",borderRadius:"8px",cursor:"pointer",background:"transparent",
+border:"1px solid "+P.line,color:P.sub,fontSize:"11px",fontWeight:"700"}},_T("Effacer")):null),
+i(NexiumIAChat,{compact:false})),
 {mb:14}),
 
 i("div",{style:{fontSize:"10.5px",color:P.faint,lineHeight:1.7,padding:"0 2px 8px"}},
@@ -12851,14 +13709,32 @@ try{m=W.findByProps("open","saveAccountChanges");}catch(_){m=null;}
 if(m&&typeof m.open!=="function")m=null;
 _NXCP._rt=m;_NXCP._rtAt=Date.now();
 return m;}catch(_){return null;}};
+// Ouvrir une page de reglages depuis n importe ou.
+//
+// Poser la section ne suffit pas : si la fenetre de reglages est fermee --
+// le cas quand on clique depuis le salon -- il ne se passe rien du tout.
+// Il faut l OUVRIR. C est ce que fait openUserSettings, qui prend la section
+// en argument et s occupe des deux.
+_NXCP.modale=function(){try{
+if(_NXCP._md&&(Date.now()-_NXCP._mdAt)<60000)return _NXCP._md;
+var W=window.Vencord&&Vencord.Webpack;
+var m=null;
+try{if(W&&W.findByProps)m=W.findByProps("openUserSettings","USER_SETTINGS_MODAL_KEY");}catch(_){m=null;}
+if(m&&typeof m.openUserSettings!=="function")m=null;
+_NXCP._md=m;_NXCP._mdAt=Date.now();
+return m;}catch(_){return null;}};
 _NXCP.goto=function(key){try{
 if(!key||typeof key!=="string")return false;
+var M=_NXCP.modale();
+if(M){try{M.openUserSettings(key);return true;}catch(_){}}
 var r=_NXCP.routeur();
 if(r&&typeof r.open==="function"){try{r.open(key);return true;}catch(_){}}
 try{
 var C=_NXcommon();
 var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));
 if(FX&&typeof FX.dispatch==="function"){
+// En dernier recours : ouvrir la fenetre, puis poser la section.
+try{FX.dispatch({type:"USER_SETTINGS_MODAL_OPEN"});}catch(_){}
 FX.dispatch({type:"USER_SETTINGS_MODAL_SET_SECTION",section:key});
 return true;}}catch(_){}
 return false;}catch(_){return false;}};
