@@ -7190,7 +7190,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="183";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="184";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -16498,114 +16498,260 @@ var pctSante=sante.total?Math.round(sante.vivants/sante.total*100):100;
 var tout=menaces+sorties+arretees;
 var etat=sante.morts.length?{t:_T("Attention requise"),c:_NXpal.warn}:
 (tout>0?{t:_T("Protection active"),c:_NXpal.ok}:{t:_T("En veille"),c:_NXpal.ok});
+var BLEU="#8ba3e8",ROSE="#d98aa8";
+
 function aller(cle,nom){try{
 if(window._NXCP&&_NXCP.ouvrir){_NXCP.ouvrir(cle,nom);return;}
 if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Ouvre les reglages Discord, puis la section Nexium."),1);
 }catch(_){}}
-function grand(v,lab,c){return i("div",{style:{flex:1,minWidth:"88px"}},
-i("div",{key:"h"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"27px",fontWeight:"800",
+
+// ------------------------------------------------------------ l illustration
+// Un bouclier, dessine avec le vocabulaire des autres pages : des anneaux
+// concentriques, et une orbite ou chaque point est un module du client. Les
+// points s allument selon l etat reel -- ce n est pas un decor, c est une
+// lecture de plus.
+function blason(){
+var C=104,R0=82;
+var mods=[
+{n:"Protect",on:!!(PR&&PR.boot),c:_NXpal.danger},
+{n:"Privacy",on:!!(PV&&PV.boot),c:_NXpal.ok},
+{n:"Gardes",on:!!(G&&G.cfg&&G.cfg.egressGuard),c:BLEU},
+{n:"Réseau",on:!!(NT&&NT.boot),c:_NXpal.warn},
+{n:"Coffre",on:!!(V&&V.boot),c:ROSE},
+{n:"Assistant",on:!!(window._NXIA&&_NXIA.boot),c:P.sub}];
+var pts=mods.map(function(m,k){
+var ang=(-90+k*(360/mods.length))*Math.PI/180;
+return {x:C+Math.cos(ang)*R0,y:C+Math.sin(ang)*R0,on:m.on,c:m.c,n:m.n,k:k};});
+return i("svg",{viewBox:"0 0 "+(C*2)+" "+(C*2),width:"100%",height:"100%",
+role:"img","aria-label":_T("Etat des modules du client"),
+style:{display:"block",maxWidth:"208px"}},
+// Les anneaux de fond
+[R0,R0-19,R0-38].map(function(r,k){
+return i("circle",{key:"a"+k,cx:C,cy:C,r:r,fill:"none",stroke:P.line,
+strokeWidth:k===0?1:1,opacity:k===0?.9:.5});}),
+// L arc de couverture : la part des modules qui tournent
+i("circle",{cx:C,cy:C,r:R0-19,fill:"none",stroke:etat.c,strokeWidth:2.5,
+strokeLinecap:"round",transform:"rotate(-90 "+C+" "+C+")",
+strokeDasharray:2*Math.PI*(R0-19),
+strokeDashoffset:2*Math.PI*(R0-19)*(1-(monte?pctSante/100:0)),
+style:{transition:"stroke-dashoffset 1.1s cubic-bezier(.22,.8,.28,1)"}}),
+// Le bouclier, au centre
+i("path",{d:"M104 58 74 70v22c0 19 12.8 35.4 30 40 17.2-4.6 30-21 30-40V70l-30-12z",
+fill:"none",stroke:etat.c,strokeWidth:2,strokeLinejoin:"round",
+opacity:monte?.95:0,style:{transition:"opacity .8s ease .2s"}}),
+i("path",{d:"M92 101l9 9 21-21",fill:"none",stroke:etat.c,strokeWidth:2.5,
+strokeLinecap:"round",strokeLinejoin:"round",
+opacity:monte?1:0,
+style:{transition:"opacity .5s ease .7s"}}),
+// L orbite des modules
+pts.map(function(p){
+return i("g",{key:"m"+p.k},
+i("circle",{cx:p.x,cy:p.y,r:p.on?5:3.5,
+fill:p.on?p.c:P.line,
+opacity:monte?(p.on?1:.6):0,
+style:{transition:"opacity .5s ease "+(300+p.k*90)+"ms"}},
+i("title",null,p.n+" \u00b7 "+(p.on?_T("actif"):_T("inactif")))),
+p.on?i("circle",{cx:p.x,cy:p.y,r:9,fill:"none",stroke:p.c,strokeWidth:1,
+opacity:monte?.28:0,
+style:{transition:"opacity .6s ease "+(400+p.k*90)+"ms"}}):null);}));}
+
+// ------------------------------------------------- la courbe des 24 dernieres h
+// Les donnees existaient deja dans Privacy sans etre montrees ici.
+function courbe(){
+var H=[],max=1;
+try{
+var st=(PV&&PV.stats)||{};
+var maintenant=new Date();
+for(var h=23;h>=0;h--){
+var d=new Date(maintenant.getTime()-h*3600000);
+var cle=d.getFullYear()+"-"+PV.pad(d.getMonth()+1)+"-"+PV.pad(d.getDate())+"-"+PV.pad(d.getHours());
+var e=(st.hours&&st.hours[cle])||{seen:0,blocked:0};
+H.push({h:d.getHours(),s:e.seen||0,b:e.blocked||0});
+if((e.seen||0)>max)max=e.seen;}
+}catch(_){return null;}
+var total=0;
+for(var a=0;a<H.length;a++)total+=H[a].b;
+if(!H.length)return null;
+return i("div",{style:{marginTop:"22px",paddingTop:"19px",borderTop:"1px solid "+P.line}},
+i("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"baseline",
+gap:"12px",marginBottom:"10px",flexWrap:"wrap"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".14em",
+textTransform:"uppercase",color:P.faint}},_T("Les vingt-quatre dernieres heures")),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.dim}},
+total?(_NXn(total)+" "+_T("arretees")):_T("rien a signaler"))),
+i("div",{style:{display:"flex",alignItems:"flex-end",gap:"2px",height:"42px"}},
+H.map(function(e,k){
+var ht=Math.max(2,Math.round(e.s/max*40));
+var hb=e.s?Math.round(e.b/e.s*ht):0;
+return i("div",{key:k,title:e.h+"h \u00b7 "+e.s+" "+_T("vues")+" \u00b7 "+e.b+" "+_T("arretees"),
+style:{flex:1,minWidth:0,height:(monte?ht:2)+"px",background:P.line,borderRadius:"2px",
+overflow:"hidden",display:"flex",flexDirection:"column",justifyContent:"flex-end",
+transition:"height .6s cubic-bezier(.22,.8,.28,1)",transitionDelay:(k*12)+"ms"}},
+hb?i("div",{style:{height:hb+"px",background:_NXpal.ok,borderRadius:"2px"}}):null);})),
+i("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"7px",
+fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint,letterSpacing:".04em"}},
+i("span",null,"-24 h"),i("span",null,_T("maintenant"))));}
+
+function grand(v,lab,c){return i("div",{style:{flex:1,minWidth:"92px"}},
+i("div",{key:"h"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"25px",fontWeight:"800",
 color:c||P.txt,letterSpacing:"-.04em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
 i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"6px",lineHeight:1.4}},lab));}
-var TUILES=[
+
+// ------------------------------------------------------------------ les tuiles
+// Groupees par intention, et chacune porte sa couleur : dix tuiles grises
+// identiques ne se distinguaient que par leur texte.
+var GROUPES=[
+{n:_T("Te proteger"),l:[
 {k:"equicord_protect",n:"Nexium Protect",d:_T("Liens, arnaques, fichiers"),ic:NexiumProtectIcon,
-v:_NXn(menaces),u:_T("bloquees")},
+c:_NXpal.danger,v:_NXn(menaces),u:_T("bloquees")},
 {k:"equicord_privacy",n:"Nexium Privacy",d:_T("Ce qui sort de ta machine"),ic:NexiumPrivacyIcon,
-v:_NXn(arretees),u:_T("arretees")},
+c:_NXpal.ok,v:_NXn(arretees),u:_T("arretees")},
+{k:"equicord_comptes",n:"Nexium Comptes",d:_T("Coffre chiffre et profils"),ic:NexiumComptesIcon,
+c:ROSE,v:_NXn(((window._NXCPT&&_NXCPT.comptes)||[]).length),u:_T("comptes")}]},
+{n:_T("Comprendre ton client"),l:[
 {k:"equicord_network",n:"Nexium Réseau",d:_T("Latence et hotes contactes"),ic:NexiumNetworkIcon,
-v:lat.n?(lat.avg+" ms"):"—",u:_T("moyenne")},
+c:_NXpal.warn,v:lat.n?(lat.avg+" ms"):"\u2014",u:_T("moyenne")},
 {k:"equicord_stats",n:"Nexium Stats",d:_T("Ton usage, en local"),ic:NexiumStatsIcon,
-v:_NXn((window._NXS&&_NXS.data&&_NXS.data.msgCount)||0),u:_T("messages")},
+c:BLEU,v:_NXn((window._NXS&&_NXS.data&&_NXS.data.msgCount)||0),u:_T("messages")},
 {k:"equicord_data",n:"Nexium Données",d:_T("Stockage, sauvegardes, sante"),ic:NexiumDataIcon,
-v:(DA&&DA.fmtTaille)?DA.fmtTaille(DA.total()):"—",u:_T("stockes")},
-{k:"equicord_music",n:"Nexium Music",d:_T("Lecteur et playlist"),ic:NexiumMusicIcon,
-v:_NXn(((window._NXM&&_NXM.cfg&&_NXM.cfg.tracks)||[]).length),u:_T("pistes")},
-{k:"equicord_auto",n:"Nexium Auto",d:_T("Automatisations et rappels"),ic:NexiumAutoIcon,
-v:_NXn((((window._NXAU&&_NXAU.data&&_NXAU.data.tasks)||[]).length)||0),u:_T("regles")},
+c:P.sub,v:(DA&&DA.fmtTaille)?DA.fmtTaille(DA.total()):"\u2014",u:_T("stockes")},
+{k:"equicord_updater",n:"Mise à jour",d:_T("Version, notes et reparation"),ic:NexiumUpdateIcon,
+c:P.sub,v:"v"+ver,u:""}]},
+{n:_T("T aider au quotidien"),l:[
 {k:"equicord_ia",n:"Nexium IA",d:_T("Un assistant qui connait ton client"),ic:NexiumIAIcon,
-v:_NXn((window._NXIA&&_NXIA.nbCaps)?_NXIA.nbCaps():0),u:_T("acces")},
-{k:"equicord_team",n:"Nexium Team",d:_T("Qui construit le client"),ic:NexiumTeamIcon,v:"",u:""},
-{k:"equicord_sponsor",n:"Sponsor",d:_T("Mettre ton serveur en avant"),ic:NexiumSponsorIcon,v:"",u:""}];
+c:P.acc,v:_NXn((window._NXIA&&_NXIA.nbCaps)?_NXIA.nbCaps():0),u:_T("acces")},
+{k:"equicord_music",n:"Nexium Music",d:_T("Lecteur et playlist"),ic:NexiumMusicIcon,
+c:ROSE,v:_NXn(((window._NXM&&_NXM.cfg&&_NXM.cfg.tracks)||[]).length),u:_T("pistes")},
+{k:"equicord_auto",n:"Nexium Auto",d:_T("Automatisations et rappels"),ic:NexiumAutoIcon,
+c:BLEU,v:_NXn((((window._NXAU&&_NXAU.data&&_NXAU.data.tasks)||[]).length)||0),u:_T("regles")},
+{k:"equicord_team",n:"Nexium Team",d:_T("Qui construit le client"),ic:NexiumTeamIcon,
+c:P.sub,v:"",u:""}]}];
+
 function tuile(t,k){
+var vif=!!(t.v&&t.v!=="0"&&t.v!=="\u2014");
 return i("div",{key:t.k,className:"nx-fx","data-nx-tile":"1",role:"button","aria-label":t.n,
 tabIndex:0,onKeyDown:_NXkey,onClick:function(){aller(t.k,t.n);},
-style:{padding:"16px 15px",borderRadius:"15px",cursor:"pointer",
-background:P.panel,border:"1px solid "+P.line,
-display:"flex",flexDirection:"column",gap:"11px"}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"10px"}},
-i("div",{style:{width:"32px",height:"32px",borderRadius:"10px",flexShrink:0,
-background:P.inset,border:"1px solid "+P.hair,color:P.sub,
+style:{position:"relative",overflow:"hidden",padding:"15px 15px",borderRadius:"16px",
+cursor:"pointer",background:P.panel,border:"1px solid "+P.line,
+display:"flex",flexDirection:"column",gap:"12px",
+transition:"border-color .22s ease,background .22s ease"}},
+i("div",{"aria-hidden":"true",style:{position:"absolute",right:"-26px",top:"-26px",
+width:"84px",height:"84px",borderRadius:"50%",pointerEvents:"none",
+background:"radial-gradient(circle,"+_NXteinte(t.c,vif?14:6)+",transparent 70%)"}}),
+i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"11px"}},
+i("div",{style:{width:"34px",height:"34px",borderRadius:"11px",flexShrink:0,
+background:_NXteinte(t.c,10),border:"1px solid "+_NXteinte(t.c,24),color:t.c,
 display:"flex",alignItems:"center",justifyContent:"center"}},
-(typeof t.ic==="function")?i(t.ic,null):null),
+(typeof t.ic==="function")?i(t.ic,{width:17,height:17}):null),
 i("div",{style:{flex:1,minWidth:0}},
 i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt,letterSpacing:"-.012em",
 overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},t.n),
 i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"3px",lineHeight:1.4,
-overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},t.d))),
-t.v?i("div",{style:{display:"flex",alignItems:"baseline",gap:"5px"}},
-i("span",{style:{fontFamily:_NXf.disp,fontSize:"17px",fontWeight:"800",color:P.txt,
-letterSpacing:"-.03em",fontVariantNumeric:"tabular-nums"}},t.v),
-i("span",{style:{fontSize:"10px",color:P.faint}},t.u)):null);}
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},t.d)),
+i("span",{"aria-hidden":"true",style:{flexShrink:0,color:P.faint,fontSize:"13px",
+opacity:.55}},"\u203a")),
+t.v?i("div",{style:{position:"relative",display:"flex",alignItems:"baseline",gap:"5px"}},
+i("span",{style:{fontFamily:_NXf.disp,fontSize:"17px",fontWeight:"800",
+color:vif?t.c:P.faint,letterSpacing:"-.03em",fontVariantNumeric:"tabular-nums"}},t.v),
+t.u?i("span",{style:{fontSize:"10px",color:P.faint}},t.u):null):null);}
+
+// ------------------------------------------------------------ actions rapides
+function actions(){
+var A=[
+{n:_T("Demander a l assistant"),d:"M12 2.5 13.7 8l5.5 1.7-5.5 1.7L12 17l-1.7-5.6L4.8 9.7 10.3 8 12 2.5z",
+f:function(){try{if(window._NXIA&&_NXIA.ouvrirPanneau){_NXIA.ouvrirPanneau();return;}}catch(_){}
+aller("equicord_ia","Nexium IA");}},
+{n:_T("Verifier un lien"),d:"M3.9 12a5 5 0 0 1 5-5h3V5h-3a7 7 0 0 0 0 14h3v-2h-3a5 5 0 0 1-5-5zm4 1h8v-2h-8v2zm7-8h-3v2h3a5 5 0 0 1 0 10h-3v2h3a7 7 0 0 0 0-14z",
+f:function(){aller("equicord_protect","Nexium Protect");}},
+{n:_T("Chercher une mise a jour"),d:"M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z",
+f:function(){try{if(window._NXUP&&!_NXUP.busy)_NXUP.check();}catch(_){}
+aller("equicord_updater","Mise a jour");}}];
+return i("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap",marginBottom:"16px"}},
+A.map(function(x,k){
+return i("div",{key:k,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+"aria-label":x.n,onClick:x.f,
+style:{display:"flex",alignItems:"center",gap:"8px",padding:"9px 15px",
+borderRadius:"999px",cursor:"pointer",background:P.panel,
+border:"1px solid "+P.line,color:P.sub,fontSize:"11.5px",fontWeight:"700"}},
+i("svg",{viewBox:"0 0 24 24",width:13,height:13,fill:"currentColor","aria-hidden":"true",
+style:{flexShrink:0,opacity:.8}},i("path",{d:x.d})),
+x.n);}));}
+
 function activite(){
 var L=[];
 try{var A=(PR&&PR.stats&&PR.stats.recent)||[];
 for(var a=0;a<A.length&&a<6;a++)L.push({t:A[a].t,k:_T("Protect"),d:PR.kindFr(A[a].k),c:_NXpal.danger});}catch(_){}
 try{var B=(G&&G.stats&&G.stats.recent)||[];
-for(var b=0;b<B.length&&b<6;b++)L.push({t:B[b].t,k:_T("Gardes"),d:B[b].d,c:_NXpal.warn});}catch(_){}
+for(var b=0;b<B.length&&b<6;b++)L.push({t:B[b].t,k:_T("Gardes"),d:B[b].d,c:BLEU});}catch(_){}
 try{var C=(PV&&Array.isArray(PV.blocked))?PV.blocked:[];
 for(var c=0;c<C.length&&c<6;c++)L.push({t:C[c].t,k:_T("Privacy"),d:PV.kindFr(C[c].k),c:_NXpal.ok});}catch(_){}
 L.sort(function(x,y){return (y.t||0)-(x.t||0);});
 return L.slice(0,8);}
 var ACT=activite();
-return i(Kr,null,i("div",{style:{maxWidth:"680px",margin:"0 auto"}},
+function horodate(t){try{
+var d=new Date(t||Date.now()),au=new Date();
+var hh=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+if(d.getFullYear()===au.getFullYear()&&d.getMonth()===au.getMonth()&&d.getDate()===au.getDate())return hh;
+return ("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+" "+hh;}catch(_){return "";}}
+
+return i(Kr,null,i("div",{style:{maxWidth:"760px",margin:"0 auto"}},
 i("div",{"data-nx-panel":"1"},
 i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
 borderRadius:"24px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",
 padding:"28px 26px",marginBottom:"14px"}},
 i("div",{"data-nx-breathe":"1","aria-hidden":"true",style:{position:"absolute",right:"-90px",top:"-110px",
 width:"300px",height:"300px",borderRadius:"50%",
-background:"radial-gradient(circle,"+etat.c+"1c,transparent 70%)",pointerEvents:"none"}}),
-i("div",{style:{position:"relative"}},
+background:"radial-gradient(circle,"+_NXteinte(etat.c,11)+",transparent 70%)",pointerEvents:"none"}}),
+i("div",{style:{position:"relative",display:"flex",gap:"26px",alignItems:"center",flexWrap:"wrap"}},
+i("div",{style:{flex:1,minWidth:"260px"}},
 i("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap",marginBottom:"12px"}},
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".2em",textTransform:"uppercase",color:P.faint}},"Nexium Client"),
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".2em",
+textTransform:"uppercase",color:P.faint}},"Nexium Client"),
 i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.dim,padding:"2px 8px",
 borderRadius:"99px",border:"1px solid "+P.line}},"v"+ver),
-i("div",{style:{display:"flex",alignItems:"center",gap:"6px",marginLeft:"auto"}},
-i("span",{"data-nx-dot":"1","aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",
-background:etat.c,flexShrink:0}}),
+i("div",{style:{display:"flex",alignItems:"center",gap:"6px"}},
+i("span",{"data-nx-dot":"1","aria-hidden":"true",style:{width:"6px",height:"6px",
+borderRadius:"50%",background:etat.c,flexShrink:0}}),
 i("span",{style:{fontSize:"11px",fontWeight:"700",color:etat.c}},etat.t))),
 i("div",{style:{fontFamily:_NXf.disp,fontSize:"31px",fontWeight:"800",color:P.txt,
-letterSpacing:"-.045em",lineHeight:1.12,marginBottom:"10px",maxWidth:"430px"}},
+letterSpacing:"-.045em",lineHeight:1.12,marginBottom:"10px"}},
 tout>0?(_NXn(tout)+" "+_T(tout>1?"choses arretees avant toi":"chose arretee avant toi"))
 :_T("Ton client veille, rien a signaler")),
-i("div",{style:{fontSize:"13px",color:P.sub,lineHeight:1.65,maxWidth:"460px"}},
-_T("Discord repris en main : un bouclier en temps reel, un pare-feu sortant, et pas une ligne de tes donnees qui quitte cette machine.")),
-i("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap",marginTop:"22px",paddingTop:"19px",
-borderTop:"1px solid "+P.line}},
+i("div",{style:{fontSize:"13px",color:P.sub,lineHeight:1.65}},
+_T("Discord repris en main : un bouclier en temps reel, un pare-feu sortant, et pas une ligne de tes donnees qui quitte cette machine."))),
+i("div",{style:{flexShrink:0,width:"208px",maxWidth:"100%",margin:"0 auto"}},blason())),
+i("div",{style:{position:"relative",display:"flex",gap:"16px",flexWrap:"wrap",marginTop:"22px",
+paddingTop:"19px",borderTop:"1px solid "+P.line}},
 grand(_NXn(menaces),_T("Menaces bloquees"),menaces?_NXpal.danger:P.txt),
 grand(_NXn(sorties),_T("Sorties arretees"),sorties?_NXpal.ok:P.txt),
 grand(_NXn(interceptees),_T("Requetes vues")),
 grand(_NXn(analyses),_T("Liens analyses")),
-grand(pctSante+"%",_T("Modules actifs"),pctSante===100?_NXpal.ok:_NXpal.warn)))),
+grand(pctSante+"%",_T("Modules actifs"),pctSante===100?_NXpal.ok:_NXpal.warn)),
+courbe())),
 sante.morts.length?_NXcard(i("div",null,
 i("div",{style:{fontSize:"13.5px",fontWeight:"800",color:_NXpal.warn,marginBottom:"6px"}},
 _T("Certains modules n ont pas demarre")),
 i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6,marginBottom:"12px"}},
 sante.morts.join(", ")+". "+_T("Le reste du client fonctionne normalement.")),
 _NXbtn(_T("Voir le detail"),function(){aller("equicord_data");})),{mb:12,glow:"rgba(240,178,108,.12)"}):null,
+actions(),
+GROUPES.map(function(g,k){
+return i("div",{key:k},
 i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",
-color:P.faint,marginBottom:"11px",marginTop:"4px"}},_T("Tout le client, d un coup d oeil")),
-i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(192px,1fr))",gap:"10px",marginBottom:"14px"}},
-TUILES.map(tuile)),
+color:P.faint,marginBottom:"11px",marginTop:k?"18px":"4px"}},g.n),
+i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(206px,1fr))",gap:"10px"}},
+g.l.map(tuile)));}),
+i("div",{style:{height:"14px"}}),
 ACT.length?_NXcard(i("div",null,
 _NXch(_T("Dernieres interventions"),_T("Ce que le client a fait sans rien te demander."),
 _NXbtn(_T("Tout voir"),function(){aller("equicord_protect");})),
 ACT.map(function(o,k,arr){
-var d=new Date(o.t||Date.now());
 return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"11px",padding:"10px 0",
 borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
-i("span",{style:{width:"6px",height:"6px",borderRadius:"50%",background:o.c,flexShrink:0}}),
-i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0}},
-("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)),
+i("span",{"aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",
+background:o.c,flexShrink:0}}),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0,
+minWidth:"38px"}},horodate(o.t)),
 i("span",{style:{fontSize:"10.5px",fontWeight:"700",color:P.dim,flexShrink:0,
 textTransform:"uppercase",letterSpacing:".06em",width:"52px"}},o.k),
 i("span",{style:{flex:1,minWidth:0,fontSize:"12px",color:P.sub,
@@ -16620,7 +16766,7 @@ reglages?i("div",{"data-nx-fade":"1",style:{marginTop:"6px",paddingTop:"14px",bo
 i(zT,null)):
 i("div",{style:{fontSize:"12px",color:P.dim,lineHeight:1.6}},
 _T("Tous les reglages d origine restent disponibles ici."))),{mb:0}),
-_NXfoot("Nexium Client v"+ver+" · tout est calcule et garde sur cette machine"))));
+_NXfoot("Nexium Client v"+ver+" \u00b7 tout est calcule et garde sur cette machine")));
 }
 var NexiumSponsorIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M5 16 3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 3h14v2H5v-2z"}));};
 function fmtN(n){if(n==null)return "—";if(n>=1000)return (n/1000).toFixed(n>=10000?0:1).replace(".0","")+"k";return ""+n;}

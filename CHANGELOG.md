@@ -1,5 +1,47 @@
 # Nexium Client — Notes de version
 
+## v184 - La page d accueil, illustree
+
+### Une vraie illustration, et qui dit quelque chose
+
+L accueil n avait pour image qu un halo rond derriere le titre. Il porte
+maintenant un blason dessine : les memes anneaux concentriques que Privacy et
+Protect, un bouclier au centre, et une orbite ou chaque point est un module du
+client. Les points s allument selon l etat reel, et l arc mesure la part des
+modules qui tournent. Ce n est pas un decor : c est une lecture de plus.
+
+### Les tuiles, groupees et colorees
+
+Dix tuiles identiques, la meme icone grise dans la meme boite grise, ne se
+distinguaient que par leur texte.
+
+- Trois groupes selon l intention : te proteger, comprendre ton client,
+  t aider au quotidien
+- Chaque module porte sa couleur, sur son icone comme sur son chiffre
+- Un chiffre a zero reste discret, un chiffre qui compte ressort
+- Nexium Comptes et Mise a jour rejoignent la grille : ils en etaient absents
+
+### Ce qui manquait
+
+- La courbe des vingt-quatre dernieres heures. Les donnees existaient dans
+  Privacy sans etre montrees ici
+- Trois actions rapides : demander a l assistant, verifier un lien, chercher
+  une mise a jour
+- Le journal des interventions porte une date quand l evenement n est pas du
+  jour, comme sur la page des mises a jour
+
+### Sur l optimisation
+
+Mesure faite avant d y toucher, et elle ne dit pas ce qu on esperait : les
+trente-sept minuteries permanentes du client coutent 0,0 ms de processeur sur
+trois secondes, et la boucle d observation du DOM traite quatre cent mille
+noeuds en 1,6 ms. Les ecritures disque sont deja groupees toutes les trois
+secondes et differees au repos. Les vingt-quatre abonnements aux modules se
+desabonnent tous, et les dix-huit pages ont toutes leur garde-fou de rendu.
+
+Aucun changement d optimisation n a donc ete fait : il n y avait pas de gras a
+retirer, et en ajouter un qui ne gagne rien aurait ete du decor.
+
 ## v183 - Nexium Comptes, largement etendu
 
 ### Les profils de reglages
