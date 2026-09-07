@@ -1,5 +1,75 @@
 # Nexium Client — Notes de version
 
+## v183 - Nexium Comptes, largement etendu
+
+### Les profils de reglages
+
+Un compte de travail et un compte perso n ont pas les memes reglages. Un
+profil est une photographie complete du client -- protections, apparence,
+automatisations, confidentialite -- que l on capture sous un nom et que l on
+retrouve d un clic.
+
+- Capturer, appliquer, mettre a jour, renommer, supprimer
+- Exporter un profil en texte, et en importer un : de quoi retrouver sa
+  configuration sur une autre machine
+- Lier un profil a un compte : il s applique tout seul apres la bascule
+- Aucun secret n y entre. Ni jeton, ni coffre, ni phrase. C est pour cela
+  qu un profil vit en clair et reste lisible coffre ferme
+- A l import, toute cle qui ne commence pas par nexium_ est ecartee, ainsi
+  que le coffre et le coffre-fort : un profil recu ne peut rien glisser
+  d autre que des reglages
+
+### Le coffre, enfin administrable
+
+- Changer la phrase. C etait impossible : il fallait tout effacer et
+  recommencer. Le coffre est rechiffre sur place, sans rien perdre, et
+  l ancienne phrase est verifiee avant
+- Verrouillage automatique apres un delai sans activite -- cinq minutes a une
+  heure, ou jamais. Un coffre ouvert toute la soiree annule l interet de la
+  phrase
+- Copie de secours : le coffre s exporte, chiffre, et se remet en place. Un
+  vidage du stockage de Discord effacait tout sans aucun recours
+- Douze comptes au lieu de huit
+
+### Les comptes, vraiment
+
+- Une note et une couleur par compte, pour les distinguer d un coup d oeil
+- Epingler, monter, descendre : l ordre est le tien
+- L age du jeton enregistre, affiche a cote de chaque compte. Nexium ne
+  verifie pas si un jeton est encore valide : le faire supposerait de s en
+  servir, et s en servir depuis un client modifie est exactement ce qu il ne
+  faut pas faire. On mesure donc, on ne teste pas
+- Relever le jeton du compte en cours sans le retirer puis le rajouter
+- La date de derniere utilisation, et le compte des bascules
+- Une recherche des que le coffre depasse quatre comptes
+- L identifiant se copie d un clic
+
+### La page des mises a jour
+
+Elle disait "client a jour" sans preciser si le renseignement datait de dix
+secondes ou de la veille, et proposait de redemarrer sans dire pourquoi.
+
+- L heure de la derniere verification aboutie est retenue et affichee
+- Ce qui change dans la version proposee est lu sur le depot et presente
+  avant le bouton de redemarrage : redemarrer devient une decision, pas un
+  reflexe. Seules les versions plus recentes que celle installee sont
+  montrees, quatre au maximum
+- Le journal porte enfin une date. Il n affichait que l heure : un evenement
+  d avant-hier se lisait comme un evenement du jour. Trente lignes au lieu de
+  huit, et un point de couleur selon l issue
+- Trois onglets -- Etat, Journal, Reparation -- un en-tete qui annonce le
+  retard en nombre de versions, et un point sur l onglet quand une mise a
+  jour attend
+- La consigne de reparation se repetait : elle finissait par "puis relancer
+  Discord", puis redisait la meme chose autrement, juste apres. Corrige
+
+### La page
+
+Trois onglets -- Comptes, Profils, Securite -- un en-tete qui compte les
+comptes, les profils, les bascules et les jetons a verifier, et des cartes de
+compte a la place des lignes grises. La mise en garde sur ce qu est un jeton
+de session s affiche desormais AVANT la creation du coffre, la ou elle sert.
+
 ## v182 - Le chat, la page IA et Protect, repris
 
 ### Le defaut le plus penible : la page remontait en haut quand on ecrivait
