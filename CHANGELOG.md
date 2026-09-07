@@ -1,5 +1,70 @@
 # Nexium Client — Notes de version
 
+## v182 - Le chat, la page IA et Protect, repris
+
+### Le defaut le plus penible : la page remontait en haut quand on ecrivait
+
+Trois causes cumulees. L effet qui suit le fil n avait aucune liste de
+dependances : il tournait a chaque rendu, donc a chaque touche frappee. Il
+appelait scrollIntoView, qui ne defile pas seulement le conteneur vise mais
+remonte toute la chaine des parents -- d ou le saut en haut de la page des
+reglages, et pas seulement dans le fil. Et il le faisait meme quand tu avais
+remonte pour relire.
+
+Le fil defile desormais son propre conteneur, uniquement quand le fil a
+change, et seulement si tu etais deja en bas. Remonter pour relire coupe le
+suivi ; envoyer le retablit.
+
+### Le chat, refait
+
+- La zone de saisie redescend apres l envoi. Elle grandissait avec le texte
+  et ne revenait jamais : elle restait haute pour le reste de la session
+- Le menu des modeles tient dans le panneau flottant. Il faisait 320 px de
+  large, ancre a gauche, dans un panneau de 420 px : il debordait des qu il
+  passait en fin de ligne. Il s adapte a la place disponible et se ferme avec
+  Echap
+- Les coupes de texte se declenchent enfin. Sans minWidth a zero dans une
+  boite flexible, les points de suspension ne s affichent jamais et le texte
+  deborde
+- Le champ, les reglages et le bouton d envoi vivent dans une seule dalle. Ils
+  etaient sur trois rangees qui passaient a la ligne des que le panneau
+  retrecissait
+- Les propositions envoyables gardent l en-tete du modele et les actions :
+  c est la meme reponse, avec des boutons en plus
+- Les suggestions de depart regardent ton etat reel au lieu d etre figees
+- L intitule d une erreur suit sa vraie cause : un compteur a zero ne voulait
+  pas dire que c etait lui qui avait bloque
+- L estimation de cout tient compte de la conversation deja engagee. Elle
+  annoncait le prix d un premier message meme au vingtieme
+
+### La page Nexium IA, refaite
+
+Deux cartes empilees et une liste grise ne disaient rien de ce qui fait
+l assistant.
+
+- Une jauge de credits en tete, en vingt segments, avec l heure de recharge
+- Trois onglets : Assistant, Acces, Service
+- Les acces deviennent des tuiles, et chacune dit combien d outils elle ouvre
+- Ils restent visibles au-dessus du chat tant que rien n est accorde : une
+  page dont le sujet est le consentement ne doit pas le cacher
+- Un onglet Service qui dit enfin ce qui tourne : les paliers et leur
+  disponibilite reelle, le nombre de voies du relais, et ce qui ne quitte
+  jamais la machine
+- Le plafond de lecture des conversations est enfin reglable. La fonction
+  existait depuis la 1.2, sans aucune interface
+- Ce que l assistant a retenu de toi s affiche, et s oublie ligne par ligne
+
+### Nexium Protect parle la langue de Nexium Privacy
+
+Un seul anneau et un pourcentage global : on savait qu il manquait des
+protections, jamais lesquelles.
+
+- Cinq anneaux concentriques, un par famille -- liens, contenus, sortie,
+  pieges, analyse avancee -- avec la legende chiffree a cote
+- Une barre de flux : ce qui a ete inspecte, et ce qui a ete arrete
+- Les boucliers passent de lignes grises a des tuiles, avec l interrupteur
+  anime de Privacy, et chaque groupe porte son compte
+
 ## v181 - Nexium IA 1.3
 
 ### Il ne repete plus un chiffre qu il vient de rendre faux

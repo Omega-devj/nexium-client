@@ -3593,12 +3593,16 @@ _NXIA.PALIERS=[
 // Disponibilite reelle, apprise du relais. Tant qu on ne l a pas, on ne
 // prejuge de rien : un palier inconnu est propose, pas grise a tort.
 _NXIA.dispo={};
+_NXIA.voies=0;
 _NXIA.chargeDispo=function(){try{
 if(_NXIA._dispoAt&&(Date.now()-_NXIA._dispoAt)<300000)return;
 _NXIA._dispoAt=Date.now();
 fetch(_NXIA.URL+"?moi="+encodeURIComponent(_NXIA.moi()||""),{method:"GET"})
 .then(function(r){return r.json();}).then(function(j){
 if(j&&typeof j.admin==="boolean")_NXIA.admin=j.admin;
+// Le nombre de voies de service : la page Service le montre, et c est ce qui
+// dit si le relais tiendra la charge.
+if(j&&typeof j.voies==="number")_NXIA.voies=j.voies;
 if(!j||!j.paliers)return;
 var d={};
 for(var a=0;a<j.paliers.length;a++)d[j.paliers[a].cle]={
@@ -3634,6 +3638,15 @@ _NXIA.NIVEAUX=[
 {k:"rapide", n:"Rapide", x:"/2", d:"Repond tout de suite, sans reflechir. Moitie prix."},
 {k:"normal", n:"Normal", x:"",   d:"Le bon compromis. C est le reglage par defaut."},
 {k:"profond",n:"Profond",x:"x3", d:"Raisonne longuement avant de repondre. Trois fois le prix."}];
+// Le poids du contexte deja engage. Sans lui, l estimation annoncait le prix
+// d un premier message meme au vingtieme echange.
+_NXIA.poids=function(){try{
+var n=0;
+for(var a=0;a<_NXIA.msgs.length;a++){
+var m=_NXIA.msgs[a];
+if(!_NXIA.ROLES||!_NXIA.ROLES[m.role])continue;
+n+=String(m.content||"").length;}
+return n;}catch(_){return 0;}};
 _NXIA.reflexion=function(){try{
 var k=_NXIA.cfg.reflexion;
 if(k===true)return "profond";
@@ -3641,6 +3654,10 @@ if(k===false||k===undefined||k===null)return "normal";
 for(var a=0;a<_NXIA.NIVEAUX.length;a++)if(_NXIA.NIVEAUX[a].k===k)return k;
 return "normal";}catch(_){return "normal";}};
 _NXIA.multiplieur=function(k){return k==="profond"?3:(k==="rapide"?0.5:1);};
+_NXIA.nomNiveau=function(){try{
+var k=_NXIA.reflexion();
+for(var a=0;a<_NXIA.NIVEAUX.length;a++)if(_NXIA.NIVEAUX[a].k===k)return _NXIA.NIVEAUX[a].n;
+return "Normal";}catch(_){return "Normal";}};
 _NXIA.setReflexion=function(v){try{
 _NXIA.cfg.reflexion=(v===true)?"profond":(v===false?"normal":String(v||"normal"));
 _NXIA.save();_NXIA.notify();}catch(_){}};
@@ -7173,7 +7190,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="181";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="182";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -7734,170 +7751,208 @@ var _s0=F.useState("");var saisie=_s0[0];var setSaisie=_s0[1];
 var _s1=F.useState(false);var choix=_s1[0];var setChoix=_s1[1];
 var _s2=F.useState(false);var mp=_s2[0];var setMp=_s2[1];
 var bas=F.useRef?F.useRef(null):{current:null};
+var zone=F.useRef?F.useRef(null):{current:null};
+var fil=F.useRef?F.useRef(null):{current:null};
+var colle=F.useRef?F.useRef(true):{current:true};
 F.useEffect(function(){
 _NXIA.listeners.push(force);
 return function(){try{_NXIA.listeners=_NXIA.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
+
+// Une empreinte de ce qui est affiche : elle ne bouge que si le fil bouge, et
+// surtout pas quand on tape dans la zone de saisie.
+// On lit _NXIA.msgs et non M : la variable locale n est affectee que plus
+// bas, et `var` la laisse indefinie ici.
+var _fl=_NXIA.msgs||[];
+var _dr=_fl.length?_fl[_fl.length-1]:null;
+var etat=_fl.length+"|"+_NXIA.busy+"|"+_NXIA.taches.length+"|"+
+((_dr&&_dr.content)?_dr.content.length:0);
 F.useEffect(function(){try{
-if(bas&&bas.current&&bas.current.scrollIntoView)bas.current.scrollIntoView({block:"end",behavior:"smooth"});}catch(_){}});
+var el=fil&&fil.current;
+if(!el||!colle.current)return;
+// On defile le conteneur du fil, jamais par scrollIntoView : celui-ci remonte
+// aussi tous les parents defilables, ce qui ramenait la page des reglages en
+// haut a chaque caractere tape.
+el.scrollTop=el.scrollHeight;}catch(_){}},[etat]);
+
+// Si l utilisateur remonte pour relire, on cesse de le ramener en bas.
+var suitFil=function(e){try{
+var el=e.target;
+colle.current=(el.scrollHeight-el.scrollTop-el.clientHeight)<48;}catch(_){}};
 var P=_NXpal;
 var M=_NXIA.msgs;
 var reste=_NXIA.restant;
 var illimite=_NXIA.admin||reste===-2;
 
+// La hauteur de la zone de saisie suit son contenu. Sans remise a zero apres
+// l envoi, elle restait haute pour toute la session : le defaut le plus
+// visible de l ancien chat.
+var ajuste=function(el){try{
+if(!el)return;
+el.style.height="auto";
+el.style.height=Math.min(148,Math.max(42,el.scrollHeight))+"px";}catch(_){}};
 var envoyer=function(){
 var t=saisie.trim();
 if(!t||_NXIA.busy)return;
-setSaisie("");
+setSaisie("");setMp(false);
+colle.current=true;
+try{if(zone.current){zone.current.style.height="auto";zone.current.style.height="42px";}}catch(_){}
 _NXIA.envoyer(t);};
 // Discord ecoute le clavier sur le document : sans cela, taper dans le chat
 // pilote l application derriere.
 var arrete=function(e){try{e.stopPropagation();}catch(_){}};
 var touche=function(e){
 arrete(e);
+if(e.key==="Escape"&&choix){e.preventDefault();setChoix(false);return;}
 if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();envoyer();}};
 
+// --- petites pieces communes ----------------------------------------------
+var etiquette=function(t,c){
+return i("span",{style:{fontSize:"9px",fontWeight:"800",letterSpacing:".15em",
+textTransform:"uppercase",color:c||P.faint,whiteSpace:"nowrap"}},t);};
+var puce=function(t,c,b){
+return i("span",{style:{padding:"2px 8px",borderRadius:"999px",fontFamily:_NXf.mono,
+fontSize:"9.5px",whiteSpace:"nowrap",color:c||P.faint,
+background:b||"transparent",border:"1px solid "+(b?"transparent":P.line)}},t);};
+
 // Le premier temps du mode profond arrive en lignes courtes, souvent
-// prefixees. Les empiler dans un pave gaspille le seul interet de la chose :
-// voir la demarche.
+// prefixees d un intitule. Les empiler dans un pave gaspille le seul interet
+// de la chose : voir la demarche.
 var etapes=function(t){
 var L=String(t||"").split(/\n+/),out=[];
 for(var a=0;a<L.length;a++){
-var x=L[a].replace(/^\s*[-*\u2022]\s*/,"").trim();
+var x=L[a].replace(/^\s*[-*\u2022\d.)]+\s*/,"").trim();
 if(!x)continue;
-var titre=x.match(/^([A-Za-z\u00c0-\u00ff' ]{3,28})\s*:\s*(.+)$/);
-out.push(i("div",{key:a,style:{display:"flex",gap:"9px",alignItems:"flex-start",padding:"3px 0"}},
-i("span",{style:{flexShrink:0,width:"5px",height:"5px",borderRadius:"50%",
-marginTop:"7px",background:P.mute}}),
-titre?i("span",{},
-i("span",{style:{color:P.sub,fontWeight:"700"}},titre[1].trim()+" "),
-i("span",{},titre[2])):i("span",{},x)));}
+var m2=x.match(/^([A-Za-z\u00c0-\u00ff' ]{3,28})\s*:\s*(.+)$/);
+out.push(i("div",{key:a,style:{display:"flex",gap:"10px",alignItems:"flex-start",padding:"4px 0"}},
+i("span",{"aria-hidden":"true",style:{flexShrink:0,width:"5px",height:"5px",borderRadius:"50%",
+marginTop:"8px",background:P.mute}}),
+i("span",{style:{flex:1,minWidth:0}},
+m2?i("span",{},i("span",{style:{color:P.sub,fontWeight:"700"}},m2[1].trim()+" \u00b7 "),
+i("span",{},m2[2])):x)));}
 return i("div",{},out);};
 
 // D ou vient la reponse. Un chiffre sans outil derriere est un chiffre
 // invente : le montrer rend l invention visible sans avoir a la chercher.
 var appuis=function(m,k){
-var libre=m.source==="local"?_T("repondu par le client, sans modele")
+var libre=m.source==="local"?_T("repondu par le client")
 :m.source==="rappel"?_T("deja repondu, rejoue"):"";
 if(!libre&&(!m.outils||!m.outils.length))return null;
 return i("div",{key:"ap"+k,style:{display:"flex",gap:"6px",flexWrap:"wrap",
-alignItems:"center",marginTop:"9px",fontFamily:_NXf.mono,fontSize:"9.5px"}},
-libre?i("span",{style:{padding:"2px 8px",borderRadius:"999px",
-background:"rgba(143,209,158,.10)",border:"1px solid rgba(143,209,158,.28)",
-color:_NXpal.ok}},libre+" \u00b7 0 "+_T("credit")):null,
-(m.outils||[]).length?i("span",{style:{color:P.faint}},_T("d apres")):null,
-(m.outils||[]).map(function(o,z){
-return i("span",{key:z,style:{padding:"2px 8px",borderRadius:"999px",
-border:"1px solid "+P.line,color:P.faint}},o);}));};
+alignItems:"center",marginTop:"10px"}},
+libre?puce(libre+" \u00b7 0 cr",_NXpal.ok,"rgba(143,209,158,.10)"):null,
+(m.outils||[]).length?etiquette(_T("d apres")):null,
+(m.outils||[]).map(function(o,z){return i("span",{key:z},puce(o));}));};
 
 // Le raisonnement n est pas la reponse : il se consulte, il ne s impose pas.
 var pensees=function(m,k){
 if(!m.prepare&&!m.pensee)return null;
 var ouvert=!!m.__pv;
-var lg=(m.prepare||m.pensee||"").length;
-return i("div",{key:"pv"+k,style:{marginTop:"9px"}},
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+var lg=(m.prepare||"").length+(m.pensee||"").length;
+return i("div",{key:"pv"+k,style:{marginTop:"10px"}},
+i("div",{className:"nx-fx",role:"button","aria-expanded":ouvert?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,
 onClick:function(){m.__pv=!ouvert;_NXIA.notify();},
-style:{display:"inline-flex",alignItems:"center",gap:"6px",padding:"5px 10px",
-borderRadius:"8px",cursor:"pointer",background:"transparent",
-border:"1px solid "+P.line,color:P.faint,fontSize:"10.5px",fontWeight:"700"}},
+style:{display:"inline-flex",alignItems:"center",gap:"7px",padding:"5px 11px",
+borderRadius:"999px",cursor:"pointer",background:"transparent",
+border:"1px solid "+P.line,color:P.faint,fontSize:"10.5px",fontWeight:"600"}},
 i("svg",{viewBox:"0 0 24 24",width:10,height:10,fill:"currentColor","aria-hidden":"true",
-style:{transform:ouvert?"rotate(180deg)":"none",transition:"transform .18s ease"}},
+style:{transform:ouvert?"rotate(180deg)":"none",transition:"transform .2s ease"}},
 i("path",{d:"M7 10l5 5 5-5z"})),
 ouvert?_T("Masquer la reflexion"):_T("Voir la reflexion"),
-i("span",{style:{fontFamily:_NXf.mono,fontSize:"9.5px",opacity:.7}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"9.5px",opacity:.65}},
 Math.round(lg/5)+" "+_T("mots"))),
-ouvert?i("div",{style:{marginTop:"8px",padding:"11px 13px",borderRadius:"11px",
+ouvert?i("div",{style:{marginTop:"9px",padding:"13px 15px",borderRadius:"12px",
 background:P.inset,border:"1px solid "+P.line,fontSize:"11.5px",color:P.dim,
-lineHeight:1.65,maxHeight:"340px",overflowY:"auto"}},
+lineHeight:1.7,maxHeight:"340px",overflowY:"auto",overflowX:"hidden",
+userSelect:"text",WebkitUserSelect:"text"}},
 m.prepare?etapes(m.prepare):null,
-(m.prepare&&m.pensee)?i("div",{style:{height:"1px",background:P.line,margin:"10px 0"}}):null,
-m.pensee?i("div",{style:{whiteSpace:"pre-wrap"}},m.pensee):null):null);};
+(m.prepare&&m.pensee)?i("div",{"aria-hidden":"true",style:{height:"1px",background:P.line,margin:"11px 0"}}):null,
+m.pensee?i("div",{style:{whiteSpace:"pre-wrap",wordBreak:"break-word"}},m.pensee):null):null);};
+
+// Les actions sous une reponse : copier, relancer, et rien de plus.
+var actions=function(m,k){
+if(m.flux||!m.content)return null;
+var b=function(lab,d,fn){
+return i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+"aria-label":lab,onClick:fn,
+style:{display:"flex",alignItems:"center",gap:"6px",padding:"5px 11px",borderRadius:"999px",
+cursor:"pointer",background:"transparent",border:"1px solid "+P.line,
+color:P.faint,fontSize:"10.5px",fontWeight:"600",userSelect:"none"}},
+i("svg",{viewBox:"0 0 24 24",width:11,height:11,fill:"currentColor","aria-hidden":"true"},
+i("path",{d:d})),lab);};
+return i("div",{style:{display:"flex",gap:"6px",marginTop:"11px",flexWrap:"wrap"}},
+b(_T("Copier"),"M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z",
+function(){_NXIA.copie(m.content);}),
+(k===M.length-1&&!_NXIA.busy)
+?b(_T("Relancer"),"M17.65 6.35A8 8 0 1 0 19.73 14h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z",
+function(){_NXIA.relancer();}):null);};
+
+// L en-tete d une reponse : qui parle, et a quel prix.
+var enTete=function(m){
+return i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"9px"}},
+i("span",{style:{color:P.mute,display:"flex",flexShrink:0}},i(NexiumIAIcon,{width:12,height:12})),
+etiquette(m.source?_T("Nexium IA"):(_NXIA.nomModele||"Nexium IA")));};
+
+// --- les bulles ------------------------------------------------------------
+var cadre=function(k,fond,bord,contenu){
+return i("div",{key:k,style:{marginBottom:"16px",padding:"12px 14px",borderRadius:"14px",
+background:fond,border:"1px solid "+bord}},contenu);};
 
 var bulle=function(m,k){
 if(m.role==="user")
-return i("div",{key:k,style:{display:"flex",justifyContent:"flex-end",marginBottom:"16px"}},
-i("div",{style:{maxWidth:"82%",padding:"10px 15px",borderRadius:"16px 16px 5px 16px",
-background:"linear-gradient(158deg,#17171b,#101013)",border:"1px solid "+P.hair,
+return i("div",{key:k,style:{display:"flex",justifyContent:"flex-end",marginBottom:"18px"}},
+i("div",{style:{maxWidth:"84%",padding:"11px 15px",borderRadius:"16px 16px 4px 16px",
+background:P.raise,border:"1px solid "+P.hair,
 color:P.txt,fontSize:"13px",lineHeight:1.7,whiteSpace:"pre-wrap",
-wordBreak:"normal",overflowWrap:"break-word",
-userSelect:"text",WebkitUserSelect:"text",cursor:"text",
-boxShadow:"0 2px 10px rgba(0,0,0,.28)"}},m.content));
-if(m.role==="envoye"){
-return i("div",{key:k,style:{marginBottom:"16px",padding:"11px 13px",borderRadius:"12px",
-background:"rgba(143,209,158,.07)",border:"1px solid rgba(143,209,158,.26)"}},
+overflowWrap:"anywhere",userSelect:"text",WebkitUserSelect:"text",cursor:"text"}},m.content));
+
+if(m.role==="envoye")
+return cadre(k,"rgba(143,209,158,.06)","rgba(143,209,158,.24)",
+i("div",null,
 i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"7px"}},
 i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor","aria-hidden":"true",
-style:{color:_NXpal.ok}},i("path",{d:"M2 21l21-9L2 3v7l15 2-15 2v7z"})),
-i("span",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".14em",
-textTransform:"uppercase",color:_NXpal.ok}},
-_T("Message envoye")+(m.ou?(" \u00b7 "+m.ou):"")) ),
-i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6}},m.texte));}
+style:{color:_NXpal.ok,flexShrink:0}},i("path",{d:"M2 21l21-9L2 3v7l15 2-15 2v7z"})),
+etiquette(_T("Message envoye")+(m.ou?(" \u00b7 "+m.ou):""),_NXpal.ok)),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6,overflowWrap:"anywhere"}},m.texte)));
+
 if(m.role==="confirm"){
 var rep=m.repondu;
-return i("div",{key:k,style:{marginBottom:"16px",padding:"12px 14px",borderRadius:"12px",
-background:rep?P.inset:"linear-gradient(158deg,#1a1710,#121011)",
-border:"1px solid "+(rep?P.line:"rgba(232,196,138,.30)")}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px"}},
+return cadre(k,rep?P.inset:"linear-gradient(158deg,#1a1710,#121011)",
+rep?P.line:"rgba(232,196,138,.30)",
+i("div",null,
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"9px"}},
 i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor","aria-hidden":"true",
-style:{color:rep?P.faint:_NXpal.warn}},
+style:{color:rep?P.faint:_NXpal.warn,flexShrink:0}},
 i("path",{d:"M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"})),
-i("span",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".14em",
-textTransform:"uppercase",color:rep?P.faint:_NXpal.warn}},
-rep==="accepte"?_T("Action autorisee"):rep==="refuse"?_T("Action refusee"):_T("Autoriser cette action ?"))),
-i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.6,marginBottom:rep?0:"12px"}},
+etiquette(rep==="accepte"?_T("Action autorisee"):rep==="refuse"?_T("Action refusee")
+:_T("Autoriser cette action ?"),rep?P.faint:_NXpal.warn)),
+i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.6,marginBottom:rep?0:"13px",
+overflowWrap:"anywhere"}},
 i("span",{style:{fontFamily:_NXf.mono,color:P.pale}},m.outil),
 (m.args&&Object.keys(m.args).length)
-?i("span",{style:{color:P.dim}}," "+JSON.stringify(m.args).slice(0,140)):null),
+?i("span",{style:{color:P.dim}}," "+JSON.stringify(m.args).slice(0,160)):null),
 rep?null:i("div",{style:{display:"flex",gap:"8px"}},
 i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
 onClick:function(){_NXIA.repondre(m.id,true);},
-style:{flex:1,textAlign:"center",padding:"9px",borderRadius:"9px",cursor:"pointer",
+style:{flex:1,textAlign:"center",padding:"10px",borderRadius:"10px",cursor:"pointer",
 background:P.acc,color:P.ink,fontSize:"11.5px",fontWeight:"800"}},_T("Autoriser")),
 i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
 onClick:function(){_NXIA.repondre(m.id,false);},
-style:{flex:1,textAlign:"center",padding:"9px",borderRadius:"9px",cursor:"pointer",
+style:{flex:1,textAlign:"center",padding:"10px",borderRadius:"10px",cursor:"pointer",
 background:"transparent",border:"1px solid "+P.line,color:P.sub,
-fontSize:"11.5px",fontWeight:"700"}},_T("Refuser"))));}
-if(m.role==="assistant"&&m.props&&m.props.length&&!m.flux){
-var envoyable=_NXIA.accorde("envoi");
-return i("div",{key:k,style:{marginBottom:"18px"}},
-i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.7,marginBottom:"10px"}},
-_NXIA.riche?_NXIA.riche(m.content):m.content),
-i("div",{style:{display:"flex",flexDirection:"column",gap:"8px"}},
-m.props.map(function(pr){
-var partie=m.envoyee===pr.rang;
-return i("div",{key:pr.rang,style:{padding:"11px 12px",borderRadius:"11px",
-background:partie?"rgba(143,209,158,.07)":P.inset,
-border:"1px solid "+(partie?"rgba(143,209,158,.26)":P.line)}},
-i("div",{style:{fontSize:"12.5px",color:P.txt,lineHeight:1.6}},pr.texte),
-pr.pourquoi?i("div",{style:{fontSize:"10.5px",color:P.faint,marginTop:"4px",fontStyle:"italic"}},pr.pourquoi):null,
-i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"9px"}},
-partie?i("span",{style:{fontSize:"10.5px",fontWeight:"700",color:_NXpal.ok}},_T("Envoye")):
-i("div",{className:envoyable?"nx-fx":"",role:"button",tabIndex:envoyable?0:-1,
-onKeyDown:envoyable?_NXkey:null,"aria-disabled":envoyable?"false":"true",
-title:envoyable?"":_T("Accorde l acces d envoi pour utiliser ce bouton"),
-onClick:envoyable?function(){
-_NXIA.envoyerProp(m.salon,pr.texte).then(function(r){
-if(r&&r.erreur)return;
-m.envoyee=pr.rang;_NXIA.notify();});}:null,
-style:{padding:"6px 12px",borderRadius:"8px",cursor:envoyable?"pointer":"not-allowed",
-opacity:envoyable?1:.45,background:P.acc,color:P.ink,fontSize:"11px",fontWeight:"800"}},
-_T("Envoyer")),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
-onClick:function(){_NXIA.copie(pr.texte);},
-style:{padding:"6px 12px",borderRadius:"8px",cursor:"pointer",background:"transparent",
-border:"1px solid "+P.line,color:P.sub,fontSize:"11px",fontWeight:"700"}},_T("Copier"))));})));}
+fontSize:"11.5px",fontWeight:"700"}},_T("Refuser")))));}
+
 if(m.role==="etape")
-return i("div",{key:k,style:{marginBottom:"16px",padding:"12px 14px",borderRadius:"12px",
-background:P.inset,border:"1px solid "+P.line}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginBottom:"8px"}},
+return cadre(k,P.inset,P.line,
+i("div",null,
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"9px"}},
 i("svg",{viewBox:"0 0 24 24",width:11,height:11,fill:"currentColor","aria-hidden":"true",
-style:{color:P.mute}},
+style:{color:P.mute,flexShrink:0}},
 i("path",{d:"M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"})),
-i("span",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".14em",
-textTransform:"uppercase",color:P.faint}},m.titre||_T("Etape"))),
-i("div",{style:{fontSize:"12px",lineHeight:1.7,color:P.sub,
-userSelect:"text",WebkitUserSelect:"text"}},_NXIA.riche(m.content)));
+etiquette(m.titre||_T("Etape"))),
+i("div",{style:{fontSize:"12px",lineHeight:1.7,color:P.sub,overflowWrap:"anywhere",
+userSelect:"text",WebkitUserSelect:"text"}},_NXIA.riche(m.content))));
+
 if(m.role==="outil"){
 var res=m.res||{};
 var souci=res.erreur||res.refuse;
@@ -7908,119 +7963,137 @@ var dit=souci?(res.erreur||res.refuse)
 :(m.outil==="musique"&&typeof res.en_lecture==="boolean")?(res.en_lecture?_T("lecture"):_T("pause"))
 :_T("consulte");
 return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"9px",
-margin:"0 0 14px 14px",padding:"7px 12px",borderRadius:"99px",
-background:P.inset,border:"1px solid "+P.line,width:"fit-content",maxWidth:"100%",
+margin:"0 0 14px 2px",padding:"6px 13px",borderRadius:"999px",
+background:P.inset,border:"1px solid "+P.line,maxWidth:"100%",
 fontSize:"10.5px",fontFamily:_NXf.mono}},
 i("div",{"aria-hidden":"true",style:{width:"5px",height:"5px",borderRadius:"50%",flexShrink:0,
 background:souci?_NXpal.warn:_NXpal.ok}}),
-i("span",{style:{color:souci?_NXpal.warnSoft:P.sub,whiteSpace:"nowrap"}},m.outil),
-i("span",{style:{color:P.faint}},"\u00b7"),
-i("span",{style:{color:souci?_NXpal.warnSoft:P.dim,overflow:"hidden",
-textOverflow:"ellipsis",whiteSpace:"nowrap"}},dit));}
-return i("div",{key:k,style:{display:"flex",gap:"12px",marginBottom:"20px"}},
+i("span",{style:{flexShrink:0,color:souci?_NXpal.warnSoft:P.sub}},m.outil),
+i("span",{style:{flexShrink:0,color:P.faint}},"\u00b7"),
+// minWidth a zero, sans quoi la coupe par points de suspension ne se
+// declenche jamais dans une boite flexible.
+i("span",{style:{flex:1,minWidth:0,color:souci?_NXpal.warnSoft:P.dim,
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},dit));}
+
+// Une reponse. Les propositions envoyables en font partie : meme en-tete,
+// memes actions -- c est la meme reponse, avec des boutons en plus.
+var propositions=null;
+if(m.props&&m.props.length&&!m.flux){
+var envoyable=_NXIA.accorde("envoi");
+propositions=i("div",{style:{display:"flex",flexDirection:"column",gap:"9px",marginTop:"12px"}},
+m.props.map(function(pr){
+var partie=m.envoyee===pr.rang;
+return i("div",{key:pr.rang,style:{padding:"12px 13px",borderRadius:"12px",
+background:partie?"rgba(143,209,158,.06)":P.inset,
+border:"1px solid "+(partie?"rgba(143,209,158,.24)":P.line)}},
+i("div",{style:{fontSize:"12.5px",color:P.txt,lineHeight:1.65,overflowWrap:"anywhere"}},pr.texte),
+pr.pourquoi?i("div",{style:{fontSize:"10.5px",color:P.faint,marginTop:"5px",fontStyle:"italic"}},pr.pourquoi):null,
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"10px",flexWrap:"wrap"}},
+partie?i("span",{style:{fontSize:"10.5px",fontWeight:"700",color:_NXpal.ok}},_T("Envoye")):
+i("div",{className:envoyable?"nx-fx":"",role:"button",tabIndex:envoyable?0:-1,
+onKeyDown:envoyable?_NXkey:null,"aria-disabled":envoyable?"false":"true",
+title:envoyable?"":_T("Accorde l acces d envoi pour utiliser ce bouton"),
+onClick:envoyable?function(){
+_NXIA.envoyerProp(m.salon,pr.texte).then(function(r){
+if(r&&r.erreur)return;
+m.envoyee=pr.rang;_NXIA.notify();});}:null,
+style:{padding:"6px 13px",borderRadius:"999px",cursor:envoyable?"pointer":"not-allowed",
+opacity:envoyable?1:.45,background:P.acc,color:P.ink,fontSize:"11px",fontWeight:"800"}},
+_T("Envoyer")),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){_NXIA.copie(pr.texte);},
+style:{padding:"6px 13px",borderRadius:"999px",cursor:"pointer",background:"transparent",
+border:"1px solid "+P.line,color:P.sub,fontSize:"11px",fontWeight:"600"}},_T("Copier"))));}));}
+
+return i("div",{key:k,style:{display:"flex",gap:"13px",marginBottom:"22px"}},
 i("div",{"aria-hidden":"true",style:{flexShrink:0,width:"2px",borderRadius:"2px",
-background:"linear-gradient(180deg,"+P.edge+","+P.line+")"}}),
+background:"linear-gradient(180deg,"+P.edge+","+P.line+" 70%,transparent)"}}),
 i("div",{style:{flex:1,minWidth:0}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginBottom:"8px"}},
-i("span",{style:{color:P.mute,display:"flex"}},i(NexiumIAIcon,{width:12,height:12})),
-i("span",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".14em",
-textTransform:"uppercase",color:P.faint}},_NXIA.nomModele||"Nexium IA")),
-i("div",{style:{fontSize:"13px",lineHeight:1.8,color:P.pale,
-wordBreak:"normal",overflowWrap:"break-word",
+enTete(m),
+i("div",{style:{fontSize:"13px",lineHeight:1.8,color:P.pale,overflowWrap:"anywhere",
 userSelect:"text",WebkitUserSelect:"text",cursor:"text"}},
 _NXIA.riche(m.content),
 m.flux?i("span",{"aria-hidden":"true",style:{display:"inline-block",width:"7px",height:"13px",
 marginLeft:"3px",verticalAlign:"text-bottom",background:P.mute,borderRadius:"1px",
 animation:"nx-ia-curseur 1s steps(2) infinite"}}):null),
-(m.flux||!m.content)?null:i("div",{style:{display:"flex",gap:"6px",marginTop:"10px"}},
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
-"aria-label":_T("Copier la reponse"),onClick:function(){_NXIA.copie(m.content);},
-style:{display:"flex",alignItems:"center",gap:"6px",padding:"5px 10px",borderRadius:"8px",
-cursor:"pointer",background:"transparent",border:"1px solid "+P.line,
-color:P.faint,fontSize:"10.5px",fontWeight:"600",userSelect:"none"}},
-i("svg",{viewBox:"0 0 24 24",width:11,height:11,fill:"currentColor","aria-hidden":"true"},
-i("path",{d:"M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"})),
-_T("Copier")),
-(k===M.length-1&&!_NXIA.busy)?i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
-"aria-label":_T("Relancer"),onClick:function(){_NXIA.relancer();},
-style:{display:"flex",alignItems:"center",gap:"6px",padding:"5px 10px",borderRadius:"8px",
-cursor:"pointer",background:"transparent",border:"1px solid "+P.line,
-color:P.faint,fontSize:"10.5px",fontWeight:"600",userSelect:"none"}},
-i("svg",{viewBox:"0 0 24 24",width:11,height:11,fill:"currentColor","aria-hidden":"true"},
-i("path",{d:"M17.65 6.35A8 8 0 1 0 19.73 14h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"})),
-_T("Relancer")):null),
-appuis(m,k),pensees(m,k)));};
+propositions,
+appuis(m,k),pensees(m,k),actions(m,k)));};
 
-// --- choix du modele -----------------------------------------------------
+// --- choix du modele -------------------------------------------------------
+// Le menu s ouvre vers la droite et se limite a la largeur disponible : ancre
+// a gauche avec 320 px fixes, il debordait du panneau flottant.
 var selecteur=function(){
 var courant=_NXIA.info(_NXIA.palier());
+var rangCol=function(r){
+return r==="S+"?"#8ba3e8":r==="S"?_NXpal.warn:(r==="B"||r==="~")?P.sub:_NXpal.ok;};
+var rangFond=function(r){
+return r==="S+"?"rgba(139,163,232,.15)":r==="S"?"rgba(232,196,138,.15)"
+:(r==="B"||r==="~")?"rgba(255,255,255,.05)":"rgba(143,209,158,.12)";};
 return i("div",{style:{position:"relative"}},
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+i("div",{className:"nx-fx",role:"button","aria-haspopup":"listbox",
+"aria-expanded":choix?"true":"false",tabIndex:0,onKeyDown:_NXkey,
 onClick:function(){setChoix(!choix);},
-style:{display:"flex",alignItems:"center",gap:"7px",padding:"6px 11px",
-borderRadius:"9px",cursor:"pointer",background:P.inset,
+style:{display:"flex",alignItems:"center",gap:"7px",padding:"6px 10px",
+borderRadius:"999px",cursor:"pointer",background:choix?P.raise:"transparent",
 border:"1px solid "+(choix?P.edge:P.line),color:P.sub,fontSize:"11px",fontWeight:"700"}},
-i("span",{style:{fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint}},courant.rang),
-courant.nom,
-i("span",{style:{fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint}},
-courant.k==="auto"?_T("auto"):(courant.base+" cr")),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"9px",fontWeight:"800",
+padding:"1px 5px",borderRadius:"4px",flexShrink:0,
+background:rangFond(courant.rang),color:rangCol(courant.rang)}},courant.rang),
+i("span",{style:{whiteSpace:"nowrap"}},courant.nom),
 i("svg",{viewBox:"0 0 24 24",width:10,height:10,fill:"currentColor","aria-hidden":"true",
-style:{opacity:.6,transform:choix?"rotate(180deg)":"none",transition:"transform .18s ease"}},
-i("path",{d:"M7 10l5 5 5-5z"}))),
-choix?i("div",{style:{position:"absolute",bottom:"calc(100% + 6px)",left:0,zIndex:5,
-minWidth:"320px",maxHeight:"340px",overflowY:"auto",padding:"6px",borderRadius:"12px",
-background:P.panel,border:"1px solid "+P.hair,boxShadow:"0 16px 44px rgba(0,0,0,.55)"}},
+style:{opacity:.55,flexShrink:0,transform:choix?"rotate(180deg)":"none",
+transition:"transform .18s ease"}},i("path",{d:"M7 10l5 5 5-5z"}))),
+choix?i("div",{role:"listbox",style:{position:"absolute",bottom:"calc(100% + 8px)",left:0,
+zIndex:20,width:"min(340px,calc(100vw - 60px))",maxHeight:"320px",overflowY:"auto",
+padding:"6px",borderRadius:"14px",background:P.panel,border:"1px solid "+P.hair,
+boxShadow:"0 18px 50px rgba(0,0,0,.6)"}},
 _NXIA.paliersVisibles().map(function(p){
 var on=_NXIA.palier()===p.k;
 var libre=_NXIA.utilisable(p.k);
-return i("div",{key:p.k,className:libre?"nx-fx":"",role:"button",
-tabIndex:libre?0:-1,onKeyDown:libre?_NXkey:null,
-"aria-disabled":libre?"false":"true",
+return i("div",{key:p.k,role:"option","aria-selected":on?"true":"false",
+className:libre?"nx-fx":"",tabIndex:libre?0:-1,onKeyDown:libre?_NXkey:null,
 title:libre?"":_T("Indisponible sur ce compte"),
 onClick:libre?function(){_NXIA.setPalier(p.k);setChoix(false);}:null,
 style:{display:"flex",alignItems:"flex-start",gap:"10px",padding:"9px 10px",
-borderRadius:"9px",cursor:libre?"pointer":"not-allowed",
-opacity:libre?1:.42,background:on?P.raise:"transparent"}},
-i("span",{style:{flexShrink:0,marginTop:"1px",width:"20px",height:"20px",borderRadius:"6px",
-display:"flex",alignItems:"center",justifyContent:"center",
+borderRadius:"10px",cursor:libre?"pointer":"not-allowed",
+opacity:libre?1:.4,background:on?P.raise:"transparent"}},
+i("span",{style:{flexShrink:0,marginTop:"1px",minWidth:"22px",height:"20px",padding:"0 5px",
+borderRadius:"6px",display:"flex",alignItems:"center",justifyContent:"center",
 fontSize:"9px",fontWeight:"800",fontFamily:_NXf.mono,
-background:p.rang==="S+"?"rgba(139,163,232,.17)":(p.rang==="S"?"rgba(232,196,138,.16)":(p.rang==="B"||p.rang==="~"?"rgba(255,255,255,.06)":"rgba(143,209,158,.13)")),
-color:p.rang==="S+"?"#8ba3e8":(p.rang==="S"?_NXpal.warn:(p.rang==="B"||p.rang==="~"?P.sub:_NXpal.ok))}},p.rang),
+background:rangFond(p.rang),color:rangCol(p.rang)}},p.rang),
 i("span",{style:{flex:1,minWidth:0}},
-i("span",{style:{display:"flex",alignItems:"center",gap:"7px"}},
+i("span",{style:{display:"flex",alignItems:"center",gap:"7px",flexWrap:"wrap"}},
 i("span",{style:{fontSize:"12px",fontWeight:"700",color:on?P.txt:P.sub}},p.nom),
-i("span",{style:{fontSize:"9px",fontWeight:"800",letterSpacing:".08em",
-textTransform:"uppercase",color:P.faint}},_T(p.role))),
-i("span",{style:{display:"block",fontSize:"10.5px",color:P.dim,marginTop:"2px",lineHeight:1.5}},
+etiquette(_T(p.role))),
+i("span",{style:{display:"block",fontSize:"10.5px",color:P.dim,marginTop:"3px",lineHeight:1.5}},
 libre?_T(p.d):_T("Indisponible sur ce compte."))),
-i("span",{style:{flexShrink:0,display:"flex",alignItems:"center",gap:"7px",marginTop:"1px"}},
+i("span",{style:{flexShrink:0,display:"flex",alignItems:"center",gap:"7px",marginTop:"2px"}},
 i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint}},
 p.k==="auto"?_T("variable"):(p.base+" cr")),
 on?i("span",{style:{color:_NXpal.ok,fontSize:"12px"}},"\u2713"):null));})):null);};
 
-// --- mode reflexion --------------------------------------------------------
+// --- niveau de reflexion ---------------------------------------------------
 var boutonReflexion=function(){
-var k=_NXIA.reflexion(),on=k!=="normal";
+var k=_NXIA.reflexion();
 var N=_NXIA.NIVEAUX,ix=0;
 for(var q=0;q<N.length;q++)if(N[q].k===k)ix=q;
 var cur=N[ix];
-var suivant=function(){_NXIA.setReflexion(N[(ix+1)%N.length].k);};
-return i("div",{className:"nx-fx",role:"switch","aria-checked":on?"true":"false",
-tabIndex:0,onKeyDown:_NXkey,
+var col=k==="profond"?_NXpal.warn:(k==="rapide"?_NXpal.ok:P.dim);
+return i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
 title:_T(cur.d)+" "+_T("Cliquer pour changer de niveau."),
-onClick:suivant,
-style:{display:"flex",alignItems:"center",gap:"6px",padding:"6px 11px",
-borderRadius:"9px",cursor:"pointer",fontSize:"11px",fontWeight:"700",
-background:k==="profond"?"rgba(232,196,138,.12)":(k==="rapide"?"rgba(143,209,158,.10)":P.inset),
-border:"1px solid "+(k==="profond"?"rgba(232,196,138,.36)":(k==="rapide"?"rgba(143,209,158,.30)":P.line)),
-color:k==="profond"?_NXpal.warn:(k==="rapide"?_NXpal.ok:P.dim),
-transition:"background .2s ease,border-color .2s ease,color .2s ease"}},
-i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor","aria-hidden":"true"},
+onClick:function(){_NXIA.setReflexion(N[(ix+1)%N.length].k);},
+style:{display:"flex",alignItems:"center",gap:"6px",padding:"6px 10px",
+borderRadius:"999px",cursor:"pointer",fontSize:"11px",fontWeight:"700",
+background:k==="normal"?"transparent":P.raise,
+border:"1px solid "+(k==="normal"?P.line:P.edge),color:col,
+transition:"color .2s ease,border-color .2s ease"}},
+i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor","aria-hidden":"true",
+style:{flexShrink:0}},
 i("path",{d:"M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2zM9 20h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-1z"})),
 _T(cur.n),
-cur.x?i("span",{style:{fontFamily:_NXf.mono,fontSize:"9.5px",opacity:.8}},cur.x):null);};
+cur.x?i("span",{style:{fontFamily:_NXf.mono,fontSize:"9.5px",opacity:.75}},cur.x):null);};
 
-// --- auto ou manuel ------------------------------------------------------
+// --- auto ou manuel --------------------------------------------------------
 var boutonMode=function(){
 var auto=_NXIA.mode()==="auto";
 return i("div",{className:"nx-fx",role:"switch","aria-checked":auto?"true":"false",
@@ -8028,152 +8101,217 @@ tabIndex:0,onKeyDown:_NXkey,
 title:auto?_T("Agit sans demander. Les lectures comme les actions.")
 :_T("Demande avant toute action. Les lectures de ton etat restent libres."),
 onClick:function(){_NXIA.setMode(auto?"manuel":"auto");},
-style:{display:"flex",alignItems:"center",gap:"6px",padding:"6px 11px",
-borderRadius:"9px",cursor:"pointer",fontSize:"11px",fontWeight:"700",
-background:auto?"rgba(143,209,158,.12)":P.inset,
-border:"1px solid "+(auto?"rgba(143,209,158,.36)":P.line),
+style:{display:"flex",alignItems:"center",gap:"6px",padding:"6px 10px",
+borderRadius:"999px",cursor:"pointer",fontSize:"11px",fontWeight:"700",
+background:auto?"rgba(143,209,158,.10)":"transparent",
+border:"1px solid "+(auto?"rgba(143,209,158,.32)":P.line),
 color:auto?_NXpal.ok:P.dim,
 transition:"background .2s ease,border-color .2s ease,color .2s ease"}},
-i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor","aria-hidden":"true"},
+i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor","aria-hidden":"true",
+style:{flexShrink:0}},
 i("path",{d:auto
 ?"M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4zm-1.2 14L7 12.2l1.4-1.4 2.4 2.4 5-5L17.2 9l-6.4 6.9z"
 :"M12 2 4 6v6c0 5 3.4 9.4 8 10 4.6-.6 8-5 8-10V6l-8-4zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"})),
 auto?_T("Auto"):_T("Manuel"));};
 
-var suggestions=[
-_T("Quelles protections me manquent ?"),
-_T("Lance la musique"),
-_T("Teste ma latence reseau")];
+// Les suggestions ne sont plus figees : elles regardent l etat reel.
+var suggestions=function(){
+var L=[];
+try{
+if(_NXIA.accorde("lecture")){
+var sc=window._NXP&&_NXP.score&&_NXP.score();
+if(sc&&sc.actifs<sc.total)
+L.push(_T("Quelles protections me manquent, et lesquelles comptent ?"));
+var bl=window._NXP&&_NXP.blocked;
+if(bl&&bl.length)L.push(_T("Qui a essaye de me pister recemment ?"));}
+}catch(_){}
+if(_NXIA.accorde("actions"))L.push(_T("Lance la musique"));
+if(!L.length)L.push(_T("Que sais-tu faire, exactement ?"));
+L.push(_T("Ce lien est-il une arnaque ?"));
+return L.slice(0,3);};
 
-var hauteur=compact?"min(46vh,420px)":"min(62vh,660px)";
-return i("div",null,
-i("div",{style:{minHeight:compact?"220px":"340px",height:hauteur,overflowY:"auto",
-padding:"8px 6px 2px",marginBottom:"12px",
-userSelect:"text",WebkitUserSelect:"text"}},
-_NXIA.taches.length?i("div",{style:{marginBottom:"16px",padding:"12px 14px",
-borderRadius:"12px",background:P.inset,border:"1px solid "+P.line}},
+// --- l accueil du fil vide -------------------------------------------------
+var vide=function(){
+return i("div",{style:{padding:(compact?"22px":"44px")+" 14px",textAlign:"center"}},
+i("div",{style:{display:"inline-flex",alignItems:"center",justifyContent:"center",
+width:"48px",height:"48px",borderRadius:"17px",marginBottom:"17px",color:P.mute,
+background:"linear-gradient(160deg,#141417,#0c0c0e)",border:"1px solid "+P.hair,
+boxShadow:"0 12px 34px rgba(0,0,0,.4)"}},
+i(NexiumIAIcon,{width:22,height:22})),
+i("div",{style:{fontSize:"13.5px",color:P.sub,fontWeight:"600",marginBottom:"6px"}},
+_T("Pose une question sur ton client.")),
+i("div",{style:{fontSize:"11.5px",color:P.faint,marginBottom:"20px",lineHeight:1.6}},
+_T("Il repond a partir de ton etat reel, pas de suppositions.")),
+i("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px",justifyContent:"center"}},
+suggestions().map(function(sg,k){
+return i("div",{key:k,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){setSaisie(sg);try{if(zone.current)zone.current.focus();}catch(_){}},
+style:{padding:"8px 14px",borderRadius:"999px",cursor:"pointer",fontSize:"11px",
+background:"transparent",border:"1px solid "+P.line,color:P.sub}},sg);})));};
+
+// --- la liste des taches ---------------------------------------------------
+var taches=function(){
+if(!_NXIA.taches.length)return null;
+var faits=0;
+for(var a=0;a<_NXIA.taches.length;a++)if(_NXIA.taches[a].etat==="fait")faits++;
+return i("div",{style:{marginBottom:"18px",padding:"13px 15px",
+borderRadius:"14px",background:P.inset,border:"1px solid "+P.line}},
 i("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",
-gap:"10px",marginBottom:"9px"}},
-i("span",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".14em",
-textTransform:"uppercase",color:P.faint}},_T("Travail en cours")),
+gap:"10px",marginBottom:"10px"}},
+etiquette(_T("Travail en cours")),
 i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint}},
-_NXIA.taches.filter(function(x){return x.etat==="fait";}).length+"/"+_NXIA.taches.length)),
+faits+"/"+_NXIA.taches.length)),
+i("div",{"aria-hidden":"true",style:{height:"2px",borderRadius:"2px",background:P.line,
+marginBottom:"11px",overflow:"hidden"}},
+i("div",{style:{height:"100%",width:Math.round(faits*100/_NXIA.taches.length)+"%",
+background:_NXpal.ok,transition:"width .5s cubic-bezier(.22,.8,.28,1)"}})),
 _NXIA.taches.map(function(x){
 var fini=x.etat==="fait",cours=x.etat==="en_cours",laisse=x.etat==="abandonne";
-return i("div",{key:x.id,style:{display:"flex",alignItems:"flex-start",gap:"9px",
-padding:"4px 0",fontSize:"11.5px",lineHeight:1.55,
+return i("div",{key:x.id,style:{display:"flex",alignItems:"flex-start",gap:"10px",
+padding:"4px 0",fontSize:"11.5px",lineHeight:1.6,
 color:fini?P.dim:(cours?P.txt:P.sub),
 textDecoration:(fini||laisse)?"line-through":"none",
 opacity:laisse?.5:1}},
-i("span",{style:{flexShrink:0,width:"13px",marginTop:"1px",
+i("span",{style:{flexShrink:0,width:"13px",marginTop:"1px",fontFamily:_NXf.mono,
 color:fini?_NXpal.ok:(cours?_NXpal.warn:P.faint)}},
 fini?"\u2713":(cours?"\u203a":(laisse?"\u00d7":"\u00b7"))),
-i("span",{style:{flex:1,minWidth:0}},x.texte));})):null,
-M.length?M.map(bulle):i("div",{style:{padding:(compact?"26px":"42px")+" 12px",textAlign:"center"}},
-i("div",{style:{display:"inline-flex",alignItems:"center",justifyContent:"center",
-width:"46px",height:"46px",borderRadius:"16px",marginBottom:"16px",color:P.mute,
-background:"linear-gradient(160deg,#141417,#0c0c0e)",border:"1px solid "+P.hair,
-boxShadow:"0 10px 30px rgba(0,0,0,.35)"}},
-i(NexiumIAIcon,{width:21,height:21})),
-i("div",{style:{fontSize:"13px",color:P.sub,fontWeight:"600",marginBottom:"6px"}},
-_T("Pose une question sur ton client.")),
-i("div",{style:{fontSize:"11px",color:P.faint,marginBottom:"18px"}},
-_T("Il repond a partir de ton etat reel, pas de suppositions.")),
-i("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px",justifyContent:"center"}},
-suggestions.map(function(sg,k){
-return i("div",{key:k,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
-onClick:function(){setSaisie(sg);},
-style:{padding:"8px 13px",borderRadius:"99px",cursor:"pointer",fontSize:"11px",
-background:P.inset,border:"1px solid "+P.line,color:P.sub}},sg);}))),
-_NXIA.busy?i("div",{style:{display:"flex",alignItems:"center",gap:"12px",padding:"2px 0 6px 14px"}},
-i("div",{style:{display:"flex",gap:"4px"}},[0,1,2].map(function(p){
-return i("div",{key:p,style:{width:"5px",height:"5px",borderRadius:"50%",background:P.mute,
-animation:"nx-ia-point 1.15s ease-in-out "+(p*0.16)+"s infinite"}});})),
-i("span",{style:{fontSize:"11px",color:P.faint}},
-_NXIA.attentes.length?_T("En attente de ton accord")
+i("span",{style:{flex:1,minWidth:0,overflowWrap:"anywhere"}},x.texte));}));};
+
+// --- l attente -------------------------------------------------------------
+var attente=function(){
+if(!_NXIA.busy)return null;
+var quoi=_NXIA.attentes.length?_T("En attente de ton accord")
 :_NXIA.etape==="lecture"?_T("Lecture de la conversation")
 :_NXIA.etape==="propositions"?_T("Redaction des propositions")
 :(_NXIA.pense
 ?(_T("L assistant reflechit")+(_NXIA.penseeLg>200?(" \u00b7 "+Math.round(_NXIA.penseeLg/5)+" "+_T("mots")):""))
-:_T("L assistant repond"))),
+:_T("L assistant repond"));
+return i("div",{style:{display:"flex",alignItems:"center",gap:"12px",
+padding:"4px 0 8px 15px",flexWrap:"wrap"}},
+i("div",{"aria-hidden":"true",style:{display:"flex",gap:"4px"}},[0,1,2].map(function(p){
+return i("div",{key:p,style:{width:"5px",height:"5px",borderRadius:"50%",background:P.mute,
+animation:"nx-ia-point 1.15s ease-in-out "+(p*0.16)+"s infinite"}});})),
+i("span",{style:{fontSize:"11px",color:P.faint}},quoi),
 i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
 onClick:function(){_NXIA.stop();},
-style:{marginLeft:"4px",padding:"4px 10px",borderRadius:"8px",cursor:"pointer",
+style:{padding:"4px 11px",borderRadius:"999px",cursor:"pointer",
 background:"transparent",border:"1px solid "+P.line,color:P.sub,
-fontSize:"10.5px",fontWeight:"700"}},_T("Arreter"))):null,
-i("div",{ref:bas})),
-_NXIA.repli?i("div",{style:{padding:"8px 11px",borderRadius:"9px",marginBottom:"10px",
-background:P.inset,border:"1px solid "+P.line,fontSize:"10.5px",color:_NXpal.warnSoft}},
-_NXIA.repli):null,
-_NXIA.erreur?i("div",{style:{padding:"11px 13px",borderRadius:"11px",marginBottom:"12px",
-background:"linear-gradient(160deg,#1a0d0d,#120909)",border:"1px solid #2c1414",
-fontSize:"11.5px",color:_NXpal.dangerSoft,lineHeight:1.6}},
-i("div",{style:{fontWeight:"700",marginBottom:"4px"}},
-(reste===0)?_T("Limite de messages atteinte"):_T("L assistant est injoignable")),
-i("div",{style:{color:P.sub,fontFamily:_NXf.mono,fontSize:"10.5px",wordBreak:"break-word"}},
-_NXIA.erreur)):null,
-mp?(function(){
+fontSize:"10.5px",fontWeight:"600"}},_T("Arreter")));};
+
+// --- avis et erreurs -------------------------------------------------------
+var avis=function(){
+if(!_NXIA.repli)return null;
+return i("div",{style:{display:"flex",gap:"9px",alignItems:"flex-start",
+padding:"9px 12px",borderRadius:"11px",marginBottom:"10px",
+background:P.inset,border:"1px solid "+P.line,
+fontSize:"10.5px",color:_NXpal.warnSoft,lineHeight:1.6}},
+i("span",{"aria-hidden":"true",style:{flexShrink:0,marginTop:"5px",width:"5px",height:"5px",
+borderRadius:"50%",background:_NXpal.warn}}),
+i("span",{style:{flex:1,minWidth:0}},_NXIA.repli));};
+var erreur=function(){
+if(!_NXIA.erreur)return null;
+// L intitule suit la vraie cause : un compteur a zero ne veut pas dire que
+// c est lui qui a bloque la demande.
+var credits=/credit/i.test(_NXIA.erreur);
+return i("div",{style:{padding:"12px 14px",borderRadius:"12px",marginBottom:"12px",
+background:"linear-gradient(160deg,#1a0d0d,#120909)",border:"1px solid #2c1414"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"6px"}},
+i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor","aria-hidden":"true",
+style:{color:_NXpal.dangerSoft,flexShrink:0}},
+i("path",{d:"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"})),
+etiquette(credits?_T("Credits epuises"):_T("L assistant est injoignable"),_NXpal.dangerSoft)),
+i("div",{style:{fontSize:"11.5px",color:P.sub,lineHeight:1.65,overflowWrap:"anywhere"}},
+_NXIA.erreur));};
+
+// --- la liste des conversations privees ------------------------------------
+var listeMP=function(){
+if(!mp)return null;
 var L=_NXIA.mpOuverts();
 var filtre=saisie.slice(1).toLowerCase();
 var V=L.filter(function(x){return !filtre||x.nom.toLowerCase().indexOf(filtre)>=0;}).slice(0,6);
-return i("div",{style:{marginBottom:"9px",padding:"7px",borderRadius:"12px",
+var permis=_NXIA.accorde("conversations");
+return i("div",{style:{marginBottom:"10px",padding:"7px",borderRadius:"13px",
 background:P.inset,border:"1px solid "+P.line}},
-i("div",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".12em",
-textTransform:"uppercase",color:P.faint,padding:"3px 6px 7px"}},
-_NXIA.accorde("conversations")
-?(_T("Analyser une conversation")+" \u00b7 "+_T("coute 2 messages"))
-:_T("Acces aux conversations privees non accorde")),
-_NXIA.accorde("conversations")
+i("div",{style:{padding:"4px 7px 8px"}},
+etiquette(permis
+?(_T("Analyser une conversation")+" \u00b7 "+_T("coute deux fois plus")+" \u00b7 "+
+_NXIA.plafondMP()+" "+_T("messages lus"))
+:_T("Acces aux conversations privees non accorde"))),
+permis
 ?(V.length?V.map(function(x){
 return i("div",{key:x.id,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
 onClick:function(){setSaisie("");setMp(false);_NXIA.analyserMP(x.id,x.nom);},
-style:{display:"flex",alignItems:"center",gap:"9px",padding:"8px 10px",
-borderRadius:"9px",cursor:"pointer",fontSize:"12px",color:P.sub}},
-i("span",{style:{color:P.faint,fontFamily:_NXf.mono,fontSize:"11px"}},"@"),
-x.nom);})
-:i("div",{style:{padding:"8px 10px",fontSize:"11px",color:P.dim}},
+style:{display:"flex",alignItems:"center",gap:"9px",padding:"8px 11px",
+borderRadius:"10px",cursor:"pointer",fontSize:"12px",color:P.sub}},
+i("span",{style:{color:P.faint,fontFamily:_NXf.mono,fontSize:"11px",flexShrink:0}},"@"),
+i("span",{style:{flex:1,minWidth:0,overflow:"hidden",textOverflow:"ellipsis",
+whiteSpace:"nowrap"}},x.nom));})
+:i("div",{style:{padding:"8px 11px",fontSize:"11px",color:P.dim,lineHeight:1.6}},
 _T("Aucune conversation privee ouverte. Ouvre-en une dans Discord, puis reessaie.")))
-:i("div",{style:{padding:"8px 10px",fontSize:"11px",color:P.dim,lineHeight:1.6}},
-_T("Cette lecture envoie les derniers messages au relais. Accorde-la dans les reglages si tu le souhaites.")));})():null,
-i("div",{style:{display:"flex",gap:"9px",alignItems:"flex-end"}},
-i("textarea",{value:saisie,rows:1,placeholder:_T("Ecris ton message, ou @ pour analyser une conversation"),
+:i("div",{style:{padding:"8px 11px",fontSize:"11px",color:P.dim,lineHeight:1.6}},
+_T("Cette lecture envoie les derniers messages au relais. Accorde-la dans les reglages si tu le souhaites.")));};
+
+// --- le composeur ----------------------------------------------------------
+// Une seule dalle : le champ, les reglages et le bouton d envoi vivent
+// ensemble. L ancien alignait un champ, un bouton, puis une rangee de
+// pastilles en dessous, qui passait a la ligne des que le panneau retrecit.
+var composeur=function(){
+var pret=!!saisie.trim();
+return i("div",{style:{borderRadius:"18px",background:P.inset,
+border:"1px solid "+(pret||_NXIA.busy?P.edge:P.line),
+transition:"border-color .2s ease",overflow:"visible"}},
+i("textarea",{ref:zone,value:saisie,rows:1,
+placeholder:_T("Ecris ton message, ou @ pour analyser une conversation"),
 onChange:function(e){
 var v=e.target.value;
 setSaisie(v);
-// Un @ en tete ouvre la liste des conversations : c est un geste explicite,
-// et rien n est lu tant qu une personne n est pas choisie.
 setMp(v.charAt(0)==="@");
-try{e.target.style.height="auto";
-e.target.style.height=Math.min(132,Math.max(44,e.target.scrollHeight))+"px";}catch(_){}},
+ajuste(e.target);},
 onKeyDown:touche,onKeyUp:arrete,onKeyPress:arrete,
-style:{flex:1,minHeight:"44px",maxHeight:"132px",resize:"none",padding:"13px 15px",
-borderRadius:"14px",background:P.inset,border:"1px solid "+(saisie?P.edge:P.line),
-color:P.txt,fontSize:"12.5px",lineHeight:1.6,fontFamily:"inherit",outline:"none",
-transition:"border-color .2s ease"}}),
+style:{display:"block",width:"100%",minHeight:"42px",maxHeight:"148px",resize:"none",
+padding:"13px 15px 4px",background:"transparent",border:"none",
+color:P.txt,fontSize:"12.5px",lineHeight:1.65,fontFamily:"inherit",outline:"none"}}),
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px",flexWrap:"wrap",
+padding:"8px 9px 9px 11px"}},
+selecteur(),boutonReflexion(),boutonMode(),
+i("div",{style:{flex:1,minWidth:"8px"}}),
+pret?i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,whiteSpace:"nowrap"},
+title:_T("Cout estime de cette demande")},
+"\u2248 "+_NXIA.cout({caracteres:saisie.length+_NXIA.poids()})+" cr"):null,
 i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
 onClick:_NXIA.busy?function(){_NXIA.stop();}:envoyer,
 "aria-label":_NXIA.busy?_T("Arreter"):_T("Envoyer"),
-style:{flexShrink:0,width:"44px",height:"44px",borderRadius:"14px",
-cursor:(_NXIA.busy||saisie.trim())?"pointer":"default",
+style:{flexShrink:0,width:"34px",height:"34px",borderRadius:"11px",
+cursor:(_NXIA.busy||pret)?"pointer":"default",
 display:"flex",alignItems:"center",justifyContent:"center",
-background:_NXIA.busy?P.raise:(saisie.trim()?P.acc:P.raise),
-border:"1px solid "+(_NXIA.busy?P.edge:(saisie.trim()?P.acc:P.edge)),
-color:_NXIA.busy?P.pale:(saisie.trim()?P.ink:P.mute),
+background:_NXIA.busy?P.raise:(pret?P.acc:"transparent"),
+border:"1px solid "+(_NXIA.busy?P.edge:(pret?P.acc:P.line)),
+color:_NXIA.busy?P.pale:(pret?P.ink:P.mute),
 transition:"background .18s ease,color .18s ease,border-color .18s ease"}},
-i("svg",{viewBox:"0 0 24 24",width:_NXIA.busy?13:17,height:_NXIA.busy?13:17,
+i("svg",{viewBox:"0 0 24 24",width:_NXIA.busy?12:15,height:_NXIA.busy?12:15,
 fill:"currentColor","aria-hidden":"true"},
-i("path",{d:_NXIA.busy?"M6 6h12v12H6z":"M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2v6.4z"})))),
+i("path",{d:_NXIA.busy?"M6 6h12v12H6z":"M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12.6 2v6.4z"})))));};
+
+// --- l assemblage ----------------------------------------------------------
+// Une colonne : le fil prend la place restante et defile seul. L ancien
+// donnait au fil une hauteur fixe A L INTERIEUR d une page qui defile deja,
+// d ou les deux ascenseurs imbriques.
+var hauteur=compact?"min(48vh,430px)":"min(64vh,680px)";
+return i("div",{style:{display:"flex",flexDirection:"column",height:hauteur,
+minHeight:compact?"260px":"360px"}},
+i("div",{ref:fil,onScroll:suitFil,
+style:{flex:1,minHeight:0,overflowY:"auto",overflowX:"hidden",overscrollBehavior:"contain",
+padding:"6px 4px 2px",userSelect:"text",WebkitUserSelect:"text"}},
+taches(),
+M.length?M.map(bulle):vide(),
+attente(),
+i("div",{ref:bas})),
+i("div",{style:{flexShrink:0,paddingTop:"10px"}},
+avis(),erreur(),listeMP(),composeur(),
 i("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",
-gap:"10px",marginTop:"10px",flexWrap:"wrap"}},
-i("div",{style:{display:"flex",gap:"7px",alignItems:"center",flexWrap:"wrap"}},
-selecteur(),boutonReflexion(),boutonMode(),
-// Le rappel clavier n a pas sa place dans le panneau compact.
-compact?null:i("span",{style:{fontSize:"10px",color:P.faint}},
-_T("Entree pour envoyer, Maj+Entree pour aller a la ligne"))),
-i("div",{style:{display:"flex",gap:"10px",alignItems:"center",fontFamily:_NXf.mono,fontSize:"10px"}},
-saisie.trim()?i("span",{style:{color:P.faint},
-title:_T("Cout estime de cette demande")},
-"\u2248 "+_NXIA.cout({caracteres:saisie.length})+" cr"):null,
+gap:"10px",marginTop:"9px",flexWrap:"wrap",fontFamily:_NXf.mono,fontSize:"10px"}},
+i("span",{style:{color:P.faint}},
+compact?"":_T("Entree pour envoyer, Maj+Entree pour aller a la ligne")),
 i("span",{style:{color:illimite?_NXpal.ok:((reste>=0&&reste<=15)?_NXpal.warn:P.faint)}},
 illimite?_T("sans limite")
 :(reste>=0?(reste+"/"+_NXIA.CREDITS_MAX+" "+_T("credits")):"\u2014")))));
@@ -8218,68 +8356,270 @@ i(NexiumIAChat,{compact:true})));
 // --------------------------------------------------------------- la page
 function NexiumIAComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
-var _s1=F.useState(false);var panneau=_s1[0];var setPanneau=_s1[1];
+var _t0=F.useState("assistant");var tab=_t0[0];var setTab=_t0[1];
 F.useEffect(function(){
 _NXIA.listeners.push(force);
-if(!_NXIA.cfg.vu)setPanneau(true);
+try{_NXIA.chargeDispo();}catch(_){}
 return function(){try{_NXIA.listeners=_NXIA.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
 var monte=_NXmounted(F);
 var P=_NXpal;
 var nCaps=_NXIA.nbCaps();
 var reste=_NXIA.restant;
 var illimite=_NXIA.admin||reste===-2;
+var max=_NXIA.CREDITS_MAX||100;
+var pct=illimite?100:(reste>=0?Math.round(reste*100/max):100);
+var col=illimite?_NXpal.ok:(pct>=50?_NXpal.ok:(pct>=15?_NXpal.warn:_NXpal.danger));
 
-var ligneCap=function(c,dernier){
+// --- la jauge de credits ---------------------------------------------------
+// Vingt segments plutot qu une barre pleine : on lit un reste d un coup d oeil
+// sans avoir a comparer deux longueurs.
+var jauge=function(){
+var n=20,pleins=illimite?n:Math.round((reste>=0?reste:max)/max*n);
+var seg=[];
+for(var a=0;a<n;a++){
+var on=a<pleins;
+seg.push(i("div",{key:a,style:{flex:1,height:"100%",borderRadius:"2px",
+background:on?col:P.line,opacity:on?(monte?1:0):.55,
+transition:"opacity .5s ease,background .3s ease",
+transitionDelay:(a*22)+"ms"}}));}
+return i("div",{style:{display:"flex",gap:"3px",height:"10px"}},seg);};
+
+var quand=function(){
+try{
+if(illimite||!_NXIA.reprise)return "";
+var d=new Date(_NXIA.reprise);
+var min=Math.max(0,Math.round((d.getTime()-Date.now())/60000));
+if(!min)return _T("bientot");
+if(min<60)return _T("dans")+" "+min+" min";
+return _T("dans")+" "+Math.round(min/60)+" h";}catch(_){return "";}};
+
+var hero=function(){
+return i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",
+border:"1px solid "+P.hair,borderRadius:"22px",
+background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",
+padding:"24px 24px 22px",marginBottom:"14px"}},
+i("div",{style:{display:"flex",alignItems:"baseline",justifyContent:"space-between",
+gap:"14px",flexWrap:"wrap",marginBottom:"14px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",
+textTransform:"uppercase",color:P.faint}},_T("Credits disponibles")),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},
+illimite?_T("compte administrateur")
+:(quand()?(_T("recharge complete")+" "+quand()):(_T("par tranche de")+" "+max+" / 7 h")))),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"12px",flexWrap:"wrap",marginBottom:"14px"}},
+i("div",{key:"c"+reste,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"40px",
+fontWeight:"800",color:col,letterSpacing:"-.05em",lineHeight:1}},
+illimite?_T("Sans limite"):(reste>=0?String(reste):"\u2014")),
+illimite?null:i("div",{style:{fontFamily:_NXf.mono,fontSize:"12px",color:P.faint}},"/ "+max)),
+jauge(),
+i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(150px,1fr))",
+gap:"14px",marginTop:"22px",paddingTop:"19px",borderTop:"1px solid "+P.line}},
+[[_T("Modele"),_NXIA.palierNom(),_NXIA.palier()==="auto"?_T("choisi pour toi"):_T("choisi par toi")],
+[_T("Reflexion"),_T(_NXIA.nomNiveau()),_NXIA.reflexion()==="profond"?_T("trois fois le prix")
+:(_NXIA.reflexion()==="rapide"?_T("moitie prix"):_T("prix de base"))],
+[_T("Mode"),_NXIA.mode()==="auto"?_T("Automatique"):_T("Manuel"),
+_NXIA.mode()==="auto"?_T("agit seul"):_T("demande avant d agir")],
+[_T("Acces accordes"),nCaps+" / "+_NXIA.CAPS.length,
+nCaps?_T("outils executes sur ta machine"):_T("il ne voit rien")]].map(function(x,k){
+return i("div",{key:k},
+i("div",{style:{fontSize:"9.5px",fontWeight:"800",letterSpacing:".14em",
+textTransform:"uppercase",color:P.faint,marginBottom:"5px"}},x[0]),
+i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt,marginBottom:"2px",
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},x[1]),
+i("div",{style:{fontSize:"10.5px",color:P.dim,lineHeight:1.5}},x[2]));})));};
+
+// --- les acces, en tuiles --------------------------------------------------
+var tuileCap=function(c){
 var on=_NXIA.accorde(c.k);
-return i("div",{key:c.k,style:{display:"flex",alignItems:"flex-start",gap:"12px",
-padding:"12px 0",borderBottom:dernier?"none":"1px solid "+P.line}},
-i("div",{style:{flex:1,minWidth:0}},
-i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:on?P.txt:P.sub,marginBottom:"3px"}},_T(c.n)),
-i("div",{style:{fontSize:"11px",color:P.dim,lineHeight:1.6}},_T(c.d))),
-i("div",{className:"nx-fx",role:"switch","aria-checked":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+var n=0;
+for(var a=0;a<_NXIA.OUTILS.length;a++)if(_NXIA.OUTILS[a].cap===c.k)n++;
+return i("div",{key:c.k,className:"nx-fx",role:"switch","aria-checked":on?"true":"false",
+"aria-label":_T(c.n),tabIndex:0,onKeyDown:_NXkey,
 onClick:function(){_NXIA.setCap(c.k,!on);},
-style:{flexShrink:0,width:"38px",height:"22px",borderRadius:"99px",cursor:"pointer",marginTop:"2px",
-background:on?_NXpal.ok:P.raise,border:"1px solid "+(on?_NXpal.ok:P.edge),
-transition:"background .18s ease,border-color .18s ease",position:"relative"}},
-i("div",{style:{position:"absolute",top:"2px",left:on?"18px":"2px",width:"16px",height:"16px",
-borderRadius:"50%",background:on?P.ink:P.mute,transition:"left .18s cubic-bezier(.4,0,.2,1)"}})));};
+style:{position:"relative",overflow:"hidden",cursor:"pointer",padding:"15px 16px",
+borderRadius:"16px",background:on?"linear-gradient(158deg,#131316,#0c0c0e)":P.inset,
+border:"1px solid "+(on?P.edge:P.line),
+transition:"border-color .22s ease,background .22s ease"}},
+on?i("div",{"aria-hidden":"true",style:{position:"absolute",left:0,top:0,bottom:0,width:"2px",
+background:_NXpal.ok,opacity:.85}}):null,
+i("div",{style:{display:"flex",alignItems:"flex-start",gap:"12px"}},
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"5px"}},
+i("div",{style:{fontSize:"12.5px",fontWeight:"700",letterSpacing:"-.01em",
+color:on?P.txt:P.sub}},_T(c.n)),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint}},
+n+" "+(n>1?_T("outils"):_T("outil")))),
+i("div",{style:{fontSize:"11px",color:P.dim,lineHeight:1.6}},_T(c.d))),
+i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{flexShrink:0,width:"34px",height:"20px",
+borderRadius:"99px",marginTop:"2px",background:on?_NXpal.ok:"transparent",
+border:"1px solid "+(on?_NXpal.ok:P.faint),
+transition:"background .22s ease,border-color .22s ease"}},
+i("div",{style:{width:"13px",height:"13px",borderRadius:"50%",margin:"2.5px",
+background:on?_NXpal.ink:P.faint,
+transform:on?"translateX(14px)":"none",
+transition:"transform .22s cubic-bezier(.4,0,.2,1)"}}))));};
 
-return i(Kr,null,i("div",{style:{maxWidth:"900px",margin:"0 auto",opacity:monte?1:0,
-transform:monte?"none":"translateY(6px)",transition:"opacity .32s ease,transform .32s ease"}},
-_NXhead("IA","Nexium IA",_T("Un assistant qui connait ton client, et rien d autre")),
+// --- l onglet Service ------------------------------------------------------
+var ligneModele=function(p){
+var libre=_NXIA.utilisable(p.k);
+var on=_NXIA.palier()===p.k;
+var rangCol=p.rang==="S+"?"#8ba3e8":p.rang==="S"?_NXpal.warn
+:(p.rang==="B"||p.rang==="~")?P.sub:_NXpal.ok;
+return i("div",{key:p.k,className:libre?"nx-fx":"",role:"button",
+tabIndex:libre?0:-1,onKeyDown:libre?_NXkey:null,
+"aria-disabled":libre?"false":"true",
+onClick:libre?function(){_NXIA.setPalier(p.k);}:null,
+style:{display:"flex",alignItems:"flex-start",gap:"13px",padding:"13px 0",
+borderBottom:"1px solid "+P.line,cursor:libre?"pointer":"not-allowed",
+opacity:libre?1:.45}},
+i("span",{style:{flexShrink:0,marginTop:"1px",minWidth:"26px",height:"22px",padding:"0 6px",
+borderRadius:"7px",display:"flex",alignItems:"center",justifyContent:"center",
+fontSize:"9.5px",fontWeight:"800",fontFamily:_NXf.mono,
+background:"rgba(255,255,255,.045)",color:rangCol}},p.rang),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},
+i("div",{style:{fontSize:"13px",fontWeight:"700",color:on?P.txt:P.sub}},p.nom),
+i("span",{style:{fontSize:"9px",fontWeight:"800",letterSpacing:".13em",
+textTransform:"uppercase",color:P.faint}},_T(p.role))),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"3px",lineHeight:1.55}},
+libre?_T(p.d):_T("Indisponible sur ce compte."))),
+i("div",{style:{flexShrink:0,display:"flex",alignItems:"center",gap:"9px",marginTop:"2px"}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.faint}},
+p.k==="auto"?_T("variable"):(p.base+" cr")),
+on?i("span",{style:{color:_NXpal.ok,fontSize:"13px"}},"\u2713")
+:i("span",{style:{width:"13px"}},"")));};
 
+var tService=function(){
+var V=_NXIA.voies||0;
+return i("div",null,
 _NXcard(i("div",null,
+_NXch(_T("Modeles"),_T("Le palier automatique choisit le moins cher qui tienne la demande. Les autres sont un choix explicite."),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.faint}},
+_NXIA.paliersVisibles().length+" "+_T("paliers"))),
+i("div",null,_NXIA.paliersVisibles().map(ligneModele))),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Le relais"),_T("Il transmet la question au modele, puis oublie. Il ne garde aucune conversation.")),
 _NXstrip([
-{v:nCaps+"/"+_NXIA.CAPS.length,label:_T("Acces accordes"),color:nCaps?_NXpal.ok:P.txt},
-{v:illimite?_T("Illimite"):(reste>=0?(reste+"/"+_NXIA.CREDITS_MAX):"\u2014"),
-label:_T("Credits restants"),
-color:illimite?_NXpal.ok:((reste>=0&&reste<=15)?_NXpal.warn:P.txt)},
-{v:_NXIA.palierNom().replace("Nexium IA ",""),label:_T("Modele")},
-{v:_T("Locale"),label:_T("Execution des outils")}]),
-i("div",{style:{marginTop:"18px",paddingTop:"4px"}},
-_NXIA.CAPS.map(function(c,k){return ligneCap(c,k===_NXIA.CAPS.length-1);})),
-i("div",{style:{display:"flex",gap:"8px",marginTop:"14px"}},
+{v:V?String(V):"\u2014",label:_T("Voies de service"),
+color:V>1?_NXpal.ok:(V===1?_NXpal.warn:P.txt)},
+{v:_NXIA.admin?_T("Oui"):_T("Non"),label:_T("Compte administrateur"),
+color:_NXIA.admin?_NXpal.ok:P.txt},
+{v:max+" / 7 h",label:_T("Enveloppe de credits")},
+{v:_T("Locale"),label:_T("Execution des outils"),color:_NXpal.ok}]),
+i("div",{style:{marginTop:"16px",fontSize:"11px",color:P.dim,lineHeight:1.7}},
+V>1?_T("Plusieurs voies : la charge se repartit, et une voie saturee ne bloque personne.")
+:V===1?_T("Une seule voie configuree : elle sature des que plusieurs personnes ecrivent en meme temps.")
+:_T("L etat du service n a pas encore ete lu."))),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Ce qui reste sur ta machine"),
+_T("Les outils s executent chez toi. Le relais ne voit que ce qu ils renvoient.")),
+i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))",gap:"12px"}},
+[[_T("Aucune conversation gardee"),_T("Ni chez toi, ni sur le serveur. Elle disparait a la fermeture."),_NXpal.ok],
+[_T("Adresses et cles retirees"),_T("Ce qui est lu dans une conversation est caviarde avant tout envoi."),_NXpal.ok],
+[_T("Un texte lu n est pas un ordre"),_T("Un message qui essaie de donner des consignes est signale, jamais suivi."),_NXpal.ok],
+[_T("Seuls tes accords sont gardes"),_T("Et tes preferences, si tu lui en confies."),P.sub]].map(function(x,k){
+return i("div",{key:k,style:{padding:"13px 14px",borderRadius:"13px",
+background:P.inset,border:"1px solid "+P.line}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"5px"}},
+i("span",{"aria-hidden":"true",style:{width:"5px",height:"5px",borderRadius:"50%",
+flexShrink:0,background:x[2]}}),
+i("div",{style:{fontSize:"12px",fontWeight:"700",color:P.txt}},x[0])),
+i("div",{style:{fontSize:"10.5px",color:P.dim,lineHeight:1.6}},x[1]));}))),{mb:12}));};
+
+// Les acces ne vivent pas seulement dans leur onglet : tant que rien n est
+// accorde, ils s affichent au-dessus du chat. Une page dont le sujet est le
+// consentement ne doit pas le cacher derriere un onglet.
+var carteAcces=function(){return _NXcard(i("div",null,
+_NXch(_T("Ce qu il a le droit de voir"),
+_T("Chaque acces ouvre un groupe d outils. Un outil dont l acces manque n est meme pas propose au modele, et un second verrou refuse son execution."),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:nCaps?_NXpal.ok:P.faint,
+whiteSpace:"nowrap"}},nCaps+"/"+_NXIA.CAPS.length)),
+i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(268px,1fr))",gap:"10px"}},
+_NXIA.CAPS.map(tuileCap)),
+i("div",{style:{display:"flex",gap:"8px",marginTop:"16px",flexWrap:"wrap"}},
 _NXbtn(_T("Tout accorder"),function(){
 for(var a=0;a<_NXIA.CAPS.length;a++)_NXIA.cfg.consent[_NXIA.CAPS[a].k]=true;
 _NXIA.cfg.vu=true;_NXIA.save();_NXIA.notify();}),
 _NXbtn(_T("Tout refuser"),function(){
 for(var a=0;a<_NXIA.CAPS.length;a++)_NXIA.cfg.consent[_NXIA.CAPS[a].k]=false;
-_NXIA.cfg.vu=true;_NXIA.save();_NXIA.notify();})),
-i("div",{style:{marginTop:"12px",fontSize:"10.5px",color:P.faint,lineHeight:1.65}},
-_T("Un outil dont l acces manque n est meme pas propose au modele."))),
-{mb:14}),
+_NXIA.cfg.vu=true;_NXIA.save();_NXIA.notify();}))),{mb:12});};
 
-_NXcard(i("div",null,
+// --- les onglets -----------------------------------------------------------
+var TABS=[["assistant","Assistant"],["acces","Accès"],["service","Service"]];
+var tabbar=function(){
+return i("div",{role:"tablist","aria-label":_T("Sections de Nexium IA"),
+style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",
+overflowX:"auto",position:"relative"}},
+TABS.map(function(t){
+var on=tab===t[0];
+return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,"data-nx-tab":"1","aria-label":_T(t[1]),
+onClick:function(){if(tab!==t[0])setTab(t[0]);},
+style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",
+fontWeight:"700",letterSpacing:".11em",textTransform:"uppercase",
+color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
+_T(t[1]),
+t[0]==="acces"?i("span",{style:{marginLeft:"7px",fontFamily:_NXf.mono,fontSize:"9.5px",
+color:nCaps?_NXpal.ok:P.faint}},nCaps+"/"+_NXIA.CAPS.length):null,
+i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",
+bottom:"-1px",height:"2px",borderRadius:"2px",background:P.txt,
+transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
+transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));};
+
+return i(Kr,null,i("div",{style:{maxWidth:"900px",margin:"0 auto",opacity:monte?1:0,
+transform:monte?"none":"translateY(6px)",transition:"opacity .32s ease,transform .32s ease"}},
+_NXhead("IA","Nexium IA",_T("Un assistant qui connait ton client, et rien d autre")),
+hero(),
+tabbar(),
+
+tab==="assistant"?_NXcard(i("div",null,
 _NXch(_T("Conversation"),
 _T("Rien n est enregistre : elle disparait quand tu fermes le client."),
 _NXIA.msgs.length?i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
 onClick:function(){_NXIA.effacer();},
-style:{padding:"6px 11px",borderRadius:"8px",cursor:"pointer",background:"transparent",
+style:{padding:"6px 12px",borderRadius:"999px",cursor:"pointer",background:"transparent",
 border:"1px solid "+P.line,color:P.sub,fontSize:"11px",fontWeight:"700"}},_T("Effacer")):null),
-i(NexiumIAChat,{compact:false})),
-{mb:14}),
+i(NexiumIAChat,{compact:false})),{mb:14}):null,
+(tab==="assistant"&&!nCaps)?carteAcces():null,
 
-i("div",{style:{fontSize:"10.5px",color:P.faint,lineHeight:1.7,padding:"0 2px 8px"}},
+tab==="acces"?i("div",null,
+carteAcces(),
+_NXcard(i("div",null,
+_NXch(_T("Lecture des conversations"),
+_T("Combien de messages sont lus au maximum quand tu demandes une analyse. Le chiffre est affiche avant chaque lecture.")),
+i("div",{style:{display:"flex",alignItems:"center",gap:"14px",flexWrap:"wrap"}},
+i("div",{style:{display:"flex",gap:"7px",flexWrap:"wrap"}},
+[5,10,15,25,30].map(function(n){
+var on=_NXIA.plafondMP()===n;
+return i("div",{key:n,className:"nx-fx",role:"button","aria-pressed":on?"true":"false",
+tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){_NXIA.setPlafondMP(n);},
+style:{padding:"7px 14px",borderRadius:"999px",cursor:"pointer",
+fontFamily:_NXf.mono,fontSize:"11px",fontWeight:"700",
+background:on?P.raise:"transparent",
+border:"1px solid "+(on?P.edge:P.line),color:on?P.txt:P.dim}},n);})),
+i("span",{style:{fontSize:"11px",color:P.dim}},_T("messages lus au plus")))),{mb:12}),
+_NXIA.prefs().length?_NXcard(i("div",null,
+_NXch(_T("Ce qu il a retenu de toi"),
+_T("Des preferences, pas des conversations. Elles restent sur ta machine et survivent a l effacement du fil."),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){_NXIA.oubliePref("");},
+style:{padding:"6px 12px",borderRadius:"999px",cursor:"pointer",background:"transparent",
+border:"1px solid "+P.line,color:P.sub,fontSize:"11px",fontWeight:"700"}},_T("Tout oublier"))),
+i("div",{style:{display:"flex",flexDirection:"column",gap:"7px"}},
+_NXIA.prefs().map(function(x,k){
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"10px",
+padding:"10px 12px",borderRadius:"11px",background:P.inset,
+border:"1px solid "+P.line}},
+i("span",{style:{flex:1,minWidth:0,fontSize:"11.5px",color:P.sub,lineHeight:1.6}},x),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+"aria-label":_T("Oublier"),onClick:function(){_NXIA.oubliePref(x);},
+style:{flexShrink:0,width:"22px",height:"22px",borderRadius:"7px",cursor:"pointer",
+display:"flex",alignItems:"center",justifyContent:"center",
+color:P.faint,fontSize:"14px"}},"\u00d7"));}))),{mb:12}):null):null,
+
+tab==="service"?tService():null,
+
+i("div",{style:{fontSize:"10.5px",color:P.faint,lineHeight:1.7,padding:"4px 2px 8px"}},
 _T("Le message part vers un relais Nexium qui interroge le modele, puis oublie. Les outils, eux, s executent sur ta machine : ce que tu n accordes pas ne quitte jamais ton client."))));
 }
 
@@ -11863,11 +12203,17 @@ sw(on));}
 function match(it){var s=(q||"").trim().toLowerCase();if(!s)return true;return (_T(it.t)+" "+_T(it.d)+" "+it.k).toLowerCase().indexOf(s)>=0;}
 function group(label,desc,list,isV){var L=list.filter(match);
 if(!L.length)return null;
-return _NXcard(i("div",null,_NXch(_T(label),desc?_T(desc):null),
-L.map(function(it,k){
+var n=0;
+for(var a=0;a<L.length;a++)if(isV?vget(L[a].k):!!cfg[L[a].k])n++;
+return _NXcard(i("div",null,
+_NXch(_T(label),desc?_T(desc):null,
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",whiteSpace:"nowrap",
+color:n?scol:P.faint}},n+"/"+L.length)),
+i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(268px,1fr))",gap:"9px"}},
+L.map(function(it){
 var on=isV?vget(it.k):!!cfg[it.k];
 var click=isV?(it.x||vtog(it.k,it.a)):tog(it.k);
-return row(it,on,click,k===L.length-1);})),{mb:12});}
+return tuilePR(it,on,click);}))),{mb:12});}
 function searchBox(ph){return i("div",{style:{position:"relative",marginBottom:"12px"}},
 i("input",{value:q,onChange:function(e){setQ(e.target.value);},placeholder:_T(ph),spellCheck:false,"aria-label":_T(ph),style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,borderRadius:"12px",padding:"11px 13px",color:P.txt,fontSize:"12.5px",outline:"none"}}),
 q?i("div",{className:"nx-fx",role:"button","aria-label":_T("Effacer la recherche"),tabIndex:0,onKeyDown:_NXkey,onClick:function(){setQ("");},style:{position:"absolute",right:"10px",top:"9px",padding:"3px 7px",color:P.faint,cursor:"pointer",fontSize:"14px",lineHeight:1.2}},"×"):null);}
@@ -11897,6 +12243,115 @@ transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",transition:"transf
 function chiffre(v,lab,col){return i("div",{style:{flex:1,minWidth:"74px"}},
 _NXbigNum(v,col),
 i("div",{style:{fontSize:"10px",color:P.dim,marginTop:"5px",lineHeight:1.4}},lab));}
+// Les cinq familles de boucliers, et leur couverture reelle. C est ce que
+// l anneau unique ne pouvait pas dire : 60 %, oui, mais 60 % de quoi.
+function famillesPR(){
+var F=[
+{n:_T("Liens"),l:SH_LIENS,c:_NXpal.ok,v:false},
+{n:_T("Contenus"),l:SH_CONTENU,c:_NXpal.info,v:false},
+{n:_T("Sortie"),l:SH_SORTIE,c:"#8ba3e8",v:true},
+{n:_T("Pieges"),l:SH_PIEGES,c:_NXpal.warn,v:false},
+{n:_T("Avance"),l:SH_AVANCE,c:_NXpal.mauve||_NXpal.info,v:false}];
+var out=[];
+for(var a=0;a<F.length;a++){
+var f=F[a],on=0,tot=0;
+if(f.v){if(!G||!G.cfg)continue;
+for(var b=0;b<f.l.length;b++){tot++;if(G.cfg[f.l[b].k])on++;}}
+else for(var c=0;c<f.l.length;c++){tot++;if(cfg[f.l[c].k])on++;}
+if(!tot)continue;
+f.on=on;f.tot=tot;f.pct=on/tot;
+out.push(f);}
+return out;}
+
+function anneauxPR(){
+var F=famillesPR();
+var C=94,ep=8,ecart=12,r0=84;
+var arcs=F.map(function(f,k){
+var r=r0-k*ecart;
+var per=2*Math.PI*r;
+var plein=monte?f.pct:0;
+return i("g",{key:k},
+i("circle",{cx:C,cy:C,r:r,fill:"none",stroke:P.line,strokeWidth:ep}),
+i("circle",{cx:C,cy:C,r:r,fill:"none",stroke:f.c,strokeWidth:ep,strokeLinecap:"round",
+strokeDasharray:per,strokeDashoffset:per*(1-plein),
+style:{transition:"stroke-dashoffset .9s cubic-bezier(.22,.8,.28,1)",
+transitionDelay:(k*110)+"ms",opacity:f.on?1:.28}}));});
+return i("div",{style:{display:"flex",alignItems:"center",gap:"26px",flexWrap:"wrap"}},
+i("div",{style:{position:"relative",flexShrink:0,width:(C*2)+"px",height:(C*2)+"px"}},
+i("svg",{viewBox:"0 0 "+(C*2)+" "+(C*2),width:C*2,height:C*2,
+style:{transform:"rotate(-90deg)"},role:"img",
+"aria-label":active+" "+_T("protections actives sur")+" "+total},arcs),
+i("div",{style:{position:"absolute",inset:0,display:"flex",flexDirection:"column",
+alignItems:"center",justifyContent:"center",pointerEvents:"none"}},
+i("div",{key:"s"+score,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"38px",
+fontWeight:"800",color:scol,letterSpacing:"-.05em",lineHeight:1}},score+"%"),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.faint,marginTop:"4px"}},
+active+" / "+total))),
+i("div",{style:{flex:1,minWidth:"190px"}},
+F.map(function(f,k){
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"10px",padding:"7px 0",
+borderBottom:k===F.length-1?"none":"1px solid "+P.line}},
+i("div",{"aria-hidden":"true",style:{width:"8px",height:"8px",borderRadius:"2px",flexShrink:0,
+background:f.on?f.c:P.faint,opacity:f.on?1:.5}}),
+i("div",{style:{flex:1,minWidth:0,fontSize:"12px",fontWeight:"600",
+color:f.on?P.pale:P.dim}},f.n),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"11px",flexShrink:0,
+color:f.on===f.tot?f.c:(f.on?P.sub:P.faint)}},f.on+"/"+f.tot));})));}
+
+// Ce qui a ete regarde, et ce qui a ete arrete. Un chiffre seul ne dit rien ;
+// la proportion, si.
+function fluxPR(){
+var arrete=cBloc+cSortie,vu=Math.max(arrete,cScan);
+var passe=Math.max(0,vu-arrete),tot=(arrete+passe)||1;
+return i("div",null,
+i("div",{style:{display:"flex",height:"9px",borderRadius:"99px",overflow:"hidden",
+background:P.line}},
+i("div",{"aria-hidden":"true",style:{width:(monte?(arrete/tot*100):0)+"%",
+background:_NXpal.ok,transition:"width .7s cubic-bezier(.22,.8,.28,1)"}}),
+i("div",{"aria-hidden":"true",style:{width:(monte?(passe/tot*100):0)+"%",
+background:P.mute,transition:"width .7s cubic-bezier(.22,.8,.28,1)"}})),
+i("div",{style:{display:"flex",gap:"18px",flexWrap:"wrap",marginTop:"11px"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px"}},
+i("span",{"aria-hidden":"true",style:{width:"7px",height:"7px",borderRadius:"2px",
+background:_NXpal.ok,flexShrink:0}}),
+i("span",{style:{fontSize:"11.5px",color:P.sub}},_NXn(arrete)+" "+_T("arretees"))),
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px"}},
+i("span",{"aria-hidden":"true",style:{width:"7px",height:"7px",borderRadius:"2px",
+background:P.mute,flexShrink:0}}),
+i("span",{style:{fontSize:"11.5px",color:P.sub}},_NXn(passe)+" "+_T("laissees passer")))));}
+
+// La tuile de Privacy, avec son interrupteur anime. Une ligne grise dans une
+// liste ne se distingue pas d une autre ; une tuile allumee, si.
+function tuilePR(it,on,click){
+return i("div",{key:it.k,className:"nx-fx",role:"button","aria-label":_T(it.t),
+"aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,onClick:click,
+style:{position:"relative",overflow:"hidden",cursor:"pointer",padding:"14px 15px",
+borderRadius:"15px",background:on?"linear-gradient(158deg,#131316,#0c0c0e)":P.inset,
+border:"1px solid "+(on?P.edge:P.line),
+transition:"border-color .22s ease,background .22s ease"}},
+on?i("div",{"aria-hidden":"true",style:{position:"absolute",left:0,top:0,bottom:0,width:"2px",
+background:scol,opacity:.85}}):null,
+i("div",{style:{display:"flex",alignItems:"flex-start",gap:"11px"}},
+i("div",{style:{flexShrink:0,width:"30px",height:"30px",borderRadius:"10px",
+display:"flex",alignItems:"center",justifyContent:"center",
+background:on?"rgba(255,255,255,.05)":"transparent",
+border:"1px solid "+(on?P.hair:P.line),
+color:on?scol:P.faint,transition:"color .22s ease,border-color .22s ease"}},
+i("svg",{viewBox:"0 0 24 24",width:16,height:16,fill:"currentColor","aria-hidden":"true"},
+i("path",{d:it.ic}))),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"12.5px",fontWeight:"700",letterSpacing:"-.01em",
+color:on?P.txt:P.sub,marginBottom:"5px",transition:"color .22s ease"}},_T(it.t)),
+i("div",{style:{fontSize:"11px",color:P.dim,lineHeight:1.6}},_T(it.d))),
+i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{flexShrink:0,width:"34px",height:"20px",
+borderRadius:"99px",marginTop:"3px",background:on?scol:"transparent",
+border:"1px solid "+(on?scol:P.faint),
+transition:"background .22s ease,border-color .22s ease"}},
+i("div",{style:{width:"13px",height:"13px",borderRadius:"50%",margin:"2.5px",
+background:on?_NXpal.ink:P.faint,
+transform:on?"translateX(14px)":"none",
+transition:"transform .22s cubic-bezier(.4,0,.2,1)"}}))));}
+
 function tApercu(){
 var gHotes=0;try{if(G&&G.stats&&G.stats.hotes)gHotes=Object.keys(G.stats.hotes).length;}catch(_){}
 return i("div",null,
@@ -11905,15 +12360,22 @@ background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",padding:"26px 24px",ma
 i("div",{"data-nx-halo":"1","aria-hidden":"true",style:{position:"absolute",right:"-80px",top:"-100px",width:"280px",height:"280px",borderRadius:"50%",
 background:"radial-gradient(circle,"+_NXteinte(scol,22)+",transparent 70%)",pointerEvents:"none"}}),
 _NXscan(_NXteinte(scol,7)),
-i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"22px",flexWrap:"wrap"}},
-_NXring(monte?score:0,scol,106,score+"%",_T("actif")),
-i("div",{style:{flex:1,minWidth:"186px"}},
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"9px"}},_T("Niveau de protection")),
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"26px",fontWeight:"800",color:P.txt,letterSpacing:"-.035em",lineHeight:1.12,marginBottom:"9px"}},_T(sclabel)),
-i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.6}},active+" "+_T("protections actives sur")+" "+total),
-i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"12px"}},
+i("div",{style:{position:"relative",display:"flex",alignItems:"baseline",
+justifyContent:"space-between",gap:"14px",flexWrap:"wrap",marginBottom:"4px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint}},_T("Niveau de protection")),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},active+" / "+total)),
+i("div",{style:{position:"relative",display:"flex",alignItems:"baseline",gap:"12px",
+flexWrap:"wrap",marginBottom:"14px"}},
+i("div",{style:{fontSize:"13px",color:P.sub,fontWeight:"600"}},_T(sclabel)),
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px"}},
 i("span",{"data-nx-dot":"1","aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",background:_NXpal.ok,flexShrink:0}}),
-i("span",{style:{fontSize:"11px",color:P.dim,lineHeight:1.5}},_T("Analyse en temps reel")+(gHotes?(" · "+gHotes+" "+_T("hote(s) inconnu(s) recense(s)")):""))))),
+i("span",{style:{fontSize:"11px",color:P.faint}},_T("Analyse en temps reel")+(gHotes?(" \u00b7 "+gHotes+" "+_T("hote(s) inconnu(s)")):"")))),
+i("div",{style:{position:"relative"}},anneauxPR()),
+i("div",{style:{position:"relative",marginTop:"22px",paddingTop:"19px",borderTop:"1px solid "+P.line}},
+i("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:"12px",marginBottom:"9px",flexWrap:"wrap"}},
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".14em",textTransform:"uppercase",color:P.faint}},_T("Ce qui a ete inspecte")),
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim}},_NXn(Math.max(cBloc+cSortie,cScan))+" "+_T("elements"))),
+fluxPR()),
 i("div",{style:{position:"relative",display:"flex",gap:"14px",flexWrap:"wrap",marginTop:"21px",paddingTop:"19px",borderTop:"1px solid "+P.line}},
 chiffre(_NXn(cBloc),_T("Menaces bloquées"),cBloc?_NXpal.danger:P.txt),
 chiffre(_NXn(cSortie),_T("Sorties arrêtées"),cSortie?_NXpal.ok:P.txt),
