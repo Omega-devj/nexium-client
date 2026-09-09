@@ -1,5 +1,236 @@
 # Nexium Client — Notes de version
 
+## v190 - Abonnements, tickets, et un client qui s ouvre sur quelque chose
+
+Cette version rassemble le travail des versions 185 a 190. Elle apporte trois
+choses neuves -- un ecran d ouverture, un systeme d abonnements, un support par
+tickets -- et reprend l esthetique de toutes les pages.
+
+### Le client s ouvre sur quelque chose
+
+Un ecran couvre Discord pendant qu il se prepare : le monogramme, une ligne de
+lecture technique, et les cinq etapes reelles du demarrage. La barre n avance
+pas sur une minuterie, elle avance sur des faits observes -- le document est
+pret, le point de montage existe, il a du contenu, l ecran de chargement de
+Discord a disparu, l ossature est en place.
+
+Trois defauts trouves et corriges, chacun mesure avant d y toucher :
+
+- L ecran etait pose puis DEPLACE dans le corps du document, ce qui redemarre
+  toutes les animations CSS : elles repartaient de zero au milieu du demarrage.
+  Il attend maintenant le corps, et ne bouge plus.
+- L arc qui tourne etait un element SVG, et Chromium calcule ces animations sur
+  le fil principal -- celui que Discord occupe pour monter son interface. L arc
+  se figeait donc exactement a la fin. Le mouvement a quitte le SVG.
+- Une trame animee plein ecran et trois nappes floues redessinaient une image
+  complete a chaque rafraichissement. Il ne reste que des transformations.
+
+Regle qui en decoule, verifiee par quarante-cinq tests : aucune animation de
+cet ecran ne passe par un etat invisible. Fige, il reste entierement lisible.
+Il mesure sa propre fluidite et se calme tout seul sous quarante-cinq images
+par seconde -- ce qui compte sur un client qui tourne sans carte graphique.
+
+### Les abonnements
+
+Trois offres generales -- Nexium Plus, Pro et Ultra -- et neuf offres par
+module a partir d un euro : Nexium IA Plus, Pro et Ultra ; Privacy One, One +
+et Extra One ; Security One, One + et Extra One.
+
+- Les comptes connus du serveur AVANT cette version gardent tout, a vie. La
+  comparaison se fait en base, entre leur date de premiere venue et la date de
+  bascule : rien dans le client ne peut la changer.
+- Les administrateurs ne sont pas concernes par les limites.
+- Un nouvel utilisateur sans abonnement garde le socle protecteur : liens
+  dangereux, hameconnage, fichiers pieges, garde console, coffre anti-vol,
+  telemetrie de base. Personne n est jamais moins protege qu avec un Discord
+  nu.
+- Une page Abonnement dit exactement ce que le compte ouvre, domaine par
+  domaine, avec les echeances et les jours restants.
+
+Sur la question du contournement, la reponse est honnete : le fichier du client
+est sur la machine de l utilisateur. Deux choses limitent la portee d une
+modification. Un reglage verrouille trouve actif est remis au repos au
+demarrage, a chaque ouverture de la page concernee, et toutes les cinq minutes.
+Et pour Nexium IA, la limite est appliquee par le relais, qui ne repond pas
+au-dela du niveau du compte quoi que fasse le client.
+
+### Le support par tickets
+
+Une page Support : tu ouvres un fil, l equipe repond dedans. Les demandes
+d abonnement passent par la, avec l offre deja renseignee.
+
+- Un vrai fil, en direct des deux cotes. Le canal de diffusion ne transporte
+  qu un signal : jamais le contenu. Chaque cote, prevenu, relit le fil par la
+  fonction qui verifie ses droits.
+- L acces repose sur un jeton remis a l ouverture, garde sur la machine. Un
+  identifiant Discord ne suffit pas a lire le ticket de quelqu un d autre.
+- Cote administration, un onglet Tickets avec la file, les etats, et un
+  raccourci qui pose l abonnement demande sans quitter le fil.
+- Un ticket disparait quinze jours apres son dernier message.
+
+### Le bac a sable, repare
+
+Il ne pouvait pas fonctionner : depuis Discord, lire une page d un autre
+domaine est refuse par le navigateur avant meme que la requete parte. Un relais
+va la chercher a la place du client.
+
+- La chaine de redirections est affichee : un lien raccourci ne cache plus rien
+- Le site inspecte ne voit ni l adresse IP ni le navigateur de l utilisateur
+- Les en-tetes de securite de la page sont rapportees
+- Les adresses du reseau local sont refusees, y compris apres redirection
+
+### Protect parle moins, protege pareil
+
+Ecrire a quelqu un declenchait une suite de bandeaux. Une conversation peut
+etre marquee de confiance, et un mode discret coupe les avis d ambiance
+partout. Ce qui est dangereux reste bloque dans les deux cas, et le code a
+coller dans la console se dit toujours.
+
+### Nexium IA
+
+Le fil est devenu une colonne unique : une rangee pleine largeur par tour, le
+texte sur une colonne de lecture fixe, une figure et un nom pour chaque
+interlocuteur. Le panneau flottant s etire par une poignee et retient sa
+taille. Des credits peuvent etre offerts a un compte : ils sont depenses avant
+le quota, et rendus si la demande echoue.
+
+### L administration
+
+- Offrir des credits Nexium IA a un compte
+- Bannir par compte, appareil ou installation, pour une duree ou definitivement
+- La session ne se coupe plus : le jeton se renouvelle une minute avant
+  l echeance, et une requete refusee pour jeton perime est rejouee une fois
+- Les utilisateurs, avec leur derniere venue, leur version, leurs credits
+- Rediger une alerte avec Nexium IA : une note en vrac devient un titre et un
+  resume, qu un humain relit avant publication
+- Les alertes de panne arrivent en une seconde au lieu de deux minutes
+
+### Une seule esthetique
+
+Soixante-dix icones partagees avec leurs animations de survol, une entete
+commune a quinze pages, une barre d onglets unique -- neuf barres presque
+identiques ont disparu. Tuiles, jauges en arc, courbes tracees au montage,
+barres qui poussent, notes colorees, boutons et champs sont desormais des
+briques communes.
+
+Tout ce mouvement s efface si le systeme demande moins d animation, ou si le
+mode economie est actif : les pages rendent alors exactement la meme chose,
+immobile.
+
+### Le reste
+
+- Nexium Auto sait envoyer des messages : dans le salon declencheur, dans un
+  salon nomme, ou en message prive. Coupe par defaut, plafonne a six envois par
+  heure, et journalise qu il reussisse ou non
+- Nexium Sponsor montre ses quatre emplacements tels qu ils apparaissent,
+  places libres comprises, avec six avantages dont chacun dit s il est
+  automatique ou pose a la main
+- Nexium Team n affiche plus l ecoute Spotify
+- Nexium Donnees remonte dans la section principale
+- Nexium Labo est retire ; son unique essai devient un reglage de Nexium Music
+- L accueil : constellation des huit modules, quatre jauges, courbe des
+  vingt-quatre heures, et les reglages de demarrage et de mouvement
+
+## v185 - Un ecran d ouverture, et une seule esthetique
+
+### Le client s ouvre sur quelque chose
+
+Un ecran couvre desormais Discord pendant qu il se prepare : le logo, une
+barre, et le nom de l etape en cours. La barre n avance pas sur une minuterie
+mais sur des faits observes -- le document est pret, le point de montage
+existe, il a du contenu, l ecran de chargement de Discord a disparu, l ossature
+est en place.
+
+Il s efface une fois et demie apres que le client soit reellement la, pas
+avant : la fenetre de Discord n est affichee qu a ce moment-la, et l ancien
+compte a rebours partait du chargement du script. Une borne dure de douze
+secondes retire l ecran quoi qu il arrive.
+
+Une regle en est sortie, verifiee par vingt-neuf tests : aucune animation de
+cet ecran ne passe par un etat invisible. Chromium gele la ligne de temps des
+animations tant que la fenetre n a pas ete peinte ; un contenu qui part de
+opacity:0 reste donc invisible pour toujours. L etat de repos est l etat
+visible, et le mouvement n est ajoute qu a la premiere image reellement peinte.
+
+L animation se coupe depuis l accueil, et se rejoue sans redemarrer.
+
+### Nexium Admin : donner, bannir, rester connecte
+
+- Offrir des credits Nexium IA a un compte. Ils sont depenses avant le
+  quota des sept heures, et rendus si la demande echoue -- le relais a ete
+  repris pour cela.
+- Bannir depuis le client, par compte, par appareil ou par installation,
+  pour une duree ou definitivement. Le client interroge maintenant deux
+  sources : le fichier du depot et cette table. Un bannissement definitif
+  reste reserve au proprietaire.
+- La session ne se coupe plus. Le jeton de renouvellement est garde et
+  rejoue une minute avant l echeance ; une requete refusee pour cause de jeton
+  perime est relancee une fois. Le stockage est brouille avec l identifiant
+  d installation -- ce n est pas du chiffrement, et la page le dit.
+- Les utilisateurs, avec leur derniere venue, leur version, leurs credits
+  et leur etat de bannissement. Chercher, offrir, bannir depuis la fiche.
+- Rediger une alerte avec Nexium IA : une note jetee en vrac devient un
+  titre, un resume et un niveau. Le modele propose, un humain relit.
+- Cinq onglets, un journal d audit qui dit qui a fait quoi.
+
+### Les alertes arrivent en une seconde
+
+La table des alertes est diffusee en direct : une alerte ouverte n attend plus
+deux minutes. Le sondage reste en place comme filet, a trente secondes au lieu
+de cent vingt, et la liaison se rattrape toute seule si elle tombe.
+
+Le bandeau a ete redessine : pastille coloree par niveau, etat, anciennete,
+les deux dernieres mises a jour de l incident, et une pile derriere quand il y
+en a plusieurs. Deux boutons de plus : Expliquer ouvre Nexium IA avec la
+question deja posee, Plus tard repousse de deux heures.
+
+### Une seule esthetique, partout
+
+- Un jeu de soixante-dix icones partage par toutes les pages, avec leurs
+  animations de survol : elles tournent, penchent, sautent ou tremblent selon
+  ce qu elles designent.
+- Une entete commune : blason anime, anneaux concentriques, chiffres clefs.
+  Quinze pages en heritent d un coup.
+- Une barre d onglets commune, avec son trait qui glisse, ses icones et ses
+  pastilles de compte. Neuf barres presque identiques ont disparu.
+- Des briques partagees : tuiles, jauges en arc, courbes tracees au montage,
+  barres qui poussent, notes colorees, boutons, champs.
+- Tout ce mouvement s efface si le systeme demande moins d animation, ou si le
+  mode economie est actif. Les pages rendent alors exactement la meme chose,
+  immobile.
+
+### Nexium IA ressemble a ce qu on attend d un chat
+
+Le fil est devenu une colonne unique : une rangee pleine largeur par tour, le
+texte sur une colonne de lecture fixe, une figure et un nom pour chaque
+interlocuteur. Plus de bulle a droite d un cote et de filet a gauche de l
+autre. Le composeur est pose sur le fil, arrondi, avec un degrade qui evite la
+coupe nette. Le fil vide propose trois pistes, tirees de l etat reel du client.
+
+### Nexium Auto sait envoyer des messages
+
+Trois actions nouvelles, qui portent le moteur a 25 actions : repondre dans le salon qui a declenche la regle,
+ecrire dans un salon nomme, envoyer un message prive. C est la seule chose que
+le moteur fait qui parle a quelqu un d autre : elle est donc coupee par
+defaut, plafonnee (six envois par heure, vingt-cinq secondes entre deux), et
+inscrite au journal qu elle reussisse ou non. Un onglet Envoi montre ce qui est
+autorise, ce qui a ete envoye dans l heure, et quelles regles peuvent parler.
+
+### Le reste
+
+- Nexium Sponsor : quatre emplacements montres tels qu ils apparaissent,
+  places libres comprises. Six avantages, chacun avec ce qu il est vraiment --
+  automatique, ou pose a la main. Trois formules, quatre etapes, six questions.
+  Aucun serveur Discord a rejoindre : tout passe par message prive.
+- Nexium Team : l ecoute Spotify n est plus affichee. Le reste de l
+  activite l est toujours.
+- Nexium Donnees remonte dans la section Nexium, juste apres Comptes.
+- L accueil : constellation des huit modules, quatre jauges en arc, courbe
+  et barres des vingt-quatre heures, tuiles groupees, et les reglages de
+  demarrage et de mouvement.
+- Nexium Labo est retire. Son unique essai -- l onde detaillee du lecteur
+  -- devient un reglage normal de Nexium Music.
+
 ## v184 - La page d accueil, illustree
 
 ### Une vraie illustration, et qui dit quelque chose

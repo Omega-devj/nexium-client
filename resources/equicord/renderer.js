@@ -383,7 +383,7 @@ var s1=(base[0]||"?").charAt(0);
 var s2=base.length>1?base[1].charAt(0):"";
 return (s1+s2).toUpperCase();}
 
-var NB=(window._NXLAB&&_NXLAB.actif("music_onde_fine"))?144:72;
+var NB=(_NXM.cfg&&_NXM.cfg.ondeFine)?144:72;
 function empreinte(t,n){
 n=n||NB;
 var v=hache(t),out=[];
@@ -663,17 +663,7 @@ i("svg",{viewBox:"0 0 24 24",width:14,height:14,fill:"currentColor","aria-hidden
 i("path",{d:glyphe})),lab);}
 
 var TABS=[["collection","Collection"],["reglages","R\u00e9glages"]];
-function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Music"),
-style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
-TABS.map(function(t){var on=tab===t[0];
-return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
-"aria-label":_T(t[1]),"data-nx-tab":"1",onClick:function(){if(tab!==t[0]){setTab(t[0]);setQ("");}},
-style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",
-letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
-_T(t[1]),
-i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",
-borderRadius:"2px",background:on?C(1):P.txt,transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
-transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function tabbar(){return _NXFX.onglets(TABS,tab,function(k){if(tab!==k){setTab(k);setQ("");}},{col:_NXpal.rose});}
 
 var RECHARGE="M17.65 6.35A8 8 0 1 0 19.73 14h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z";
 function vide(titre,texte,ton){
@@ -914,6 +904,69 @@ _NXMO.CSS=[
 '.nx-anim [data-nx-grow="6"]{animation-delay:.24s}',
 '.nx-anim [data-nx-run]{animation:nx-run 2.6s cubic-bezier(.45,0,.55,1) infinite}',
 '.nx-anim [data-nx-halo]{animation:nx-halo 4.2s ease-in-out infinite;will-change:opacity,transform}',
+'@keyframes nx-float{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-3px,0)}}',
+'@keyframes nx-bob{0%,100%{transform:translate3d(0,0,0) rotate(0)}25%{transform:translate3d(0,-2px,0) rotate(-5deg)}75%{transform:translate3d(0,1px,0) rotate(5deg)}}',
+'@keyframes nx-beat{0%,100%{transform:scale(1)}14%{transform:scale(1.17)}28%{transform:scale(1)}42%{transform:scale(1.1)}56%{transform:scale(1)}}',
+'@keyframes nx-swing{0%,100%{transform:rotate(0)}20%{transform:rotate(10deg)}40%{transform:rotate(-8deg)}60%{transform:rotate(5deg)}80%{transform:rotate(-2deg)}}',
+'@keyframes nx-wob{0%,100%{transform:rotate(0) scale(1)}30%{transform:rotate(-7deg) scale(1.07)}70%{transform:rotate(7deg) scale(1.07)}}',
+'@keyframes nx-draw{from{stroke-dashoffset:var(--nx-len,140)}to{stroke-dashoffset:0}}',
+'@keyframes nx-orbit{from{transform:rotate(0) translateX(var(--nx-r,7px)) rotate(0)}to{transform:rotate(360deg) translateX(var(--nx-r,7px)) rotate(-360deg)}}',
+'@keyframes nx-tick{0%{transform:scale(.35);opacity:0}60%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}',
+'@keyframes nx-glow{0%,100%{filter:drop-shadow(0 0 0 currentColor)}50%{filter:drop-shadow(0 0 5px currentColor)}}',
+'@keyframes nx-shake{0%,100%{transform:translate3d(0,0,0)}20%{transform:translate3d(-2px,0,0)}40%{transform:translate3d(2px,0,0)}60%{transform:translate3d(-1px,0,0)}80%{transform:translate3d(1px,0,0)}}',
+'@keyframes nx-zoom{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}',
+'@keyframes nx-slidel{from{opacity:0;transform:translate3d(-14px,0,0)}to{opacity:1;transform:none}}',
+'@keyframes nx-slider{from{opacity:0;transform:translate3d(14px,0,0)}to{opacity:1;transform:none}}',
+'@keyframes nx-blurin{from{opacity:0;filter:blur(7px)}to{opacity:1;filter:blur(0)}}',
+'@keyframes nx-wave{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-5px,0)}}',
+'@keyframes nx-dash{to{stroke-dashoffset:-64}}',
+'@keyframes nx-ripple{0%{transform:scale(.55);opacity:.45}100%{transform:scale(2.2);opacity:0}}',
+'@keyframes nx-marquee{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}',
+'@keyframes nx-sheen2{0%{transform:translate3d(-130%,0,0) rotate(16deg)}100%{transform:translate3d(340%,0,0) rotate(16deg)}}',
+'@keyframes nx-drift{0%{transform:translate3d(0,0,0)}50%{transform:translate3d(6px,-8px,0)}100%{transform:translate3d(0,0,0)}}',
+'@keyframes nx-flip{from{transform:rotateY(-90deg);opacity:0}to{transform:none;opacity:1}}',
+'@keyframes nx-stroke{0%{stroke-dashoffset:var(--nx-len,140);opacity:0}12%{opacity:1}100%{stroke-dashoffset:0;opacity:1}}',
+'.nx-anim [data-nx-float]{animation:nx-float 3.4s ease-in-out infinite;will-change:transform}',
+'.nx-anim [data-nx-bob]{animation:nx-bob 4.2s ease-in-out infinite;will-change:transform}',
+'.nx-anim [data-nx-beat]{animation:nx-beat 2.6s ease-in-out infinite;will-change:transform}',
+'.nx-anim [data-nx-swing]{animation:nx-swing 3.8s ease-in-out infinite;transform-origin:top center}',
+'.nx-anim [data-nx-glow]{animation:nx-glow 3.2s ease-in-out infinite}',
+'.nx-anim [data-nx-shake]{animation:nx-shake .5s ease-in-out}',
+'.nx-anim [data-nx-zoom]{animation:nx-zoom .3s cubic-bezier(.22,.8,.28,1) both}',
+'.nx-anim [data-nx-slidel]{animation:nx-slidel .34s cubic-bezier(.22,.8,.28,1) both}',
+'.nx-anim [data-nx-slider]{animation:nx-slider .34s cubic-bezier(.22,.8,.28,1) both}',
+'.nx-anim [data-nx-blurin]{animation:nx-blurin .5s ease both}',
+'.nx-anim [data-nx-drift]{animation:nx-drift 14s ease-in-out infinite;will-change:transform}',
+'.nx-anim [data-nx-flip]{animation:nx-flip .4s cubic-bezier(.22,.8,.28,1) both}',
+'.nx-anim [data-nx-trace]{stroke-dasharray:var(--nx-len,140);animation:nx-stroke 1.5s cubic-bezier(.5,0,.2,1) both}',
+'.nx-anim [data-nx-dashy]{stroke-dasharray:6 6;animation:nx-dash 3.4s linear infinite}',
+'.nx-anim [data-nx-marquee] > *{animation:nx-marquee 26s linear infinite}',
+'.nx-anim [data-nx-ripple]{animation:nx-ripple 2.6s cubic-bezier(.2,.7,.4,1) infinite}',
+'.nx-anim [data-nx-sheen]{position:relative;overflow:hidden}',
+'.nx-anim [data-nx-sheen]::after{content:"";position:absolute;top:-60%;bottom:-60%;width:34%;'
++'background:linear-gradient(90deg,transparent,rgba(255,255,255,.09),transparent);animation:nx-sheen2 4.6s ease-in-out infinite;pointer-events:none}',
+'[data-nx-ico]{display:inline-flex;align-items:center;justify-content:center}',
+'.nx-anim [data-nx-ico]{transition:transform .3s cubic-bezier(.34,1.45,.5,1),color .2s ease}',
+'.nx-anim [data-nx-lift]:hover [data-nx-ico],.nx-anim [data-nx-tile]:hover [data-nx-ico],.nx-anim .nx-fx:hover [data-nx-ico]{transform:scale(1.16)}',
+'.nx-anim [data-nx-tile]:hover [data-nx-ico="tourne"],.nx-anim [data-nx-lift]:hover [data-nx-ico="tourne"]{transform:rotate(90deg) scale(1.1)}',
+'.nx-anim [data-nx-tile]:hover [data-nx-ico="penche"],.nx-anim [data-nx-lift]:hover [data-nx-ico="penche"]{transform:rotate(-9deg) scale(1.16)}',
+'.nx-anim [data-nx-tile]:hover [data-nx-ico="saute"],.nx-anim [data-nx-lift]:hover [data-nx-ico="saute"]{transform:translate3d(0,-3px,0) scale(1.12)}',
+'.nx-anim [data-nx-tile]:hover [data-nx-ico="secoue"],.nx-anim [data-nx-lift]:hover [data-nx-ico="secoue"]{animation:nx-wob .55s ease-in-out}',
+'.nx-anim [data-nx-tile]:hover [data-nx-ico="pousse"],.nx-anim [data-nx-lift]:hover [data-nx-ico="pousse"]{transform:translate3d(3px,0,0) scale(1.1)}',
+'.nx-anim [data-nx-rise="7"]{animation-delay:.2s}',
+'.nx-anim [data-nx-rise="8"]{animation-delay:.23s}',
+'.nx-anim [data-nx-rise="9"]{animation-delay:.26s}',
+'.nx-anim [data-nx-rise="10"]{animation-delay:.29s}',
+'.nx-anim [data-nx-rise="11"]{animation-delay:.32s}',
+'.nx-anim [data-nx-rise="12"]{animation-delay:.35s}',
+'.nx-anim [data-nx-souligne]{position:relative}',
+'.nx-anim [data-nx-souligne]::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;'
++'background:currentColor;transform:scaleX(0);transform-origin:left center;transition:transform .26s cubic-bezier(.22,.8,.28,1)}',
+'.nx-anim [data-nx-souligne]:hover::after{transform:scaleX(1)}',
+'.nx-anim [data-nx-carte]{transition:transform .26s cubic-bezier(.22,.8,.28,1),box-shadow .26s ease,border-color .26s ease}',
+'.nx-anim [data-nx-carte]:hover{transform:translate3d(0,-2px,0);box-shadow:0 10px 30px rgba(0,0,0,.32)}',
+'.nx-anim [data-nx-appui]:active{transform:scale(.975)}',
+'[data-nx-defile]{scroll-behavior:smooth}',
 '[data-nx-rise],[data-nx-fade]{animation:none}',
 '@media (prefers-reduced-motion: reduce){.nx-anim *{animation:none!important;transition:none!important}}'
 ].join("\n");
@@ -944,6 +997,1271 @@ if(mq.addEventListener)mq.addEventListener("change",function(){_NXMO.apply();});
 else if(mq.addListener)mq.addListener(function(){_NXMO.apply();});}
 })();}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXMO");if(window._NXERR)_NXERR.push("module _NXMO :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXMO desactive:",_nxE);}catch(_){}}
+}
+var _NXFX=window._NXFX||(window._NXFX={});
+if(!_NXFX.boot){try{_NXFX.boot=true;
+// La boite a outils visuelle partagee par toutes les pages : un jeu d icones,
+// et les quelques briques qui reviennent partout (entete, onglets, tuiles,
+// jauges). Le mouvement y est toujours conditionnel : si le systeme demande
+// moins d animation, ou si le mode economie est actif, ces fonctions rendent
+// exactement la meme chose, immobile. Rien ne disparait, rien ne se decale.
+_NXFX.anime=function(){try{
+if(!window._NXMO||!_NXMO.on)return false;
+if(_NXMO.reduced())return false;
+if(window._NXECO&&_NXECO.actif&&_NXECO.actif()&&_NXECO.cfg&&_NXECO.cfg.legerAnim)return false;
+return true;}catch(_){return false;}};
+// Attributs d animation, poses seulement si l animation a lieu d etre.
+_NXFX.a=function(o){try{if(!_NXFX.anime())return {};var r={};for(var k in o)r[k]=o[k];return r;}catch(_){return {};}};
+_NXFX.fusion=function(base,extra){try{var o={},k;for(k in base)o[k]=base[k];if(extra)for(k in extra)o[k]=extra[k];return o;}catch(_){return base||{};}};
+
+// --------------------------------------------------------------- les traces
+// Tout est dessine sur une grille de 24, en aplat : une seule couleur, celle
+// du texte courant. Une icone ne porte donc jamais sa propre teinte -- c est
+// son contenant qui decide, et le survol peut la changer d un seul reglage.
+_NXFX.D={
+accueil:"M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z",
+etincelle:"M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 10l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6z",
+comptes:"M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z",
+maj:"M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z",
+liste:"M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h12v2H3v-2z",
+bouclier:"M12 2 4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z",
+bouclierOk:"M12 2 4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z",
+oeil:"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
+oeilBarre:"M12 7a5 5 0 0 1 5 5c0 .65-.13 1.26-.36 1.83l2.92 2.92A11.8 11.8 0 0 0 23 12c-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.15 2.15C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46A11.8 11.8 0 0 0 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65a3 3 0 0 0 3 3c.22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53a5 5 0 0 1-5-5c0-.79.2-1.53.53-2.2z",
+graphe:"M3.5 18.5l6-6 4 4L22 6.92 20.59 5.5l-7.09 8.09-4-4L2 16.5l1.5 2z",
+eclair:"M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z",
+note:"M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z",
+base:"M12 2C7 2 3 3.6 3 5.5v13C3 20.4 7 22 12 22s9-1.6 9-3.5v-13C21 3.6 17 2 12 2zm0 2c4.4 0 7 1.3 7 1.5S16.4 7 12 7 5 5.7 5 5.5 7.6 4 12 4zM5 8.2C6.7 9.1 9.2 9.5 12 9.5s5.3-.4 7-1.3v3.1c0 .2-2.6 1.5-7 1.5s-7-1.3-7-1.5V8.2zm0 5.5C6.7 14.6 9.2 15 12 15s5.3-.4 7-1.3v3.1c0 .2-2.6 1.5-7 1.5s-7-1.3-7-1.5v-3.1z",
+equipe:"M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.18.68-2.26 1.76-2.73 1.17-.52 2.61-.91 4.24-.91zM4 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c-.37-.06-.74-.1-1.13-.1-.99 0-1.93.21-2.78.58A2.01 2.01 0 0 0 0 16.43V18h4.5v-1.61c0-.83.23-1.61.63-2.29zM20 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4 3.43c0-.81-.48-1.53-1.22-1.85A6.95 6.95 0 0 0 20 14c-.39 0-.76.04-1.13.1.4.68.63 1.46.63 2.29V18H24v-1.57zM12 6c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z",
+coeur:"M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z",
+reseau:"M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.07 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z",
+check:"M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z",
+croix:"M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
+alerte:"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z",
+info:"M11 7h2v2h-2V7zm0 4h2v6h-2v-6zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z",
+cadenas:"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z",
+cadenasOuvert:"M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z",
+cle:"M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z",
+horloge:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z",
+loupe:"M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+plus:"M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+moins:"M19 13H5v-2h14v2z",
+poubelle:"M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z",
+crayon:"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
+copie:"M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z",
+telecharge:"M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z",
+televerse:"M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z",
+envoi:"M2.01 21 23 12 2.01 3 2 10l15 2-15 2z",
+lecture:"M8 5v14l11-7z",
+pause:"M6 19h4V5H6v14zm8-14v14h4V5h-4z",
+reglages:"M19.14 12.94a7.07 7.07 0 0 0 0-1.88l2.03-1.58a.5.5 0 0 0 .12-.63l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.2 7.2 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 2h-3.84a.5.5 0 0 0-.49.42l-.36 2.54c-.59.24-1.13.56-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.67 8.48a.5.5 0 0 0 .12.63l2.03 1.58a7.07 7.07 0 0 0 0 1.88l-2.03 1.58a.5.5 0 0 0-.12.63l1.92 3.32c.12.22.38.3.6.22l2.39-.96c.5.38 1.04.7 1.63.94l.36 2.54c.04.24.25.42.49.42h3.84c.24 0 .45-.18.49-.42l.36-2.54c.59-.24 1.13-.56 1.63-.94l2.39.96c.22.08.48 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.63l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z",
+etoile:"M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z",
+feu:"M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36A10.54 10.54 0 0 0 4 12a8 8 0 1 0 16 0c0-4.84-2.34-9.16-6.5-11.33zM11.71 19a3.2 3.2 0 0 1-3.21-3.15c0-1.6 1.03-2.73 2.76-3.08 1.74-.35 3.53-1.19 4.53-2.54.38 1.26.58 2.59.58 3.94A4.71 4.71 0 0 1 11.71 19z",
+cadeau:"M20 6h-2.18A3 3 0 0 0 13 2.5L12 3.6l-1-1.1A3 3 0 0 0 6.18 6H4a2 2 0 0 0-2 2v2h9V8h2v2h9V8a2 2 0 0 0-2-2zM9 6a1 1 0 1 1 0-2c.5 0 .9.3 1.2.7L11 6H9zm6 0h-2l.8-1.3A1.4 1.4 0 0 1 15 4a1 1 0 1 1 0 2zM2 12v8a2 2 0 0 0 2 2h7V12H2zm11 10h7a2 2 0 0 0 2-2v-8h-9v10z",
+jeton:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15.93V19h-2v-1.08a4 4 0 0 1-3-3.42h2a2 2 0 0 0 2 1.75c1.1 0 2-.6 2-1.4 0-.72-.5-1.1-2.2-1.5-1.9-.45-3.6-1.1-3.6-3.1a3.4 3.4 0 0 1 2.8-3.2V5h2v1.06a3.6 3.6 0 0 1 2.9 3.19h-2c-.1-.9-.8-1.5-1.9-1.5-1.1 0-1.9.55-1.9 1.3 0 .68.55 1.02 2.2 1.42 1.95.47 3.6 1.15 3.6 3.2a3.5 3.5 0 0 1-2.9 3.26z",
+banni:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM4 12a8 8 0 0 1 12.9-6.32L5.68 16.9A7.96 7.96 0 0 1 4 12zm8 8a7.96 7.96 0 0 1-4.9-1.68L18.32 7.1A8 8 0 0 1 12 20z",
+couronne:"M5 16 3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 3h14v2H5v-2z",
+cloche:"M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z",
+courrier:"M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z",
+lien:"M3.9 12a3.1 3.1 0 0 1 3.1-3.1h4V7H7a5 5 0 0 0 0 10h4v-1.9H7A3.1 3.1 0 0 1 3.9 12zM8 13h8v-2H8v2zm9-6h-4v1.9h4a3.1 3.1 0 1 1 0 6.2h-4V17h4a5 5 0 0 0 0-10z",
+globe:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.93 6h-2.95a15.6 15.6 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.93 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14A7.8 7.8 0 0 1 4 12c0-.69.1-1.36.26-2h3.38a16.5 16.5 0 0 0 0 4H4.26zm.81 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.99 7.99 0 0 1 5.07 16zm2.95-8H5.07a7.99 7.99 0 0 1 4.33-3.56A15.6 15.6 0 0 0 8.02 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82A13.7 13.7 0 0 1 12 19.96zM14.34 14H9.66a14.7 14.7 0 0 1 0-4h4.68a14.7 14.7 0 0 1 0 4zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14a16.5 16.5 0 0 0 0-4h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z",
+puce:"M15 9H9v6h6V9zm-2 4h-2v-2h2v2zm8-2V9h-2V7a2 2 0 0 0-2-2h-2V3h-2v2h-2V3H9v2H7a2 2 0 0 0-2 2v2H3v2h2v2H3v2h2v2a2 2 0 0 0 2 2h2v2h2v-2h2v2h2v-2h2a2 2 0 0 0 2-2v-2h2v-2h-2v-2h2zm-4 6H7V7h10v10z",
+terminal:"M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 14H4V8h16v10zM6.5 10 5 11.5 7.5 14 5 16.5 6.5 18l4-4-4-4zM12 16.5h6V18h-6v-1.5z",
+code:"M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z",
+livre:"M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM6 4h5v8l-2.5-1.5L6 12V4z",
+question:"M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14a4 4 0 0 0-4 4h2a2 2 0 1 1 4 0c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5a4 4 0 0 0-4-4z",
+fleche:"M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z",
+retour:"M12 4l1.41 1.41L7.83 11H20v2H7.83l5.58 5.59L12 20l-8-8z",
+chevron:"M9.29 6.71a1 1 0 0 0 0 1.41L13.17 12l-3.88 3.88a1 1 0 1 0 1.42 1.41l4.59-4.59a1 1 0 0 0 0-1.41L10.71 6.7a1 1 0 0 0-1.42 0z",
+externe:"M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z",
+baguette:"M7.5 5.6 5 7l1.4-2.5L5 2l2.5 1.4L10 2 8.6 4.5 10 7 7.5 5.6zm12 9.8L22 14l-1.4 2.5L22 19l-2.5-1.4L17 19l1.4-2.5L17 14l2.5 1.4zM22 2l-1.4 2.5L22 7l-2.5-1.4L17 7l1.4-2.5L17 2l2.5 1.4L22 2zm-8.7 6.29a1 1 0 0 0-1.41 0l-9.6 9.6a1 1 0 0 0 0 1.41l1.41 1.41a1 1 0 0 0 1.41 0l9.6-9.6a1 1 0 0 0 0-1.41l-1.41-1.41z",
+cible:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm0-14a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z",
+drapeau:"M14.4 6 14 4H5v17h2v-7h5.6l.4 2h7V6z",
+couches:"M12 2 1 8l11 6 9-4.91V17h2V8L12 2zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z",
+grille:"M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z",
+calendrier:"M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 18H5V9h14v12z",
+pouls:"M20 12h-2.5l-2.1 6.3a1 1 0 0 1-1.9-.02L9.9 6.9l-1.6 4.77a1 1 0 0 1-.95.68H4v-2h2.63l2.42-7.22a1 1 0 0 1 1.9.02l3.6 11.4 1.55-4.66a1 1 0 0 1 .95-.69H20v2z",
+image:"M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z",
+dossier:"M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z",
+etiquette:"M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7c0 .55.22 1.05.59 1.42l9 9A2 2 0 0 0 13 22a2 2 0 0 0 1.41-.59l7-7A2 2 0 0 0 22 13a2 2 0 0 0-.59-1.42zM5.5 7A1.5 1.5 0 1 1 5.5 4a1.5 1.5 0 0 1 0 3z",
+filtre:"M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z",
+boussole:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm2.19 12.19L6 18l3.81-8.19L18 6l-3.81 8.19zM12 10.9a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2z",
+robot:"M20 9V7a2 2 0 0 0-2-2h-3V3h-2v2h-2V3H9v2H6a2 2 0 0 0-2 2v2H2v4h2v2a2 2 0 0 0 2 2h3v2h2v-2h2v2h2v-2h3a2 2 0 0 0 2-2v-2h2V9h-2zM9.5 14a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z",
+boite:"M12 2 3 7v10l9 5 9-5V7l-9-5zm0 2.31L18.5 8 12 11.69 5.5 8 12 4.31zM5 9.72l6 3.41v6.15l-6-3.33V9.72zm8 9.56v-6.15l6-3.41v6.23l-6 3.33z",
+nuage:"M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.99 5.99 0 0 0 6 20h13a5 5 0 0 0 .35-9.96z",
+batterie:"M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z",
+micro:"M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z",
+casque:"M12 1a9 9 0 0 0-9 9v7a3 3 0 0 0 3 3h3v-8H5v-2a7 7 0 1 1 14 0v2h-4v8h3a3 3 0 0 0 3-3v-7a9 9 0 0 0-9-9z",
+point:"M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"};
+_NXFX.trace=function(nom){try{return _NXFX.D[nom]||_NXFX.D.point;}catch(_){return "";}};
+
+// Une icone nue. `mv` nomme l animation permanente eventuelle (float, bob,
+// beat, swing, glow) ; `hv` celle du survol du contenant (tourne, penche,
+// saute, secoue, pousse). Les deux sont ignorees si l animation est coupee.
+_NXFX.svg=function(nom,z,opt){try{
+opt=opt||{};z=z||18;
+var att={viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"};
+if(opt.style)att.style=opt.style;
+return i("svg",att,i("path",{d:_NXFX.trace(nom)}));}catch(_){return null;}};
+_NXFX.ico=function(nom,z,opt){try{
+opt=opt||{};
+var att={"data-nx-ico":opt.hv||"1",style:_NXFX.fusion({color:opt.col||"inherit",lineHeight:0},opt.style)};
+if(opt.mv&&_NXFX.anime())att["data-nx-"+opt.mv]="1";
+return i("span",att,_NXFX.svg(nom,z||18));}catch(_){return null;}};
+
+// La pastille : une icone posee dans un carre arrondi, avec un halo discret
+// qui prend la teinte donnee. C est la brique de toutes les listes.
+_NXFX.pastille=function(nom,opt){try{
+opt=opt||{};
+var P=_NXpal,col=opt.col||P.sub,t=opt.taille||34;
+return i("div",{style:{position:"relative",width:t+"px",height:t+"px",borderRadius:Math.round(t*0.32)+"px",
+flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",
+background:opt.plein?col:_NXteinte(col,opt.fond||.1),
+border:"1px solid "+(opt.plein?col:_NXteinte(col,.22)),
+color:opt.plein?P.ink:col,overflow:"hidden"}},
+opt.halo&&_NXFX.anime()?i("div",{"data-nx-halo":"1","aria-hidden":"true",style:{position:"absolute",inset:"-30%",
+background:"radial-gradient(circle,"+_NXteinte(col,.3)+",transparent 68%)",pointerEvents:"none"}}):null,
+i("div",{style:{position:"relative",display:"flex"}},_NXFX.ico(nom,opt.z||Math.round(t*0.52),{mv:opt.mv,hv:opt.hv})));}catch(_){return null;}};
+
+// La grande icone d entete : trois anneaux concentriques, un halo, l icone.
+_NXFX.blason=function(nom,col,taille){try{
+var P=_NXpal,t=taille||76,c=col||P.acc,r=t/2;
+var an=_NXFX.anime();
+return i("div",{style:{position:"relative",width:t+"px",height:t+"px",flexShrink:0}},
+i("svg",{viewBox:"0 0 100 100",width:t,height:t,"aria-hidden":"true",style:{position:"absolute",inset:0}},
+i("circle",_NXFX.fusion({cx:50,cy:50,r:47,fill:"none",stroke:_NXteinte(c,.16),"strokeWidth":1},an?{"data-nx-spin":"1",style:{transformOrigin:"50% 50%",animationDuration:"38s"},"strokeDasharray":"3 7"}:{})),
+i("circle",{cx:50,cy:50,r:38,fill:_NXteinte(c,.07),stroke:_NXteinte(c,.24),"strokeWidth":1}),
+i("circle",_NXFX.fusion({cx:50,cy:50,r:30,fill:"none",stroke:_NXteinte(c,.3),"strokeWidth":1,"strokeDasharray":"46 142"},
+an?{"data-nx-spin":"1",style:{transformOrigin:"50% 50%",animationDuration:"14s",animationDirection:"reverse"}}:{}))),
+i("div",_NXFX.fusion({style:{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",color:c}},
+an?{"data-nx-float":"1"}:{}),_NXFX.svg(nom,Math.round(t*0.34))),
+an?i("div",{"data-nx-halo":"1","aria-hidden":"true",style:{position:"absolute",inset:"-22%",borderRadius:"50%",
+background:"radial-gradient(circle,"+_NXteinte(c,.2)+",transparent 66%)",pointerEvents:"none"}}):null);}catch(_){return null;}};
+
+// L entete de page : blason anime, surtitre, titre, phrase, et une bande de
+// chiffres facultative. Toutes les pages partagent desormais cette forme.
+_NXFX.entete=function(o){try{
+o=o||{};var P=_NXpal,c=o.col||P.acc;
+return i("div",_NXFX.fusion({style:{position:"relative",marginBottom:"24px",paddingTop:"2px"}},_NXFX.a({"data-nx-fade":"1"})),
+i("div",{"aria-hidden":"true",style:{position:"absolute",left:"-60px",top:"-70px",width:"420px",height:"210px",
+background:"radial-gradient(52% 66% at 8% 42%,"+_NXteinte(c,.09)+",transparent 72%)",pointerEvents:"none"}}),
+i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"18px"}},
+o.icone?_NXFX.blason(o.icone,c,o.taille||74):null,
+i("div",{style:{flex:1,minWidth:0}},
+i("div",_NXFX.fusion({style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"9px"}},_NXFX.a({"data-nx-slidel":"1"})),
+i("div",_NXFX.fusion({style:{width:"6px",height:"6px",borderRadius:"50%",background:c,boxShadow:"0 0 10px "+_NXteinte(c,.5)}},_NXFX.a({"data-nx-dot":"1"}))),
+i("div",{style:{fontSize:"10.5px",fontWeight:"800",letterSpacing:".26em",color:P.sub,textTransform:"uppercase"}},o.cle||""),
+o.marque?i("div",{style:{marginLeft:"4px",fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,
+border:"1px solid "+P.hair,borderRadius:"99px",padding:"1px 8px"}},o.marque):null),
+i("div",_NXFX.fusion({style:{fontFamily:_NXf.disp,fontSize:"33px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.035em",lineHeight:1.03}},_NXFX.a({"data-nx-blurin":"1"})),o.titre||""),
+o.texte?i("div",{style:{fontSize:"13.5px",color:P.sub,marginTop:"11px",lineHeight:1.62,maxWidth:"560px"}},o.texte):null)),
+o.chiffres&&o.chiffres.length?i("div",{style:{position:"relative",display:"flex",gap:"22px",marginTop:"20px",flexWrap:"wrap"}},
+o.chiffres.map(function(x,k){return i("div",_NXFX.fusion({key:k,style:{minWidth:"84px"}},_NXFX.a({"data-nx-rise":String(k+1)})),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"21px",fontWeight:"800",color:x.col||P.txt,letterSpacing:"-.02em",
+fontVariantNumeric:"tabular-nums",lineHeight:1}},x.v),
+i("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:".1em",color:P.dim,textTransform:"uppercase",marginTop:"7px"}},x.k));})):null,
+i("div",{style:{position:"relative",height:"1px",marginTop:"22px",
+background:"linear-gradient(90deg,"+_NXteinte(c,.34)+","+P.hair+" 34%,transparent)"}}));}catch(_){return null;}};
+
+// Les onglets, avec le trait qui glisse d un onglet a l autre.
+_NXFX.onglets=function(L,actif,set,opt){try{
+opt=opt||{};var P=_NXpal,c=opt.col||P.acc;
+var idx=0,a;for(a=0;a<L.length;a++)if(L[a][0]===actif)idx=a;
+var pas=L.length?100/L.length:100;
+var trait={position:"absolute",bottom:"-1px",height:"2px",borderRadius:"2px",background:c,
+left:(idx*pas)+"%",width:pas+"%",boxShadow:"0 0 12px "+_NXteinte(c,.5)};
+if(_NXFX.anime())trait.transition="left .28s cubic-bezier(.22,.8,.28,1),width .28s cubic-bezier(.22,.8,.28,1)";
+return i("div",{style:{position:"relative",display:"flex",gap:"2px",marginBottom:"22px",
+borderBottom:"1px solid "+P.hair}},
+L.map(function(t,k){var on=t[0]===actif;
+return i("div",{key:k,className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){set(t[0]);},"data-nx-tab":"1",
+style:{flex:1,textAlign:"center",padding:"11px 6px 13px",cursor:"pointer",
+fontSize:"12.5px",fontWeight:on?"800":"600",letterSpacing:".01em",
+color:on?P.txt:P.dim,display:"flex",alignItems:"center",justifyContent:"center",gap:"7px"}},
+t[2]?_NXFX.ico(t[2],15,{hv:"saute",col:on?c:P.faint}):null,
+i("span",null,t[1]),
+(t[3]!==undefined&&t[3]!==null&&t[3]!=="")?i("span",_NXFX.fusion({style:{minWidth:"17px",height:"17px",padding:"0 5px",
+borderRadius:"99px",background:on?_NXteinte(c,.2):P.raise,color:on?c:P.sub,fontSize:"9.5px",fontWeight:"900",
+display:"inline-flex",alignItems:"center",justifyContent:"center",fontFamily:_NXf.mono}},
+_NXFX.a({"data-nx-pop":"1"})),String(t[3])):null);}),
+i("div",{"aria-hidden":"true",style:trait}));}catch(_){return null;}};
+
+// La tuile : une icone, un titre, une phrase. Cliquable ou non.
+_NXFX.tuile=function(o){try{
+o=o||{};var P=_NXpal,c=o.col||P.sub;
+var att={style:{position:"relative",overflow:"hidden",padding:"16px",borderRadius:"15px",
+background:o.plein?_NXteinte(c,.07):P.inset,border:"1px solid "+(o.plein?_NXteinte(c,.24):P.line),
+cursor:o.onClick?"pointer":"default",minWidth:0}};
+if(o.key!==undefined&&o.key!==null)att.key=o.key;
+if(o.onClick){att.className="nx-fx";att.role="button";att.role="button";att.tabIndex=0;att.onKeyDown=_NXkey;att.onClick=o.onClick;}
+if(_NXFX.anime()){att["data-nx-tile"]="1";if(o.rang)att["data-nx-rise"]=String(o.rang);}
+return i("div",att,
+o.ruban?i("div",{"aria-hidden":"true",style:{position:"absolute",top:0,left:"14px",right:"14px",height:"1px",
+background:"linear-gradient(90deg,transparent,"+_NXteinte(c,.5)+",transparent)"}}):null,
+i("div",{style:{display:"flex",alignItems:"center",gap:"11px",marginBottom:o.texte?"11px":"0"}},
+o.icone?_NXFX.pastille(o.icone,{col:c,taille:o.z||32,mv:o.mv,hv:o.hv||"penche",halo:!!o.halo}):null,
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},o.titre||""),
+o.sous?i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"3px",fontFamily:_NXf.mono}},o.sous):null),
+o.droite?i("div",{style:{flexShrink:0}},o.droite):null),
+o.texte?i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.55}},o.texte):null,
+o.bas?i("div",{style:{marginTop:"12px"}},o.bas):null);}catch(_){return null;}};
+
+_NXFX.grille=function(enfants,min){try{
+return i("div",{style:{display:"grid",gap:"12px",
+gridTemplateColumns:"repeat(auto-fill,minmax("+(min||246)+"px,1fr))"}},enfants);}catch(_){return null;}};
+
+// Un chiffre qui compte, une etiquette, une teinte.
+_NXFX.chiffre=function(o){try{
+o=o||{};var P=_NXpal;
+return i("div",_NXFX.fusion({style:{minWidth:0}},_NXFX.a(o.rang?{"data-nx-rise":String(o.rang)}:{})),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"5px"}},
+i("div",{style:{fontFamily:_NXf.disp,fontSize:o.grand?"30px":"23px",fontWeight:"800",
+color:o.col||P.txt,letterSpacing:"-.03em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},o.v),
+o.unite?i("div",{style:{fontSize:"11px",color:P.dim,fontFamily:_NXf.mono}},o.unite):null),
+i("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:".1em",color:P.dim,
+textTransform:"uppercase",marginTop:"8px"}},o.k||""),
+o.sous?i("div",{style:{fontSize:"11px",color:P.faint,marginTop:"3px"}},o.sous):null);}catch(_){return null;}};
+
+// La jauge en arc : la portion pleine se dessine au montage.
+_NXFX.jauge=function(pct,col,taille,texte,sous){try{
+var P=_NXpal,t=taille||118,c=col||P.acc;
+var p=Math.max(0,Math.min(100,+pct||0));
+var r=42,circ=2*Math.PI*r,arc=circ*0.75;
+var plein=arc*(p/100);
+return i("div",{style:{position:"relative",width:t+"px",height:t+"px",flexShrink:0}},
+i("svg",{viewBox:"0 0 100 100",width:t,height:t,"aria-hidden":"true",
+style:{transform:"rotate(135deg)"}},
+i("circle",{cx:50,cy:50,r:r,fill:"none",stroke:P.line,"strokeWidth":7,"strokeLinecap":"round",
+"strokeDasharray":arc+" "+circ}),
+i("circle",_NXFX.fusion({cx:50,cy:50,r:r,fill:"none",stroke:c,"strokeWidth":7,"strokeLinecap":"round",
+"strokeDasharray":plein+" "+circ},_NXFX.a({"data-nx-ring":"1"})))),
+i("div",{style:{position:"absolute",inset:0,display:"flex",flexDirection:"column",
+alignItems:"center",justifyContent:"center",paddingTop:"4px"}},
+i("div",{style:{fontFamily:_NXf.disp,fontSize:Math.round(t*0.2)+"px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.03em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},texte),
+sous?i("div",{style:{fontSize:"9.5px",fontWeight:"700",letterSpacing:".1em",color:P.dim,
+textTransform:"uppercase",marginTop:"5px"}},sous):null));}catch(_){return null;}};
+
+// Une courbe, tracee au montage. `vals` est une suite de nombres bruts.
+_NXFX.courbe=function(vals,col,h,opt){try{
+opt=opt||{};var P=_NXpal,c=col||P.acc,H=h||58,W=100;
+var L=vals&&vals.length?vals:[0];
+var mx=0,a;for(a=0;a<L.length;a++)if(L[a]>mx)mx=L[a];
+if(mx<=0)mx=1;
+var pts=[],pas=L.length>1?W/(L.length-1):W;
+for(a=0;a<L.length;a++)pts.push((a*pas).toFixed(2)+","+(H-(L[a]/mx)*(H-6)-3).toFixed(2));
+var d="M"+pts.join(" L");
+var aire=d+" L"+W+","+H+" L0,"+H+" Z";
+var uid="nxc"+Math.abs(_NXFX.hash(String(c)+L.length+H));
+return i("svg",{viewBox:"0 0 "+W+" "+H,preserveAspectRatio:"none",width:"100%",height:H+"px","aria-hidden":"true"},
+i("defs",null,i("linearGradient",{id:uid,x1:"0",y1:"0",x2:"0",y2:"1"},
+i("stop",{offset:"0%","stopColor":c,"stopOpacity":opt.plein||.22}),
+i("stop",{offset:"100%","stopColor":c,"stopOpacity":0}))),
+i("path",{d:aire,fill:"url(#"+uid+")"}),
+i("path",_NXFX.fusion({d:d,fill:"none",stroke:c,"strokeWidth":opt.gros||1.6,
+"strokeLinecap":"round","strokeLinejoin":"round","vectorEffect":"non-scaling-stroke"},
+_NXFX.a({"data-nx-trace":"1",style:{"--nx-len":"260"}}))));}catch(_){return null;}};
+
+_NXFX.hash=function(s){try{var h=5381,a=0,t=String(s||"");for(;a<t.length;a++)h=(((h<<5)+h)^t.charCodeAt(a))|0;return h>>>0;}catch(_){return 0;}};
+
+// Des barres, qui poussent au montage.
+_NXFX.barres=function(L,col,h){try{
+var P=_NXpal,c=col||P.acc,H=h||72;
+var mx=0,a;for(a=0;a<L.length;a++)if(L[a].v>mx)mx=L[a].v;
+if(mx<=0)mx=1;
+return i("div",{style:{display:"flex",alignItems:"flex-end",gap:L.length>36?"1px":(L.length>18?"3px":"5px"),
+height:H+"px"}},
+L.map(function(x,k){var pc=Math.max(3,(x.v/mx)*100);
+return i("div",_NXFX.fusion({key:k,title:x.t||"",style:{flex:1,height:pc+"%",borderRadius:"3px 3px 1px 1px",
+background:x.v>0?(x.hi?c:"linear-gradient("+"180deg,"+_NXteinte(c,.62)+","+_NXteinte(c,.16)+")"):P.raise,
+transformOrigin:"bottom center"}},_NXFX.a({style:{flex:1,height:pc+"%",borderRadius:"3px 3px 1px 1px",
+background:x.v>0?(x.hi?c:"linear-gradient(180deg,"+_NXteinte(c,.62)+","+_NXteinte(c,.16)+")"):P.raise,
+transformOrigin:"bottom center",transition:"height .5s cubic-bezier(.22,.8,.28,1)"}})));}));}catch(_){return null;}};
+
+// Une pastille de texte : etat, compteur, mention.
+_NXFX.badge=function(txt,col,opt){try{
+opt=opt||{};var P=_NXpal,c=col||P.sub;
+return i("span",_NXFX.fusion({style:{display:"inline-flex",alignItems:"center",gap:"5px",
+padding:opt.gros?"5px 11px":"3px 9px",borderRadius:"99px",
+background:opt.plein?c:_NXteinte(c,.12),color:opt.plein?P.ink:c,
+border:"1px solid "+(opt.plein?c:_NXteinte(c,.26)),
+fontSize:opt.gros?"11px":"10px",fontWeight:"800",letterSpacing:".04em",whiteSpace:"nowrap"}},
+opt.anime?_NXFX.a({"data-nx-pop":"1"}):{}),
+opt.point?i("span",_NXFX.fusion({style:{width:"5px",height:"5px",borderRadius:"50%",
+background:"currentColor",flexShrink:0}},_NXFX.a({"data-nx-dot":"1"}))):null,
+opt.icone?_NXFX.ico(opt.icone,11):null,
+txt);}catch(_){return null;}};
+
+// Un bouton, avec sa teinte et son icone.
+_NXFX.bouton=function(o){try{
+o=o||{};var P=_NXpal,c=o.col||P.pale;
+var fond=o.plein?c:(o.creux?"transparent":P.raise);
+return i("div",_NXFX.fusion({className:"nx-fx",role:"button",tabIndex:o.off?-1:0,onKeyDown:_NXkey,
+onClick:o.off?null:o.onClick,"aria-disabled":o.off?"true":"false",
+style:{display:"inline-flex",alignItems:"center",justifyContent:"center",gap:"7px",
+padding:o.petit?"7px 12px":"11px 16px",borderRadius:"11px",
+background:o.off?P.inset:fond,color:o.off?P.mute:(o.plein?P.ink:c),
+border:"1px solid "+(o.off?P.line:(o.plein?c:_NXteinte(c,.3))),
+fontSize:o.petit?"11.5px":"12.5px",fontWeight:"800",letterSpacing:".01em",
+cursor:o.off?"not-allowed":"pointer",flex:o.large?1:"0 0 auto",whiteSpace:"nowrap",
+opacity:o.off?.6:1}},_NXFX.a({"data-nx-appui":"1"})),
+o.icone?_NXFX.ico(o.icone,o.petit?13:15,{hv:o.hv||"pousse"}):null,
+i("span",null,o.t||""));}catch(_){return null;}};
+
+// L etat vide : une icone qui flotte, une phrase, une porte de sortie.
+_NXFX.vide=function(o){try{
+o=o||{};var P=_NXpal,c=o.col||P.faint;
+return i("div",_NXFX.fusion({style:{padding:"46px 22px",textAlign:"center"}},_NXFX.a({"data-nx-fade":"1"})),
+i("div",_NXFX.fusion({style:{display:"inline-flex",color:c,marginBottom:"16px"}},_NXFX.a({"data-nx-float":"1"})),
+_NXFX.svg(o.icone||"point",44)),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"17px",fontWeight:"800",color:P.pale,letterSpacing:"-.02em"}},o.titre||""),
+o.texte?i("div",{style:{fontSize:"12.5px",color:P.dim,marginTop:"9px",lineHeight:1.6,maxWidth:"400px",
+marginLeft:"auto",marginRight:"auto"}},o.texte):null,
+o.action?i("div",{style:{marginTop:"18px"}},o.action):null);}catch(_){return null;}};
+
+// Une ligne de liste : pastille, deux lignes de texte, un cote droit.
+_NXFX.rangee=function(o){try{
+o=o||{};var P=_NXpal,c=o.col||P.sub;
+var att={style:{display:"flex",alignItems:"center",gap:"13px",padding:"13px 2px",
+borderTop:o.premier?"none":"1px solid "+P.line,cursor:o.onClick?"pointer":"default"}};
+if(o.key!==undefined&&o.key!==null)att.key=o.key;
+if(o.onClick){att.className="nx-fx";att.role="button";att.tabIndex=0;att.onKeyDown=_NXkey;att.onClick=o.onClick;}
+if(_NXFX.anime()&&o.rang)att["data-nx-rise"]=String(o.rang);
+return i("div",att,
+o.icone?_NXFX.pastille(o.icone,{col:c,taille:o.z||32,hv:"penche"}):null,
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13px",fontWeight:"600",color:P.txt,overflow:"hidden",
+textOverflow:"ellipsis",whiteSpace:"nowrap"}},o.titre||""),
+o.texte?i("div",{style:{fontSize:"11.5px",color:P.sub,marginTop:"4px",lineHeight:1.5}},o.texte):null),
+o.droite?i("div",{style:{flexShrink:0,display:"flex",alignItems:"center",gap:"8px"}},o.droite):null);}catch(_){return null;}};
+
+// Un champ de saisie, au meme dessin partout.
+_NXFX.champ=function(o){try{
+o=o||{};var P=_NXpal;
+return i("div",{style:{marginBottom:o.serre?"8px":"12px"}},
+o.k?i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".13em",color:P.dim,
+textTransform:"uppercase",marginBottom:"7px"}},o.k):null,
+i("div",{style:{position:"relative",display:"flex",alignItems:"center"}},
+o.icone?i("div",{style:{position:"absolute",left:"12px",color:P.faint,display:"flex",pointerEvents:"none"}},
+_NXFX.svg(o.icone,15)):null,
+i(o.multi?"textarea":"input",{type:o.type||"text",value:o.v==null?"":o.v,placeholder:o.ph||"",
+onChange:o.onChange,onKeyDown:o.onKeyDown,rows:o.lignes||3,spellCheck:false,
+style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,
+borderRadius:"11px",padding:o.icone?"11px 12px 11px 34px":"11px 12px",color:P.txt,
+fontSize:"12.5px",fontFamily:o.mono?_NXf.mono:"inherit",outline:"none",resize:o.multi?"vertical":"none"}})),
+o.aide?i("div",{style:{fontSize:"10.5px",color:P.faint,marginTop:"6px",lineHeight:1.5}},o.aide):null);}catch(_){return null;}};
+
+// Un bandeau d avertissement, colore par le ton.
+_NXFX.note=function(o){try{
+o=o||{};var P=_NXpal,c=o.col||P.info;
+return i("div",_NXFX.fusion({style:{display:"flex",gap:"11px",alignItems:"flex-start",
+padding:"13px 14px",borderRadius:"13px",background:_NXteinte(c,.08),
+border:"1px solid "+_NXteinte(c,.24),marginBottom:o.serre?"10px":"14px"}},_NXFX.a({"data-nx-zoom":"1"})),
+i("div",{style:{color:c,display:"flex",flexShrink:0,marginTop:"1px"}},_NXFX.svg(o.icone||"info",16)),
+i("div",{style:{flex:1,minWidth:0}},
+o.titre?i("div",{style:{fontSize:"12px",fontWeight:"800",color:c,marginBottom:"5px"}},o.titre):null,
+i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.6}},o.texte||"")),
+o.droite?i("div",{style:{flexShrink:0}},o.droite):null);}catch(_){return null;}};
+
+// Une barre de progression, qui pousse au montage.
+_NXFX.barre=function(pct,col,h){try{
+var P=_NXpal,c=col||P.acc,p=Math.max(0,Math.min(100,+pct||0));
+return i("div",_NXFX.fusion({style:{height:(h||5)+"px",background:P.line,borderRadius:"99px",overflow:"hidden"}},
+_NXFX.a({"data-nx-bar":"1"})),
+i("div",{style:{height:"100%",width:p+"%",borderRadius:"99px",
+background:"linear-gradient(90deg,"+_NXteinte(c,.45)+","+c+")"}}));}catch(_){return null;}};
+
+_NXFX.sep=function(m){return i("div",{style:{height:"1px",background:_NXpal.line,margin:(m||16)+"px 0"}});};
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXFX");if(window._NXERR)_NXERR.push("module _NXFX :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXFX desactive:",_nxE);}catch(_){}}
+}
+var _NXBOOT=window._NXBOOT||(window._NXBOOT={});
+if(!_NXBOOT.boot){try{_NXBOOT.boot=true;
+// L ecran d ouverture. Il est pose AVANT que Discord ne dessine quoi que ce
+// soit, et il ne s efface que lorsque l application est reellement la : la
+// barre n avance pas sur une minuterie, elle avance sur des faits observes
+// (le document est pret, le point de montage existe, il a du contenu, l ecran
+// de chargement de Discord a disparu, l ossature est en place). Si un de ces
+// faits n arrive jamais, une borne dure retire l ecran de toute facon : mieux
+// vaut un demarrage sans decor qu un client invisible.
+_NXBOOT.ID="nx-boot";
+_NXBOOT.KEY="nexium_boot_anim";
+_NXBOOT.MIN=1600;      // le temps d affichage UNE FOIS le client pret
+_NXBOOT.MAX=12000;     // la borne dure depuis le chargement du script
+_NXBOOT.tPret=0;       // quand l ossature est apparue, fenetre visible
+_NXBOOT.SORTIE=460;    // la duree du fondu de sortie
+_NXBOOT.t0=Date.now();
+_NXBOOT.fini=false;
+_NXBOOT.el=null;
+_NXBOOT.pas=0;
+_NXBOOT.iv=null;
+_NXBOOT.veut=function(){try{
+var v=_NXDB.get(_NXBOOT.KEY);
+return v===null||v===undefined?true:v==="1";}catch(_){return true;}};
+_NXBOOT.set=function(v){try{_NXDB.set(_NXBOOT.KEY,v?"1":"0");}catch(_){}};
+_NXBOOT.calme=function(){try{
+if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return true;
+if(window._NXMO&&_NXMO.on===false)return true;
+return false;}catch(_){return false;}};
+// Les etapes, dans l ordre ou elles se produisent. Chacune est une question
+// a laquelle le document repond oui ou non -- rien n est suppose.
+_NXBOOT.ETAPES=[
+["Modules Nexium",function(){return true;}],
+["Document",function(){try{return document.readyState!=="loading";}catch(_){return false;}}],
+["Point de montage",function(){try{return !!document.getElementById("app-mount");}catch(_){return false;}}],
+["Interface Discord",function(){try{var m=document.getElementById("app-mount");return !!(m&&m.firstElementChild);}catch(_){return false;}}],
+["Ossature",function(){try{
+var m=document.getElementById("app-mount");
+if(!m||!m.firstElementChild)return false;
+if(m.querySelector('[class*="loadingScreen"],[class*="splashScreen"],[class*="connecting"]'))return false;
+return !!m.querySelector('[class*="app-"],[class*="guilds"],[class*="sidebar"],[class*="base_"]');}catch(_){return false;}}]];
+// Interroger le document coute cher pendant le demarrage : les selecteurs
+// par fragment de classe parcourent tout l arbre quand ils ne trouvent rien,
+// et cet arbre passe de zero a plusieurs milliers de noeuds. On garde le
+// rythme d affichage, mais on ne repose la question que trois fois par
+// seconde -- et plus du tout une fois la derniere etape atteinte.
+_NXBOOT._vu=0;
+_NXBOOT.avance=function(){try{
+if(_NXBOOT.pas>=_NXBOOT.ETAPES.length)return _NXBOOT.pas;
+var t=Date.now();
+if(_NXBOOT._vu&&(t-_NXBOOT._vu)<320)return _NXBOOT.pas;
+_NXBOOT._vu=t;
+var n=0;
+for(var a=0;a<_NXBOOT.ETAPES.length;a++){if(_NXBOOT.ETAPES[a][1]())n=a+1;else break;}
+return n;}catch(_){return _NXBOOT.pas;}};
+_NXBOOT.css=function(){return ""+
+"#nx-boot{position:fixed;inset:0;z-index:2147483646;background:#08080a;"+
+"display:flex;align-items:center;justify-content:center;flex-direction:column;"+
+"font-family:'gg sans','Noto Sans',Helvetica,Arial,sans-serif;color:#f4f4f5;"+
+"opacity:1;transition:opacity "+_NXBOOT.SORTIE+"ms cubic-bezier(.4,0,.2,1);}"+
+"#nx-boot.nxb-part{opacity:0;pointer-events:none;}"+
+// --- le fond : une grille fine, une lumiere rasante, une vignette ---------
+"#nx-boot .nxb-trame{position:absolute;inset:0;pointer-events:none;"+
+"background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),"+
+"linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);"+
+"background-size:52px 52px;"+
+"-webkit-mask-image:radial-gradient(58% 54% at 50% 46%,#000,transparent 76%);"+
+"mask-image:radial-gradient(58% 54% at 50% 46%,#000,transparent 76%);}"+
+"#nx-boot .nxb-jour{position:absolute;left:50%;top:46%;width:min(760px,86vw);height:min(760px,86vw);"+
+"transform:translate(-50%,-50%);pointer-events:none;border-radius:50%;"+
+"background:radial-gradient(circle,rgba(255,255,255,.055),transparent 62%);}"+
+"#nx-boot .nxb-vignette{position:absolute;inset:0;pointer-events:none;"+
+"background:radial-gradient(76% 70% at 50% 46%,transparent 42%,rgba(0,0,0,.66) 100%);}"+
+"#nx-boot .nxb-cadre{position:relative;display:flex;flex-direction:column;align-items:center;"+
+"padding:0 24px;}"+
+// --- la marque : un trait, rien d autre -----------------------------------
+"#nx-boot .nxb-marque{position:relative;width:104px;height:104px;}"+
+"#nx-boot .nxb-marque svg{position:absolute;inset:0;overflow:visible;}"+
+"#nx-boot .nxb-trace{fill:none;stroke:#f4f4f5;stroke-width:3;"+
+"stroke-linecap:square;stroke-linejoin:miter;stroke-dasharray:var(--l,250);stroke-dashoffset:0;}"+
+"#nx-boot .nxb-cadran{fill:none;stroke:rgba(255,255,255,.13);stroke-width:1;}"+
+// L anneau qui tourne est en HTML, pas en SVG : le compositeur sait le
+// faire tourner tout seul, meme quand le fil principal est occupe.
+"#nx-boot .nxb-arc{position:absolute;inset:4px;border-radius:50%;"+
+"border:1.4px solid transparent;border-top-color:rgba(255,255,255,.72);"+
+"border-right-color:rgba(255,255,255,.20);"+
+"will-change:transform;transform:translateZ(0);}"+
+"#nx-boot .nxb-tic{stroke:rgba(255,255,255,.22);stroke-width:1;}"+
+// --- le texte --------------------------------------------------------------
+"#nx-boot .nxb-nom{position:relative;overflow:hidden;margin-top:32px;padding:2px 0;"+
+"transform:translateZ(0);"+
+"font-size:15px;font-weight:700;letter-spacing:.74em;text-indent:.74em;"+
+"text-transform:uppercase;color:#f4f4f5;}"+
+"#nx-boot .nxb-nom::after{content:'';position:absolute;top:0;bottom:0;left:0;width:40%;"+
+"pointer-events:none;transform:translate3d(-180%,0,0);will-change:transform;"+
+"background:linear-gradient(100deg,transparent,rgba(255,255,255,.22),transparent);}"+
+"#nx-boot .nxb-filet{width:216px;height:1px;margin-top:22px;position:relative;overflow:hidden;"+
+"background:rgba(255,255,255,.10);transform:translateZ(0);}"+
+"#nx-boot .nxb-filet::after{content:'';position:absolute;top:0;bottom:0;left:0;width:34%;"+
+"background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);"+
+"transform:translate3d(-120%,0,0);will-change:transform;}"+
+"#nx-boot .nxb-lecture{display:flex;align-items:center;gap:14px;margin-top:20px;"+
+"font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;"+
+"font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#57545f;}"+
+"#nx-boot .nxb-lecture b{font-weight:600;color:#c9c6d2;font-variant-numeric:tabular-nums;}"+
+"#nx-boot .nxb-sep{width:1px;height:10px;background:rgba(255,255,255,.14);}"+
+"#nx-boot .nxb-pied{position:absolute;bottom:26px;left:0;right:0;text-align:center;"+
+"font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;"+
+"font-size:9px;color:#332f3a;letter-spacing:.24em;text-transform:uppercase;}"+
+// --- ce qui bouge, une fois la premiere image peinte -----------------------
+"#nx-boot.nxb-vif .nxb-cadre{animation:nxb-entre 1s cubic-bezier(.2,.9,.3,1) both;}"+
+"#nx-boot.nxb-vif .nxb-arc{animation:nxb-tourne 5.4s linear infinite;}"+
+"#nx-boot.nxb-vif .nxb-nom{animation:nxb-monte .8s cubic-bezier(.2,.9,.3,1) .1s both;}"+
+"#nx-boot.nxb-vif .nxb-nom::after{animation:nxb-brille 5s cubic-bezier(.5,0,.5,1) 1.4s infinite;}"+
+"#nx-boot.nxb-vif .nxb-filet{animation:nxb-monte .7s cubic-bezier(.2,.9,.3,1) .24s both;}"+
+"#nx-boot.nxb-vif .nxb-filet::after{animation:nxb-court 1.9s cubic-bezier(.45,0,.55,1) infinite;}"+
+"#nx-boot.nxb-vif .nxb-lecture{animation:nxb-monte .7s cubic-bezier(.2,.9,.3,1) .36s both;}"+
+"#nx-boot.nxb-vif .nxb-pied{animation:nxb-monte .8s cubic-bezier(.2,.9,.3,1) .5s both;}"+
+"@keyframes nxb-entre{from{transform:scale(.97)}to{transform:none}}"+
+"@keyframes nxb-monte{from{transform:translateY(10px)}to{transform:none}}"+
+"@keyframes nxb-tourne{to{transform:rotate(360deg)}}"+
+"@keyframes nxb-brille{0%{transform:translate3d(-180%,0,0)}100%{transform:translate3d(400%,0,0)}}"+
+"@keyframes nxb-court{0%{transform:translate3d(-120%,0,0)}100%{transform:translate3d(420%,0,0)}}"+
+// Mettre en pause, et non couper : couper redemarrerait l animation le
+// jour ou on la remet, et changer `animation` force un recalcul complet.
+"#nx-boot.nxb-sobre .nxb-arc,#nx-boot.nxb-sobre .nxb-nom::after,"+
+"#nx-boot.nxb-sobre .nxb-filet::after{animation-play-state:paused!important;}"+
+"@media (prefers-reduced-motion: reduce){#nx-boot *{animation:none!important;}}";};
+// Le monogramme : un cadran gradue, un arc qui tourne, et la lettre au trait.
+// Aucun degrade, aucune lueur -- le contraste fait tout le travail.
+_NXBOOT.marque=function(){
+var tics="";
+for(var a=0;a<12;a++){
+var ang=(a*30)*Math.PI/180;
+var x1=52+Math.cos(ang)*46,y1=52+Math.sin(ang)*46;
+var x2=52+Math.cos(ang)*(a%3===0?40:43),y2=52+Math.sin(ang)*(a%3===0?40:43);
+tics+='<line class="nxb-tic" x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+
+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'"/>';}
+return ''+
+'<div class="nxb-arc"></div>'+
+'<svg viewBox="0 0 104 104" aria-hidden="true">'+
+'<circle class="nxb-cadran" cx="52" cy="52" r="47"/>'+
+tics+
+'<path class="nxb-trace" style="--l:200" d="M35 70 V34 L69 70 V34"/>'+
+'</svg>';};
+_NXBOOT.pose=function(){try{
+if(_NXBOOT.el)return true;
+var racine=document.documentElement;
+if(!racine)return false;
+// On attend le corps du document. Poser sur <html> obligeait a deplacer le
+// noeud plus tard, et un deplacement redemarre toutes les animations.
+if(!document.body)return false;
+var st=document.createElement("style");
+st.id="nx-boot-style";
+st.textContent=_NXBOOT.css();
+(document.head||racine).appendChild(st);
+var d=document.createElement("div");
+d.id=_NXBOOT.ID;
+d.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646;"+
+"background:#08080a;display:flex;align-items:center;justify-content:center;flex-direction:column;"+
+"color:#f4f4f5;font-family:'gg sans','Noto Sans',Helvetica,Arial,sans-serif;";
+d.setAttribute("role","status");
+d.setAttribute("aria-label","Nexium Client demarre");
+d.innerHTML=
+'<div class="nxb-jour"></div><div class="nxb-trame"></div>'+
+'<div class="nxb-vignette"></div>'+
+'<div class="nxb-cadre">'+
+'<div class="nxb-marque">'+_NXBOOT.marque()+'</div>'+
+'<div class="nxb-nom">Nexium</div>'+
+'<div class="nxb-filet"></div>'+
+'<div class="nxb-lecture">'+
+'<b id="nx-boot-pas">01 / 0'+_NXBOOT.ETAPES.length+'</b>'+
+'<span class="nxb-sep"></span>'+
+'<span id="nx-boot-mot"></span>'+
+'<span class="nxb-sep"></span>'+
+'<b id="nx-boot-pct">0%</b></div></div>'+
+'<div class="nxb-pied" id="nx-boot-pied">Nexium Client</div>';
+document.body.appendChild(d);
+_NXBOOT.el=d;
+try{d.addEventListener("click",function(){_NXBOOT.retire("clic");},{once:true});}catch(_){
+try{d.onclick=function(){_NXBOOT.retire("clic");};}catch(__){}}
+// Le mouvement n est ajoute qu au premier battement d image reellement peint.
+// Si la fenetre n est jamais peinte, l ecran reste lisible, simplement fige.
+try{if(typeof requestAnimationFrame==="function")
+requestAnimationFrame(function(){requestAnimationFrame(function(){try{
+_NXBOOT.vif=true;_NXBOOT.classe();_NXBOOT.mesure();}catch(_){}});});
+else{_NXBOOT.vif=true;_NXBOOT.classe();}}catch(_){}
+return true;}catch(_){return false;}};
+// La classe de l ecran, composee a partir de son etat. Trois drapeaux, une
+// seule ecriture : c est ce qui evite qu une transition en efface une autre.
+_NXBOOT.classe=function(){try{
+if(!_NXBOOT.el)return;
+var c=(_NXBOOT.vif?"nxb-vif":"")+(_NXBOOT.sobre?" nxb-sobre":"");
+// N ecrire que si la valeur change : une ecriture identique suffit a faire
+// repartir les animations sur certains moteurs.
+if(_NXBOOT.el.className!==c)_NXBOOT.el.className=c;}catch(_){}};
+// Compter les images reellement rendues. Aucune supposition sur la machine :
+// c est le seul chiffre qui dise si le decor passe ou non.
+_NXBOOT.fps=0;
+_NXBOOT.mesure=function(){try{
+if(_NXBOOT._mes||typeof requestAnimationFrame!=="function")return;
+_NXBOOT._mes=true;
+var maintenant=function(){try{
+return (typeof performance!=="undefined"&&performance.now)?performance.now():Date.now();}catch(_){return Date.now();}};
+var n=0,t0=maintenant();
+var battement=function(){try{
+if(_NXBOOT.fini)return;
+n++;
+var t=maintenant();
+if((t-t0)<700){requestAnimationFrame(battement);return;}
+_NXBOOT.fps=Math.round(n/((t-t0)/1000));
+if(_NXBOOT.fps<45){_NXBOOT.sobre=true;_NXBOOT.classe();}
+}catch(_){}};
+requestAnimationFrame(battement);}catch(_){}};
+_NXBOOT.peint=function(){try{
+if(!_NXBOOT.el)return;
+var n=_NXBOOT.avance();
+if(n>_NXBOOT.pas)_NXBOOT.pas=n;
+var total=_NXBOOT.ETAPES.length;
+var pc=Math.round((_NXBOOT.pas/total)*100);
+// Une ecriture inutile dans le document est un recalcul de style de plus,
+// huit fois par seconde, pendant que Discord se charge.
+if(_NXBOOT._pc!==pc){_NXBOOT._pc=pc;
+var p2=document.getElementById("nx-boot-pct");
+if(p2)p2.textContent=pc+"%";
+var e=document.getElementById("nx-boot-mot");
+if(e){var k=Math.min(_NXBOOT.pas,total-1);e.textContent=_NXBOOT.ETAPES[k][0];}
+var ps=document.getElementById("nx-boot-pas");
+if(ps){var n2=Math.min(total,Math.max(1,_NXBOOT.pas+(_NXBOOT.pas<total?1:0)));
+ps.textContent=("0"+n2).slice(-2)+" / "+("0"+total).slice(-2);}}
+if(!_NXBOOT._ver){var p=document.getElementById("nx-boot-pied");
+var v="";try{v=(window._NXUP&&_NXUP.VERSION)?("v"+_NXUP.VERSION):"";}catch(_){}
+if(p&&v){p.textContent="Nexium Client — "+v;_NXBOOT._ver=true;}}
+}catch(_){}};
+_NXBOOT.pret=function(){try{
+if(_NXBOOT.pas<_NXBOOT.ETAPES.length)return false;
+// Une fenetre cachee ne compte pas : Discord ouvre la sienne quand
+// l application est prete, et c est a partir de la qu il y a quelque chose
+// a regarder.
+if(document.hidden)return false;
+if(!_NXBOOT.tPret)_NXBOOT.tPret=Date.now();
+return (Date.now()-_NXBOOT.tPret)>=_NXBOOT.MIN;}catch(_){return true;}};
+_NXBOOT.retire=function(pourquoi){try{
+if(_NXBOOT.fini)return;
+_NXBOOT.fini=true;
+_NXBOOT.raison=pourquoi||"pret";
+_NXBOOT.duree=Date.now()-_NXBOOT.t0;
+try{_NXDB.set("nexium_boot_trace",JSON.stringify({a:Date.now(),d:_NXBOOT.duree,
+r:_NXBOOT.raison,p:_NXBOOT.pas,att:_NXBOOT.tPret?(_NXBOOT.tPret-_NXBOOT.t0):0,
+essais:_NXBOOT.essais||0,vu:!!_NXBOOT.vif,fps:_NXBOOT.fps||0,sobre:!!_NXBOOT.sobre}));}catch(_){}
+if(_NXBOOT.iv){try{clearInterval(_NXBOOT.iv);}catch(_){}_NXBOOT.iv=null;}
+var d=_NXBOOT.el;
+if(!d)return;
+try{var j=document.getElementById("nx-boot-jauge");if(j)j.style.width="100%";}catch(_){}
+// Le fondu passe par le style, pas par une classe : ajouter une classe
+// relancerait les animations en cours au moment meme ou l ecran s efface.
+try{d.style.opacity="0";d.style.pointerEvents="none";}catch(_){}
+setTimeout(function(){try{
+if(d&&d.parentNode)d.parentNode.removeChild(d);
+var s=document.getElementById("nx-boot-style");
+if(s&&s.parentNode)s.parentNode.removeChild(s);
+_NXBOOT.el=null;}catch(_){}},_NXBOOT.calme()?60:_NXBOOT.SORTIE);
+}catch(_){}};
+_NXBOOT.essais=0;
+// Le document n existe pas forcement encore : on repose la question jusqu a
+// ce qu il soit la, ou jusqu a renoncer. Sans cela, un bundle injecte trop
+// tot n affiche jamais rien.
+_NXBOOT.insiste=function(){try{
+if(_NXBOOT.fini||_NXBOOT.el)return;
+_NXBOOT.essais++;
+if(_NXBOOT.pose()){_NXBOOT.demarre();return;}
+if(_NXBOOT.essais>120)return;
+setTimeout(_NXBOOT.insiste,25);}catch(_){}};
+_NXBOOT.demarre=function(){try{
+if(_NXBOOT.iv)return;
+_NXBOOT.peint();
+_NXBOOT.iv=setInterval(function(){try{
+_NXBOOT.peint();
+if(_NXBOOT.pret()){_NXBOOT.retire("pret");return;}
+if((Date.now()-_NXBOOT.t0)>_NXBOOT.MAX)_NXBOOT.retire("borne");
+}catch(_){_NXBOOT.retire("erreur");}},200);
+}catch(_){}};
+_NXBOOT.lance=function(){try{
+if(!_NXBOOT.veut())return false;
+// Une fenetre detachee de Discord n est pas un demarrage du client.
+try{if(String(location.pathname||"").indexOf("popout")>=0)return false;}catch(_){}
+if(_NXBOOT.calme()){_NXBOOT.MIN=350;_NXBOOT.MAX=4000;}
+try{document.addEventListener("readystatechange",_NXBOOT.insiste);
+document.addEventListener("DOMContentLoaded",_NXBOOT.insiste);}catch(_){}
+if(!_NXBOOT.pose()){_NXBOOT.insiste();
+// La borne dure vaut aussi pour les essais : jamais de voile oublie.
+try{setTimeout(function(){_NXBOOT.retire("borne");},_NXBOOT.MAX+1500);}catch(_){}
+return true;}
+_NXBOOT.peint();
+_NXBOOT.demarre();
+// Une securite de plus, independante de la boucle : si l intervalle est
+// tue par autre chose, l ecran s efface quand meme.
+setTimeout(function(){_NXBOOT.retire("borne");},_NXBOOT.MAX+800);
+return true;}catch(_){return false;}};
+// Revoir l ecran d ouverture sans redemarrer le client.
+_NXBOOT.rejoue=function(){try{
+_NXBOOT.fini=false;_NXBOOT.pas=0;_NXBOOT.tPret=0;_NXBOOT._ver=false;
+_NXBOOT.vif=false;_NXBOOT.part=false;_NXBOOT.sobre=false;_NXBOOT._mes=false;
+_NXBOOT._pc=-1;_NXBOOT._vu=0;
+_NXBOOT.t0=Date.now();
+try{var v=document.getElementById("nx-boot");if(v&&v.parentNode)v.parentNode.removeChild(v);}catch(_){}
+try{var w=document.getElementById("nx-boot-style");if(w&&w.parentNode)w.parentNode.removeChild(w);}catch(_){}
+_NXBOOT.el=null;
+if(!_NXBOOT.pose())return false;
+_NXBOOT.peint();
+_NXBOOT.iv=setInterval(function(){try{
+_NXBOOT.peint();
+if(_NXBOOT.pret()){_NXBOOT.retire("pret");return;}
+if((Date.now()-_NXBOOT.t0)>8000)_NXBOOT.retire("borne");
+}catch(_){_NXBOOT.retire("erreur");}},200);
+return true;}catch(_){return false;}};
+_NXBOOT.dernier=function(){try{
+var r=_NXDB.get("nexium_boot_trace");return r?JSON.parse(r):null;}catch(_){return null;}};
+_NXBOOT.etat=function(){try{
+return {actif:_NXBOOT.veut(),pose:!!_NXBOOT.el,fini:_NXBOOT.fini,
+pas:_NXBOOT.pas,total:_NXBOOT.ETAPES.length,
+duree:_NXBOOT.duree||0,raison:_NXBOOT.raison||"",fps:_NXBOOT.fps||0,sobre:!!_NXBOOT.sobre,
+attenteClient:_NXBOOT.tPret?(_NXBOOT.tPret-_NXBOOT.t0):0};}catch(_){return {};}};
+try{_NXBOOT.lance();}catch(_){}
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXBOOT");if(window._NXERR)_NXERR.push("module _NXBOOT :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXBOOT desactive:",_nxE);
+try{var _NXzb=document.getElementById("nx-boot");if(_NXzb&&_NXzb.parentNode)_NXzb.parentNode.removeChild(_NXzb);}catch(__){}}catch(_){}}
+}
+var _NXABO=window._NXABO||(window._NXABO={});
+if(!_NXABO.boot){try{_NXABO.boot=true;
+// Les abonnements Nexium.
+//
+// Ce module ne DECIDE rien : il lit ce que le serveur repond, et le range.
+// Le calcul des niveaux se fait dans la base, pour une raison simple -- un
+// client qui tourne sur la machine de l utilisateur peut etre modifie, et
+// une regle ecrite ici seule ne vaudrait que pour ceux qui ne cherchent pas.
+//
+// Ce qui est reellement infalsifiable : Nexium IA, dont le relais verifie le
+// niveau de son cote avant de repondre. Pour Protect et Privacy, la limite
+// est appliquee dans le COMPORTEMENT -- chaque protection demande la
+// permission avant d agir, pas seulement son interrupteur -- et un client
+// modifie se voit dans la somme de controle et le controle d integrite.
+_NXABO.URL="https://emcoqnvxriyrchmfpunq.supabase.co/rest/v1/rpc/";
+_NXABO.CLE="sb_publishable_mhLyot9Dv_VCtWpCbYpngg_evMB79C3";
+_NXABO.KEY="nexium_abo";
+_NXABO.FRAIS=3600000;      // on redemande au plus une fois par heure
+_NXABO.PERIME=604800000;   // au-dela d une semaine sans reponse, le cache ne vaut plus
+_NXABO.etat=null;
+_NXABO.at=0;
+_NXABO.busy=false;
+_NXABO.err=null;
+_NXABO.listeners=[];
+_NXABO.notify=function(){for(var a=0;a<_NXABO.listeners.length;a++){try{_NXABO.listeners[a]();}catch(_){}}};
+
+_NXABO.moi=function(){try{
+var US=_NXcommon().store("UserStore");
+var u=US&&US.getCurrentUser&&US.getCurrentUser();
+return (u&&u.id)?String(u.id):"";}catch(_){return "";}};
+
+_NXABO.lis=function(){try{
+var r=_NXDB.get(_NXABO.KEY);var d=r?JSON.parse(r):null;
+if(!d||typeof d!=="object"||!d.e)return null;
+return d;}catch(_){return null;}};
+_NXABO.range=function(e){try{
+_NXDB.set(_NXABO.KEY,JSON.stringify({v:1,a:Date.now(),id:_NXABO.moi(),e:e}));}catch(_){}};
+
+// L etat retenu : celui du serveur s il a repondu, sinon le dernier connu,
+// a condition qu il concerne bien ce compte et qu il ne soit pas trop vieux.
+_NXABO.courant=function(){try{
+if(_NXABO.etat)return _NXABO.etat;
+var d=_NXABO.lis();
+if(!d)return null;
+if(d.id&&_NXABO.moi()&&d.id!==_NXABO.moi())return null;
+if(d.a&&(Date.now()-d.a)>_NXABO.PERIME)return null;
+return d.e;}catch(_){return null;}};
+
+_NXABO.charge=function(force,cb){try{
+if(_NXABO.busy){if(cb)cb(null);return;}
+if(!force&&_NXABO.at&&(Date.now()-_NXABO.at)<_NXABO.FRAIS){if(cb)cb(_NXABO.etat);return;}
+var id=_NXABO.moi();
+if(!id){if(cb)cb(null);return;}
+_NXABO.busy=true;
+_NXNETX.go(_NXABO.URL+"nx_abo_etat",{method:"POST",cache:"no-store",
+headers:{apikey:_NXABO.CLE,"Content-Type":"application/json",Accept:"application/json"},
+body:JSON.stringify({p_id:id})},20000)
+.then(function(r){if(!r||!r.ok)throw 0;return r.json();})
+.then(function(j){
+_NXABO.busy=false;_NXABO.err=null;_NXABO.at=Date.now();
+if(j&&typeof j==="object"){_NXABO.etat=j;_NXABO.range(j);}
+try{_NXABO.reconcilie();}catch(_){}
+_NXABO.notify();if(cb)cb(_NXABO.etat);})
+.catch(function(){
+_NXABO.busy=false;_NXABO.err=true;
+_NXABO.notify();if(cb)cb(null);});
+}catch(_){_NXABO.busy=false;if(cb)cb(null);}};
+
+// -------------------------------------------------------------- les droits
+_NXABO.DOMS=[["ia","Nexium IA"],["pr","Nexium Protect"],["pv","Nexium Privacy"]];
+// Tant que le serveur n a jamais repondu et qu aucun cache ne subsiste, on
+// n enleve rien : punir quelqu un parce qu il est hors ligne serait absurde.
+_NXABO.inconnu=function(){return !_NXABO.courant();};
+_NXABO.niveau=function(dom){try{
+var e=_NXABO.courant();
+if(!e)return 3;
+var n=e.niveaux&&e.niveaux[dom];
+return (typeof n==="number")?n:0;}catch(_){return 3;}};
+_NXABO.libre=function(){try{
+var e=_NXABO.courant();
+if(!e)return true;
+return !!(e.pionnier||e.admin);}catch(_){return true;}};
+_NXABO.pionnier=function(){try{var e=_NXABO.courant();return !!(e&&e.pionnier);}catch(_){return false;}};
+_NXABO.admin=function(){try{var e=_NXABO.courant();return !!(e&&e.admin);}catch(_){return false;}};
+_NXABO.offres=function(){try{var e=_NXABO.courant();return (e&&e.offres)||[];}catch(_){return [];}};
+_NXABO.permis=function(dom,rang){try{
+return _NXABO.niveau(dom)>=(rang||1);}catch(_){return true;}};
+// Ce qu il manque pour obtenir un droit : sert a proposer la bonne offre au
+// bon endroit, plutot qu un mur sans issue.
+_NXABO.manque=function(dom,rang){try{
+if(_NXABO.permis(dom,rang))return null;
+var f=dom==="ia"?"ia":(dom==="pr"?"securite":"privacy");
+return {dom:dom,rang:rang,famille:f,niveau:_NXABO.niveau(dom)};}catch(_){return null;}};
+_NXABO.expire=function(offre){try{
+var L=_NXABO.offres();
+for(var a=0;a<L.length;a++)if(L[a].offre===offre)return L[a].expire_le||null;
+return null;}catch(_){return null;}};
+// La plus proche echeance, pour prevenir avant la coupure.
+_NXABO.prochaine=function(){try{
+var L=_NXABO.offres(),min=null,a;
+for(a=0;a<L.length;a++){
+if(!L[a].expire_le)continue;
+var t=(new Date(L[a].expire_le)).getTime();
+if(!isFinite(t))continue;
+if(min===null||t<min.t)min={t:t,offre:L[a].offre,nom:L[a].nom};}
+return min;}catch(_){return null;}};
+_NXABO.jours=function(iso){try{
+if(!iso)return null;
+var d=(new Date(iso)).getTime()-Date.now();
+if(!isFinite(d))return null;
+return Math.max(0,Math.ceil(d/86400000));}catch(_){return null;}};
+
+// ----------------------------------------------------- remettre les compteurs
+// Un reglage verrouille qui se retrouve actif -- fichier modifie a la main,
+// sauvegarde importee d un autre compte, abonnement expire -- est remis a
+// zero. C est la seule chose que le client puisse faire seul, et elle est
+// refaite a chaque chargement.
+_NXABO.reconcilie=function(){try{
+var n=0;
+try{if(window._NXPR&&_NXPR.reconcilie)n+=_NXPR.reconcilie()||0;}catch(_){}
+try{if(window._NXP&&_NXP.reconcilie)n+=_NXP.reconcilie()||0;}catch(_){}
+if(n)_NXABO.derniereRemise={n:n,a:Date.now()};
+return n;}catch(_){return 0;}};
+
+// Le catalogue, tel que le serveur le publie. Le client ne l invente pas :
+// un prix code en dur ici finirait par mentir.
+_NXABO.CAT=null;_NXABO.catAt=0;
+_NXABO.catalogue=function(cb){try{
+if(_NXABO.CAT&&(Date.now()-_NXABO.catAt)<21600000){if(cb)cb(_NXABO.CAT);return;}
+_NXNETX.go(_NXABO.URL+"nx_offres_liste",{method:"POST",cache:"no-store",
+headers:{apikey:_NXABO.CLE,"Content-Type":"application/json",Accept:"application/json"},
+body:"{}"},20000)
+.then(function(r){if(!r||!r.ok)throw 0;return r.json();})
+.then(function(j){
+if(j&&j.length!==undefined){_NXABO.CAT=j;_NXABO.catAt=Date.now();}
+_NXABO.notify();if(cb)cb(_NXABO.CAT);})
+.catch(function(){if(cb)cb(_NXABO.CAT);});
+}catch(_){if(cb)cb(_NXABO.CAT);}};
+
+_NXABO.resume=function(){try{
+var e=_NXABO.courant();
+if(!e)return {etat:"inconnu",texte:"Etat d abonnement inconnu pour le moment."};
+if(e.admin)return {etat:"admin",texte:"Compte d equipe : tout est ouvert, sans abonnement."};
+if(e.pionnier)return {etat:"pionnier",texte:"Utilisateur des les debuts : tout est ouvert, a vie."};
+var L=e.offres||[];
+if(!L.length)return {etat:"libre",texte:"Aucun abonnement. Le socle protecteur reste actif."};
+return {etat:"abonne",texte:L.length+" abonnement(s) actif(s)."};}catch(_){return {etat:"inconnu",texte:""};}};
+
+try{setTimeout(function(){_NXABO.charge();},9000);
+setInterval(function(){if(!document.hidden)_NXABO.charge();},3600000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden)_NXABO.charge();});}catch(_){}
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXABO");if(window._NXERR)_NXERR.push("module _NXABO :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXABO desactive:",_nxE);}catch(_){}}
+}
+var _NXTK=window._NXTK||(window._NXTK={});
+if(!_NXTK.boot){try{_NXTK.boot=true;
+// Les tickets de support.
+//
+// Le client n a pas de compte aupres de la base : il se presente avec un
+// jeton remis a l ouverture du fil, garde sur cette machine. C est ce jeton
+// qui donne acces au fil, pas l identifiant Discord -- lequel n a rien d un
+// secret. Perdre le jeton, c est perdre l acces : on ne peut donc pas lire
+// le ticket de quelqu un d autre en devinant son identifiant.
+//
+// Le direct passe par un canal de diffusion qui ne transporte QU UN SIGNAL :
+// jamais le contenu d un message. Chaque cote, prevenu, relit le fil par la
+// fonction qui verifie ses droits. Si le canal ne s etablit pas, un sondage
+// prend le relais -- plus lent, jamais muet.
+_NXTK.URL="https://emcoqnvxriyrchmfpunq.supabase.co/rest/v1/rpc/";
+_NXTK.WS="wss://emcoqnvxriyrchmfpunq.supabase.co/realtime/v1/websocket";
+_NXTK.CLE="sb_publishable_mhLyot9Dv_VCtWpCbYpngg_evMB79C3";
+_NXTK.KEY="nexium_tickets";
+_NXTK.CATS=[["abonnement","Abonnement","etoile"],["probleme","Un probleme","alerte"],
+["question","Une question","question"],["signalement","Un signalement","bouclier"]];
+_NXTK.ETATS={ouvert:"Ouvert",en_cours:"En cours",resolu:"Resolu",ferme:"Ferme"};
+_NXTK.listeners=[];
+_NXTK.notify=function(){for(var a=0;a<_NXTK.listeners.length;a++){try{_NXTK.listeners[a]();}catch(_){}}};
+_NXTK.liste=[];_NXTK.fil=null;_NXTK.filId=null;_NXTK.busy=false;_NXTK.err=null;
+
+_NXTK.moi=function(){try{
+var US=_NXcommon().store("UserStore");
+var u=US&&US.getCurrentUser&&US.getCurrentUser();
+return (u&&u.id)?String(u.id):"";}catch(_){return "";}};
+_NXTK.pseudo=function(){try{
+var US=_NXcommon().store("UserStore");
+var u=US&&US.getCurrentUser&&US.getCurrentUser();
+return (u&&(u.globalName||u.username))||"";}catch(_){return "";}};
+
+// Les jetons, gardes ici et nulle part ailleurs.
+_NXTK.jetons=function(){try{
+var r=_NXDB.get(_NXTK.KEY);var d=r?JSON.parse(r):null;
+return (d&&d.length!==undefined)?d:[];}catch(_){return [];}};
+_NXTK.garde=function(id,jeton){try{
+var L=_NXTK.jetons();
+for(var a=0;a<L.length;a++)if(L[a].id===id)return;
+L.unshift({id:id,j:jeton,a:Date.now()});
+if(L.length>40)L=L.slice(0,40);
+_NXDB.set(_NXTK.KEY,JSON.stringify(L));}catch(_){}};
+_NXTK.jetonDe=function(id){try{
+var L=_NXTK.jetons();
+for(var a=0;a<L.length;a++)if(L[a].id===id)return L[a].j;
+return null;}catch(_){return null;}};
+_NXTK.oublie=function(id){try{
+var L=_NXTK.jetons(),out=[];
+for(var a=0;a<L.length;a++)if(L[a].id!==id)out.push(L[a]);
+_NXDB.set(_NXTK.KEY,JSON.stringify(out));}catch(_){}};
+
+_NXTK.appel=function(nom,corps,cb){try{
+_NXNETX.go(_NXTK.URL+nom,{method:"POST",cache:"no-store",
+headers:{apikey:_NXTK.CLE,"Content-Type":"application/json",Accept:"application/json"},
+body:JSON.stringify(corps||{})},20000)
+.then(function(r){if(!r||!r.ok)throw 0;return r.json();})
+.then(function(j){cb(null,j);})
+.catch(function(){cb("Serveur injoignable.",null);});
+}catch(_){cb("Erreur interne.",null);}};
+
+_NXTK.ouvre=function(o,cb){try{
+var id=_NXTK.moi();
+if(!id){cb("Compte Discord introuvable.");return;}
+_NXTK.busy=true;_NXTK.notify();
+_NXTK.appel("nx_ticket_ouvre",{p_id:id,p_pseudo:_NXTK.pseudo(),
+p_sujet:String(o.sujet||""),p_categorie:String(o.categorie||"question"),
+p_offre:o.offre||null,p_message:String(o.message||"")},function(e,j){
+_NXTK.busy=false;
+if(e){cb(e);_NXTK.notify();return;}
+if(!j||j.ok===false){cb((j&&j.raison)||"Ouverture refusee.");_NXTK.notify();return;}
+_NXTK.garde(j.id,j.jeton);
+_NXTK.rafraichis(function(){cb(null,j.id);});});
+}catch(_){_NXTK.busy=false;cb("Erreur interne.");}};
+
+_NXTK.rafraichis=function(cb){try{
+var id=_NXTK.moi();
+var L=_NXTK.jetons();
+if(!id||!L.length){_NXTK.liste=[];_NXTK.notify();if(cb)cb();return;}
+var js=[];for(var a=0;a<L.length;a++)js.push(L[a].j);
+_NXTK.appel("nx_ticket_miens",{p_id:id,p_jetons:js},function(e,j){
+if(!e&&j&&j.length!==undefined)_NXTK.liste=j;
+_NXTK.err=e||null;
+_NXTK.notify();if(cb)cb();});
+}catch(_){if(cb)cb();}};
+
+_NXTK.lis=function(tid,cb){try{
+var jt=_NXTK.jetonDe(tid);
+if(!jt){if(cb)cb("Jeton perdu pour ce ticket.");return;}
+_NXTK.appel("nx_ticket_lis",{p_id:_NXTK.moi(),p_jeton:jt},function(e,j){
+if(e){_NXTK.err=e;_NXTK.notify();if(cb)cb(e);return;}
+if(!j||j.ok===false){if(cb)cb((j&&j.raison)||"Ticket introuvable.");return;}
+_NXTK.fil=j;_NXTK.filId=tid;_NXTK.err=null;
+_NXTK.notify();if(cb)cb(null,j);});
+}catch(_){if(cb)cb("Erreur interne.");}};
+
+_NXTK.ecrit=function(tid,texte,cb){try{
+var jt=_NXTK.jetonDe(tid);
+if(!jt){cb("Jeton perdu pour ce ticket.");return;}
+var t=String(texte||"").trim();
+if(!t){cb("Message vide.");return;}
+_NXTK.appel("nx_ticket_ecrit",{p_id:_NXTK.moi(),p_jeton:jt,p_texte:t},function(e,j){
+if(e){cb(e);return;}
+if(!j||j.ok===false){cb((j&&j.raison)||"Envoi refuse.");return;}
+_NXTK.signale(tid);
+_NXTK.lis(tid,function(){cb(null);});});
+}catch(_){cb("Erreur interne.");}};
+
+// ------------------------------------------------------------------ le direct
+// Un canal par ticket, qui ne porte qu un signal. Les deux cotes relisent le
+// fil par leur propre fonction : le contenu ne transite jamais par la.
+_NXTK.rt=null;_NXTK.rtTopic=null;_NXTK.rtRef=0;_NXTK.rtBat=null;_NXTK.rtEtat="inactif";
+_NXTK.ferme=function(){try{
+if(_NXTK.rtBat){clearInterval(_NXTK.rtBat);_NXTK.rtBat=null;}
+if(_NXTK.rt){try{_NXTK.rt.onclose=null;_NXTK.rt.close();}catch(_){}_NXTK.rt=null;}
+_NXTK.rtTopic=null;_NXTK.rtEtat="inactif";}catch(_){}};
+_NXTK.suit=function(tid,quand){try{
+if(typeof WebSocket!=="function")return false;
+var topic="realtime:nxt-"+String(tid);
+if(_NXTK.rt&&_NXTK.rtTopic===topic)return true;
+_NXTK.ferme();
+var w=new WebSocket(_NXTK.WS+"?apikey="+encodeURIComponent(_NXTK.CLE)+"&vsn=1.0.0");
+_NXTK.rt=w;_NXTK.rtTopic=topic;_NXTK.rtEtat="connexion";
+w.onopen=function(){try{
+_NXTK.rtEtat="ouvert";
+w.send(JSON.stringify({topic:topic,event:"phx_join",
+payload:{config:{broadcast:{self:false}}},ref:String(++_NXTK.rtRef)}));
+_NXTK.rtBat=setInterval(function(){try{
+if(_NXTK.rt&&_NXTK.rt.readyState===1)
+_NXTK.rt.send(JSON.stringify({topic:"phoenix",event:"heartbeat",payload:{},ref:String(++_NXTK.rtRef)}));
+}catch(_){}},28000);}catch(_){}};
+w.onmessage=function(ev){try{
+var m=JSON.parse(ev.data);
+if(m&&m.event==="phx_reply"&&m.payload&&m.payload.status==="ok")_NXTK.rtEtat="abonne";
+if(m&&m.event==="broadcast"){_NXTK.rtEtat="abonne";if(quand)quand();}
+}catch(_){}};
+w.onerror=function(){_NXTK.rtEtat="erreur";};
+w.onclose=function(){_NXTK.rt=null;_NXTK.rtEtat="ferme";};
+return true;}catch(_){_NXTK.rtEtat="indisponible";return false;}};
+_NXTK.signale=function(tid){try{
+if(!_NXTK.rt||_NXTK.rt.readyState!==1)return false;
+_NXTK.rt.send(JSON.stringify({topic:"realtime:nxt-"+String(tid),event:"broadcast",
+payload:{type:"broadcast",event:"nx",payload:{t:Date.now()}},ref:String(++_NXTK.rtRef)}));
+return true;}catch(_){return false;}};
+_NXTK.etatDirect=function(){try{
+return {etat:_NXTK.rtEtat,ouvert:!!(_NXTK.rt&&_NXTK.rt.readyState===1),topic:_NXTK.rtTopic};}catch(_){return {};}};
+
+_NXTK.enAttente=function(){try{
+var n=0;
+for(var a=0;a<_NXTK.liste.length;a++){
+var t=_NXTK.liste[a];
+if(t.etat==="ouvert"||t.etat==="en_cours")n++;}
+return n;}catch(_){return 0;}};
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXTK");if(window._NXERR)_NXERR.push("module _NXTK :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXTK desactive:",_nxE);}catch(_){}}
+}
+var _NXANN=window._NXANN||(window._NXANN={});
+if(!_NXANN.boot){try{_NXANN.boot=true;
+// L annonce de version.
+//
+// Elle passe une fois, apres quoi elle se tait. Meme regle que l ecran
+// d ouverture : rien n est cache par une animation -- une image figee reste
+// entierement lisible -- et tout ce qui bouge le fait en transform, pour ne
+// pas dependre du fil principal pendant que Discord travaille.
+_NXANN.KEY="nexium_annonce";
+_NXANN.VER="190";
+_NXANN.ID="nx-annonce";
+_NXANN.el=null;_NXANN.page=0;
+_NXANN.vu=function(){try{return _NXDB.get(_NXANN.KEY)===_NXANN.VER;}catch(_){return false;}};
+_NXANN.marque=function(){try{_NXDB.set(_NXANN.KEY,_NXANN.VER);}catch(_){}};
+
+_NXANN.PAGES=[
+{c:"Nouveau",t:"Le client s ouvre sur quelque chose",
+d:"Un ecran d ouverture couvre Discord pendant qu il se prepare. Il n avance pas sur une minuterie : il avance sur des faits, et s efface une fois et demie apres que le client soit reellement la.",
+l:["Le logo se trace, la barre suit les cinq etapes reelles du demarrage",
+"Il mesure sa propre fluidite et se calme tout seul si la machine peine",
+"Desactivable, et rejouable depuis la page d accueil"],
+ic:"M12 2 2 12h3v8h6v-6h2v6h6v-8h3L12 2z"},
+{c:"Nouveau",t:"Abonnements et tickets",
+d:"Trois offres generales, neuf offres par module, et un vrai fil de support pour les demander. Les utilisateurs presents avant cette version gardent tout, a vie.",
+l:["Nexium Plus, Pro et Ultra, plus neuf offres par module a partir d un euro",
+"Une page Abonnement qui dit exactement ce que ton compte ouvre",
+"Une page Support : tu ouvres un ticket, l equipe repond dans le meme fil",
+"Le fil est efface quinze jours apres son dernier message"],
+ic:"M12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21 12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2z"},
+{c:"Repare",t:"Le bac a sable fonctionne enfin",
+d:"Il ne pouvait pas marcher : depuis Discord, lire une page d un autre domaine est refuse par le navigateur avant meme que la requete parte. Un relais va la chercher a ta place.",
+l:["La chaine de redirections est affichee : un lien raccourci ne cache plus rien",
+"Le site inspecte ne voit ni ton adresse IP ni ton navigateur",
+"Les en-tetes de securite de la page sont rapportees"],
+ic:"M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z"},
+{c:"Ameliore",t:"Protect parle moins, protege pareil",
+d:"Ecrire a quelqu un declenchait une suite de bandeaux. Une conversation peut desormais etre marquee de confiance, et un mode discret coupe les avis d ambiance partout.",
+l:["Ce qui est dangereux reste bloque dans tous les cas",
+"Le code a coller dans la console se dit toujours : c est l arnaque qui vide un compte",
+"Vingt-cinq actions sensibles de ton compte peuvent etre confirmees avant de partir"],
+ic:"M12 2 4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z"},
+{c:"Refait",t:"Nexium IA ressemble a un vrai chat",
+d:"Le fil est devenu une colonne unique : une rangee pleine largeur par tour, le texte sur une colonne de lecture fixe, une figure et un nom pour chaque interlocuteur.",
+l:["Le panneau flottant s etire par une poignee, et retient sa taille",
+"Des credits peuvent etre offerts a un compte, et sont depenses avant le quota",
+"Le relais applique les niveaux d abonnement de son cote"],
+ic:"M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2z"},
+{c:"Nouveau",t:"Une administration qui sert",
+d:"Offrir des credits, bannir depuis le client, accorder un abonnement, repondre a un ticket en direct. Et une session qui ne se coupe plus toutes les dix minutes.",
+l:["Les alertes de panne arrivent en une seconde au lieu de deux minutes",
+"Une note jetee en vrac devient un titre et un resume, ecrits par Nexium IA",
+"Le bandeau d alerte propose d expliquer l incident, ou de le repousser"],
+ic:"M5 16 3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 3h14v2H5v-2z"},
+{c:"Partout",t:"Une seule esthetique",
+d:"Soixante-dix icones partagees avec leurs animations, une entete commune a quinze pages, une barre d onglets unique. Neuf barres presque identiques ont disparu.",
+l:["Tout le mouvement s efface si le systeme demande moins d animation",
+"Nexium Donnees remonte dans la section principale, Nexium Labo est retire",
+"Nexium Auto sait envoyer des messages, sous plafond et avec journal"],
+ic:"M7.5 5.6 5 7l1.4-2.5L5 2l2.5 1.4L10 2 8.6 4.5 10 7 7.5 5.6zm12 9.8L22 14l-1.4 2.5L22 19l-2.5-1.4L17 19l1.4-2.5L17 14l2.5 1.4zM22 2l-1.4 2.5L22 7l-2.5-1.4L17 7l1.4-2.5L17 2l2.5 1.4L22 2zm-8.7 6.29a1 1 0 0 0-1.41 0l-9.6 9.6a1 1 0 0 0 0 1.41l1.41 1.41a1 1 0 0 0 1.41 0l9.6-9.6a1 1 0 0 0 0-1.41l-1.41-1.41z"}];
+
+_NXANN.css=function(){return ""+
+"#nx-annonce{position:fixed;inset:0;z-index:2147483000;background:rgba(6,6,9,.86);"+
+"display:flex;align-items:center;justify-content:center;padding:24px;"+
+"font-family:'gg sans','Noto Sans',Helvetica,Arial,sans-serif;color:#f4f4f5;"+
+"opacity:1;transition:opacity .32s ease;}"+
+"#nx-annonce.nxa-part{opacity:0;pointer-events:none;}"+
+"#nx-annonce .nxa-boite{position:relative;width:min(720px,100%);max-height:min(86vh,720px);"+
+"display:flex;flex-direction:column;overflow:hidden;border-radius:24px;"+
+"background:linear-gradient(158deg,#111114,#08080a);border:1px solid #24242a;"+
+"box-shadow:0 40px 120px rgba(0,0,0,.7);transform:translateZ(0);}"+
+"#nx-annonce .nxa-lueur{position:absolute;left:-15%;top:-30%;width:70%;height:70%;"+
+"pointer-events:none;border-radius:50%;"+
+"background:radial-gradient(circle,rgba(255,255,255,.07),transparent 66%);}"+
+"#nx-annonce .nxa-tete{position:relative;display:flex;align-items:center;gap:13px;"+
+"padding:22px 24px 0;}"+
+"#nx-annonce .nxa-marque{width:34px;height:34px;border-radius:11px;flex-shrink:0;"+
+"border:1px solid #2c2c34;display:flex;align-items:center;justify-content:center;"+
+"background:rgba(255,255,255,.04);}"+
+"#nx-annonce .nxa-ver{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;"+
+"letter-spacing:.2em;text-transform:uppercase;color:#6c6c78;}"+
+"#nx-annonce .nxa-x{margin-left:auto;width:28px;height:28px;border-radius:9px;cursor:pointer;"+
+"display:flex;align-items:center;justify-content:center;color:#6c6c78;font-size:17px;"+
+"transition:background-color .16s,color .16s;}"+
+"#nx-annonce .nxa-x:hover{background:rgba(255,255,255,.07);color:#f4f4f5;}"+
+"#nx-annonce .nxa-corps{position:relative;flex:1;min-height:0;overflow-y:auto;padding:20px 24px 4px;}"+
+"#nx-annonce .nxa-ico{width:52px;height:52px;border-radius:17px;margin-bottom:18px;"+
+"border:1px solid #2c2c34;background:rgba(255,255,255,.04);color:#e8e8ea;"+
+"display:flex;align-items:center;justify-content:center;}"+
+"#nx-annonce .nxa-cat{display:inline-block;font-size:9px;font-weight:900;letter-spacing:.16em;"+
+"text-transform:uppercase;color:#0a0a0a;background:#e8e8ea;border-radius:99px;"+
+"padding:3px 10px;margin-bottom:13px;}"+
+"#nx-annonce .nxa-t{font-family:var(--font-display),'Bricolage Grotesque','gg sans',sans-serif;"+
+"font-size:27px;font-weight:800;letter-spacing:-.035em;line-height:1.1;margin-bottom:13px;}"+
+"#nx-annonce .nxa-d{font-size:14px;color:#a6a6ac;line-height:1.7;margin-bottom:20px;}"+
+"#nx-annonce .nxa-l{list-style:none;margin:0;padding:0;}"+
+"#nx-annonce .nxa-l li{display:flex;gap:11px;align-items:flex-start;padding:9px 0;"+
+"border-top:1px solid #1a1a1e;font-size:13px;color:#c9c9d2;line-height:1.6;}"+
+"#nx-annonce .nxa-l li:first-child{border-top:none;}"+
+"#nx-annonce .nxa-p{flex-shrink:0;width:5px;height:5px;border-radius:50%;margin-top:8px;"+
+"background:#4a4a52;}"+
+"#nx-annonce .nxa-pied{position:relative;display:flex;align-items:center;gap:12px;"+
+"padding:16px 24px 20px;border-top:1px solid #1a1a1e;}"+
+"#nx-annonce .nxa-pts{display:flex;gap:6px;flex:1;}"+
+"#nx-annonce .nxa-pts i{width:20px;height:3px;border-radius:99px;background:rgba(255,255,255,.12);"+
+"cursor:pointer;transition:background-color .3s,transform .3s;transform-origin:center;}"+
+"#nx-annonce .nxa-pts i.on{background:#e8e8ea;transform:scaleY(1.7);}"+
+"#nx-annonce .nxa-pts i.faite{background:rgba(255,255,255,.34);}"+
+"#nx-annonce .nxa-b{height:36px;padding:0 18px;border-radius:11px;font-size:12.5px;"+
+"font-weight:800;border:1px solid transparent;cursor:pointer;font-family:inherit;"+
+"display:inline-flex;align-items:center;gap:7px;"+
+"transition:transform .15s cubic-bezier(.22,.8,.28,1),background-color .15s;}"+
+"#nx-annonce .nxa-b:hover{transform:translateY(-1px);}"+
+"#nx-annonce .nxa-b1{background:#e8e8ea;color:#0a0a0a;}"+
+"#nx-annonce .nxa-b2{background:transparent;color:#8a8a92;border-color:#24242a;}"+
+"#nx-annonce .nxa-b2:hover{color:#f4f4f5;}"+
+"#nx-annonce.nxa-vif .nxa-boite{animation:nxann-entre .5s cubic-bezier(.2,.9,.3,1) both;}"+
+"#nx-annonce.nxa-vif .nxa-page > *{animation:nxann-monte .45s cubic-bezier(.2,.9,.3,1) both;}"+
+"#nx-annonce.nxa-vif .nxa-page > *:nth-child(1){animation-delay:.02s}"+
+"#nx-annonce.nxa-vif .nxa-page > *:nth-child(2){animation-delay:.06s}"+
+"#nx-annonce.nxa-vif .nxa-page > *:nth-child(3){animation-delay:.1s}"+
+"#nx-annonce.nxa-vif .nxa-page > *:nth-child(4){animation-delay:.14s}"+
+"#nx-annonce.nxa-vif .nxa-page > *:nth-child(5){animation-delay:.18s}"+
+"@keyframes nxann-entre{from{transform:translateY(16px) scale(.985)}to{transform:none}}"+
+"@keyframes nxann-monte{from{transform:translateY(10px)}to{transform:none}}"+
+"@media (prefers-reduced-motion: reduce){#nx-annonce *{animation:none!important;}}";};
+
+_NXANN.dessine=function(){try{
+if(!_NXANN.el)return;
+var p=_NXANN.PAGES[_NXANN.page];
+var c=_NXANN.el.querySelector(".nxa-page");
+if(!c)return;
+while(c.firstChild)c.removeChild(c.firstChild);
+var el=function(t,cl,tx){var e=document.createElement(t);if(cl)e.className=cl;if(tx!=null)e.textContent=tx;return e;};
+var ico=el("div","nxa-ico");
+try{
+var NS="http://www.w3.org/2000/svg";
+var sv=document.createElementNS(NS,"svg");
+sv.setAttribute("viewBox","0 0 24 24");sv.setAttribute("width","24");sv.setAttribute("height","24");
+sv.setAttribute("fill","currentColor");
+var pa=document.createElementNS(NS,"path");pa.setAttribute("d",p.ic);
+sv.appendChild(pa);ico.appendChild(sv);}catch(_){}
+c.appendChild(ico);
+c.appendChild(el("div","nxa-cat",p.c));
+c.appendChild(el("div","nxa-t",p.t));
+c.appendChild(el("div","nxa-d",p.d));
+var ul=el("ul","nxa-l");
+for(var a=0;a<p.l.length;a++){
+var li=el("li");
+li.appendChild(el("span","nxa-p"));
+li.appendChild(el("span",null,p.l[a]));
+ul.appendChild(li);}
+c.appendChild(ul);
+// Les jalons, et le libelle du bouton principal.
+var pts=_NXANN.el.querySelector(".nxa-pts");
+if(pts){while(pts.firstChild)pts.removeChild(pts.firstChild);
+for(var b=0;b<_NXANN.PAGES.length;b++){
+var d=el("i");
+d.className=(b===_NXANN.page)?"on":(b<_NXANN.page?"faite":"");
+(function(k){d.onclick=function(){_NXANN.va(k);};})(b);
+pts.appendChild(d);}}
+var b1=_NXANN.el.querySelector(".nxa-b1");
+if(b1)b1.textContent=(_NXANN.page>=_NXANN.PAGES.length-1)?"Terminer":"Suivant";
+var b2=_NXANN.el.querySelector(".nxa-b2");
+if(b2)b2.style.visibility=_NXANN.page?"visible":"hidden";
+var corps=_NXANN.el.querySelector(".nxa-corps");
+if(corps)corps.scrollTop=0;
+// Relancer l entree de la page : on retire la classe puis on la remet au
+// battement suivant, sinon l animation ne repart pas.
+try{if(_NXANN.vif&&typeof requestAnimationFrame==="function"){
+_NXANN.el.className="";
+requestAnimationFrame(function(){try{if(_NXANN.el)_NXANN.el.className="nxa-vif";}catch(_){}});}}catch(_){}
+}catch(_){}};
+
+_NXANN.va=function(k){try{
+if(k<0)return;
+if(k>=_NXANN.PAGES.length){_NXANN.ferme();return;}
+_NXANN.page=k;_NXANN.dessine();}catch(_){}};
+
+_NXANN.ferme=function(){try{
+_NXANN.marque();
+var d=_NXANN.el;
+if(!d)return;
+_NXANN.el=null;
+try{d.className="nxa-part";}catch(_){}
+try{if(_NXANN._clav){document.removeEventListener("keydown",_NXANN._clav,true);_NXANN._clav=null;}}catch(_){}
+setTimeout(function(){try{
+if(d&&d.parentNode)d.parentNode.removeChild(d);
+var st=document.getElementById("nx-annonce-style");
+if(st&&st.parentNode)st.parentNode.removeChild(st);}catch(_){}},340);}catch(_){}};
+
+_NXANN.montre=function(force){try{
+if(_NXANN.el)return true;
+if(!force&&_NXANN.vu())return false;
+if(!document.body)return false;
+try{if(String(location.pathname||"").indexOf("popout")>=0)return false;}catch(_){}
+var st=document.createElement("style");
+st.id="nx-annonce-style";st.textContent=_NXANN.css();
+(document.head||document.documentElement).appendChild(st);
+var d=document.createElement("div");
+d.id=_NXANN.ID;
+d.setAttribute("role","dialog");
+d.setAttribute("aria-label","Nouveautes de Nexium Client");
+var ver=(window._NXUP&&_NXUP.VERSION)?("v"+_NXUP.VERSION):("v"+_NXANN.VER);
+d.innerHTML=
+'<div class="nxa-boite"><div class="nxa-lueur"></div>'+
+'<div class="nxa-tete">'+
+'<div class="nxa-marque"><svg viewBox="0 0 100 100" width="18" height="18" fill="none" '+
+'stroke="#f4f4f5" stroke-width="9" stroke-linecap="square"><path d="M28 72 V28 L72 72 V28"/></svg></div>'+
+'<div><div style="font-size:13.5px;font-weight:800;letter-spacing:-.01em;">Nexium Client</div>'+
+'<div class="nxa-ver">'+ver+' &middot; nouveautes</div></div>'+
+'<div class="nxa-x" role="button" aria-label="Fermer">&times;</div></div>'+
+'<div class="nxa-corps"><div class="nxa-page"></div></div>'+
+'<div class="nxa-pied"><div class="nxa-pts"></div>'+
+'<button type="button" class="nxa-b nxa-b2">Precedent</button>'+
+'<button type="button" class="nxa-b nxa-b1">Suivant</button></div></div>';
+document.body.appendChild(d);
+_NXANN.el=d;_NXANN.page=0;
+try{
+d.querySelector(".nxa-x").onclick=function(){_NXANN.ferme();};
+d.querySelector(".nxa-b1").onclick=function(){_NXANN.va(_NXANN.page+1);};
+d.querySelector(".nxa-b2").onclick=function(){_NXANN.va(_NXANN.page-1);};
+d.onclick=function(e){try{if(e.target===d)_NXANN.ferme();}catch(_){}};
+_NXANN._clav=function(e){try{
+if(e.key==="Escape"){e.preventDefault();e.stopPropagation();_NXANN.ferme();return;}
+if(e.key==="ArrowRight"){e.preventDefault();_NXANN.va(_NXANN.page+1);}
+if(e.key==="ArrowLeft"){e.preventDefault();_NXANN.va(_NXANN.page-1);}}catch(_){}};
+document.addEventListener("keydown",_NXANN._clav,true);}catch(_){}
+_NXANN.dessine();
+// Le mouvement n arrive qu a la premiere image peinte : fige, l annonce
+// reste entierement lisible.
+try{if(typeof requestAnimationFrame==="function")
+requestAnimationFrame(function(){requestAnimationFrame(function(){try{
+_NXANN.vif=true;if(_NXANN.el)_NXANN.el.className="nxa-vif";}catch(_){}});});
+else{_NXANN.vif=true;d.className="nxa-vif";}}catch(_){}
+return true;}catch(_){return false;}};
+
+// On attend que le client soit reellement la : une annonce posee sur un
+// ecran de chargement ne se lit pas.
+try{setTimeout(function(){try{
+if(_NXANN.vu())return;
+var essais=0;
+var voir=function(){try{
+essais++;
+var m=document.getElementById("app-mount");
+var pret=!!(m&&m.firstElementChild&&!m.querySelector('[class*="loadingScreen"]'));
+var voile=!!document.getElementById("nx-boot");
+if(pret&&!voile){_NXANN.montre();return;}
+if(essais<60)setTimeout(voir,1000);}catch(_){}};
+voir();}catch(_){}},6000);}catch(_){}
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXANN");if(window._NXERR)_NXERR.push("module _NXANN :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXANN desactive:",_nxE);}catch(_){}}
 }
 var _NXPALD={bg:"#08080a",panel:"#0b0b0c",inset:"#0e0e10",raise:"#141416",line:"#161618",hair:"#212125",edge:"#2a2a30",faint:"#34343a",mute:"#4a4a52",dim:"#5b5b63",soft:"#6c6c74",sub:"#8a8a92",mid:"#a6a6ac",pale:"#c9c9d2",txt:"#f4f4f5",acc:"#e8e8ea",ink:"#0a0a0a",ok:"#8fd19e",okSoft:"#a9cdb4",warn:"#e6c48a",warnSoft:"#d8d2a8",danger:"#e79a9a",dangerSoft:"#d6aeae",red:"#d6484a",info:"#8fb4ea",mauve:"#c7a2ee",cyan:"#7fd3c4",lime:"#c3d98a",rose:"#e9a3c1",light:false};
 var _NXPALL={bg:"#f2f3f5",panel:"#ffffff",inset:"#f6f6f7",raise:"#eceef1",line:"#e3e5e8",hair:"#dcdee1",edge:"#cfcfd2",faint:"#b5bac1",mute:"#9a9aa0",dim:"#6d6f78",soft:"#5a5a60",sub:"#4e5058",mid:"#42424a",pale:"#2a2a30",txt:"#111214",acc:"#1a1a1e",ink:"#ffffff",ok:"#248046",okSoft:"#5a6a5e",warn:"#8a6a2a",warnSoft:"#6a6650",danger:"#9a3a3a",dangerSoft:"#6a5050",red:"#d6484a",info:"#2f5aa8",mauve:"#6a3fa0",cyan:"#1f7a6a",lime:"#5a6f22",rose:"#9a3f6a",light:true};
@@ -1912,7 +3230,30 @@ var t=String(el.tagName||"").toUpperCase();
 return t==="INPUT"||t==="TEXTAREA"||t==="SELECT";}catch(_){return false;}};
 var _NXkey=function(e){try{if(e.key==="Enter"||e.key===" "||e.key==="Spacebar"){e.preventDefault();if(e.currentTarget&&e.currentTarget.click)e.currentTarget.click();}}catch(_){}};
 var _NXn=function(v){v=v||0;if(v>=1000000)return(v/1000000).toFixed(1).replace(/\.0$/,"")+"M";if(v>=1000)return(v/1000).toFixed(1).replace(/\.0$/,"")+"k";return""+v;};
-var _NXhead=function(k,t,d){return i("div",{style:{position:"relative",marginBottom:"26px",paddingTop:"4px"}},i("div",{style:{position:"absolute",left:"-40px",top:"-56px",width:"340px",height:"170px",background:"radial-gradient(55% 70% at 0% 40%, rgba(255,255,255,.045), transparent 72%)",pointerEvents:"none"}}),i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"8px",marginBottom:"14px"}},i("div",{style:{width:"6px",height:"6px",borderRadius:"50%",background:_NXpal.acc,boxShadow:"0 0 10px "+_NXpal.acc+"66"}}),i("div",{style:{fontSize:"10.5px",fontWeight:"800",letterSpacing:".26em",color:_NXpal.sub,textTransform:"uppercase"}},k)),i("div",{style:{position:"relative",fontFamily:_NXf.disp,fontSize:"34px",fontWeight:"800",color:_NXpal.txt,letterSpacing:"-.035em",lineHeight:1.02}},t),d?i("div",{style:{position:"relative",fontSize:"13.5px",color:_NXpal.sub,marginTop:"13px",lineHeight:1.65,maxWidth:"540px"}},d):null,i("div",{style:{position:"relative",height:"1px",marginTop:"22px",background:"linear-gradient(90deg,"+_NXpal.hair+", "+_NXpal.hair+" 30%, transparent)"}}));};
+var _NXMARQUES={
+"Nexium Client":["accueil","acc"],"Nexium IA":["etincelle","mauve"],
+"Nexium Protect":["bouclierOk","danger"],"Nexium Privacy":["oeilBarre","ok"],
+"Nexium R\u00e9seau":["reseau","warn"],"Nexium Donn\u00e9es":["base","lime"],
+"Nexium Stats":["graphe","info"],"Nexium Music":["note","rose"],
+"Nexium Auto":["eclair","warn"],"Nexium Comptes":["comptes","rose"],
+"Nexium Team":["equipe","acc"],"Nexium Sponsor":["coeur","rose"],
+"Nexium Admins":["couronne","warn"],"Nexium Changelog":["liste","info"],
+"Nexium Mise \u00e0 jour":["maj","cyan"]};
+var _NXhead=function(k,t,d){try{
+var m=_NXMARQUES[t]||null;
+return _NXFX.entete({cle:k,titre:t,texte:d,
+icone:m?m[0]:"point",col:m?(_NXpal[m[1]]||_NXpal.acc):_NXpal.acc});
+}catch(_){
+// Repli : la forme d origine, sans blason. Une entete manquante vaudrait
+// une page sans titre -- ce qui serait pire que pas d icone.
+return i("div",{style:{marginBottom:"26px"}},
+i("div",{style:{fontSize:"10.5px",fontWeight:"800",letterSpacing:".26em",
+color:_NXpal.sub,textTransform:"uppercase"}},k),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"34px",fontWeight:"800",
+color:_NXpal.txt,letterSpacing:"-.035em",lineHeight:1.02,marginTop:"12px"}},t),
+d?i("div",{style:{fontSize:"13.5px",color:_NXpal.sub,marginTop:"13px",
+lineHeight:1.65,maxWidth:"540px"}},d):null,
+i("div",{style:{height:"1px",marginTop:"22px",background:_NXpal.hair}}));}};
 var _NXcard=function(body,opt){opt=opt||{};var g=opt.glow;
 var p={style:{position:"relative",overflow:"hidden",background:_NXpal.panel,border:"1px solid "+_NXpal.line,borderRadius:_NXrad.lg,padding:opt.pad||"22px",marginBottom:opt.mb===0?0:"14px",boxShadow:"0 1px 0 rgba(255,255,255,.055) inset, 0 10px 34px rgba(0,0,0,.32)"}};
 try{if(window._NXMO&&_NXMO.on){_NXcard._n=((_NXcard._n||0)%6)+1;p["data-nx-rise"]=String(_NXcard._n);p["data-nx-lift"]="1";}}catch(_){}
@@ -2468,17 +3809,7 @@ background:P.line,overflow:"hidden"}},
 i("div",{style:{height:"100%",borderRadius:"99px",background:c||P.mid,
 transform:"scaleX("+(monte?Math.max(0,Math.min(1,pct)):0)+")",transformOrigin:"left center"}}));}
 var TABS=[["apercu","Aperçu"],["rythme","Rythme"],["classements","Classements"],["objectifs","Objectifs"]];
-function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Stats"),
-style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
-TABS.map(function(t){var on=tab===t[0];
-return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
-"aria-label":_T(t[1]),onClick:function(){if(tab!==t[0])setTab(t[0]);},
-style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",
-letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
-_T(t[1]),
-i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",
-borderRadius:"2px",background:P.txt,transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
-transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function tabbar(){return _NXFX.onglets(TABS,tab,function(k){if(tab!==k)setTab(k);},{col:_NXpal.info});}
 function calendrier(){
 var J=jours(91);
 var sem=[],cur=[];
@@ -2785,7 +4116,41 @@ var h="";try{h=new URL(url).host;}catch(_){h=String(url||"").slice(0,60);}
 _NXP.blocked.unshift({k:kind,h:h,t:Date.now()});
 if(_NXP.blocked.length>40)_NXP.blocked=_NXP.blocked.slice(0,40);}catch(_){}};
 _NXP.mark=function(kind,blk){_NXP.rev=(_NXP.rev||0)+1;_NXP.seen++;_NXP.stats.seen++;_NXP.stats[kind]=(_NXP.stats[kind]||0)+1;var hk=_NXP.hourKey();var hb=_NXP.stats.hours[hk]||(_NXP.stats.hours[hk]={seen:0,blocked:0});hb.seen++;if(blk){_NXP.nBlocked++;_NXP.stats.blocked++;hb.blocked++;}_NXP.log.unshift({t:Date.now(),kind:kind,blk:blk});if(_NXP.log.length>50)_NXP.log.pop();_NXP.pruneHours();_NXP.saveStats();_NXP.tnotify();};
-_NXP.shouldBlock=function(url){try{var u=String(url);var kind=_NXP.classify(u);if(kind){var _bm={sentry:"blockSentry",harvest:"blockHarvest",analytics:"blockAnalytics",errors:"blockErrors",promotions:"blockPromotions",science:"blockTel",track:"blockTel",metrics:"blockTel",experiments:"noExperiments",detectables:"noDetectables",contacts:"noContacts",affinities:"noAffinities",guildevents:"noGuildEvents",recommendations:"noRecommendations",voiceprobe:"noVoiceProbe"};var blk=!!_NXP.cfg[_bm[kind]||"blockTel"];if(blk)_NXP.logBlocked(kind,u);_NXP.mark(kind,blk);return blk;}var tc=_NXP.typingCh(u);if(tc){var g=_NXguildOf(tc);if(_NXP.cfg.silentTyping||(g&&_NXP.cfg.quiet[g])){_NXP.logBlocked("typing",u);_NXP.mark("typing",true);return true;}_NXP.mark("typing",false);return false;}var ac=_NXP.ackCh(u);if(ac){var g2=_NXguildOf(ac);if(_NXP.cfg.noAck||(g2&&_NXP.cfg.quiet[g2])){_NXP.logBlocked("ack",u);_NXP.mark("ack",true);return true;}_NXP.mark("ack",false);return false;}}catch(_){}return false;};
+// Les groupes de Privacy suivent le meme principe : la telemetrie de base
+// reste ouverte, le reste demande un abonnement.
+_NXP.RANGS={
+blockTel:0,blockSentry:0,blockHarvest:0,blockAnalytics:0,blockErrors:0,blockPromotions:0,
+silentTyping:1,noAck:1,noPresenceIdle:1,noAffinities:1,noContacts:1,noGuildEvents:1,
+noActivityShare:1,
+noCanvas:2,noWebGL:2,noAudioFp:2,noScreen:2,noPlugins:2,noBattery:2,noUAData:2,
+noWebRtcIp:2,stripHeaders:2,spoofHardware:2,blockStun:2,noDetectables:2,
+noExperiments:2,noRecommendations:2,noVoiceProbe:2,
+stripExif:3,cleanSentLinks:3,stripTracking:3,stripFilenames:3,cleanClipboard:3,purgeOnQuit:3};
+_NXP.rangDe=function(k){try{
+var r=_NXP.RANGS[k];
+return (typeof r==="number")?r:0;}catch(_){return 0;}};
+_NXP.permis=function(k){try{
+var r=_NXP.rangDe(k);
+if(r<=0)return true;
+if(!window._NXABO)return true;
+return _NXABO.permis("pv",r);}catch(_){return true;}};
+_NXP.reconcilie=function(){try{
+if(!window._NXABO)return 0;
+var n=0,k,touche=false;
+for(k in _NXP.RANGS){
+if(!_NXP.cfg[k])continue;
+if(_NXP.permis(k))continue;
+_NXP.cfg[k]=false;n++;touche=true;}
+if(touche){_NXP.saveCfg();
+// Les correctifs d empreinte sont poses sur les fonctions du navigateur :
+// il ne suffit pas de changer le reglage, il faut les retirer.
+try{_NXP.appliquerTout();}catch(_){}
+try{_NXP.notify();}catch(_){}}
+return n;}catch(_){return 0;}};
+_NXP.shouldBlock=function(url){try{var u=String(url);var kind=_NXP.classify(u);if(kind){var _bm={sentry:"blockSentry",harvest:"blockHarvest",analytics:"blockAnalytics",errors:"blockErrors",promotions:"blockPromotions",science:"blockTel",track:"blockTel",metrics:"blockTel",experiments:"noExperiments",detectables:"noDetectables",contacts:"noContacts",affinities:"noAffinities",guildevents:"noGuildEvents",recommendations:"noRecommendations",voiceprobe:"noVoiceProbe"};var _ck=_bm[kind]||"blockTel";
+// Le reglage ET le droit : c est la double condition qui rend un reglage
+// force a la main sans effet.
+var blk=!!_NXP.cfg[_ck]&&_NXP.permis(_ck);if(blk)_NXP.logBlocked(kind,u);_NXP.mark(kind,blk);return blk;}var tc=_NXP.typingCh(u);if(tc){var g=_NXguildOf(tc);if((_NXP.cfg.silentTyping&&_NXP.permis("silentTyping"))||(g&&_NXP.cfg.quiet[g])){_NXP.logBlocked("typing",u);_NXP.mark("typing",true);return true;}_NXP.mark("typing",false);return false;}var ac=_NXP.ackCh(u);if(ac){var g2=_NXguildOf(ac);if((_NXP.cfg.noAck&&_NXP.permis("noAck"))||(g2&&_NXP.cfg.quiet[g2])){_NXP.logBlocked("ack",u);_NXP.mark("ack",true);return true;}_NXP.mark("ack",false);return false;}}catch(_){}return false;};
 _NXP.onFlux=function(a){try{if(window._NXPATCH&&!_NXPATCH.on)return false;if(a&&a.type==="IDLE"&&_NXP.cfg.noPresenceIdle){_NXP.mark("idle",true);_NXP.logBlocked("idle","signal d inactivite");return true;}
 if(a&&_NXP.cfg.noActivityShare&&(a.type==="LOCAL_ACTIVITY_UPDATE"||a.type==="RUNNING_GAMES_CHANGE")){_NXP.mark("activity",true);_NXP.logBlocked("activity","partage de l activite en cours");return true;}if(!a||a.type!=="TRACK")return false;_NXP.stats.flux=(_NXP.stats.flux||0)+1;var blk=!!_NXP.cfg.blockTel;_NXP.mark("event",blk);return blk;}catch(_){return false;}};
 _NXP.wireFlux=function(){try{if(_NXP.fxi)return;var C=_NXcommon();var FX=C.C.FluxDispatcher||(C.WP.findByProps&&C.WP.findByProps("subscribe","dispatch","_actionHandlers"));if(!FX||typeof FX.addInterceptor!=="function"){_NXP.ftr=(_NXP.ftr||0)+1;if(_NXP.ftr<25)_NXPERF.amorce(_NXP.wireFlux,1500);return;}FX.addInterceptor(_NXP.onFlux);_NXP.fxi=true;}catch(_){}};
@@ -4070,8 +5435,7 @@ _NXIA.OUTILS=[
  var P2={protect:"equicord_protect",privacy:"equicord_privacy",vie_privee:"equicord_privacy",
  reseau:"equicord_network",network:"equicord_network",stats:"equicord_stats",
  donnees:"equicord_data",data:"equicord_data",music:"equicord_music",musique:"equicord_music",
- auto:"equicord_auto",ia:"equicord_ia",comptes:"equicord_comptes",labo:"equicord_labo",
- team:"equicord_team",accueil:"equicord_main"};
+ auto:"equicord_auto",ia:"equicord_ia",comptes:"equicord_comptes", abonnement:"equicord_abo", abo:"equicord_abo", ticket:"equicord_ticket", support:"equicord_ticket", team:"equicord_team",accueil:"equicord_main"};
  var k=String((a&&a.page)||"").trim().toLowerCase();
  var cle=P2[k];
  if(!cle)return {erreur:"page inconnue : "+k,pages:Object.keys(P2)};
@@ -5548,6 +6912,23 @@ nom:(u&&(u.globalName||u.global_name||u.username))||String(uid||"?")});}
 return out;}catch(_){return [];}};
 // Combien de messages sont lus au maximum lors d une analyse. Le chiffre est
 // affiche dans l interface : personne ne doit avoir a deviner ce qui part.
+// La taille du panneau flottant. Retenue, bornee, et remise a plat si le
+// disque rend n importe quoi.
+_NXIA.TKEY="nexium_ia_panneau";
+_NXIA.PDEF={l:420,h:470};
+_NXIA.PMIN={l:320,h:300};
+_NXIA.PMAX={l:900,h:900};
+_NXIA.taillePanneau=function(){try{
+var r=_NXDB.get(_NXIA.TKEY);var d=r?JSON.parse(r):null;
+if(!d||typeof d!=="object")return {l:_NXIA.PDEF.l,h:_NXIA.PDEF.h};
+var l=Math.max(_NXIA.PMIN.l,Math.min(_NXIA.PMAX.l,parseInt(d.l,10)||_NXIA.PDEF.l));
+var h=Math.max(_NXIA.PMIN.h,Math.min(_NXIA.PMAX.h,parseInt(d.h,10)||_NXIA.PDEF.h));
+return {l:l,h:h};}catch(_){return {l:_NXIA.PDEF.l,h:_NXIA.PDEF.h};}};
+_NXIA.setTaillePanneau=function(d){try{
+if(!d)return false;
+var l=Math.max(_NXIA.PMIN.l,Math.min(_NXIA.PMAX.l,parseInt(d.l,10)||_NXIA.PDEF.l));
+var h=Math.max(_NXIA.PMIN.h,Math.min(_NXIA.PMAX.h,parseInt(d.h,10)||_NXIA.PDEF.h));
+_NXDB.set(_NXIA.TKEY,JSON.stringify({l:l,h:h}));return true;}catch(_){return false;}};
 _NXIA.plafondMP=function(){try{
 var n=parseInt(_NXIA.cfg.plafondMP,10);
 return (n>=5&&n<=30)?n:25;}catch(_){return 25;}};
@@ -5936,7 +7317,13 @@ var sc=_NXP.score();
 var profil=_NXP.profilActuel();
 var arretees=st.blocked||0,vues=st.seen||0,passees=Math.max(0,vues-arretees);
 var col=sc.pct>=80?_NXpal.ok:sc.pct>=40?P.txt:_NXpal.warn;
-function tog(k){return function(){cfg[k]=!cfg[k];_NXP.saveCfg();try{_NXP.appliquerTout();}catch(_){}force();};}
+// A chaque ouverture : ce qui est verrouille et actif redescend.
+try{if(_NXP.reconcilie)_NXP.reconcilie();}catch(_){}
+function verrouPV(k){try{return !!(_NXP.permis&&!_NXP.permis(k));}catch(_){return false;}}
+function versOffresPV(){try{if(window._NXCP)_NXCP.ouvrir("equicord_abo","Nexium Abonnement");}catch(_){}}
+function tog(k){return function(){
+if(verrouPV(k)){versOffresPV();return;}
+cfg[k]=!cfg[k];_NXP.saveCfg();try{_NXP.appliquerTout();}catch(_){}force();};}
 function match(it){var v=(q||"").trim().toLowerCase();if(!v)return true;return (_T(it.t)+" "+_T(it.d)+" "+it.k).toLowerCase().indexOf(v)>=0;}
 function familles(){
 return [{n:_T("Telemetrie"),l:PV_TELE,c:_NXpal.ok},
@@ -6023,13 +7410,21 @@ background:on?col:"transparent",border:"1px solid "+(on?col:P.faint)}},
 i("div",{style:{width:"14px",height:"14px",borderRadius:"50%",margin:"3px",
 background:on?_NXpal.ink:P.faint,transform:on?"translateX(16px)":"none"}})));}
 function tuile(it){
-var on=!!cfg[it.k];
-return i("div",{key:it.k,className:"nx-fx",role:"button","aria-label":_T(it.t),
+var ferme=verrouPV(it.k);
+var on=!ferme&&!!cfg[it.k];
+return i("div",{key:it.k,className:"nx-fx",role:"button",
+"aria-label":_T(it.t)+(ferme?(" \u2014 "+_T("abonnement requis")):""),
 "aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,onClick:tog(it.k),
+title:ferme?_T("Cette protection demande un abonnement Nexium Privacy."):"",
 style:{position:"relative",overflow:"hidden",cursor:"pointer",padding:"14px 15px",
 borderRadius:"15px",background:on?"linear-gradient(158deg,#131316,#0c0c0e)":P.inset,
-border:"1px solid "+(on?P.edge:P.line),
-transition:"border-color .22s ease,background .22s ease"}},
+border:"1px solid "+(ferme?_NXteinte(_NXpal.warn,.26):(on?P.edge:P.line)),
+opacity:ferme?.72:1,
+transition:"border-color .22s ease,background .22s ease,opacity .22s ease"}},
+ferme?i("div",{"aria-hidden":"true",style:{position:"absolute",right:"11px",top:"11px",
+color:_NXpal.warn,display:"flex"}},
+i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor"},
+i("path",{d:"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"}))):null,
 on?i("div",{"aria-hidden":"true",style:{position:"absolute",left:0,top:0,bottom:0,width:"2px",
 background:col,opacity:.85}}):null,
 i("div",{style:{display:"flex",alignItems:"flex-start",gap:"11px"}},
@@ -6046,7 +7441,10 @@ i("div",{style:{fontSize:"12.5px",fontWeight:"700",letterSpacing:"-.01em",
 color:on?P.txt:P.sub,transition:"color .22s ease"}},_T(it.t)),
 it.n?_NXneuf():null),
 i("div",{style:{fontSize:"11px",color:P.dim,lineHeight:1.6}},_T(it.d))),
-i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{flexShrink:0,width:"34px",height:"20px",
+ferme?i("div",{style:{flexShrink:0,marginTop:"2px",fontSize:"9.5px",fontWeight:"800",
+letterSpacing:".08em",textTransform:"uppercase",color:_NXpal.warn,whiteSpace:"nowrap"}},
+_T("Abonnement"))
+:i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{flexShrink:0,width:"34px",height:"20px",
 borderRadius:"99px",marginTop:"3px",background:on?col:"transparent",
 border:"1px solid "+(on?col:P.faint),transition:"background .22s ease,border-color .22s ease"}},
 i("div",{style:{width:"13px",height:"13px",borderRadius:"50%",margin:"2.5px",
@@ -6063,18 +7461,7 @@ color:n?col:P.faint,whiteSpace:"nowrap"}},n+"/"+L.length)),
 i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(268px,1fr))",gap:"9px"}},
 L.map(tuile))),{mb:12});}
 var TABS=[["apercu","Aperçu"],["reglages","Réglages"],["preuve","Preuve"],["journal","Journal"],["serveurs","Serveurs"]];
-function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Privacy"),
-style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
-TABS.map(function(t){var on=tab===t[0];
-return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,"data-nx-tab":"1",
-"aria-label":_T(t[1]),
-onClick:function(){if(tab!==t[0]){setTab(t[0]);setQ("");}},
-style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",
-letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
-_T(t[1]),
-i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",borderRadius:"2px",
-background:P.txt,transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
-transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function tabbar(){return _NXFX.onglets(TABS,tab,function(k){if(tab!==k){setTab(k);setQ("");}},{col:_NXpal.ok});}
 function tApercu(){
 var fams=[];
 try{for(var k in _NXP.KINDS){var v=st[k]||0;if(v>0)fams.push([k,v]);}
@@ -6365,17 +7752,7 @@ i("div",{key:"v"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"21px"
 color:c||P.txt,letterSpacing:"-.035em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
 i("div",{style:{fontSize:"10px",color:P.dim,marginTop:"5px"}},lab));}
 var TABS=[["direct","En direct"],["hotes","Hôtes"],["routes","Routes"],["reglages","Réglages"]];
-function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Réseau"),
-style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
-TABS.map(function(t){var on=tab===t[0];
-return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
-"aria-label":_T(t[1]),onClick:function(){if(tab!==t[0])setTab(t[0]);},
-style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",
-letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
-_T(t[1]),
-i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",
-borderRadius:"2px",background:P.txt,transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
-transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function tabbar(){return _NXFX.onglets(TABS,tab,function(k){if(tab!==k)setTab(k);},{col:_NXpal.warn});}
 function tDirect(){
 var H=net.heures(24);
 var hmax=1;for(var a=0;a<H.length;a++)if(H[a].moy>hmax)hmax=H[a].moy;
@@ -6677,18 +8054,12 @@ i("div",{key:"d"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"25px"
 color:c||P.txt,letterSpacing:"-.04em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
 i("div",{style:{fontSize:"11px",color:P.sub,marginTop:"6px",fontWeight:"600"}},lab),
 sub?i("div",{style:{fontSize:"10px",color:P.faint,marginTop:"2px"}},sub):null);}
-var TABS=[["stockage","Stockage"],["sauvegardes","Sauvegardes"],["sante","Santé"],["apparence","Apparence"]];
-function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Données"),
-style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
-TABS.map(function(t){var on=tab===t[0];
-return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
-"aria-label":_T(t[1]),onClick:function(){if(tab!==t[0]){setTab(t[0]);setOuvert("");}},
-style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",
-letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
-_T(t[1]),
-i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",
-borderRadius:"2px",background:P.txt,transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
-transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+var TABS=[["stockage",_T("Stockage"),"base",toutes.length],
+["sauvegardes",_T("Sauvegardes"),"boite",(D.sauvegardes()||[]).length],
+["sante",_T("Santé"),"pouls",""],
+["apparence",_T("Apparence"),"baguette",""]];
+function tabbar(){return _NXFX.onglets(TABS,tab,function(k){
+if(tab!==k){setTab(k);setOuvert("");}},{col:P.lime});}
 function tStockage(){
 var teintes=[P.info,P.ok,P.mauve,P.warn,P.cyan,P.rose,P.lime];
 var rang={};
@@ -7190,7 +8561,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="184";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="190";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -7594,27 +8965,8 @@ i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:P.txt,marginBottom:"5px
 i("div",{style:{fontSize:"11px",color:P.dim,lineHeight:1.65}},x[1]));}))),{mb:12}));}
 
 // ------------------------------------------------------------------ onglets
-var TABS=[["etat","État"],["journal","Journal"],["reparation","Réparation"]];
-function tabbar(){
-return i("div",{role:"tablist","aria-label":_T("Sections de la mise a jour"),
-style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",
-overflowX:"auto",position:"relative"}},
-TABS.map(function(t){
-var on=tab===t[0];
-return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",
-tabIndex:0,onKeyDown:_NXkey,"data-nx-tab":"1","aria-label":_T(t[1]),
-onClick:function(){if(tab!==t[0])setTab(t[0]);},
-style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",
-fontWeight:"700",letterSpacing:".11em",textTransform:"uppercase",
-color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
-_T(t[1]),
-(t[0]==="etat"&&up)?i("span",{"aria-hidden":"true",style:{marginLeft:"7px",
-display:"inline-block",width:"6px",height:"6px",borderRadius:"50%",
-background:_NXpal.ok,verticalAlign:"middle"}}):null,
-i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",
-bottom:"-1px",height:"2px",borderRadius:"2px",background:P.txt,
-transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
-transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+var TABS=[["etat",_T("État"),"pouls",_NXUP.available()?_T("neuf"):""],["journal",_T("Journal"),"liste",""],["reparation",_T("Réparation"),"reglages",""]];
+function tabbar(){return _NXFX.onglets(TABS,tab,function(k){if(tab!==k)setTab(k);},{col:_NXpal.cyan});}
 
 return i(Kr,null,i("div",{style:{maxWidth:"760px",margin:"0 auto",opacity:monte?1:0,
 transform:monte?"none":"translateY(6px)",transition:"opacity .32s ease,transform .32s ease"}},
@@ -7656,125 +9008,615 @@ function NexiumAdminComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 F.useEffect(function(){
 _NXADMIN.listeners.push(force);
-if(_NXADMIN.connecte())_NXADMIN.charge();
+if(_NXADMIN.connecte())_NXADMIN.chargeTout();
+else _NXADMIN.reprend();
 return function(){try{_NXADMIN.listeners=_NXADMIN.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
 var P=_NXpal;
 var msg=F.useState(null),setMsg=msg[1];
 var ident=F.useState(""),mdp=F.useState("");
-var titre=F.useState(""),resume=F.useState(""),grav=F.useState("majeur"),compo=F.useState("client"),vers=F.useState("");
 var onglet=F.useState("alertes");
-function dire(r,bon){try{if(r&&r.err)setMsg({t:r.err,ko:true});else setMsg({t:bon,ko:false});}catch(_){}}
-function champ(val,set,ph,lignes){
-return i(lignes?"textarea":"input",{value:val,placeholder:ph,rows:lignes||undefined,
-onChange:function(e){set(e.target.value);},
-style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,
-borderRadius:"10px",padding:"10px 12px",color:P.txt,font:"13px/1.5 inherit",outline:"none",
-resize:lignes?"vertical":undefined,marginBottom:"9px"}});}
+var titre=F.useState(""),resume=F.useState(""),grav=F.useState("majeur"),compo=F.useState("client"),vers=F.useState("");
+var brut=F.useState("");
+var q=F.useState(""),vise=F.useState(null);
+var don=F.useState("50");
+var bcle=F.useState(""),bgenre=F.useState("compte"),braison=F.useState(""),bjours=F.useState("7");
+var acle=F.useState(""),aoffre=F.useState("plus"),ajours=F.useState("30");
+var trep=F.useState(""),tfiltre=F.useState("");
+var tbas=F.useRef?F.useRef(null):{current:null};
+var histo=F.useState(false);
+
+function dire(r,bon){try{if(r&&r.err)setMsg({t:r.err,ko:true});else setMsg({t:bon,ko:false});
+setTimeout(function(){try{setMsg(function(x){return (x&&x.t===((r&&r.err)||bon))?null:x;});}catch(_){}},6000);}catch(_){}}
+function quand(t){try{
+if(!t)return "—";
+var d=Date.now()-(new Date(t)).getTime();
+var m=Math.floor(d/60000);
+if(m<1)return "a l instant";
+if(m<60)return m+" min";
+var h=Math.floor(m/60);
+if(h<48)return h+" h";
+return Math.floor(h/24)+" j";}catch(_){return "—";}}
+
+// ------------------------------------------------------------- les portes
 if(!_NXADMIN.estEquipe()){
-return i("div",null,_NXcard(i("div",null,_NXch("Acces refuse","Ce compte Discord ne fait pas partie de l equipe Nexium."))));}
+return i("div",null,
+_NXFX.entete({cle:"Administration",titre:"Acces refuse",icone:"cadenas",col:P.danger,
+texte:"Ce compte Discord ne fait pas partie de l equipe Nexium. Cette page ne montre rien, et n envoie rien."}),
+_NXFX.note({col:P.danger,icone:"bouclier",titre:"Rien n est charge",
+texte:"Le client ne demande aucune donnee tant que le compte n est pas reconnu. Le controle est refait sur le serveur a chaque requete."}),
+_NXfoot("Nexium Admins"));}
+
+function lancer(){setMsg(null);_NXADMIN.connexion(ident[0],mdp[0],function(r){mdp[1]("");dire(r,"Connecte.");});}
+
 if(!_NXADMIN.connecte()){
 return i("div",null,
-_NXcard(i("div",null,
-_NXch("Nexium Admins","Connexion requise. Elle est independante de Discord : meme si quelqu un force l affichage de cette page, il ne passera pas cet ecran."),
-champ(ident[0],ident[1],"Identifiant"),
-i("input",{type:"password",value:mdp[0],placeholder:"Mot de passe",
+_NXFX.entete({cle:"Administration",titre:"Nexium Admins",icone:"cle",col:P.warn,
+texte:"Une seconde porte, independante de Discord. Meme si quelqu un force l affichage de cette page, il ne passera pas cet ecran."}),
+_NXcard(i("div",_NXFX.fusion({style:{maxWidth:"430px",margin:"0 auto",padding:"6px 0"}},_NXFX.a({"data-nx-zoom":"1"})),
+i("div",{style:{display:"flex",justifyContent:"center",marginBottom:"20px"}},
+_NXFX.blason("cadenas",P.warn,84)),
+_NXFX.champ({k:"Identifiant",icone:"comptes",v:ident[0],ph:"pseudo",
+onChange:function(e){ident[1](e.target.value);}}),
+_NXFX.champ({k:"Mot de passe",icone:"cle",type:"password",v:mdp[0],ph:"••••••••",
 onChange:function(e){mdp[1](e.target.value);},
-onKeyDown:function(e){if(e.key==="Enter")lancer();},
-style:{width:"100%",boxSizing:"border-box",background:P.inset,border:"1px solid "+P.line,
-borderRadius:"10px",padding:"10px 12px",color:P.txt,font:"13px/1.5 inherit",outline:"none",marginBottom:"12px"}}),
-i("div",{style:{display:"flex",gap:"9px"}},_NXbtn(_NXADMIN.busy?"Connexion...":"Se connecter",lancer)),
-msg[0]?i("div",{style:{marginTop:"11px",fontSize:"12.5px",color:msg[0].ko?P.danger:P.acc}},msg[0].t):null)),
-_NXfoot("Nexium Admins \u00b7 la verification se fait sur le serveur, pas dans le client"));}
-function lancer(){setMsg(null);_NXADMIN.connexion(ident[0],mdp[0],function(r){mdp[1]("");dire(r,"Connecte.");});}
+onKeyDown:function(e){if(e.key==="Enter")lancer();}}),
+i("div",{style:{display:"flex",alignItems:"center",gap:"11px",margin:"4px 0 16px"}},
+_NXtoggle(_NXADMIN.garde(),function(){_NXADMIN.setGarde(!_NXADMIN.garde());force();}),
+i("div",{style:{flex:1}},
+i("div",{style:{fontSize:"12.5px",color:P.txt,fontWeight:"600"}},"Rester connecte"),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"3px",lineHeight:1.5}},
+"La session se renouvelle toute seule. Le jeton est range sur cette machine, brouille avec l identifiant d installation — ce n est pas du chiffrement."))),
+_NXFX.bouton({t:_NXADMIN.busy?"Connexion…":"Se connecter",icone:"fleche",plein:true,large:true,
+col:P.warn,off:_NXADMIN.busy,onClick:lancer}),
+msg[0]?i("div",_NXFX.fusion({style:{marginTop:"14px",fontSize:"12.5px",textAlign:"center",
+color:msg[0].ko?P.danger:P.ok}},_NXFX.a({"data-nx-pop":"1"})),msg[0].t):null)),
+_NXfoot("Nexium Admins · la verification se fait sur le serveur, pas dans le client"));}
+
 var estProp=_NXADMIN.role==="proprietaire";
 var ouvertes=[],closes=[],a;
-for(a=0;a<_NXADMIN.alertes.length;a++){var al=_NXADMIN.alertes[a];if(al.fin||al.etat==="resolu")closes.push(al);else ouvertes.push(al);}
-function mini(lab,onClick,tone){
-return i("div",{className:"nx-fx",role:"button","aria-label":lab,tabIndex:0,onKeyDown:_NXkey,onClick:onClick,
-style:{display:"inline-block",padding:"6px 11px",borderRadius:"8px",cursor:"pointer",
-fontSize:"11px",fontWeight:"700",whiteSpace:"nowrap",
-border:"1px solid "+(tone===_NXpal.danger?_NXpal.danger:P.line),
-color:tone||P.sub,background:"transparent"}},lab);}
+for(a=0;a<_NXADMIN.alertes.length;a++){var al=_NXADMIN.alertes[a];
+if(al.fin||al.etat==="resolu")closes.push(al);else ouvertes.push(al);}
+var graves=0;
+for(a=0;a<ouvertes.length;a++)if(_NXSTATUS.poids(ouvertes[a].gravite)>=4)graves++;
+var CH=_NXADMIN.chiffres||{};
+var bansActifs=_NXADMIN.bans.length;
+
+// ----------------------------------------------------------- les alertes
 function diffusion(al){
 var d=_NXADMIN.diffusion?_NXADMIN.diffusion(al):null;
-var col=d?(d.echecs?_NXpal.danger:(d.attente?_NXpal.warn:_NXpal.ok)):P.faint;
+var col=d?(d.echecs?P.danger:(d.attente?P.warn:P.ok)):P.faint;
 var txt=d?(d.echecs?(d.echecs+" diffusion(s) en echec sur Discord")
-:(d.attente?"diffusion sur Discord en cours\u2026"
-:("diffuse sur Discord \u00b7 "+d.envoyes+" message(s)")))
+:(d.attente?"diffusion sur Discord en cours…"
+:("diffuse sur Discord · "+d.envoyes+" message(s)")))
 :"pas encore diffuse sur Discord";
-return i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"10px",flexWrap:"wrap"}},
-i("span",{"aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",
-background:col,flexShrink:0}}),
-i("span",{style:{fontSize:"11.5px",color:d&&d.echecs?_NXpal.danger:P.dim}},txt),
+return i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginTop:"12px",flexWrap:"wrap"}},
+i("span",_NXFX.fusion({"aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",
+background:col,flexShrink:0}},(d&&d.attente)?_NXFX.a({"data-nx-dot":"1"}):{})),
+i("span",{style:{fontSize:"11.5px",color:(d&&d.echecs)?P.danger:P.dim}},txt),
 (d&&d.echecs&&d.dernier&&d.dernier.detail)?i("span",{style:{fontSize:"11px",color:P.faint,
-fontFamily:_NXf.mono}},"\u00b7 "+String(d.dernier.detail).slice(0,80)):null,
-i("div",{style:{flex:1}}),
-mini("Renvoyer sur Discord",function(){
-_NXADMIN.renvoie(al,"manuel",function(r){dire(r,"Renvoi demande : la mention depend du reglage du serveur.");});}),
-mini("Essai sans mention",function(){
-_NXADMIN.renvoie(al,"test",function(r){dire(r,"Essai envoye, sans mention.");});}));}
-function ligne(al){
-return i("div",{key:al.id,style:{padding:"14px 0",borderTop:"1px solid "+P.line}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"9px",flexWrap:"wrap"}},
-i("span",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".1em",textTransform:"uppercase",
-color:_NXSTATUS.couleur(al.gravite)}},_NXSTATUS.gravFr(al.gravite)),
-i("span",{style:{fontWeight:"600",color:P.txt}},al.titre),
-i("span",{style:{marginLeft:"auto",fontSize:"11px",color:P.dim}},al.fin?"cloturee":al.etat)),
-i("div",{style:{fontSize:"12.5px",color:P.sub,marginTop:"5px"}},al.resume),
+fontFamily:_NXf.mono}},"· "+String(d.dernier.detail).slice(0,80)):null,
+i("div",{style:{flex:1,minWidth:"8px"}}),
+_NXFX.bouton({t:"Renvoyer sur Discord",icone:"envoi",petit:true,creux:true,col:P.sub,onClick:function(){
+_NXADMIN.renvoie(al,"manuel",function(r){dire(r,"Renvoi demande : la mention depend du reglage du serveur.");});}}),
+_NXFX.bouton({t:"Essai sans mention",petit:true,creux:true,col:P.faint,onClick:function(){
+_NXADMIN.renvoie(al,"test",function(r){dire(r,"Essai envoye, sans mention.");});}}));}
+
+function carte(al,k){
+var c=_NXSTATUS.couleur(al.gravite);
+var M=al.maj||[];
+return i("div",_NXFX.fusion({key:al.id,style:{position:"relative",overflow:"hidden",
+background:P.inset,border:"1px solid "+P.line,borderRadius:"15px",padding:"16px",marginBottom:"11px"}},
+_NXFX.a({"data-nx-rise":String(Math.min(6,k+1))})),
+i("div",{"aria-hidden":"true",style:{position:"absolute",left:0,top:0,bottom:0,width:"3px",
+background:"linear-gradient(180deg,"+c+","+_NXteinte(c,.15)+")"}}),
+i("div",{style:{display:"flex",alignItems:"flex-start",gap:"12px"}},
+_NXFX.pastille(al.gravite==="securite"?"bouclier":(al.gravite==="info"?"info":"alerte"),
+{col:c,taille:34,halo:_NXSTATUS.poids(al.gravite)>=4,hv:"secoue"}),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginBottom:"5px"}},
+i("span",{style:{fontSize:"9.5px",fontWeight:"900",letterSpacing:".14em",textTransform:"uppercase",
+color:c}},_NXSTATUS.gravFr(al.gravite)),
+_NXFX.badge(al.fin?"cloturee":al.etat,al.fin?P.faint:P.sub),
+al.composant?_NXFX.badge(String(al.composant),P.dim):null,
+i("span",{style:{marginLeft:"auto",fontSize:"11px",color:P.faint,fontFamily:_NXf.mono}},quand(al.debut))),
+i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt,lineHeight:1.35}},al.titre),
+i("div",{style:{fontSize:"12.5px",color:P.sub,marginTop:"6px",lineHeight:1.55}},al.resume),
+M.length>1?i("div",{style:{marginTop:"11px",paddingLeft:"11px",borderLeft:"1px solid "+P.line}},
+M.slice(-3).map(function(u,z){
+return i("div",{key:z,style:{fontSize:"11.5px",color:P.dim,marginBottom:"4px",lineHeight:1.5}},
+i("span",{style:{color:P.sub,fontWeight:"600"}},quand(u.a)),
+" · "+String(u.texte||"").slice(0,140));})):null,
 diffusion(al),
-al.fin?null:i("div",{style:{display:"flex",gap:"8px",marginTop:"11px",flexWrap:"wrap"}},
-_NXbtn("Cause identifiee",function(){_NXADMIN.majEtat(al,"identifie","La cause est identifiee, un correctif est en preparation.",function(r){dire(r,"Alerte mise a jour.");});}),
-_NXbtn("Sous surveillance",function(){_NXADMIN.majEtat(al,"surveille","Un correctif est en place, la situation est sous surveillance.",function(r){dire(r,"Alerte mise a jour.");});}),
-_NXbtn("Cloturer",function(){_NXADMIN.majEtat(al,"resolu","Incident resolu.",function(r){dire(r,"Alerte cloturee.");});})),
-estProp?i("div",{style:{marginTop:"8px"}},_NXbtn("Supprimer",function(){_NXADMIN.supprime(al,function(r){dire(r,"Alerte supprimee.");});},"danger")):null);}
-return i("div",null,
-_NXcard(i("div",null,_NXch("Nexium Admins",
-"Connecte en tant que "+_NXADMIN.pseudo+" \u00b7 "+(estProp?"proprietaire, tous les droits":"operateur, droits limites"),
-i("div",{style:{minWidth:"120px"}},_NXbtn("Se deconnecter",function(){_NXADMIN.deconnexion();}))),
-msg[0]?i("div",{style:{fontSize:"12.5px",color:msg[0].ko?P.danger:P.acc}},msg[0].t):null),{glow:"rgba(230,196,138,.08)"}),
+al.fin?null:i("div",{style:{display:"flex",gap:"7px",marginTop:"12px",flexWrap:"wrap"}},
+_NXFX.bouton({t:"Cause identifiee",icone:"loupe",petit:true,col:P.info,onClick:function(){
+_NXADMIN.majEtat(al,"identifie","La cause est identifiee, un correctif est en preparation.",function(r){dire(r,"Alerte mise a jour.");});}}),
+_NXFX.bouton({t:"Sous surveillance",icone:"oeil",petit:true,col:P.warn,onClick:function(){
+_NXADMIN.majEtat(al,"surveille","Un correctif est en place, la situation est sous surveillance.",function(r){dire(r,"Alerte mise a jour.");});}}),
+_NXFX.bouton({t:"Cloturer",icone:"check",petit:true,col:P.ok,onClick:function(){
+_NXADMIN.majEtat(al,"resolu","Incident resolu.",function(r){dire(r,"Alerte cloturee.");});}}),
+estProp?_NXFX.bouton({t:"Supprimer",icone:"poubelle",petit:true,creux:true,col:P.danger,onClick:function(){
+_NXADMIN.supprime(al,function(r){dire(r,"Alerte supprimee.");});}}):null))));}
+
+function ongletAlertes(){
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
 _NXcard(i("div",null,
-_NXch("Ouvrir une alerte","Elle apparaitra tout de suite sur la page de statut et dans le client de chaque utilisateur."),
-champ(titre[0],titre[1],"Titre : ce que l utilisateur constate"),
-champ(resume[0],resume[1],"Resume : ce qui ne marche pas, pour qui",3),
-i("div",{style:{display:"flex",gap:"9px"}},
-i("div",{style:{flex:1}},champ(compo[0],compo[1],"Composant (client, blocklist...)")),
-i("div",{style:{flex:1}},champ(vers[0],vers[1],"Versions touchees"))),
-i("div",{style:{display:"flex",gap:"6px",marginBottom:"12px",flexWrap:"wrap"}},
+_NXch("Rediger une alerte","Jette la situation en vrac : Nexium IA en fait un titre, un resume et un niveau. Tu relis, tu corriges, tu publies."),
+_NXFX.champ({k:"Note brute",multi:true,lignes:3,v:brut[0],
+ph:"ex : depuis la 184 le scan des liens plante chez certains, ca vient du cache",
+onChange:function(e){brut[1](e.target.value);}}),
+i("div",{style:{display:"flex",gap:"8px",marginBottom:"18px",flexWrap:"wrap"}},
+_NXFX.bouton({t:_NXADMIN.iaBusy?"Redaction…":"Rediger avec Nexium IA",icone:"etincelle",
+col:P.mauve,plein:!_NXADMIN.iaBusy,off:_NXADMIN.iaBusy,onClick:function(){
+setMsg(null);
+_NXADMIN.redigeIA(brut[0],function(r){
+if(r&&r.ok&&r.data){titre[1](r.data.titre);resume[1](r.data.resume);
+if(_NXADMIN.peutNiveau(r.data.gravite))grav[1](r.data.gravite);
+if(r.data.composant)compo[1](r.data.composant);
+dire(null,"Proposition ecrite. Relis-la avant de publier.");}
+else dire(r,"");});}}),
+brut[0]?_NXFX.bouton({t:"Vider",petit:true,creux:true,col:P.faint,onClick:function(){brut[1]("");}}):null),
+_NXFX.sep(4),
+_NXFX.champ({k:"Titre",v:titre[0],ph:"ce que l utilisateur constate",
+onChange:function(e){titre[1](e.target.value);},
+aide:titre[0]?(titre[0].length+" caracteres"):""}),
+_NXFX.champ({k:"Resume",multi:true,lignes:4,v:resume[0],ph:"ce qui ne marche pas, pour qui, quoi faire en attendant",
+onChange:function(e){resume[1](e.target.value);}}),
+i("div",{style:{display:"flex",gap:"10px"}},
+i("div",{style:{flex:1}},_NXFX.champ({k:"Composant",v:compo[0],ph:"client, blocklist…",
+onChange:function(e){compo[1](e.target.value);}})),
+i("div",{style:{flex:1}},_NXFX.champ({k:"Versions touchees",v:vers[0],ph:"184, 185…",
+onChange:function(e){vers[1](e.target.value);}}))),
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".13em",color:P.dim,
+textTransform:"uppercase",marginBottom:"9px"}},"Niveau"),
+i("div",{style:{display:"flex",gap:"6px",marginBottom:"16px",flexWrap:"wrap"}},
 _NXSTATUS.NIVEAUX.map(function(nv){
-var g=nv.k;
-var on=grav[0]===g;
-var interdit=!_NXADMIN.peutNiveau(g);
-return i("div",{key:g,className:"nx-fx",role:"button",tabIndex:0,
-title:nv.d+(interdit?" \u2014 r\u00e9serv\u00e9 au propri\u00e9taire":""),
+var g=nv.k,on=grav[0]===g,interdit=!_NXADMIN.peutNiveau(g);
+return i("div",_NXFX.fusion({key:g,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+title:nv.d+(interdit?" — reserve au proprietaire":""),
 onClick:function(){if(!interdit)grav[1](g);},
-style:{display:"flex",alignItems:"center",gap:"7px",
-padding:"7px 13px",borderRadius:"99px",cursor:interdit?"not-allowed":"pointer",
-border:"1px solid "+(on?nv.c:P.line),
-background:on?"rgba(255,255,255,.05)":"transparent",
-color:interdit?P.faint:(on?nv.c:P.sub),
-fontSize:"12px",fontWeight:"650",opacity:interdit?.45:1}},
-i("span",{style:{width:"7px",height:"7px",borderRadius:"50%",background:interdit?P.faint:nv.c,
-display:"inline-block",flexShrink:0}}),
-nv.n+(interdit?" \u00b7 propri\u00e9taire":""));})),
-i("div",{style:{display:"flex",gap:"9px"}},_NXbtn("Publier l alerte",function(){
+style:{display:"flex",alignItems:"center",gap:"7px",padding:"7px 13px",borderRadius:"99px",
+cursor:interdit?"not-allowed":"pointer",border:"1px solid "+(on?nv.c:P.line),
+background:on?_NXteinte(nv.c,.12):"transparent",
+color:interdit?P.faint:(on?nv.c:P.sub),fontSize:"12px",fontWeight:"700",
+opacity:interdit?.45:1}},_NXFX.a({"data-nx-appui":"1"})),
+i("span",_NXFX.fusion({style:{width:"7px",height:"7px",borderRadius:"50%",
+background:interdit?P.faint:nv.c,display:"inline-block",flexShrink:0}},
+on?_NXFX.a({"data-nx-dot":"1"}):{})),
+nv.n+(interdit?" · propriétaire":""));})),
+_NXFX.bouton({t:"Publier l alerte",icone:"envoi",plein:true,large:true,col:P.acc,onClick:function(){
 _NXADMIN.ouvrir({titre:titre[0],resume:resume[0],gravite:grav[0],composant:compo[0],versions:vers[0]},function(r){
-if(r&&r.ok){titre[1]("");resume[1]("");vers[1]("");}
-dire(r,"Alerte publiee.");});})))),
+if(r&&r.ok){titre[1]("");resume[1]("");vers[1]("");brut[1]("");}
+dire(r,"Alerte publiee. Elle part en direct chez les utilisateurs.");});}}))),
 _NXcard(i("div",null,
 _NXch("Alertes en cours",ouvertes.length?(ouvertes.length+" alerte(s) visible(s) par les utilisateurs"):"Aucune alerte ouverte.",
-i("div",{style:{minWidth:"110px"}},_NXbtn("Rafraichir",function(){_NXADMIN.charge(function(r){dire(r,"Liste rechargee.");});}))),
-ouvertes.map(ligne))),
-closes.length?_NXcard(i("div",null,_NXch("Historique",closes.length+" alerte(s) cloturee(s)"),closes.slice(0,10).map(ligne))):null,
-estProp?_NXcard(i("div",null,
-_NXch("Journal d audit","Chaque ouverture, modification et suppression est enregistree cote serveur.",
-i("div",{style:{minWidth:"110px"}},_NXbtn("Charger",function(){_NXADMIN.chargeJournal(function(r){dire(r,"Journal charge.");});}))),
-_NXADMIN.journal.map(function(e,k){
-return i("div",{key:k,style:{display:"flex",gap:"10px",padding:"8px 0",borderTop:k?"1px solid "+P.line:"none",fontSize:"12.5px"}},
-i("span",{style:{color:P.dim,fontFamily:_NXf.mono,fontSize:"11px",flex:"0 0 auto"}},new Date(e.a).toLocaleString("fr-FR")),
-i("span",{style:{color:P.txt,fontWeight:"600"}},e.pseudo||"?"),
-i("span",{style:{color:P.sub}},e.action));})))
-:null,
-_NXfoot("Nexium Admins \u00b7 les droits sont verifies par Supabase, pas par le client"));
+_NXFX.bouton({t:"Rafraichir",icone:"maj",petit:true,creux:true,col:P.sub,hv:"tourne",onClick:function(){
+_NXADMIN.charge(function(r){dire(r,"Liste rechargee.");});}})),
+ouvertes.length?ouvertes.map(carte):_NXFX.vide({icone:"bouclierOk",col:P.ok,
+titre:"Tout va bien",texte:"Aucun incident ouvert. Les utilisateurs ne voient aucun bandeau."}))),
+closes.length?_NXcard(i("div",null,
+_NXch("Historique",closes.length+" alerte(s) cloturee(s)",
+_NXFX.bouton({t:histo[0]?"Replier":"Deplier",petit:true,creux:true,col:P.sub,
+onClick:function(){histo[1](!histo[0]);}})),
+histo[0]?closes.slice(0,12).map(carte):null)):null));}
+
+// ----------------------------------------------------------- les membres
+function fiche(){
+var m=vise[0];
+if(!m)return null;
+return i("div",_NXFX.fusion({style:{marginTop:"14px",padding:"15px",borderRadius:"14px",
+background:_NXteinte(P.acc,.05),border:"1px solid "+P.hair}},_NXFX.a({"data-nx-zoom":"1"})),
+i("div",{style:{display:"flex",alignItems:"center",gap:"11px",marginBottom:"14px"}},
+_NXFX.pastille("comptes",{col:m.banni?P.danger:P.info,taille:36,halo:true}),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"13px",color:P.txt,fontWeight:"700"}},m.user_id),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"3px"}},
+"vu il y a "+quand(m.last_seen)+" · arrive il y a "+quand(m.first_seen)+
+(m.version?(" · v"+m.version):"")+" · "+(m.seen_count||0)+" ouverture(s)")),
+_NXFX.bouton({t:"Fermer",petit:true,creux:true,col:P.faint,onClick:function(){vise[1](null);}})),
+i("div",{style:{display:"flex",gap:"10px",flexWrap:"wrap",marginBottom:"14px"}},
+_NXFX.badge(m.banni?"banni":"actif",m.banni?P.danger:P.ok,{point:true}),
+_NXFX.badge((m.bonus||0)+" credits offerts",m.bonus?P.lime:P.faint,{icone:"jeton"})),
+i("div",{style:{display:"flex",gap:"9px",alignItems:"flex-end",flexWrap:"wrap"}},
+i("div",{style:{width:"120px"}},_NXFX.champ({k:"Montant",serre:true,mono:true,v:don[0],
+onChange:function(e){don[1](e.target.value);}})),
+_NXFX.bouton({t:"Offrir",icone:"cadeau",col:P.lime,plein:true,onClick:function(){
+_NXADMIN.donneCredits(m.user_id,don[0],function(r){
+if(r&&r.ok){_NXADMIN.chargeMembres(q[0]);dire(r,don[0]+" credits vers "+m.user_id+".");}
+else dire(r,"");});}}),
+_NXFX.bouton({t:"Retirer",icone:"moins",creux:true,col:P.warn,onClick:function(){
+_NXADMIN.donneCredits(m.user_id,-Math.abs(parseInt(don[0],10)||0),function(r){
+if(r&&r.ok)_NXADMIN.chargeMembres(q[0]);
+dire(r,"Retire.");});}}),
+i("div",{style:{flex:1,minWidth:"8px"}}),
+m.banni?_NXFX.bouton({t:"Lever le bannissement",icone:"cadenasOuvert",col:P.ok,onClick:function(){
+_NXADMIN.leveBan(m.user_id,function(r){if(r&&r.ok)_NXADMIN.chargeMembres(q[0]);dire(r,"Bannissement leve.");});}})
+:_NXFX.bouton({t:"Bannir…",icone:"banni",creux:true,col:P.danger,onClick:function(){
+bcle[1](m.user_id);bgenre[1]("compte");onglet[1]("bans");}})));}
+
+function ongletMembres(){
+var L=_NXADMIN.membres||[];
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+_NXcard(i("div",null,
+_NXch("Population",(CH.total!==undefined)?(CH.total+" comptes connus · "+(CH.actifs_24h||0)+" ces 24 h"):"Chargement…",
+_NXFX.bouton({t:"Rafraichir",icone:"maj",petit:true,creux:true,col:P.sub,hv:"tourne",onClick:function(){
+_NXADMIN.chargeChiffres();_NXADMIN.chargeMembres(q[0],function(r){dire(r,"Liste rechargee.");});}})),
+i("div",{style:{display:"flex",gap:"24px",flexWrap:"wrap",marginBottom:"18px"}},
+_NXFX.chiffre({k:"Total",v:_NXn(CH.total||0),rang:1}),
+_NXFX.chiffre({k:"24 heures",v:_NXn(CH.actifs_24h||0),col:P.ok,rang:2}),
+_NXFX.chiffre({k:"7 jours",v:_NXn(CH.actifs_7j||0),col:P.info,rang:3}),
+_NXFX.chiffre({k:"Nouveaux",v:_NXn(CH.nouveaux_7j||0),col:P.mauve,rang:4}),
+_NXFX.chiffre({k:"Bannis",v:_NXn(CH.bannis||0),col:(CH.bannis?P.danger:P.faint),rang:5}),
+_NXFX.chiffre({k:"Credits offerts",v:_NXn(CH.credits||0),col:P.lime,rang:6})),
+CH.versions?i("div",null,
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".13em",color:P.dim,
+textTransform:"uppercase",marginBottom:"10px"}},"Versions en circulation, 30 derniers jours"),
+(function(){var ks=[],kk;for(kk in CH.versions)ks.push(kk);
+ks.sort(function(x,y){return CH.versions[y]-CH.versions[x];});
+var mx=ks.length?CH.versions[ks[0]]:1;
+return i("div",null,ks.slice(0,8).map(function(v,z){
+return i("div",{key:v,style:{display:"flex",alignItems:"center",gap:"11px",marginBottom:"7px"}},
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11.5px",color:P.sub,width:"52px",flexShrink:0}},"v"+v),
+i("div",{style:{flex:1}},_NXFX.barre(mx?(CH.versions[v]/mx*100):0,z===0?P.acc:P.info,4)),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"11px",color:P.dim,width:"42px",
+textAlign:"right",flexShrink:0}},_NXn(CH.versions[v])));}));})()):null)),
+_NXcard(i("div",null,
+_NXch("Chercher un compte","Tape un identifiant, ou une partie. La liste montre les soixante derniers vus."),
+i("div",{style:{display:"flex",gap:"9px",alignItems:"flex-end",marginBottom:"6px"}},
+i("div",{style:{flex:1}},_NXFX.champ({serre:true,icone:"loupe",mono:true,v:q[0],ph:"546349979757707265",
+onChange:function(e){q[1](e.target.value);},
+onKeyDown:function(e){if(e.key==="Enter")_NXADMIN.chargeMembres(q[0]);}})),
+_NXFX.bouton({t:"Chercher",icone:"loupe",col:P.acc,plein:true,onClick:function(){
+_NXADMIN.chargeMembres(q[0],function(r){dire(r,"");});}})),
+L.length?i("div",{style:{marginTop:"8px"}},L.map(function(m,k){
+return _NXFX.rangee({premier:k===0,rang:Math.min(6,k+1),icone:"comptes",
+col:m.banni?P.danger:(m.bonus?P.lime:P.faint),
+titre:m.user_id,
+texte:"vu il y a "+quand(m.last_seen)+(m.version?(" · v"+m.version):"")+
+" · "+(m.seen_count||0)+" ouverture(s)",
+onClick:function(){vise[1](m);},
+droite:i("div",{style:{display:"flex",gap:"6px",alignItems:"center"}},
+m.bonus?_NXFX.badge(String(m.bonus),P.lime,{icone:"jeton"}):null,
+m.banni?_NXFX.badge("banni",P.danger,{point:true}):null,
+_NXFX.ico("chevron",14,{hv:"pousse"}))});}))
+:_NXFX.vide({icone:"loupe",titre:"Rien pour l instant",
+texte:"Lance une recherche, ou rafraichis la population."}),
+fiche()))));}
+
+// -------------------------------------------------------------- les bans
+function ongletBans(){
+var L=_NXADMIN.bans||[];
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+_NXcard(i("div",null,
+_NXch("Bannir depuis le client","Le client verifie deux sources a chaque demarrage : le fichier du depot, et cette table. Ce qui est pose ici prend effet en quelques minutes, sans publication."),
+_NXFX.note({col:P.warn,icone:"alerte",titre:"Trois portees",
+texte:"Le compte vise une personne. L appareil vise la machine, donc tous ses comptes. L installation ne vise que ce profil Discord — elle se contourne en reinstallant."}),
+i("div",{style:{display:"flex",gap:"6px",marginBottom:"14px",flexWrap:"wrap"}},
+_NXADMIN.GENRES.map(function(g){
+var on=bgenre[0]===g[0];
+return i("div",_NXFX.fusion({key:g[0],className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+title:g[2],onClick:function(){bgenre[1](g[0]);},
+style:{padding:"8px 14px",borderRadius:"11px",cursor:"pointer",
+border:"1px solid "+(on?P.danger:P.line),
+background:on?_NXteinte(P.danger,.1):"transparent",
+color:on?P.danger:P.sub,fontSize:"12px",fontWeight:"700"}},_NXFX.a({"data-nx-appui":"1"})),g[1]);})),
+_NXFX.champ({k:"Cible",mono:true,icone:"cible",v:bcle[0],
+ph:bgenre[0]==="compte"?"identifiant Discord":"empreinte",
+onChange:function(e){bcle[1](e.target.value);},
+aide:(function(){for(var z=0;z<_NXADMIN.GENRES.length;z++)if(_NXADMIN.GENRES[z][0]===bgenre[0])return _NXADMIN.GENRES[z][2];return "";})()}),
+_NXFX.champ({k:"Motif",v:braison[0],ph:"ce qui est reproche, en une phrase",
+onChange:function(e){braison[1](e.target.value);}}),
+_NXFX.champ({k:"Duree en jours",mono:true,icone:"horloge",v:bjours[0],ph:"7",
+onChange:function(e){bjours[1](e.target.value);},
+aide:estProp?"Laisse vide pour un bannissement definitif.":"Un operateur ne pose que des bannissements a duree limitee."}),
+i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
+_NXFX.bouton({t:"Poser le bannissement",icone:"banni",plein:true,col:P.danger,onClick:function(){
+var j=String(bjours[0]||"").trim();
+_NXADMIN.poseBan({cle:bcle[0],genre:bgenre[0],raison:braison[0],jours:j?j:null},function(r){
+if(r&&r.ok){bcle[1]("");braison[1]("");dire(r,"Bannissement pose.");}
+else dire(r,"");});}}),
+_NXFX.bouton({t:"Vider",petit:true,creux:true,col:P.faint,onClick:function(){
+bcle[1]("");braison[1]("");}})))),
+_NXcard(i("div",null,
+_NXch("Bannissements actifs",bansActifs?(bansActifs+" en vigueur"):"Aucun bannissement pose depuis le client.",
+_NXFX.bouton({t:"Rafraichir",icone:"maj",petit:true,creux:true,col:P.sub,hv:"tourne",onClick:function(){
+_NXADMIN.chargeBans(function(r){dire(r,"Liste rechargee.");});}})),
+L.length?L.map(function(b,k){
+var perm=!b.expire_le;
+return _NXFX.rangee({premier:k===0,rang:Math.min(6,k+1),icone:"banni",col:perm?P.danger:P.warn,
+titre:b.cle,
+texte:b.genre+" · "+(perm?"definitif":("jusqu au "+new Date(b.expire_le).toLocaleDateString("fr-FR")))+
+(b.par?(" · par "+b.par):"")+(b.raison?(" — "+b.raison):""),
+droite:_NXFX.bouton({t:"Lever",icone:"cadenasOuvert",petit:true,creux:true,col:P.ok,onClick:function(){
+_NXADMIN.leveBan(b.cle,function(r){dire(r,"Bannissement leve.");});}})});})
+:_NXFX.vide({icone:"bouclierOk",col:P.ok,titre:"Personne",
+texte:"Aucun bannissement en vigueur. Le fichier du depot reste consulte de son cote."})))));}
+
+// ----------------------------------------------------------- les credits
+function ongletCredits(){
+var L=_NXADMIN.credits||[];
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+_NXcard(i("div",null,
+_NXch("Offrir des credits Nexium IA","Ils sont depenses AVANT le quota des sept heures, et rendus si la demande echoue. Un montant negatif retire."),
+i("div",{style:{display:"flex",gap:"9px",alignItems:"flex-end",flexWrap:"wrap"}},
+i("div",{style:{flex:2,minWidth:"200px"}},_NXFX.champ({k:"Identifiant Discord",serre:true,mono:true,
+icone:"comptes",v:q[0],ph:"546349979757707265",onChange:function(e){q[1](e.target.value);}})),
+i("div",{style:{width:"120px"}},_NXFX.champ({k:"Montant",serre:true,mono:true,v:don[0],
+onChange:function(e){don[1](e.target.value);}})),
+_NXFX.bouton({t:"Offrir",icone:"cadeau",plein:true,col:P.lime,onClick:function(){
+_NXADMIN.donneCredits(q[0],don[0],function(r){dire(r,don[0]+" credits vers "+q[0]+".");});}})),
+i("div",{style:{display:"flex",gap:"7px",marginTop:"6px",flexWrap:"wrap"}},
+["25","50","100","250"].map(function(v){
+return i("div",{key:v},_NXFX.bouton({t:"+"+v,petit:true,creux:true,
+col:don[0]===v?P.lime:P.faint,onClick:function(){don[1](v);}}));})))),
+_NXcard(i("div",null,
+_NXch("Comptes credites",L.length?(L.length+" compte(s)"):"Personne n a encore recu de credits.",
+_NXFX.bouton({t:"Rafraichir",icone:"maj",petit:true,creux:true,col:P.sub,hv:"tourne",onClick:function(){
+_NXADMIN.chargeCredits(function(r){dire(r,"Liste rechargee.");});}})),
+L.length?L.map(function(c,k){
+return _NXFX.rangee({premier:k===0,rang:Math.min(6,k+1),icone:"jeton",
+col:c.bonus?P.lime:P.faint,titre:c.discord_id,
+texte:(c.bonus||0)+" restant(s) sur "+(c.total_offert||0)+" offert(s) · il y a "+quand(c.maj),
+droite:i("div",{style:{display:"flex",gap:"6px"}},
+_NXFX.bouton({t:"+50",petit:true,creux:true,col:P.lime,onClick:function(){
+_NXADMIN.donneCredits(c.discord_id,50,function(r){dire(r,"50 credits ajoutes.");});}}),
+_NXFX.bouton({t:"Vider",petit:true,creux:true,col:P.warn,onClick:function(){
+_NXADMIN.donneCredits(c.discord_id,-(c.bonus||0),function(r){dire(r,"Solde remis a zero.");});}}))});})
+:_NXFX.vide({icone:"cadeau",titre:"Aucun credit offert",
+texte:"Offre des credits a un compte pour lui laisser essayer les paliers hauts."})))));}
+
+// ------------------------------------------------------------- les tickets
+function ongletTickets(){
+var L=_NXADMIN.tickets||[];
+var f=_NXADMIN.fil;
+var CAT={abonnement:["etoile",_NXpal.warn],probleme:["alerte",P.danger],
+question:["question",P.info],signalement:["bouclier",P.mauve]};
+var ETA={ouvert:[_T("Ouvert"),P.warn],en_cours:[_T("En cours"),P.info],
+resolu:[_T("Resolu"),P.ok],ferme:[_T("Ferme"),P.faint]};
+function ic(c){return (CAT[c]||["courrier",P.sub])[0];}
+function co(c){return (CAT[c]||["courrier",P.sub])[1];}
+
+if(f&&f.ticket){
+var t=f.ticket;
+var ec=(ETA[t.etat]||[t.etat,P.sub]);
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+_NXcard(i("div",null,
+i("div",{style:{display:"flex",alignItems:"center",gap:"11px",marginBottom:"14px",flexWrap:"wrap"}},
+_NXFX.bouton({t:_T("Retour"),icone:"retour",petit:true,creux:true,col:P.sub,
+onClick:function(){try{if(window._NXTK)_NXTK.ferme();}catch(_){}
+_NXADMIN.fil=null;_NXADMIN.filId=null;_NXADMIN.chargeTickets(null);force();}}),
+_NXFX.pastille(ic(t.categorie),{col:co(t.categorie),taille:32,hv:"penche"}),
+i("div",{style:{flex:1,minWidth:"150px"}},
+i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt}},t.sujet),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"3px",fontFamily:_NXf.mono}},
+(t.pseudo?(t.pseudo+" \u00b7 "):"")+t.discord_id+" \u00b7 "+quand(t.cree_le))),
+_NXFX.badge(ec[0],ec[1],{point:t.etat==="ouvert",gros:true})),
+t.offre?_NXFX.note({col:_NXpal.warn,icone:"etoile",titre:_T("Demande d abonnement"),
+texte:_T("Ce ticket porte sur")+" : "+t.offre+". "+
+_T("Tu peux poser l abonnement sans quitter le fil."),
+droite:i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap"}},
+["30","90","365"].map(function(j){
+return i("div",{key:j},_NXFX.bouton({t:j+" j",petit:true,creux:true,col:_NXpal.warn,
+onClick:function(){
+// L offre est nommee dans le ticket : on retrouve sa clef au catalogue.
+var cle=null,z;
+for(z=0;z<(_NXADMIN.offres||[]).length;z++)
+if(_NXADMIN.offres[z].nom===t.offre)cle=_NXADMIN.offres[z].offre;
+if(!cle){dire({err:_T("Offre introuvable au catalogue : pose-la depuis l onglet Abonnements.")});return;}
+_NXADMIN.donneAbo(t.discord_id,cle,j,function(r){
+if(r&&r.ok){_NXADMIN.repondTicket(t.id,
+_T("Abonnement pose")+" : "+t.offre+" ("+j+" "+_T("jours")+"). "+
+_T("Il apparait dans ta page Abonnement."),function(){});
+dire(r,_T("Abonnement accorde et annonce dans le fil."));}
+else dire(r,"");});}}));}))}):null,
+i("div",{ref:tbas,style:{maxHeight:"44vh",minHeight:"170px",overflowY:"auto",
+padding:"12px",background:P.bg,borderRadius:"14px",border:"1px solid "+P.line}},
+(f.messages||[]).map(function(m,k){
+if(m.auteur==="systeme")return i("div",{key:k,style:{textAlign:"center",padding:"7px 0"}},
+i("span",{style:{fontSize:"10.5px",color:P.faint,fontFamily:_NXf.mono,
+border:"1px solid "+P.line,borderRadius:"99px",padding:"3px 11px"}},m.contenu));
+var moi=m.auteur==="admin";
+return i("div",{key:k,style:{display:"flex",justifyContent:moi?"flex-end":"flex-start",
+marginBottom:"11px"}},
+i("div",{style:{maxWidth:"80%"}},
+i("div",{style:{display:"flex",gap:"7px",marginBottom:"5px",
+justifyContent:moi?"flex-end":"flex-start"}},
+i("span",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".1em",
+textTransform:"uppercase",color:moi?_NXpal.warn:P.dim}},
+moi?_T("Equipe"):(t.pseudo||_T("Utilisateur"))),
+i("span",{style:{fontSize:"10px",color:P.faint,fontFamily:_NXf.mono}},quand(m.a))),
+i("div",{style:{padding:"11px 14px",
+borderRadius:moi?"14px 14px 4px 14px":"14px 14px 14px 4px",
+background:moi?_NXteinte(_NXpal.warn,.09):P.raise,
+border:"1px solid "+(moi?_NXteinte(_NXpal.warn,.24):P.hair),
+color:P.txt,fontSize:"13px",lineHeight:1.65,whiteSpace:"pre-wrap",
+overflowWrap:"anywhere",userSelect:"text",WebkitUserSelect:"text"}},m.contenu)));})),
+t.etat==="ferme"?_NXFX.note({col:P.faint,icone:"cadenas",serre:true,
+texte:_T("Ce ticket est ferme : l utilisateur ne peut plus y ecrire.")})
+:i("div",{style:{marginTop:"12px"}},
+_NXFX.champ({multi:true,lignes:3,serre:true,v:trep[0],ph:_T("Ta reponse\u2026"),
+onChange:function(e){trep[1](e.target.value);},
+onKeyDown:function(e){try{e.stopPropagation();
+if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();
+var v=trep[0];if(!v.trim())return;trep[1]("");
+_NXADMIN.repondTicket(t.id,v,function(r){dire(r,"");});}}catch(_){}}}),
+i("div",{style:{display:"flex",gap:"7px",flexWrap:"wrap"}},
+_NXFX.bouton({t:_T("Repondre"),icone:"envoi",plein:true,col:_NXpal.warn,onClick:function(){
+var v=trep[0];if(!v.trim())return;trep[1]("");
+_NXADMIN.repondTicket(t.id,v,function(r){dire(r,"");});}}),
+_NXFX.bouton({t:_T("Marquer resolu"),icone:"check",creux:true,col:P.ok,onClick:function(){
+_NXADMIN.etatTicket(t.id,"resolu",function(r){dire(r,_T("Ticket marque resolu."));});}}),
+_NXFX.bouton({t:_T("Fermer"),icone:"cadenas",creux:true,col:P.danger,onClick:function(){
+_NXADMIN.etatTicket(t.id,"ferme",function(r){dire(r,_T("Ticket ferme."));});}})))),{mb:0})));}
+
+var vues=L;
+if(tfiltre[0])vues=L.filter(function(x){return x.etat===tfiltre[0];});
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+_NXcard(i("div",null,
+_NXch(_T("File de support"),
+L.length?(_NXADMIN.enAttente()+" "+_T("en attente de reponse, sur")+" "+L.length):_T("Aucun ticket."),
+_NXFX.bouton({t:_T("Rafraichir"),icone:"maj",hv:"tourne",petit:true,creux:true,col:P.sub,
+onClick:function(){_NXADMIN.chargeTickets(tfiltre[0]||null,function(r){dire(r,_T("File rechargee."));});}})),
+i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"14px"}},
+[["",_T("Tous")],["ouvert",_T("Ouverts")],["en_cours",_T("En cours")],
+["resolu",_T("Resolus")],["ferme",_T("Fermes")]].map(function(x){
+var on=tfiltre[0]===x[0];
+return i("div",{key:x[0]||"tous"},_NXFX.bouton({t:x[1],petit:true,
+plein:on,creux:!on,col:on?_NXpal.warn:P.sub,
+onClick:function(){tfiltre[1](x[0]);_NXADMIN.chargeTickets(x[0]||null);}}));})),
+vues.length?vues.map(function(x,k){
+var ec=(ETA[x.etat]||[x.etat,P.sub]);
+return _NXFX.rangee({key:x.id,premier:k===0,rang:Math.min(6,k+1),
+icone:ic(x.categorie),col:x.attente?co(x.categorie):P.faint,
+titre:x.sujet,
+texte:(x.pseudo?(x.pseudo+" \u00b7 "):"")+x.discord_id+" \u00b7 "+
+x.messages+" "+_T("message(s)")+" \u00b7 "+quand(x.maj_le)+
+(x.offre?(" \u00b7 "+x.offre):""),
+onClick:function(){_NXADMIN.ouvreFil(x.id,function(){
+try{if(window._NXTK)_NXTK.suit(x.id,function(){_NXADMIN.ouvreFil(x.id);});}catch(_){}});},
+droite:i("div",{style:{display:"flex",gap:"6px",alignItems:"center"}},
+x.attente?_NXFX.badge(_T("a repondre"),_NXpal.warn,{point:true}):null,
+_NXFX.badge(ec[0],ec[1]),
+_NXFX.ico("chevron",13,{col:P.faint,hv:"pousse"}))});})
+:_NXFX.vide({icone:"courrier",titre:_T("Rien a traiter"),
+texte:_T("Les tickets ouverts depuis le client arrivent ici. Ils disparaissent quinze jours apres leur dernier message.")})))));}
+
+// --------------------------------------------------------- les abonnements
+function ongletAbos(){
+var L=_NXADMIN.abos||[];
+var OF=_NXADMIN.offres||[];
+var FAM={general:[_NXpal.warn,"etoile"],ia:[_NXpal.mauve,"etincelle"],
+privacy:[_NXpal.ok,"oeilBarre"],securite:[_NXpal.danger,"bouclierOk"]};
+function couleur(f){return (FAM[f]||[P.sub,"etoile"])[0];}
+function icone(f){return (FAM[f]||[P.sub,"etoile"])[1];}
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+_NXcard(i("div",null,
+_NXch(_T("Accorder un abonnement"),
+_T("La duree repart de l echeance en cours, pas d aujourd hui : renouveler en avance ne fait perdre aucun jour.")),
+_NXFX.champ({k:_T("Identifiant Discord"),mono:true,icone:"comptes",v:acle[0],
+ph:"546349979757707265",onChange:function(e){acle[1](e.target.value);}}),
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".13em",color:P.dim,
+textTransform:"uppercase",marginBottom:"9px"}},_T("Offre")),
+OF.length?i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"14px"}},
+OF.map(function(o){
+var on=aoffre[0]===o.offre;
+var c=couleur(o.famille);
+return i("div",_NXFX.fusion({key:o.offre,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){aoffre[1](o.offre);},
+title:o.nom+" \u00b7 "+o.prix+" \u20ac / "+o.periode,
+style:{display:"flex",alignItems:"center",gap:"7px",padding:"7px 12px",borderRadius:"10px",
+cursor:"pointer",border:"1px solid "+(on?c:P.line),
+background:on?_NXteinte(c,.12):"transparent",
+color:on?c:P.sub,fontSize:"11.5px",fontWeight:"700"}},_NXFX.a({"data-nx-appui":"1"})),
+_NXFX.ico(icone(o.famille),13),
+i("span",null,o.nom),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint}},
+String(o.prix).replace(".00","")+"\u20ac"));}))
+:i("div",{style:{fontSize:"12px",color:P.dim,marginBottom:"14px"}},_T("Catalogue non charge.")),
+_NXFX.champ({k:_T("Duree en jours"),mono:true,icone:"horloge",v:ajours[0],ph:"30",
+onChange:function(e){ajours[1](e.target.value);},
+aide:estProp?_T("Laisse vide pour un abonnement sans echeance.")
+:_T("Un operateur ne pose que des abonnements a duree limitee.")}),
+i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
+_NXFX.bouton({t:_T("Accorder"),icone:"etoile",plein:true,col:_NXpal.warn,onClick:function(){
+var j=String(ajours[0]||"").trim();
+_NXADMIN.donneAbo(acle[0],aoffre[0],j?j:null,function(r){
+if(r&&r.ok){acle[1]("");dire(r,_T("Abonnement accorde."));}
+else dire(r,"");});}}),
+["7","30","90","365"].map(function(v){
+return i("div",{key:v},_NXFX.bouton({t:v+" j",petit:true,creux:true,
+col:ajours[0]===v?_NXpal.warn:P.faint,onClick:function(){ajours[1](v);}}));}))),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Abonnements en cours"),L.length?(L.length+" "+_T("ligne(s)")):_T("Aucun abonnement pose."),
+_NXFX.bouton({t:_T("Rafraichir"),icone:"maj",hv:"tourne",petit:true,creux:true,col:P.sub,
+onClick:function(){_NXADMIN.chargeOffres();_NXADMIN.chargeAbos("",function(r){dire(r,_T("Liste rechargee."));});}})),
+L.length?L.map(function(x,k){
+var fini=x.expire_le&&(new Date(x.expire_le)).getTime()<Date.now();
+var j=x.expire_le?Math.max(0,Math.ceil(((new Date(x.expire_le)).getTime()-Date.now())/86400000)):null;
+return _NXFX.rangee({key:x.discord_id+x.offre,premier:k===0,rang:Math.min(6,k+1),
+icone:icone(x.famille),col:fini?P.faint:couleur(x.famille),
+titre:x.discord_id,
+texte:x.nom+" \u00b7 "+(x.expire_le
+?(fini?_T("expire"):(j+" "+_T("jour(s) restant(s)")))
+:_T("sans echeance"))+(x.par?(" \u00b7 "+_T("par")+" "+x.par):""),
+droite:i("div",{style:{display:"flex",gap:"6px"}},
+_NXFX.bouton({t:"+30 j",petit:true,creux:true,col:_NXpal.warn,onClick:function(){
+_NXADMIN.donneAbo(x.discord_id,x.offre,30,function(r){dire(r,_T("Prolonge de trente jours."));});}}),
+_NXFX.bouton({t:_T("Retirer"),petit:true,creux:true,col:P.danger,onClick:function(){
+_NXADMIN.retireAbo(x.discord_id,x.offre,function(r){dire(r,_T("Abonnement retire."));});}}))});})
+:_NXFX.vide({icone:"etoile",titre:_T("Aucun abonnement"),
+texte:_T("Les comptes connus avant la bascule ont deja tout, sans abonnement.")})))));}
+
+// ------------------------------------------------------------- la session
+function ongletSession(){
+var d=_NXSTATUS.etatDirect?_NXSTATUS.etatDirect():{};
+var reste=Math.max(0,Math.round((_NXADMIN.expire-Date.now())/60000));
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+_NXcard(i("div",null,
+_NXch("Ta session",_NXADMIN.pseudo+" · "+(estProp?"proprietaire, tous les droits":"operateur, droits limites")),
+_NXFX.grille([
+_NXFX.tuile({key:"a",icone:"cle",col:P.ok,titre:"Jeton d acces",sous:reste+" min restantes",
+texte:"Il se renouvelle tout seul une minute avant l echeance. Une demande refusee pour cause de jeton perime est rejouee, une fois.",rang:1}),
+_NXFX.tuile({key:"b",icone:_NXADMIN.garde()?"cadenas":"cadenasOuvert",
+col:_NXADMIN.garde()?P.info:P.faint,titre:"Rester connecte",
+sous:_NXADMIN.garde()?"active":"desactive",
+texte:_NXADMIN.garde()?"Le jeton de renouvellement est garde sur cette machine, brouille avec l identifiant d installation. Ce brouillage n est pas du chiffrement."
+:"Rien n est garde : il faudra se reconnecter a chaque ouverture du client.",
+rang:2,bas:_NXFX.bouton({t:_NXADMIN.garde()?"Desactiver":"Activer",petit:true,creux:true,
+col:P.sub,onClick:function(){_NXADMIN.setGarde(!_NXADMIN.garde());force();}})}),
+_NXFX.tuile({key:"c",icone:"reseau",col:d.ouvert?P.ok:P.warn,titre:"Alertes en direct",
+sous:d.etat||"inactif",
+texte:d.ouvert?"La table des alertes est diffusee : une alerte posee arrive chez les utilisateurs en une seconde."
+:"La liaison permanente n est pas etablie. Le sondage prend le relais toutes les trente secondes.",
+rang:3,mv:d.ouvert?"float":null})],250),
+i("div",{style:{display:"flex",gap:"9px",marginTop:"16px",flexWrap:"wrap"}},
+_NXFX.bouton({t:"Renouveler maintenant",icone:"maj",hv:"tourne",col:P.info,onClick:function(){
+_NXADMIN.renouvelle(function(r){dire(r,"Session renouvelee.");});}}),
+_NXFX.bouton({t:"Tout recharger",icone:"telecharge",creux:true,col:P.sub,onClick:function(){
+_NXADMIN.chargeTout();dire(null,"Tout est en cours de rechargement.");}}),
+i("div",{style:{flex:1,minWidth:"8px"}}),
+_NXFX.bouton({t:"Se deconnecter",icone:"croix",creux:true,col:P.danger,onClick:function(){
+_NXADMIN.deconnexion();}})))),
+_NXcard(i("div",null,
+_NXch("Journal d audit","Chaque ouverture, chaque bannissement, chaque credit offert laisse une ligne, cote serveur.",
+_NXFX.bouton({t:"Charger",icone:"liste",petit:true,creux:true,col:P.sub,onClick:function(){
+_NXADMIN.chargeJournal(function(r){dire(r,"Journal charge.");});}})),
+_NXADMIN.journal.length?_NXADMIN.journal.map(function(e,k){
+var ic=e.action==="ban_pose"?"banni":(e.action==="ban_leve"?"cadenasOuvert":
+(e.action==="credits_don"?"jeton":"crayon"));
+var col=e.action==="ban_pose"?P.danger:(e.action==="credits_don"?P.lime:P.sub);
+var det="";try{det=e.details?JSON.stringify(e.details).slice(0,120):"";}catch(_){det="";}
+return _NXFX.rangee({key:k,premier:k===0,rang:Math.min(6,k+1),icone:ic,col:col,z:28,
+titre:(e.pseudo||"?")+" · "+e.action,
+texte:new Date(e.a).toLocaleString("fr-FR")+(det?(" · "+det):"")});})
+:_NXFX.vide({icone:"liste",titre:"Journal vide",texte:"Appuie sur Charger pour le lire."})))));}
+
+var TABS=[["alertes","Alertes","alerte",ouvertes.length||""],
+["tickets","Tickets","courrier",_NXADMIN.enAttente()||""],
+["membres","Membres","comptes",""],
+["abos","Abonnements","etoile",(_NXADMIN.abos||[]).length||""],
+["bans","Bans","banni",bansActifs||""],
+["credits","Credits","jeton",""],
+["session","Session","cle",""]];
+
+return i("div",null,
+_NXFX.entete({cle:"Administration · "+_NXADMIN.pseudo,titre:"Nexium Admins",icone:"couronne",col:P.warn,
+marque:estProp?"proprietaire, tous les droits":"operateur, droits limites",
+texte:"Ouvrir une alerte, offrir des credits, bannir. Chaque droit est verifie par le serveur — le client ne fait qu afficher.",
+chiffres:[{k:"Alertes",v:ouvertes.length,col:ouvertes.length?P.warn:P.ok},
+{k:"Graves",v:graves,col:graves?P.danger:P.faint},
+{k:"Comptes",v:_NXn(CH.total||0)},
+{k:"Bannis",v:_NXn(CH.bannis||0),col:CH.bannis?P.danger:P.faint},
+{k:"Credits",v:_NXn(CH.credits||0),col:P.lime}]}),
+msg[0]?_NXFX.note({col:msg[0].ko?P.danger:P.ok,icone:msg[0].ko?"alerte":"check",
+texte:msg[0].t}):null,
+_NXFX.onglets(TABS,onglet[0],onglet[1],{col:P.warn}),
+(onglet[0]==="alertes"?ongletAlertes():
+onglet[0]==="tickets"?ongletTickets():
+onglet[0]==="membres"?ongletMembres():
+onglet[0]==="abos"?ongletAbos():
+onglet[0]==="bans"?ongletBans():
+onglet[0]==="credits"?ongletCredits():ongletSession()),
+_NXfoot("Nexium Admins · les droits sont verifies par Supabase, pas par le client"));
 }
 var NexiumTeamIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.18.68-2.26 1.76-2.73 1.17-.52 2.61-.91 4.24-.91zM4 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c-.37-.06-.74-.1-1.13-.1-.99 0-1.93.21-2.78.58A2.01 2.01 0 0 0 0 16.43V18h4.5v-1.61c0-.83.23-1.61.63-2.29zM20 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4 3.43c0-.81-.48-1.53-1.22-1.85A6.95 6.95 0 0 0 20 14c-.39 0-.76.04-1.13.1.4.68.63 1.46.63 2.29V18H24v-1.57zM12 6c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"}));};
 function _NXthemeWrap(Orig){try{
@@ -8162,17 +10004,51 @@ return i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom
 i("span",{style:{color:P.mute,display:"flex",flexShrink:0}},i(NexiumIAIcon,{width:12,height:12})),
 etiquette(m.source?_T("Nexium IA"):(_NXIA.nomModele||"Nexium IA")));};
 
-// --- les bulles ------------------------------------------------------------
+// --- le fil ----------------------------------------------------------------
+// Une rangee occupe toute la largeur ; son contenu, lui, reste sur une
+// colonne de lecture fixe. C est ce qui donne au fil sa regularite, quelle
+// que soit la largeur de la fenetre.
+var COL=compact?"100%":"736px";
+var rangee=function(k,dedans,fond,bord){
+return i("div",{key:k,style:{position:"relative",width:"100%",
+background:fond||"transparent",
+borderTop:bord?("1px solid "+P.line):"none"}},
+i("div",{style:{maxWidth:COL,margin:"0 auto",padding:compact?"14px 12px":"20px 20px"}},dedans));};
+// L avatar : un carre arrondi de 28, la seule marque de qui parle.
+var figure=function(quoi){
+if(quoi==="moi"){
+var moi=null;try{moi=_NXcommon().store("UserStore").getCurrentUser();}catch(_){}
+var av=null;
+try{if(moi&&moi.avatar)av="https://cdn.discordapp.com/avatars/"+moi.id+"/"+moi.avatar+".png?size=64";}catch(_){}
+if(av)return i("img",{src:av,alt:"",style:{width:"28px",height:"28px",borderRadius:"9px",
+display:"block",flexShrink:0,border:"1px solid "+P.hair}});
+return i("div",{style:{width:"28px",height:"28px",borderRadius:"9px",flexShrink:0,
+background:P.raise,border:"1px solid "+P.hair,color:P.sub,
+display:"flex",alignItems:"center",justifyContent:"center",
+fontSize:"11px",fontWeight:"800"}},
+(moi&&(moi.globalName||moi.username)||"?").charAt(0).toUpperCase());}
+return i("div",_NXFX.fusion({style:{width:"28px",height:"28px",borderRadius:"9px",flexShrink:0,
+background:"linear-gradient(150deg,"+_NXteinte(P.mauve,.3)+","+P.raise+")",
+border:"1px solid "+_NXteinte(P.mauve,.34),color:P.mauve,
+display:"flex",alignItems:"center",justifyContent:"center"}},
+(_NXIA.busy&&_NXFX.anime())?{"data-nx-breathe":"1"}:{}),
+i(NexiumIAIcon,{width:14,height:14}));};
+// Une rangee de conversation : figure, nom, contenu.
+var tour=function(k,quoi,nom,contenu,fond){
+return rangee(k,i("div",{style:{display:"flex",gap:"15px",alignItems:"flex-start"}},
+figure(quoi),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"12px",fontWeight:"800",color:P.txt,marginBottom:"7px",
+letterSpacing:"-.005em"}},nom),
+contenu)),fond,true);};
 var cadre=function(k,fond,bord,contenu){
-return i("div",{key:k,style:{marginBottom:"16px",padding:"12px 14px",borderRadius:"14px",
-background:fond,border:"1px solid "+bord}},contenu);};
+return rangee(k,i("div",{style:{padding:"12px 14px",borderRadius:"14px",
+background:fond,border:"1px solid "+bord}},contenu),null,true);};
 
 var bulle=function(m,k){
 if(m.role==="user")
-return i("div",{key:k,style:{display:"flex",justifyContent:"flex-end",marginBottom:"18px"}},
-i("div",{style:{maxWidth:"84%",padding:"11px 15px",borderRadius:"16px 16px 4px 16px",
-background:P.raise,border:"1px solid "+P.hair,
-color:P.txt,fontSize:"13px",lineHeight:1.7,whiteSpace:"pre-wrap",
+return tour(k,"moi",_T("Toi"),
+i("div",{style:{fontSize:"14px",lineHeight:1.75,color:P.txt,whiteSpace:"pre-wrap",
 overflowWrap:"anywhere",userSelect:"text",WebkitUserSelect:"text",cursor:"text"}},m.content));
 
 if(m.role==="envoye")
@@ -8231,8 +10107,8 @@ var dit=souci?(res.erreur||res.refuse)
 :(m.outil==="appliquer_profil_privacy"&&res.profil)?(_T("profil")+" "+res.profil)
 :(m.outil==="musique"&&typeof res.en_lecture==="boolean")?(res.en_lecture?_T("lecture"):_T("pause"))
 :_T("consulte");
-return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"9px",
-margin:"0 0 14px 2px",padding:"6px 13px",borderRadius:"999px",
+return rangee(k,i("div",{style:{display:"inline-flex",alignItems:"center",gap:"9px",
+padding:"6px 13px",borderRadius:"999px",marginLeft:"43px",
 background:P.inset,border:"1px solid "+P.line,maxWidth:"100%",
 fontSize:"10.5px",fontFamily:_NXf.mono}},
 i("div",{"aria-hidden":"true",style:{width:"5px",height:"5px",borderRadius:"50%",flexShrink:0,
@@ -8242,7 +10118,7 @@ i("span",{style:{flexShrink:0,color:P.faint}},"\u00b7"),
 // minWidth a zero, sans quoi la coupe par points de suspension ne se
 // declenche jamais dans une boite flexible.
 i("span",{style:{flex:1,minWidth:0,color:souci?_NXpal.warnSoft:P.dim,
-overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},dit));}
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},dit)),null,false);}
 
 // Une reponse. Les propositions envoyables en font partie : meme en-tete,
 // memes actions -- c est la meme reponse, avec des boutons en plus.
@@ -8274,19 +10150,17 @@ onClick:function(){_NXIA.copie(pr.texte);},
 style:{padding:"6px 13px",borderRadius:"999px",cursor:"pointer",background:"transparent",
 border:"1px solid "+P.line,color:P.sub,fontSize:"11px",fontWeight:"600"}},_T("Copier"))));}));}
 
-return i("div",{key:k,style:{display:"flex",gap:"13px",marginBottom:"22px"}},
-i("div",{"aria-hidden":"true",style:{flexShrink:0,width:"2px",borderRadius:"2px",
-background:"linear-gradient(180deg,"+P.edge+","+P.line+" 70%,transparent)"}}),
-i("div",{style:{flex:1,minWidth:0}},
-enTete(m),
-i("div",{style:{fontSize:"13px",lineHeight:1.8,color:P.pale,overflowWrap:"anywhere",
+return tour(k,"ia",m.source?"Nexium IA":(_NXIA.nomModele||"Nexium IA"),
+i("div",null,
+i("div",{style:{fontSize:"14px",lineHeight:1.78,color:P.pale,overflowWrap:"anywhere",
 userSelect:"text",WebkitUserSelect:"text",cursor:"text"}},
 _NXIA.riche(m.content),
-m.flux?i("span",{"aria-hidden":"true",style:{display:"inline-block",width:"7px",height:"13px",
+m.flux?i("span",{"aria-hidden":"true",style:{display:"inline-block",width:"7px",height:"14px",
 marginLeft:"3px",verticalAlign:"text-bottom",background:P.mute,borderRadius:"1px",
 animation:"nx-ia-curseur 1s steps(2) infinite"}}):null),
 propositions,
-appuis(m,k),pensees(m,k),actions(m,k)));};
+appuis(m,k),pensees(m,k),actions(m,k)),
+_NXteinte(P.acc,.022));};
 
 // --- choix du modele -------------------------------------------------------
 // Le menu s ouvre vers la droite et se limite a la largeur disponible : ancre
@@ -8401,22 +10275,33 @@ return L.slice(0,3);};
 
 // --- l accueil du fil vide -------------------------------------------------
 var vide=function(){
-return i("div",{style:{padding:(compact?"22px":"44px")+" 14px",textAlign:"center"}},
-i("div",{style:{display:"inline-flex",alignItems:"center",justifyContent:"center",
-width:"48px",height:"48px",borderRadius:"17px",marginBottom:"17px",color:P.mute,
-background:"linear-gradient(160deg,#141417,#0c0c0e)",border:"1px solid "+P.hair,
-boxShadow:"0 12px 34px rgba(0,0,0,.4)"}},
-i(NexiumIAIcon,{width:22,height:22})),
-i("div",{style:{fontSize:"13.5px",color:P.sub,fontWeight:"600",marginBottom:"6px"}},
-_T("Pose une question sur ton client.")),
-i("div",{style:{fontSize:"11.5px",color:P.faint,marginBottom:"20px",lineHeight:1.6}},
-_T("Il repond a partir de ton etat reel, pas de suppositions.")),
-i("div",{style:{display:"flex",flexWrap:"wrap",gap:"7px",justifyContent:"center"}},
+var an=_NXFX.anime();
+return i("div",{style:{display:"flex",alignItems:"center",justifyContent:"center",
+minHeight:compact?"180px":"320px",padding:"20px 16px"}},
+i("div",{style:{maxWidth:"620px",width:"100%",textAlign:"center"}},
+i("div",_NXFX.fusion({style:{display:"inline-flex",alignItems:"center",justifyContent:"center",
+width:"56px",height:"56px",borderRadius:"19px",marginBottom:"18px",color:P.mauve,
+background:"linear-gradient(150deg,"+_NXteinte(P.mauve,.22)+","+P.raise+")",
+border:"1px solid "+_NXteinte(P.mauve,.3),
+boxShadow:"0 14px 38px rgba(0,0,0,.42)"}},an?{"data-nx-float":"1"}:{}),
+i(NexiumIAIcon,{width:26,height:26})),
+i("div",_NXFX.fusion({style:{fontFamily:_NXf.disp,fontSize:compact?"20px":"26px",fontWeight:"800",
+color:P.txt,letterSpacing:"-.03em",marginBottom:"10px"}},_NXFX.a({"data-nx-blurin":"1"})),
+_T("Qu est-ce qu on regarde ?")),
+i("div",{style:{fontSize:"13px",color:P.dim,marginBottom:"24px",lineHeight:1.65,
+maxWidth:"420px",marginLeft:"auto",marginRight:"auto"}},
+_T("Il repond a partir de l etat reel de ton client, pas de suppositions.")),
+i("div",{style:{display:"grid",gap:"9px",
+gridTemplateColumns:compact?"1fr":"repeat(auto-fit,minmax(198px,1fr))",textAlign:"left"}},
 suggestions().map(function(sg,k){
-return i("div",{key:k,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+return i("div",_NXFX.fusion({key:k,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
 onClick:function(){setSaisie(sg);try{if(zone.current)zone.current.focus();}catch(_){}},
-style:{padding:"8px 14px",borderRadius:"999px",cursor:"pointer",fontSize:"11px",
-background:"transparent",border:"1px solid "+P.line,color:P.sub}},sg);})));};
+style:{padding:"13px 14px",borderRadius:"14px",cursor:"pointer",fontSize:"12.5px",
+lineHeight:1.5,background:P.inset,border:"1px solid "+P.line,color:P.sub,
+display:"flex",alignItems:"flex-start",gap:"10px"}},
+_NXFX.a({"data-nx-tile":"1","data-nx-rise":String(k+1)})),
+_NXFX.ico(k===0?"loupe":(k===1?"bouclier":"etincelle"),14,{col:P.faint,hv:"saute"}),
+i("span",{style:{flex:1,minWidth:0}},sg));}))));};
 
 // --- la liste des taches ---------------------------------------------------
 var taches=function(){
@@ -8526,9 +10411,10 @@ _T("Cette lecture envoie les derniers messages au relais. Accorde-la dans les re
 // pastilles en dessous, qui passait a la ligne des que le panneau retrecit.
 var composeur=function(){
 var pret=!!saisie.trim();
-return i("div",{style:{borderRadius:"18px",background:P.inset,
+return i("div",{style:{borderRadius:"22px",background:P.inset,
 border:"1px solid "+(pret||_NXIA.busy?P.edge:P.line),
-transition:"border-color .2s ease",overflow:"visible"}},
+boxShadow:"0 8px 28px rgba(0,0,0,.28)",
+transition:"border-color .2s ease,box-shadow .2s ease",overflow:"visible"}},
 i("textarea",{ref:zone,value:saisie,rows:1,
 placeholder:_T("Ecris ton message, ou @ pour analyser une conversation"),
 onChange:function(e){
@@ -8565,17 +10451,26 @@ i("path",{d:_NXIA.busy?"M6 6h12v12H6z":"M3.4 20.4 21 12 3.4 3.6 3.4 10l12.6 2-12
 // Une colonne : le fil prend la place restante et defile seul. L ancien
 // donnait au fil une hauteur fixe A L INTERIEUR d une page qui defile deja,
 // d ou les deux ascenseurs imbriques.
-var hauteur=compact?"min(48vh,430px)":"min(64vh,680px)";
-return i("div",{style:{display:"flex",flexDirection:"column",height:hauteur,
-minHeight:compact?"260px":"360px"}},
+// Dans le panneau flottant, la hauteur vient du panneau : il est etirable,
+// et le chat doit suivre au lieu de garder la sienne.
+var plein=!!(props&&props.plein);
+var hauteur=plein?"100%":(compact?"min(52vh,470px)":"min(70vh,760px)");
+return i("div",{style:{position:"relative",display:"flex",flexDirection:"column",
+height:hauteur,minHeight:plein?"0":(compact?"280px":"400px"),
+background:P.bg,borderRadius:"18px",border:"1px solid "+P.line,overflow:"hidden"}},
+// Le fil : pleine largeur, sans marge propre. Chaque rangee pose la sienne.
 i("div",{ref:fil,onScroll:suitFil,
 style:{flex:1,minHeight:0,overflowY:"auto",overflowX:"hidden",overscrollBehavior:"contain",
-padding:"6px 4px 2px",userSelect:"text",WebkitUserSelect:"text"}},
-taches(),
+userSelect:"text",WebkitUserSelect:"text"}},
+taches()?i("div",{style:{maxWidth:COL,margin:"0 auto",padding:"14px 20px 0"}},taches()):null,
 M.length?M.map(bulle):vide(),
-attente(),
-i("div",{ref:bas})),
-i("div",{style:{flexShrink:0,paddingTop:"10px"}},
+attente()?i("div",{style:{maxWidth:COL,margin:"0 auto",padding:"4px 20px 14px 63px"}},attente()):null,
+i("div",{ref:bas,style:{height:"12px"}})),
+// Le composeur : pose sur le fil, avec un degrade qui evite la coupe nette.
+i("div",{style:{flexShrink:0,position:"relative",
+background:"linear-gradient(180deg,transparent,"+P.bg+" 22%)",
+padding:compact?"6px 12px 12px":"10px 20px 16px"}},
+i("div",{style:{maxWidth:COL,margin:"0 auto"}},
 avis(),erreur(),listeMP(),composeur(),
 i("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",
 gap:"10px",marginTop:"9px",flexWrap:"wrap",fontFamily:_NXf.mono,fontSize:"10px"}},
@@ -8583,7 +10478,7 @@ i("span",{style:{color:P.faint}},
 compact?"":_T("Entree pour envoyer, Maj+Entree pour aller a la ligne")),
 i("span",{style:{color:illimite?_NXpal.ok:((reste>=0&&reste<=15)?_NXpal.warn:P.faint)}},
 illimite?_T("sans limite")
-:(reste>=0?(reste+"/"+_NXIA.CREDITS_MAX+" "+_T("credits")):"\u2014")))));
+:(reste>=0?(reste+"/"+_NXIA.CREDITS_MAX+" "+_T("credits")):"\u2014"))))));
 }
 
 // ------------------------------------------------------- panneau flottant
@@ -8594,16 +10489,64 @@ _NXIA.listeners.push(force);
 return function(){try{_NXIA.listeners=_NXIA.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
 var P=_NXpal;
 var nCaps=_NXIA.nbCaps();
-return i("div",{style:{width:"420px",maxWidth:"calc(100vw - 32px)",
-borderRadius:"18px",overflow:"hidden",
+var boite=F.useRef?F.useRef(null):{current:null};
+var dim=F.useState(_NXIA.taillePanneau());
+var tire=F.useRef?F.useRef(null):{current:null};
+
+// Etirer : on ecoute sur le document, pas sur la poignee. Sans cela, un
+// deplacement rapide sort du curseur et le redimensionnement s arrete net.
+var prend=function(e){try{
+e.preventDefault();e.stopPropagation();
+var d0=dim[0];
+tire.current={x:e.clientX,y:e.clientY,l:d0.l,h:d0.h};
+var bouge=function(ev){try{
+var t=tire.current;if(!t)return;
+var l=Math.max(_NXIA.PMIN.l,Math.min(_NXIA.PMAX.l,t.l+(t.x-ev.clientX)));
+var h=Math.max(_NXIA.PMIN.h,Math.min(_NXIA.PMAX.h,t.h+(t.y-ev.clientY)));
+dim[1]({l:Math.round(l),h:Math.round(h)});}catch(_){}};
+var lache=function(){try{
+tire.current=null;
+document.removeEventListener("mousemove",bouge,true);
+document.removeEventListener("mouseup",lache,true);
+_NXIA.setTaillePanneau(dim[0]);}catch(_){}};
+document.addEventListener("mousemove",bouge,true);
+document.addEventListener("mouseup",lache,true);
+}catch(_){}};
+
+// La poignee est en haut a gauche : le panneau est ancre en bas a droite,
+// donc c est ce coin-la qui commande la taille.
+var poignee=function(){
+return i("div",{role:"separator","aria-label":_T("Redimensionner le panneau"),
+onMouseDown:prend,
+title:_T("Etirer pour redimensionner"),
+style:{position:"absolute",left:0,top:0,width:"20px",height:"20px",
+cursor:"nwse-resize",zIndex:3,display:"flex",alignItems:"center",justifyContent:"center"}},
+i("svg",{viewBox:"0 0 12 12",width:11,height:11,"aria-hidden":"true",
+style:{color:P.faint,transform:"rotate(180deg)"}},
+i("path",{d:"M11 1 1 11M11 5 5 11M11 9 9 11",stroke:"currentColor",strokeWidth:"1.2",
+strokeLinecap:"round",fill:"none"})));};
+
+return i("div",{ref:boite,style:{position:"relative",
+width:dim[0].l+"px",height:dim[0].h+"px",
+maxWidth:"calc(100vw - 32px)",maxHeight:"calc(100vh - 96px)",
+borderRadius:"18px",overflow:"hidden",display:"flex",flexDirection:"column",
 background:"linear-gradient(160deg,"+P.panel+","+P.bg+")",
-border:"1px solid "+P.hair,boxShadow:"0 24px 70px rgba(0,0,0,.62)"}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"13px 14px",
-borderBottom:"1px solid "+P.line}},
+border:"1px solid "+(tire.current?P.edge:P.hair),
+boxShadow:"0 24px 70px rgba(0,0,0,.62)"}},
+poignee(),
+i("div",{style:{flexShrink:0,display:"flex",alignItems:"center",gap:"10px",
+padding:"13px 14px 13px 26px",borderBottom:"1px solid "+P.line}},
 i("span",{style:{color:P.mid,display:"flex"}},i(NexiumIAIcon,{width:15,height:15})),
 i("span",{style:{flex:1,minWidth:0,fontSize:"12.5px",fontWeight:"800",color:P.txt}},"Nexium IA"),
 i("span",{style:{fontSize:"10px",color:P.faint,fontFamily:_NXf.mono}},
 nCaps+"/"+_NXIA.CAPS.length),
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+"aria-label":_T("Remettre la taille d origine"),title:_T("Taille d origine"),
+onClick:function(){var d=_NXIA.PDEF;dim[1]({l:d.l,h:d.h});_NXIA.setTaillePanneau(d);},
+style:{width:"24px",height:"24px",borderRadius:"7px",cursor:"pointer",
+display:"flex",alignItems:"center",justifyContent:"center",color:P.dim}},
+i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor","aria-hidden":"true"},
+i("path",{d:"M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm14 0h2v6h-6v-2h4v-4z"}))),
 i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
 "aria-label":_T("Ouvrir la page complete"),
 onClick:function(){_NXIA.fermerPanneau();_NXIA.ouvrePage();},
@@ -8615,11 +10558,12 @@ i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
 style:{width:"24px",height:"24px",borderRadius:"7px",cursor:"pointer",
 display:"flex",alignItems:"center",justifyContent:"center",color:P.dim,fontSize:"15px"}},
 "\u00d7")),
-i("div",{style:{padding:"12px 14px 14px"}},
-nCaps?null:i("div",{style:{padding:"9px 11px",borderRadius:"9px",marginBottom:"11px",
+i("div",{style:{flex:1,minHeight:0,display:"flex",flexDirection:"column",
+padding:"12px 14px 14px"}},
+nCaps?null:i("div",{style:{flexShrink:0,padding:"9px 11px",borderRadius:"9px",marginBottom:"11px",
 background:P.inset,border:"1px solid "+P.line,fontSize:"10.5px",color:P.dim,lineHeight:1.6}},
 _T("Aucun acces accorde : l assistant ne voit rien de ton client. Ouvre les reglages pour lui en donner.")),
-i(NexiumIAChat,{compact:true})));
+i("div",{style:{flex:1,minHeight:0}},i(NexiumIAChat,{compact:true,plein:true}))));
 }
 
 // --------------------------------------------------------------- la page
@@ -8907,40 +10851,45 @@ var nom=(du&&(du.global_name||du.username))||"5dj0";
 var pseudo=du&&du.username?"@"+du.username:null;
 var sm=_NXLY.statusMeta();
 var perso=_NXLY.customStatus();
-var acts=_NXLY.acts();
+// Ce qu il ecoute ne regarde personne : Spotify est retire de l affichage,
+// et seulement Spotify -- les autres activites restent visibles.
+var acts=(_NXLY.acts()||[]).filter(function(x){return !x.spotify;});
 var live=!!d&&!_NXLY.err;
+var an=_NXFX.anime();
 var CONTRIB=[
-{n:"kikou",r:_T("Developpeur"),s:_T("C++ · Lua · Luau")},
-{n:"elias.qsd7",r:_T("Contributeur"),s:_T("Idees et retours")}];
+{n:"kikou",r:_T("Developpeur"),s:_T("C++ · Lua · Luau"),ic:"code",c:P.info},
+{n:"elias.qsd7",r:_T("Contributeur"),s:_T("Idees et retours"),ic:"baguette",c:P.mauve}];
 function ms(x){var t=Math.max(0,Math.floor(x/1000));var m=Math.floor(t/60);var r=t%60;return m+":"+(r<10?"0":"")+r;}
+
 function anneau(){
-var taille=104,r=taille/2-5,c=2*Math.PI*r;
+var taille=118,r=taille/2-6,c=2*Math.PI*r;
 return i("div",{style:{position:"relative",width:taille+"px",height:taille+"px",flexShrink:0}},
+an&&live?i("div",{"data-nx-halo":"1","aria-hidden":"true",style:{position:"absolute",inset:"-18%",
+borderRadius:"50%",background:"radial-gradient(circle,"+_NXteinte(sm.c,.28)+",transparent 68%)",
+pointerEvents:"none"}}):null,
 i("svg",{width:taille,height:taille,viewBox:"0 0 "+taille+" "+taille,
-style:{transform:"rotate(-90deg)",display:"block"},"aria-hidden":"true"},
-i("circle",{cx:taille/2,cy:taille/2,r:r,fill:"none",stroke:P.line,"stroke-width":"3"}),
-i("circle",{"data-nx-ring":"1",cx:taille/2,cy:taille/2,r:r,fill:"none",stroke:sm.c,
-"stroke-width":"3","stroke-linecap":"round",
-"stroke-dasharray":c.toFixed(1),
-"stroke-dashoffset":(monte?(live?0:c*0.72):c).toFixed(1)})),
-i("div",{style:{position:"absolute",left:"11px",top:"11px",width:"82px",height:"82px",
+style:{transform:"rotate(-90deg)",display:"block",position:"relative"},"aria-hidden":"true"},
+i("circle",{cx:taille/2,cy:taille/2,r:r,fill:"none",stroke:P.line,strokeWidth:"3"}),
+i("circle",_NXFX.fusion({cx:taille/2,cy:taille/2,r:r,fill:"none",stroke:sm.c,
+strokeWidth:"3",strokeLinecap:"round",strokeDasharray:c.toFixed(1),
+strokeDashoffset:(monte?(live?0:c*0.72):c).toFixed(1)},an?{"data-nx-ring":"1"}:{}))),
+i("div",{style:{position:"absolute",left:"13px",top:"13px",width:"92px",height:"92px",
 borderRadius:"50%",overflow:"hidden",background:P.inset,border:"1px solid "+P.hair}},
 i("img",{src:_NXLY.avatar(),alt:nom,
 style:{width:"100%",height:"100%",objectFit:"cover",display:"block"}})),
-i("div",{"data-nx-dot":live?"1":null,"aria-hidden":"true",
-style:{position:"absolute",right:"3px",bottom:"3px",width:"20px",height:"20px",borderRadius:"50%",
-background:sm.c,border:"3px solid "+P.panel}}));}
+i("div",_NXFX.fusion({"aria-hidden":"true",
+style:{position:"absolute",right:"4px",bottom:"4px",width:"22px",height:"22px",borderRadius:"50%",
+background:sm.c,border:"3px solid "+P.panel}},(an&&live)?{"data-nx-dot":"1"}:{})));}
+
 function carteActivite(x,k){
 var prog=null,cur="",tot="";
 if(x.start&&x.end&&x.end>x.start){
 var now=Date.now();
 var p=Math.min(1,Math.max(0,(now-x.start)/(x.end-x.start)));
 prog=Math.round(p*100);cur=ms(now-x.start);tot=ms(x.end-x.start);}
-var vert="#3ecf6f";
-return i("div",{key:k,"data-nx-tile":"1",
-style:{padding:"15px",borderRadius:"15px",marginBottom:"9px",
-background:x.spotify?("linear-gradient(140deg,rgba(62,207,111,.09),"+P.inset+" 70%)"):P.inset,
-border:"1px solid "+(x.spotify?"rgba(62,207,111,.28)":P.line)}},
+return i("div",_NXFX.fusion({key:k,style:{padding:"15px",borderRadius:"15px",marginBottom:"9px",
+background:P.inset,border:"1px solid "+P.line}},
+_NXFX.a({"data-nx-tile":"1","data-nx-rise":String(Math.min(6,k+1))})),
 i("div",{style:{display:"flex",alignItems:"center",gap:"14px"}},
 i("div",{style:{position:"relative",flexShrink:0,width:"54px",height:"54px"}},
 x.img?i("img",{src:x.img,alt:"",
@@ -8948,14 +10897,13 @@ style:{width:"54px",height:"54px",borderRadius:"13px",objectFit:"cover",
 background:P.panel,border:"1px solid "+P.hair,display:"block"}})
 :i("div",{style:{width:"54px",height:"54px",borderRadius:"13px",background:P.panel,
 border:"1px solid "+P.hair,display:"flex",alignItems:"center",justifyContent:"center",color:P.faint}},
-i("svg",{viewBox:"0 0 24 24",width:20,height:20,fill:"currentColor","aria-hidden":"true"},
-i("path",{d:"M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"}))),
+_NXFX.svg("lecture",20)),
 x.imgSmall?i("img",{src:x.imgSmall,alt:"",
 style:{position:"absolute",right:"-5px",bottom:"-5px",width:"21px",height:"21px",
 borderRadius:"50%",border:"2px solid "+P.panel,display:"block"}}):null),
 i("div",{style:{flex:1,minWidth:0}},
 i("div",{style:{fontSize:"9.5px",textTransform:"uppercase",letterSpacing:".1em",fontWeight:"800",
-color:x.spotify?vert:P.faint,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},
+color:P.faint,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},
 x.type||_T("Activite")),
 i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt,marginTop:"4px",
 letterSpacing:"-.012em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},x.name||""),
@@ -8966,88 +10914,75 @@ overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},x.sub2):null,
 (!prog&&x.elapsed)?i("div",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,marginTop:"5px"}},
 x.elapsed):null)),
 prog!=null?i("div",{style:{marginTop:"13px"}},
-i("div",{"data-nx-bar":"1",style:{height:"4px",borderRadius:"99px",
-background:x.spotify?"rgba(255,255,255,.10)":P.hair,overflow:"hidden"}},
-i("div",{style:{height:"100%",borderRadius:"99px",background:x.spotify?vert:P.txt,
-transform:"scaleX("+(monte?prog/100:0)+")",transformOrigin:"left center"}})),
+_NXFX.barre(monte?prog:0,P.acc,4),
 i("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"6px",
 fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint}},
 i("span",null,cur),i("span",null,tot))):null);}
-function chiffre(v,lab){return i("div",{style:{flex:1,minWidth:"84px"}},
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"22px",fontWeight:"800",color:P.txt,
-letterSpacing:"-.035em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
-i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"5px"}},lab));}
+
 var sante=(window._NXDATA&&_NXDATA.sante)?_NXDATA.sante():{total:0,vivants:0};
 var nProt=0;
 try{nProt=(SH_LIENS.length+SH_CONTENU.length+SH_AVANCE.length+SH_PIEGES.length+SH_SORTIE.length);}catch(_){}
-function lien(txt,url,fort){
-return i("div",{className:"nx-fx",role:"button","aria-label":txt,tabIndex:0,onKeyDown:_NXkey,
-onClick:function(){try{_NXP.open(url);}catch(_){}},
-style:{flex:"1 1 150px",textAlign:"center",padding:"12px",borderRadius:"12px",cursor:"pointer",
-background:fort?P.acc:"transparent",border:"1px solid "+(fort?P.acc:P.line),
-color:fort?_NXpal.ink:P.sub,fontSize:"12.5px",fontWeight:"800"}},txt);}
-return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
-_NXhead(_T("L'équipe"),"Nexium Team",
-_T("Le client est concu et developpe par 5dj0. Sa presence Discord est lue en direct tant que cette page reste ouverte, et nulle part ailleurs.")),
-i("div",{"data-nx-panel":"1"},
-i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
+var ver=(window._NXUP&&_NXUP.VERSION)||"?";
+
+var LIENS=[
+{t:_T("Site officiel"),u:"https://nexium-client.netlify.app/",ic:"globe",c:P.acc,fort:true,
+d:_T("La presentation publique du client.")},
+{t:_T("Depot du client"),u:"https://github.com/Omega-devj/nexium-client",ic:"code",c:P.info,
+d:_T("Tout le code, lisible par n importe qui.")},
+{t:_T("Base de menaces"),u:"https://github.com/Omega-devj/blacklist-url-nexium-client",ic:"bouclier",c:P.danger,
+d:_T("La liste des liens dangereux, ouverte aussi.")}];
+
+return i(Kr,null,i("div",{style:{maxWidth:"700px",margin:"0 auto"}},
+_NXFX.entete({cle:_T("L equipe"),titre:"Nexium Team",icone:"equipe",col:P.acc,
+texte:_T("Le client est concu et developpe par 5dj0. Sa presence Discord est lue en direct tant que cette page reste ouverte, et nulle part ailleurs."),
+marque:live?_T("en direct"):_T("hors ligne"),
+chiffres:[{k:_T("Version"),v:"v"+ver},
+{k:_T("Protections"),v:nProt||"—",col:P.danger},
+{k:_T("Modules"),v:sante.total?(sante.vivants+"/"+sante.total):"—",col:P.ok},
+{k:_T("Personnes"),v:CONTRIB.length+1,col:P.info}]}),
+
+i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+i("div",_NXFX.fusion({style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
 borderRadius:"24px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",
-padding:"26px 24px",marginBottom:"14px"}},
-live?i("div",{"data-nx-breathe":"1","aria-hidden":"true",
-style:{position:"absolute",left:"-70px",top:"-90px",width:"260px",height:"260px",borderRadius:"50%",
-background:"radial-gradient(circle,"+sm.c+"22,transparent 70%)",pointerEvents:"none"}}):null,
+padding:"26px 24px",marginBottom:"14px"}},_NXFX.a({"data-nx-carte":"1"})),
+live&&an?i("div",{"data-nx-breathe":"1","aria-hidden":"true",
+style:{position:"absolute",left:"-70px",top:"-90px",width:"280px",height:"280px",borderRadius:"50%",
+background:"radial-gradient(circle,"+_NXteinte(sm.c,.14)+",transparent 70%)",pointerEvents:"none"}}):null,
 i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"22px",flexWrap:"wrap"}},
 anneau(),
 i("div",{style:{flex:1,minWidth:"180px"}},
 i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".18em",textTransform:"uppercase",
 color:P.faint,marginBottom:"8px"}},_T("Createur du client")),
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"28px",fontWeight:"800",color:P.txt,
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"30px",fontWeight:"800",color:P.txt,
 letterSpacing:"-.04em",lineHeight:1.1}},nom),
 pseudo?i("div",{style:{fontFamily:_NXf.mono,fontSize:"11.5px",color:P.dim,marginTop:"6px"}},pseudo):null,
-i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"11px"}},
-i("span",{"data-nx-dot":live?"1":null,"aria-hidden":"true",
-style:{width:"7px",height:"7px",borderRadius:"50%",background:sm.c,flexShrink:0}}),
-i("span",{style:{fontSize:"12px",color:P.sub,fontWeight:"600"}},
-sm.t+(live?"":" \u00b7 "+_T("hors ligne")))))),
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"12px",flexWrap:"wrap"}},
+_NXFX.badge(sm.t+(live?"":" · "+_T("hors ligne")),sm.c,{point:live}),
+_NXFX.badge(_T("Ecoute masquee"),P.faint,{icone:"oeilBarre"})))),
 perso?i("div",{style:{position:"relative",marginTop:"18px",padding:"13px 15px",
 background:P.inset,borderRadius:"13px",border:"1px solid "+P.line,
-fontSize:"12.5px",color:P.sub,lineHeight:1.6}},perso):null,
-i("div",{style:{position:"relative",display:"flex",gap:"16px",flexWrap:"wrap",
-marginTop:"20px",paddingTop:"18px",borderTop:"1px solid "+P.line}},
-chiffre("v"+((window._NXUP&&_NXUP.VERSION)||"?"),_T("Version")),
-chiffre(nProt||"\u2014",_T("Protections")),
-chiffre(sante.total?(sante.vivants+"/"+sante.total):"\u2014",_T("Modules")),
-chiffre(CONTRIB.length+1,_T("Personnes")))),
+fontSize:"12.5px",color:P.sub,lineHeight:1.6}},perso):null),
+
 acts.length?_NXcard(i("div",null,
-_NXch(_T("En ce moment"),_T("Ce que Discord annonce publiquement de son activite.")),
+_NXch(_T("En ce moment"),_T("Ce que Discord annonce publiquement de son activite. La musique n est pas affichee.")),
 acts.map(carteActivite)),{mb:12}):null,
+
 _NXcard(i("div",null,
 _NXch(_T("Contributeurs"),_T("Ceux qui font avancer le client autrement qu en ecrivant du code.")),
-i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(178px,1fr))",gap:"10px"}},
-CONTRIB.map(function(m,k){
-return i("div",{key:k,"data-nx-tile":"1",
-style:{padding:"14px",borderRadius:"14px",background:P.inset,border:"1px solid "+P.line}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"11px",marginBottom:"9px"}},
-i("div",{style:{width:"34px",height:"34px",borderRadius:"11px",flexShrink:0,
-background:"linear-gradient(140deg,"+P.raise+","+P.panel+")",border:"1px solid "+P.hair,
-display:"flex",alignItems:"center",justifyContent:"center",
-fontFamily:_NXf.disp,fontSize:"14px",fontWeight:"800",color:P.sub}},
-String(m.n).charAt(0).toUpperCase()),
-i("div",{style:{flex:1,minWidth:0}},
-i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt,
-overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},m.n),
-i("div",{style:{fontSize:"10px",fontWeight:"700",letterSpacing:".07em",textTransform:"uppercase",
-color:P.faint,marginTop:"3px"}},m.r))),
-i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.5}},m.s));}))),{mb:12}),
+_NXFX.grille(CONTRIB.map(function(m,k){
+return _NXFX.tuile({key:m.n,icone:m.ic,col:m.c,rang:k+1,hv:"secoue",halo:true,
+titre:m.n,sous:m.r,texte:m.s});}),200)),{mb:12}),
+
 _NXcard(i("div",null,
 _NXch(_T("Le projet"),_T("Tout est ouvert : le code, les listes de menaces, le journal des versions.")),
-i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
-lien(_T("Site officiel"),"https://nexium-client.netlify.app/",true),
-lien(_T("Depot du client"),"https://github.com/Omega-devj/nexium-client"),
-lien(_T("Base de menaces"),"https://github.com/Omega-devj/blacklist-url-nexium-client"))),{mb:0})),
-_NXfoot("Nexium Team · presence lue en direct, uniquement sur cette page")));
-
-}var _NXSP=window._NXSP||(window._NXSP={});
+_NXFX.grille(LIENS.map(function(l,k){
+return _NXFX.tuile({key:l.u,icone:l.ic,col:l.c,rang:k+1,hv:"pousse",plein:l.fort,
+titre:l.t,texte:l.d,
+droite:_NXFX.ico("externe",13,{col:P.faint}),
+onClick:function(){try{_NXP.open(l.u);}catch(_){}}});}),210)),{mb:0}))),
+_NXfoot("Nexium Team · "+_T("presence lue en direct, uniquement sur cette page"))));
+}
+var _NXSP=window._NXSP||(window._NXSP={});
 if(!_NXSP.boot){try{_NXSP.boot=true;
 _NXSP.CODE="itsuki";
 _NXSP.data=null;_NXSP.err=false;_NXSP.loading=false;_NXSP.busy=false;_NXSP.listeners=[];
@@ -9146,7 +11081,9 @@ _NXSP.online=function(){try{var v=_NXSP.data&&_NXSP.data.approximate_presence_co
 }var _NXPR=window._NXPR||(window._NXPR={});
 if(!_NXPR.boot){_NXPR.boot=true;_NXPR.KEY="nexium_protect_v1";
 _NXPR.cfg=(function(){var d;try{var raw=_NXDB.get(_NXPR.KEY);d=raw?JSON.parse(raw):null;}catch(e){d=null;}if(!d||typeof d!=="object")d={};
-if(typeof d.scanLinks!=="boolean")d.scanLinks=true;if(typeof d.blockGrabbers!=="boolean")d.blockGrabbers=true;if(typeof d.scamAlerts!=="boolean")d.scamAlerts=true;if(typeof d.warnAccounts!=="boolean")d.warnAccounts=true;if(typeof d.phishGuard!=="boolean")d.phishGuard=true;if(typeof d.consoleGuard!=="boolean")d.consoleGuard=true;if(!Array.isArray(d.allow))d.allow=[];if(typeof d.heuristics!=="boolean")d.heuristics=true;if(typeof d.hThreshold!=="number")d.hThreshold=5;if(typeof d.hBlock!=="boolean")d.hBlock=false;if(typeof d.profile!=="string")d.profile="equilibre";
+if(typeof d.scanLinks!=="boolean")d.scanLinks=true;if(typeof d.blockGrabbers!=="boolean")d.blockGrabbers=true;if(typeof d.scamAlerts!=="boolean")d.scamAlerts=true;if(typeof d.warnAccounts!=="boolean")d.warnAccounts=true;
+// Le mode discret : les avis d ambiance se taisent, les blocages restent.
+if(typeof d.discret!=="boolean")d.discret=false;if(typeof d.phishGuard!=="boolean")d.phishGuard=true;if(typeof d.consoleGuard!=="boolean")d.consoleGuard=true;if(!Array.isArray(d.allow))d.allow=[];if(typeof d.heuristics!=="boolean")d.heuristics=true;if(typeof d.hThreshold!=="number")d.hThreshold=5;if(typeof d.hBlock!=="boolean")d.hBlock=false;if(typeof d.profile!=="string")d.profile="equilibre";
 if(typeof d.scanFiles!=="boolean")d.scanFiles=true;
 if(typeof d.scanDownloads!=="boolean")d.scanDownloads=true;
 if(typeof d.scanInvites!=="boolean")d.scanInvites=true;
@@ -9659,7 +11596,7 @@ _NXPR.warnedUsers=Object.create(null);_NXPR._wuN=0;
 _NXPR.warnAccount=function(uid,days){try{
 if(_NXPR.warnedUsers[uid])return;_NXPR.warnedUsers[uid]=1;if(++_NXPR._wuN>300){_NXPR.warnedUsers=Object.create(null);_NXPR._wuN=0;}
 _NXPR.stats.accounts=(_NXPR.stats.accounts||0)+1;_NXPR.logThreat("account","compte cree il y a "+days+" j");_NXPR.saveStats();
-_NXPR.toast("Message prive d un compte tres recent ("+days+" jour"+(days>1?"s":"")+"). Mefie-toi des demandes inhabituelles.",0);
+_NXPR.avis("Message prive d un compte tres recent ("+days+" jour"+(days>1?"s":"")+"). Mefie-toi des demandes inhabituelles.",0);
 }catch(_){}};
 _NXPR.consoleWarn=function(){try{
 if(!_NXPR.cfg.consoleGuard||_NXPR._cw)return;_NXPR._cw=true;
@@ -9673,9 +11610,14 @@ _NXPR.onPaste=function(e){try{
 if(!_NXPR.cfg.consoleGuard)return;
 var t="";try{t=(e.clipboardData||window.clipboardData).getData("text")||"";}catch(_){}
 if(!t||t.length<40)return;
-if(_NXPR.RXSELFXSS.test(t)||_NXPR.RXTOKEN.test(t)||_NXPR.RXHOOK.test(t)){
-_NXPR.logThreat("selfxss","collage suspect intercepte");
-_NXPR.toast("Le contenu que tu viens de coller contient du code ou un secret sensible. Verifie avant d envoyer.",0);}
+if(_NXPR.RXSELFXSS.test(t)){
+// Du code a coller dans la console : c est l arnaque qui vide un compte.
+// Celle-la se dit toujours, meme en mode discret.
+_NXPR.logThreat("selfxss","collage de code intercepte");
+_NXPR.toast("Tu viens de coller du code destine a la console. Si quelqu un te l a demande, c est une tentative de vol de compte.",0);return;}
+if(_NXPR.RXHOOK.test(t)||_NXPR.RXTOKEN.test(t)){
+_NXPR.logThreat("secret","collage d un secret");
+_NXPR.avis("Ce que tu viens de coller ressemble a un jeton ou a un webhook. Verifie avant d envoyer.",2);}
 }catch(_){}};
 _NXPR.scanEmbeds=function(m){try{
 if(!_NXPR.cfg.scanLinks||!_NXPR.cfg.scanEmbeds)return;var E=m&&m.embeds;if(!E||!E.length)return;
@@ -9687,7 +11629,7 @@ var cl=_NXPR.classify(u);if(!cl)continue;
 if(_NXPR.threat(cl)){_NXPR.stats.blocked=(_NXPR.stats.blocked||0)+1;_NXPR.logThreat(cl.kind,"apercu: "+cl.host);_NXPR.saveStats();
 if(!_NXPR.dejaDit("ap:"+cl.host,1800000))_NXPR.toast("Apercu de lien dangereux ("+cl.host+"). Ne l ouvre pas.",0);return;}
 if(cl.kind==="suspect"){_NXPR.logThreat("suspect","apercu: "+cl.host);_NXPR.saveStats();
-if(!_NXPR.dejaDit("aps:"+cl.host,1800000))_NXPR.toast("Apercu de lien suspect ("+cl.host+").",2);return;}}}
+if(!_NXPR.dejaDit("aps:"+cl.host,1800000))_NXPR.avis("Apercu de lien suspect ("+cl.host+").",2);return;}}}
 }catch(_){}};
 _NXPR.scanMasked=function(txt){try{
 if(!_NXPR.cfg.scanLinks||!_NXPR.cfg.scanMasked)return;var s=String(txt||"");if(s.indexOf("](")<0)return;
@@ -9701,7 +11643,7 @@ var lm=label.match(/(?:https?:\/\/)?([a-z0-9.\-]+\.[a-z]{2,})/i);
 if(lm){var lh=String(lm[1]).toLowerCase().replace(/^www\./,"");
 if(lh!==th&&th.indexOf(lh)<0&&lh.indexOf(th)<0){
 _NXPR.logThreat("masked",lh+" -> "+th);_NXPR.saveStats();
-if(!_NXPR.dejaDit("lt:"+lh+">"+th,1800000))_NXPR.toast("Lien trompeur : affiche "+lh+" mais mene vers "+th,0);return;}}}
+if(!_NXPR.dejaDit("lt:"+lh+">"+th,1800000))_NXPR.avis("Lien trompeur : affiche "+lh+" mais mene vers "+th,0);return;}}}
 }catch(_){}};
 _NXPR.RXINV=/(?:discord\.gg|discord(?:app)?\.com\/invite)\/([a-z0-9\-]{2,25})/gi;
 _NXPR.invSeen=Object.create(null);_NXPR._invN=0;
@@ -9867,6 +11809,73 @@ _NXPR._moi=(u&&u.id)?String(u.id):null;}catch(_){}
 return _NXPR._moi;};
 _NXPR.oublierMoi=function(){try{_NXPR._moi=null;_NXPR._dmc=null;_NXPR._dmn=0;}catch(_){}};
 try{setInterval(function(){try{if(!document.hidden)_NXPR.oublierMoi();}catch(_){}},120000);}catch(_){}
+// --------------------------------------------------- confiance et discretion
+_NXPR.CONF="nexium_protect_confiance";
+_NXPR.confiance=(function(){try{
+var r=_NXDB.get(_NXPR.CONF);var d=r?JSON.parse(r):null;
+return (d&&typeof d==="object")?d:{};}catch(_){return {};}})();
+_NXPR.sauveConfiance=function(){try{_NXDB.set(_NXPR.CONF,JSON.stringify(_NXPR.confiance));}catch(_){}};
+_NXPR.estConfie=function(cid){try{
+if(!cid)return false;
+return !!_NXPR.confiance[String(cid)];}catch(_){return false;}};
+_NXPR.confie=function(cid,nom){try{
+if(!cid)return false;
+var L=[],k;for(k in _NXPR.confiance)L.push(k);
+if(L.length>=60){L.sort(function(x,y){return _NXPR.confiance[x].a-_NXPR.confiance[y].a;});
+delete _NXPR.confiance[L[0]];}
+_NXPR.confiance[String(cid)]={a:Date.now(),n:String(nom||"").slice(0,60)};
+_NXPR.sauveConfiance();return true;}catch(_){return false;}};
+_NXPR.dementi=function(cid){try{
+delete _NXPR.confiance[String(cid)];_NXPR.sauveConfiance();return true;}catch(_){return false;}};
+// Le salon ouvert a cet instant. Un clic sur un lien ne dit pas d ou il
+// vient : c est le seul moyen de savoir si la conversation est de confiance.
+_NXPR.salonActuel=function(){try{
+var W=window.Vencord&&Vencord.Webpack;
+if(!_NXPR._sc){try{_NXPR._sc=(W&&W.findStore&&W.findStore("SelectedChannelStore"))||
+(W&&W.findByProps&&W.findByProps("getLastSelectedChannelId"))||null;}catch(_){_NXPR._sc=null;}}
+var S=_NXPR._sc;
+return (S&&S.getChannelId&&S.getChannelId())||"";}catch(_){return "";}};
+// Un avis d ambiance : utile, mais jamais vital. Il se tait dans une
+// conversation de confiance et en mode discret. Les blocages, eux, passent
+// par _NXPR.toast directement et ne sont jamais concernes.
+_NXPR.avis=function(m,type,cid){try{
+if(_NXPR.cfg.discret)return false;
+var c=cid||_NXPR.salonActuel();
+if(c&&_NXPR.estConfie(c))return false;
+return _NXPR.toast(m,type);}catch(_){return false;}};
+// ------------------------------------------------------ ce qui est ouvert
+// Chaque groupe de boucliers demande un rang d abonnement. Le socle -- liens,
+// contenu, coffre anti-vol -- reste ouvert a tout le monde : personne ne doit
+// se retrouver moins protege qu avec un Discord nu.
+_NXPR.RANGS={
+maskLinks:0,maskSuspect:0,scanLinks:0,blockGrabbers:0,phishGuard:0,scamAlerts:0,
+warnAccounts:0,consoleGuard:0,heuristics:0,
+scanFiles:0,scanDownloads:0,scanMasked:0,scanEmbeds:0,scanEdits:0,scanInvites:0,
+scanImpostor:0,scanWaves:0,qrGuard:0,scanStatus:0,clipGuard:0,
+unicodeGuard:1,cryptoGuard:1,dmLinkGuard:1,leakGuard:1,raidGuard:1,nameGuard:1,
+qrLoginGuard:1,passkeyGuard:1,
+oauthGuard:2,schemeGuard:2,bidiGuard:2,ipGuard:2,codeGuard:2,
+webhookGuard:3,egressGuard:3,beaconGuard:3,domGuard:3};
+_NXPR.rangDe=function(k){try{
+var r=_NXPR.RANGS[k];
+return (typeof r==="number")?r:0;}catch(_){return 0;}};
+_NXPR.permis=function(k){try{
+var r=_NXPR.rangDe(k);
+if(r<=0)return true;
+if(!window._NXABO)return true;
+return _NXABO.permis("pr",r);}catch(_){return true;}};
+// Un reglage verrouille qui se retrouve actif est remis a zero. C est la
+// seule chose que le client puisse faire seul contre une modification
+// manuelle -- et elle est refaite sans arret.
+_NXPR.reconcilie=function(){try{
+if(!window._NXABO)return 0;
+var n=0,k;
+for(k in _NXPR.RANGS){
+if(!_NXPR.cfg[k])continue;
+if(_NXPR.permis(k))continue;
+_NXPR.cfg[k]=false;n++;}
+if(n){_NXPR.saveCfg();try{_NXPR.notify();}catch(_){}}
+return n;}catch(_){return 0;}};
 _NXPR.estDM=function(cid){try{
 if(!cid)return false;
 if(!_NXPR._dmc)_NXPR._dmc=Object.create(null);
@@ -9898,9 +11907,13 @@ try{if(window._NXV)_NXV.checkGift(content);}catch(_){}
 _NXPR.scanEmbeds(m);
 _NXPR.scanAttachments(m,isDM);
 _NXPR.checkQR(m,isDM);
-if(isDM&&m.author){_NXPR.checkImpostor(m.author);_NXPR.checkWave(m.author,content);}
+// Dans une conversation marquee de confiance, on cesse de commenter le
+// correspondant : c est deja quelqu un de connu. L analyse du CONTENU, elle,
+// continue -- un ami dont le compte est vole envoie de vrais pieges.
+if(isDM&&m.author&&!_NXPR.estConfie(m.channel_id)){
+_NXPR.checkImpostor(m.author);_NXPR.checkWave(m.author,content);}
 try{_NXPR.scanNouveau(m,content,mine,isDM,_NXguildOf(m.channel_id));}catch(_){}
-if(_NXPR.cfg.warnAccounts&&isDM&&m.author&&m.author.id){try{
+if(_NXPR.cfg.warnAccounts&&isDM&&m.author&&m.author.id&&!_NXPR.estConfie(m.channel_id)){try{
 var created=(BigInt(m.author.id)>>22n)+1420070400000n;
 var ageD=Math.floor((Date.now()-Number(created))/86400000);
 if(ageD<7&&ageD>=0)_NXPR.warnAccount(m.author.id,ageD);
@@ -10088,8 +12101,9 @@ _NXPR.blockedPrompt(href,cl);return;}
 _NXPR.stats.scanned=(_NXPR.stats.scanned||0)+1;
 if(cl.kind==="suspect"){_NXPR.logThreat("suspect",cl.host);_NXPR.saveStats();
 var r1=(cl.why&&cl.why.length)?cl.why[0]:"signaux inhabituels";
-_NXPR.toast("Lien suspect ("+cl.host+") : "+r1+". Verifie avant de continuer.",0);return;}
-if(cl.kind==="short"){_NXPR.bumpSafe();_NXPR.toast("Lien raccourci : destination masquee ("+cl.host+")",1);return;}
+_NXPR.avis("Lien suspect ("+cl.host+") : "+r1+". Verifie avant de continuer.",0);return;}
+if(cl.kind==="short"){_NXPR.bumpSafe();
+_NXPR.avis("Lien raccourci : destination masquee ("+cl.host+")",1);return;}
 _NXPR.bumpSafe();
 }catch(_){}};
 _NXPR.RXOAUTH=/https?:\/\/(?:[\w-]+\.)?discord(?:app)?\.com\/(?:api\/)?oauth2\/authorize\?[^\s<>"')]+/gi;
@@ -10272,22 +12286,76 @@ if(out.scripts.length>=6){out.score+=1;out.alertes.push(out.scripts.length+" dom
 if(out.iframes>=3){out.score+=1;out.alertes.push(out.iframes+" cadres imbriques");}
 out.verdict=out.score>=6?"danger":out.score>=3?"suspect":"neutre";
 return out;}catch(_){return {host:"",alertes:[],score:0,verdict:"neutre",scripts:[],destinations:[],marques:[]};}};
-_NXPR.sandbox=function(url,cb){try{
-if(!url||!/^https?:\/\//i.test(url)){cb&&cb({erreur:"adresse invalide"});return;}
-_NXNETX.go(url,{method:"GET",redirect:"follow",mode:"cors",cache:"no-store",headers:{"Accept":"text/html"}},14000)
+_NXPR.SBX="https://emcoqnvxriyrchmfpunq.supabase.co/functions/v1/sbx";
+// L inspection directe, depuis le client. Elle ne reussit que sur les sites
+// qui autorisent la lecture par n importe qui : c est le repli, pas la voie
+// normale.
+_NXPR.sbxDirect=function(url,cb){try{
+_NXNETX.go(url,{method:"GET",redirect:"follow",mode:"cors",cache:"no-store",
+headers:{"Accept":"text/html"}},14000)
 .then(function(r){
 if(!r)throw 0;
 var fin=(r.url||url);
 var ct="";try{ct=(r.headers&&r.headers.get&&r.headers.get("content-type"))||"";}catch(_){}
 if(ct&&ct.indexOf("text/html")<0&&ct.indexOf("text/plain")<0){
-cb&&cb({erreur:"la reponse n est pas une page web ("+ct.split(";")[0]+")",host:_NXPR.sbxHost(fin),finalUrl:fin});return null;}
+cb({erreur:"la reponse n est pas une page web ("+ct.split(";")[0]+")",
+host:_NXPR.sbxHost(fin),finalUrl:fin});return null;}
 return r.text().then(function(t){
 var res=_NXPR.sbxAnalyse(String(t||"").slice(0,400000),fin,url);
-try{_NXPR.logThreat("sandbox",res.host+" : "+(res.alertes[0]||res.verdict));}catch(_){}
-cb&&cb(res);return null;});})
-.catch(function(){cb&&cb({erreur:"page injoignable ou lecture refusee par le site",host:_NXPR.sbxHost(url),finalUrl:url});});
+res.voie="directe";
+cb(res);return null;});})
+.catch(function(){cb({erreur:"page injoignable, et le relais n a pas repondu",
+host:_NXPR.sbxHost(url),finalUrl:url});});
+}catch(_){cb({erreur:"analyse impossible"});}};
+
+_NXPR.sandbox=function(url,cb){try{
+if(!url||!/^https?:\/\//i.test(url)){cb&&cb({erreur:"adresse invalide"});return;}
+var fini=false;
+var rendre=function(r){if(fini)return;fini=true;
+try{if(r&&!r.erreur)_NXPR.logThreat("sandbox",r.host+" : "+(r.alertes&&r.alertes[0]||r.verdict||"inspecte"));}catch(_){}
+cb&&cb(r);};
+_NXNETX.go(_NXPR.SBX,{method:"POST",cache:"no-store",
+headers:{"Content-Type":"application/json",apikey:_NXSTATUS.CLE},
+body:JSON.stringify({url:url})},20000)
+.then(function(r){if(!r)throw 0;return r.json();})
+.then(function(j){
+if(!j||(!j.ok&&!j.erreur))throw 0;
+if(j.erreur&&!j.ok){
+// Le relais a repondu, mais le site n a rien donne : inutile de retenter
+// en direct, le navigateur ferait moins bien.
+rendre({erreur:j.erreur,host:_NXPR.sbxHost(url),finalUrl:(j.finalUrl||url),
+chaine:j.chaine||[],voie:"relais"});return null;}
+var res=_NXPR.sbxAnalyse(String(j.html||""),j.finalUrl||url,url);
+res.voie="relais";
+res.statut=j.statut;
+res.type=j.type;
+res.taille=j.taille;
+res.tronquee=!!j.tronquee;
+res.ms=j.ms;
+res.entetes=j.entetes||null;
+// La chaine de redirections : c est elle qui trahit un raccourcisseur.
+res.chaine=[];
+try{for(var a=0;a<(j.chaine||[]).length;a++){
+var e=j.chaine[a];
+res.chaine.push({url:e.url,host:_NXPR.sbxHost(e.url),statut:e.statut});}}catch(_){}
+if(res.chaine.length>1){
+res.redirige=true;
+var dep=res.chaine[0].host,arr=res.chaine[res.chaine.length-1].host;
+if(dep&&arr&&dep!==arr){
+res.alertes=res.alertes||[];
+res.alertes.unshift("redirige "+dep+" vers "+arr);
+res.score=(res.score||0)+1;}}
+try{if(j.entetes&&j.entetes.csp===false&&res.motDePasse){
+res.alertes=res.alertes||[];
+res.alertes.push("page de mot de passe sans politique de securite");
+res.score=(res.score||0)+1;}}catch(_){}
+rendre(res);return null;})
+.catch(function(){
+// Le relais n a pas repondu : on tente quand meme depuis le client.
+if(fini)return;
+_NXPR.sbxDirect(url,rendre);});
 }catch(_){cb&&cb({erreur:"analyse impossible"});}};
-_NXPR.CRITICAL=["classify","scanText","scanMasked","scanInvites","scanEmbeds","scanAttachments","scanSecrets","verifyFile","deepFile","matchSig","warnAccount","checkImpostor","checkWave","consoleWarn","onPaste","onMsg","onMsgUpdate","onClickCapture","report","loadRemote","parseList","buildIndex","heuristic","applyProfile","oauthInfo","scanOAuth","scanScheme","scanBidi","isRawIp","scanRawIp","scanCode","scanExtra","rawHost","mixedScript","sandbox","sbxAnalyse","sbxHost","masqueScan","masqueUn","masqueVerdict","masqueVeille"];
+_NXPR.CRITICAL=["classify","scanText","scanMasked","scanInvites","scanEmbeds","scanAttachments","scanSecrets","verifyFile","deepFile","matchSig","warnAccount","checkImpostor","checkWave","consoleWarn","onPaste","onMsg","onMsgUpdate","onClickCapture","report","loadRemote","parseList","buildIndex","heuristic","applyProfile","oauthInfo","scanOAuth","scanScheme","scanBidi","isRawIp","scanRawIp","scanCode","scanExtra","rawHost","mixedScript","sandbox","sbxDirect","sbxAnalyse","sbxHost","masqueScan","masqueUn","masqueVerdict","masqueVeille"];
 _NXPR.selfCheck=function(final){try{
 var miss=[];
 for(var a=0;a<_NXPR.CRITICAL.length;a++){var f=_NXPR.CRITICAL[a];
@@ -10798,6 +12866,9 @@ document.addEventListener("auxclick",_NXPR.onClickCapture,true);
 document.addEventListener("paste",_NXPR.onPaste,true);
 }catch(_){}};
 try{_NXPR.wireDom();}catch(_){}
+// Toutes les cinq minutes : un reglage verrouille ne reste pas actif.
+try{setInterval(function(){try{if(_NXPR.reconcilie)_NXPR.reconcilie();}catch(_){}
+try{if(window._NXP&&_NXP.reconcilie)_NXP.reconcilie();}catch(_){}},300000);}catch(_){}
 try{_NXPERF.amorce(function(){try{if(!_NXPR.masqueVeille())setTimeout(_NXPR.masqueVeille,4000);}catch(_){}},1200);}catch(_){}
 try{setTimeout(function(){_NXPR.consoleWarn();},2500);
 setTimeout(function(){_NXPR.loadRemote();_NXPR.loadAllow();},4000);
@@ -11352,6 +13423,13 @@ if(!Array.isArray(d.log))d.log=[];
 if(!Array.isArray(d.notes))d.notes=[];
 if(!d.counters||typeof d.counters!=="object")d.counters={};
 if(typeof d.lastDay!=="string")d.lastDay="";
+// L envoi de messages : coupe par defaut, et plafonne. Une automatisation
+// qui parle a ta place peut te faire exclure d un serveur en trois minutes.
+if(!d.envoi||typeof d.envoi!=="object")d.envoi={};
+if(typeof d.envoi.on!=="boolean")d.envoi.on=false;
+if(typeof d.envoi.parHeure!=="number")d.envoi.parHeure=6;
+if(typeof d.envoi.mini!=="number")d.envoi.mini=25;
+if(!Array.isArray(d.envoi.faits))d.envoi.faits=[];
 for(var a=0;a<d.tasks.length;a++){var t=d.tasks[a];
 if(!t.id)t.id=_NXAU.uid();
 if(typeof t.on!=="boolean")t.on=true;
@@ -11410,7 +13488,10 @@ _NXAU.ACT=[
 {k:"mute",g:"Vocal",n:"Couper le micro",d:"Bascule le micro sur muet."},
 {k:"deafen",g:"Vocal",n:"Couper le son",d:"Bascule la sortie audio sur muet."},
 {k:"status",g:"Presence",n:"Changer le statut",d:"En ligne, absent, ne pas deranger ou invisible.",arg:"status"},
-{k:"open",g:"Donnees",n:"Ouvrir un lien",d:"Ouvre une adresse dans le navigateur.",arg:"text",ph:"https://"}
+{k:"open",g:"Donnees",n:"Ouvrir un lien",d:"Ouvre une adresse dans le navigateur.",arg:"text",ph:"https://"},
+{k:"reply",g:"Envoyer",n:"Repondre dans le salon",d:"Envoie un message dans le salon qui a declenche la regle. Demande l autorisation d envoi.",arg:"text",ph:"Je reviens dans un instant."},
+{k:"send",g:"Envoyer",n:"Envoyer dans un salon",d:"Envoie un message dans un salon precis. Ecris : identifiant du salon | texte.",arg:"text",ph:"123456789012345678 | Bonjour"},
+{k:"dm",g:"Envoyer",n:"Envoyer un message prive",d:"Ouvre la conversation privee avec un compte et lui ecrit. Ecris : identifiant du compte | texte.",arg:"text",ph:"123456789012345678 | Bonjour"}
 ];
 _NXAU.STATUS=[["online","En ligne"],["idle","Absent"],["dnd","Ne pas deranger"],["invisible","Invisible"]];
 _NXAU.OPS=[[">=","au moins"],["<=","au plus"],["==","exactement"]];
@@ -11432,7 +13513,58 @@ var AC=window.AudioContext||window.webkitAudioContext;
 if(typeof AC!=="function")return null;
 if(!_NXAU._ac)_NXAU._ac=new AC();
 return _NXAU._ac;}catch(_){return null;}};
+// ------------------------------------------------------------- les envois
+_NXAU.MSG=[["reply","dans le salon qui a declenche"],["send","dans un salon nomme"],["dm","en message prive"]];
+_NXAU.estEnvoi=function(k){return k==="reply"||k==="send"||k==="dm";};
+_NXAU.envoiPret=function(){try{
+return !!(window._NXIA&&_NXIA.envoiReel&&_NXAU.data.envoi&&_NXAU.data.envoi.on);}catch(_){return false;}};
+// Le plafond : au plus N envois par heure, et jamais deux coup sur coup.
+_NXAU.envoiPlace=function(){try{
+var E=_NXAU.data.envoi,now=Date.now();
+E.faits=(E.faits||[]).filter(function(t){return (now-t)<3600000;});
+if(E.faits.length>=Math.max(1,E.parHeure))
+return {non:"plafond atteint : "+E.faits.length+" envoi(s) dans l heure"};
+if(E.faits.length&&(now-E.faits[E.faits.length-1])<(Math.max(5,E.mini)*1000))
+return {non:"trop rapproche du precedent envoi"};
+return {ok:true};}catch(_){return {non:"etat d envoi illisible"};}};
+_NXAU.envoiNote=function(){try{
+var E=_NXAU.data.envoi;E.faits=(E.faits||[]);E.faits.push(Date.now());
+if(E.faits.length>40)E.faits=E.faits.slice(-40);
+_NXAU.save();}catch(_){}};
+// Le salon prive d un compte : on prend celui qui existe deja, sinon on le
+// fait ouvrir par Discord. Aucune invitation, aucun contournement.
+_NXAU.salonPrive=function(uid){try{
+var W=_NXAU.wp();if(!W||!W.findByProps)return Promise.resolve(null);
+var id=String(uid||"").replace(/[^0-9]/g,"");
+if(!/^[0-9]{15,25}$/.test(id))return Promise.resolve(null);
+var PS=null;try{PS=W.findByProps("getDMFromUserId");}catch(_){}
+try{var deja=PS&&PS.getDMFromUserId&&PS.getDMFromUserId(id);if(deja)return Promise.resolve(deja);}catch(_){}
+var CA=null;try{CA=W.findByProps("openPrivateChannel");}catch(_){}
+if(!CA||typeof CA.openPrivateChannel!=="function")return Promise.resolve(null);
+try{return Promise.resolve(CA.openPrivateChannel(id)).then(function(r){
+try{if(typeof r==="string"&&r)return r;
+var c=PS&&PS.getDMFromUserId&&PS.getDMFromUserId(id);
+return c||null;}catch(_){return null;}},function(){return null;});
+}catch(_){return Promise.resolve(null);}}catch(_){return Promise.resolve(null);}};
+// Le salon vise selon l action. Rend une promesse d identifiant, ou null.
+_NXAU.cible=function(task,ctx){try{
+var k=(task.act&&task.act.k)||"";
+var v=String((task.act&&task.act.v)||"").trim();
+if(k==="reply"){
+var c=(ctx&&(ctx.channelId||ctx.cid))||"";
+if(!c&&window._NXIA&&_NXIA.salonCourant)c=_NXIA.salonCourant()||"";
+return Promise.resolve(c||null);}
+if(k==="send"){
+// "salon | texte" : la premiere partie designe le salon.
+var sp=_NXAU.splitArg(v);
+var id=String(sp.a||"").replace(/[^0-9]/g,"");
+return Promise.resolve(/^[0-9]{15,25}$/.test(id)?id:null);}
+if(k==="dm"){
+var sp2=_NXAU.splitArg(v);
+return _NXAU.salonPrive(sp2.a);}
+return Promise.resolve(null);}catch(_){return Promise.resolve(null);}};
 _NXAU.probe=function(k){try{
+if(_NXAU.estEnvoi(k))return !!(window._NXIA&&_NXIA.envoiReel);
 if(k==="notify")return typeof Notification==="function";
 if(k==="toast")return !!(window._NXPR&&_NXPR.toast);
 if(k==="clip"||k==="draft"||k==="export"||k==="copyLink"||k==="notes")return !!(window.DiscordNative&&DiscordNative.clipboard&&DiscordNative.clipboard.copy);
@@ -11646,6 +13778,30 @@ _NXAU.jot(nm,(st.name||st.id)+" en veille "+mins+" min");return true;}
 if(k==="mute"||k==="deafen"){var okv=_NXAU.voice(k);_NXAU.jot(nm,okv?(k==="mute"?"micro bascule":"son bascule"):"commande vocale indisponible",!okv);return okv;}
 if(k==="status"){var oks=_NXAU.setStatus((task.act&&task.act.v)||"dnd");_NXAU.jot(nm,oks?("statut change : "+((task.act&&task.act.v)||"dnd")):"changement de statut indisponible",!oks);return oks;}
 if(k==="open"){var oko=_NXAU.openUrl(txt||(task.act&&task.act.v)||"");_NXAU.jot(nm,oko?"lien ouvert":"adresse invalide",!oko);return oko;}
+if(_NXAU.estEnvoi(k)){
+if(!_NXAU.envoiPret()){_NXAU.jot(nm,"envoi de messages non autorise : active-le dans l onglet Envoi",true);return false;}
+var pl=_NXAU.envoiPlace();
+if(!pl.ok){_NXAU.jot(nm,pl.non,true);return false;}
+// Pour "send" et "dm", le texte suit la barre verticale ; pour "reply", il
+// est pris tel quel apres substitution des variables.
+var corps=txt;
+if(k!=="reply"){var sp3=_NXAU.splitArg(String((task.act&&task.act.v)||""));
+corps=_NXAU.text({act:{k:k,v:sp3.b}},ctx)||sp3.b;}
+corps=String(corps||"").trim();
+if(!corps){_NXAU.jot(nm,"aucun texte a envoyer",true);return false;}
+if(corps.length>1800)corps=corps.slice(0,1800);
+_NXAU.cible(task,ctx).then(function(cid){
+if(!cid){_NXAU.jot(nm,"destinataire introuvable",true);return;}
+_NXAU.envoiNote();
+_NXIA.envoiReel(cid,corps).then(function(r){
+if(r&&r.erreur){_NXAU.jot(nm,"envoi refuse : "+r.erreur,true);return;}
+_NXAU.jot(nm,"message envoye"+(r&&r.ou?(" dans "+r.ou):"")+" : "+corps.slice(0,60));
+},function(){_NXAU.jot(nm,"envoi impossible",true);});
+});
+// L envoi est asynchrone : la tache est comptee comme lancee, et le
+// journal dira si le message est reellement parti.
+_NXAU.jot(nm,"envoi demande");
+return true;}
 _NXAU.jot(nm,"action inconnue : "+k,true);return false;}catch(e){try{_NXAU.jot(task&&task.name,"erreur : "+((e&&e.message)||"inconnue"),true);}catch(_){}return false;}};
 _NXAU.run=function(task,ctx){try{
 if(!task)return false;
@@ -12032,17 +14188,14 @@ setForm(null);setTab("taches");force();}catch(_){}}
 if(!A)return i(Kr,null,i("div",{style:{maxWidth:"640px",margin:"0 auto"}},
 _NXhead(_T("Automatisation"),"Nexium Auto",_T("Le moteur d automatisation n a pas demarre sur ce client.")),
 _NXcard(i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6}},_T("Redemarre Discord. Si le probleme persiste, le module _NXAU a ete desactive par une erreur au chargement.")),{mb:0})));
-var TABS=[["taches","Taches"],["modeles","Modeles"],["editeur","Editeur"],["focus","Focus"],["memoire","Memoire"],["journal","Journal"]];
-function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Auto"),style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
-TABS.map(function(t){var on=tab===t[0];
-return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,
-"aria-label":_T(t[1]),"data-nx-tab":"1",
-onClick:function(){if(t[0]==="editeur"&&!form)setForm(blank());setTab(t[0]);setQ("");},
-style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap",transition:"color .16s ease"}},
-_T(t[1]),
-i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",
-borderRadius:"2px",background:P.txt,transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
-transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+var TABS=[["taches",_T("Taches"),"eclair",_NXAU.data.tasks.length||""],
+["modeles",_T("Modeles"),"couches",""],
+["editeur",_T("Editeur"),"crayon",""],
+["envoi",_T("Envoi"),"envoi",_NXAU.envoiPret()?_T("ouvert"):""],
+["focus",_T("Focus"),"cible",""],
+["memoire",_T("Memoire"),"base",""],
+["journal",_T("Journal"),"liste",""]];
+function tabbar(){return _NXFX.onglets(TABS,tab,function(k){if(k==="editeur"&&!form)setForm(blank());setTab(k);setQ("");},{col:_NXpal.warn});}
 function chiffreA(v,lab,c){return i("div",{style:{flex:1,minWidth:"84px"}},
 i("div",{style:{fontFamily:_NXf.disp,fontSize:"24px",fontWeight:"800",
 color:c||P.txt,letterSpacing:"-.038em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
@@ -12355,13 +14508,82 @@ i("div",{style:{flex:1,minWidth:0}},
 i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:e.e?_NXpal.danger:P.txt}},e.n||"—"),
 i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"2px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},e.m)),
 e.e?pill(_T("echec"),_NXpal.danger):null);})),{mb:0});}
+// ------------------------------------------------------------ l onglet Envoi
+function tEnvoi(){
+var E=_NXAU.data.envoi;
+var pret=_NXAU.envoiPret();
+var dispo=!!(window._NXIA&&_NXIA.envoiReel);
+var faits=(E.faits||[]).filter(function(t){return (Date.now()-t)<3600000;}).length;
+var regles=[];
+for(var z=0;z<_NXAU.data.tasks.length;z++){
+var tk=_NXAU.data.tasks[z];
+if(tk.act&&_NXAU.estEnvoi(tk.act.k))regles.push(tk);}
+function nb(cle,val,mini,maxi,lab,aide){
+return i("div",{style:{flex:"1 1 180px",minWidth:"168px"}},
+_NXFX.champ({k:lab,mono:true,serre:true,v:String(val),aide:aide,
+onChange:function(e){
+var n=parseInt(e.target.value,10);
+if(!isFinite(n))return;
+E[cle]=Math.max(mini,Math.min(maxi,n));_NXAU.save();_NXAU.notify();}}));}
+return i("div",null,
+_NXFX.note({col:pret?_NXpal.warn:_NXpal.info,icone:pret?"alerte":"info",
+titre:pret?_T("Le moteur peut ecrire en ton nom"):_T("Le moteur n ecrit a personne"),
+texte:pret?_T("Trois actions peuvent envoyer un message : repondre dans le salon declencheur, ecrire dans un salon nomme, ou envoyer un message prive. Chaque envoi est plafonne et inscrit au journal.")
+:_T("Tant que cette porte reste fermee, aucune regle ne peut envoyer quoi que ce soit : l action est refusee et notee au journal.")}),
+_NXcard(i("div",null,
+_NXch(_T("Autoriser l envoi de messages"),
+dispo?_T("A n ouvrir que si tu sais ce que tes regles envoient. Un message automatique mal regle peut te faire exclure d un serveur.")
+:_T("Le module d envoi de Nexium IA n a pas demarre : l envoi restera indisponible."),
+_NXtoggle(pret,function(){
+if(!dispo)return;
+E.on=!E.on;_NXAU.save();_NXAU.notify();},true)),
+dispo?i("div",{style:{display:"flex",gap:"12px",flexWrap:"wrap",marginTop:"6px"}},
+nb("parHeure",E.parHeure,1,30,_T("Envois par heure"),_T("Au-dela, l action est refusee.")),
+nb("mini",E.mini,5,600,_T("Secondes entre deux"),_T("Deux envois colles ressemblent a du pourriel."))):null,
+i("div",{style:{display:"flex",gap:"26px",flexWrap:"wrap",marginTop:"14px",
+paddingTop:"16px",borderTop:"1px solid "+P.line}},
+_NXFX.chiffre({k:_T("Cette heure"),v:faits+" / "+E.parHeure,
+col:faits>=E.parHeure?_NXpal.warn:P.txt,rang:1}),
+_NXFX.chiffre({k:_T("Regles qui envoient"),v:regles.length,
+col:regles.length?_NXpal.warn:P.faint,rang:2}),
+_NXFX.chiffre({k:_T("Etat"),v:pret?_T("ouvert"):_T("ferme"),
+col:pret?_NXpal.warn:_NXpal.ok,rang:3}))),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Comment ecrire la cible"),_T("Les trois actions d envoi prennent leur destinataire dans le champ.")),
+_NXFX.grille([
+_NXFX.tuile({key:"r",icone:"envoi",col:_NXpal.info,rang:1,hv:"pousse",
+titre:_T("Repondre dans le salon"),sous:"reply",
+texte:_T("Le champ ne contient que le texte. Le salon est celui qui a declenche la regle.")}),
+_NXFX.tuile({key:"s",icone:"grille",col:_NXpal.cyan,rang:2,hv:"penche",
+titre:_T("Envoyer dans un salon"),sous:"send",
+texte:_T("Ecris : identifiant du salon, une barre verticale, puis le texte.")}),
+_NXFX.tuile({key:"d",icone:"courrier",col:_NXpal.mauve,rang:3,hv:"saute",
+titre:_T("Message prive"),sous:"dm",
+texte:_T("Ecris : identifiant du compte, une barre verticale, puis le texte. La conversation est ouverte si elle n existe pas.")})],228)),{mb:12}),
+regles.length?_NXcard(i("div",null,
+_NXch(_T("Les regles concernees"),regles.length+" "+_T("regle(s) peuvent envoyer un message.")),
+regles.map(function(tk,k){
+var def=_NXAU.actDef(tk.act.k)||{};
+return _NXFX.rangee({key:tk.id,premier:k===0,rang:Math.min(6,k+1),
+icone:tk.act.k==="dm"?"courrier":"envoi",
+col:tk.on?_NXpal.warn:P.faint,
+titre:tk.name||_T("Regle sans nom"),
+texte:(def.n||tk.act.k)+" \u00b7 "+String(tk.act.v||"").slice(0,70),
+droite:_NXFX.badge(tk.on?_T("active"):_T("coupee"),tk.on?_NXpal.warn:P.faint,{point:tk.on})});})),{mb:0}):null);}
+
 return i(Kr,null,i("div",{style:{maxWidth:"660px",margin:"0 auto"}},
-_NXhead(_T("Automatisation"),"Nexium Auto",_T("Des regles simples qui travaillent pour toi : un declencheur, des conditions, une action. Tout s execute localement, et jamais un message n est envoye a ta place.")),
+_NXhead(_T("Automatisation"),"Nexium Auto",
+_NXAU.envoiPret()
+?_T("Des regles simples qui travaillent pour toi : un declencheur, des conditions, une action. L envoi de messages est ouvert : le moteur peut ecrire en ton nom, dans les limites que tu as posees.")
+:_T("Des regles simples qui travaillent pour toi : un declencheur, des conditions, une action. Tout s execute localement, et aucun message n est envoye tant que tu ne l as pas autorise.")),
 head(),
 tabbar(),
 i("div",{key:tab,"data-nx-panel":"1"},
-tab==="taches"?tTaches():tab==="modeles"?tModeles():tab==="editeur"?tEditeur():tab==="focus"?tFocus():tab==="memoire"?tMemoire():tJournal()),
-_NXfoot("Nexium Auto · execution locale, aucun envoi automatique de message")));
+tab==="taches"?tTaches():tab==="modeles"?tModeles():tab==="editeur"?tEditeur():
+tab==="envoi"?tEnvoi():tab==="focus"?tFocus():tab==="memoire"?tMemoire():tJournal()),
+_NXfoot("Nexium Auto \u00b7 "+(_NXAU.envoiPret()
+?_T("envoi autorise, plafonne et journalise")
+:_T("execution locale, aucun envoi de message")))));
 }
 var NexiumProtectIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M12 2 4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z"}));};
 var SH_LIENS=[
@@ -12449,7 +14671,14 @@ try{if(window._NXGD)_NXGD.listeners=_NXGD.listeners.filter(function(f){return f!
 var monte=_NXmounted(F);
 var G=window._NXGD||null;
 var P=_NXpal;var cfg=_NXPR.cfg;var st=_NXPR.stats;var V=window._NXV||null;
-function tog(k){return function(){cfg[k]=!cfg[k];_NXPR.saveCfg();try{if(k==="maskLinks"||k==="maskSuspect"||k==="scanLinks"){if(cfg.maskLinks&&cfg.scanLinks){_NXPR.masqueVeille();_NXPR.masqueRefaire();}else _NXPR.masqueTout();}}catch(_){}force();};}
+// A chaque ouverture de la page : ce qui est verrouille et actif redescend.
+try{if(_NXPR.reconcilie)_NXPR.reconcilie();}catch(_){}
+// Un reglage verrouille ne s allume pas : on mene a la page des offres.
+function verrou(k){try{return !!(_NXPR.permis&&!_NXPR.permis(k));}catch(_){return false;}}
+function versOffres(){try{if(window._NXCP)_NXCP.ouvrir("equicord_abo","Nexium Abonnement");}catch(_){}}
+function tog(k){return function(){
+if(verrou(k)){versOffres();return;}
+cfg[k]=!cfg[k];_NXPR.saveCfg();try{if(k==="maskLinks"||k==="maskSuspect"||k==="scanLinks"){if(cfg.maskLinks&&cfg.scanLinks){_NXPR.masqueVeille();_NXPR.masqueRefaire();}else _NXPR.masqueTout();}}catch(_){}force();};}
 function vtog(k,after){return function(){try{if(!V)return;V.cfg[k]=!V.cfg[k];V.save();if(after)after(V.cfg[k]);if(V.notify)V.notify();force();}catch(_){}};}
 function vget(k){return !!(V&&V.cfg&&V.cfg[k]);}
 var _KEYS=[];for(var _a=0;_a<SH_LIENS.length;_a++)_KEYS.push(SH_LIENS[_a].k);
@@ -12497,18 +14726,7 @@ var cSortie=_NXcount(F,nSortie);
 var cScan=_NXcount(F,(st&&st.scanned)||0);
 var cSafe=_NXcount(F,(st&&st.safe)||0);
 var TABS=[["apercu","Aperçu",null],["boucliers","Boucliers",null],["preuve","Preuve",null],["coffre","Coffre-fort",null],["journal","Journal",nQuar?String(nQuar>99?"99+":nQuar):null],["base","Base",null]];
-function tabbar(){return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Protect"),style:{display:"flex",gap:"0",borderBottom:"1px solid "+P.line,marginBottom:"18px",overflowX:"auto",position:"relative"}},
-TABS.map(function(t){var on=tab===t[0];
-return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,"data-nx-tab":"1",
-"aria-label":_T(t[1])+(t[2]?(" \u2014 "+t[2]+" "+_T("en quarantaine")):""),
-onClick:function(){if(tab!==t[0]){setTab(t[0]);setQ("");}},
-style:{position:"relative",display:"flex",alignItems:"center",gap:"7px",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",fontWeight:"700",
-letterSpacing:".11em",textTransform:"uppercase",color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
-_T(t[1]),
-t[2]?i("span",{key:"b"+t[2],"data-nx-pop":"1",style:{fontFamily:_NXf.mono,fontSize:"9px",fontWeight:"800",color:_NXpal.ink,
-background:_NXpal.warn,borderRadius:"99px",padding:"2px 6px",lineHeight:1.3,letterSpacing:0}},t[2]):null,
-i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",bottom:"-1px",height:"2px",borderRadius:"2px",background:P.txt,
-transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function tabbar(){return _NXFX.onglets(TABS,tab,function(k){if(tab!==k){setTab(k);setQ("");}},{col:_NXpal.danger});}
 function chiffre(v,lab,col){return i("div",{style:{flex:1,minWidth:"74px"}},
 _NXbigNum(v,col),
 i("div",{style:{fontSize:"10px",color:P.dim,marginTop:"5px",lineHeight:1.4}},lab));}
@@ -12592,12 +14810,21 @@ i("span",{style:{fontSize:"11.5px",color:P.sub}},_NXn(passe)+" "+_T("laissees pa
 // La tuile de Privacy, avec son interrupteur anime. Une ligne grise dans une
 // liste ne se distingue pas d une autre ; une tuile allumee, si.
 function tuilePR(it,on,click){
-return i("div",{key:it.k,className:"nx-fx",role:"button","aria-label":_T(it.t),
+var ferme=verrou(it.k);
+if(ferme)on=false;
+return i("div",{key:it.k,className:"nx-fx",role:"button",
+"aria-label":_T(it.t)+(ferme?(" \u2014 "+_T("abonnement requis")):""),
 "aria-pressed":on?"true":"false",tabIndex:0,onKeyDown:_NXkey,onClick:click,
+title:ferme?_T("Cette protection demande un abonnement Nexium Security."):"",
 style:{position:"relative",overflow:"hidden",cursor:"pointer",padding:"14px 15px",
 borderRadius:"15px",background:on?"linear-gradient(158deg,#131316,#0c0c0e)":P.inset,
-border:"1px solid "+(on?P.edge:P.line),
-transition:"border-color .22s ease,background .22s ease"}},
+border:"1px solid "+(ferme?_NXteinte(_NXpal.warn,.26):(on?P.edge:P.line)),
+opacity:ferme?.72:1,
+transition:"border-color .22s ease,background .22s ease,opacity .22s ease"}},
+ferme?i("div",{"aria-hidden":"true",style:{position:"absolute",right:"11px",top:"11px",
+color:_NXpal.warn,display:"flex"}},
+i("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"currentColor"},
+i("path",{d:"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z"}))):null,
 on?i("div",{"aria-hidden":"true",style:{position:"absolute",left:0,top:0,bottom:0,width:"2px",
 background:scol,opacity:.85}}):null,
 i("div",{style:{display:"flex",alignItems:"flex-start",gap:"11px"}},
@@ -12612,7 +14839,10 @@ i("div",{style:{flex:1,minWidth:0}},
 i("div",{style:{fontSize:"12.5px",fontWeight:"700",letterSpacing:"-.01em",
 color:on?P.txt:P.sub,marginBottom:"5px",transition:"color .22s ease"}},_T(it.t)),
 i("div",{style:{fontSize:"11px",color:P.dim,lineHeight:1.6}},_T(it.d))),
-i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{flexShrink:0,width:"34px",height:"20px",
+ferme?i("div",{style:{flexShrink:0,marginTop:"2px",fontSize:"9.5px",fontWeight:"800",
+letterSpacing:".08em",textTransform:"uppercase",color:_NXpal.warn,whiteSpace:"nowrap"}},
+_T("Abonnement"))
+:i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{flexShrink:0,width:"34px",height:"20px",
 borderRadius:"99px",marginTop:"3px",background:on?scol:"transparent",
 border:"1px solid "+(on?scol:P.faint),
 transition:"background .22s ease,border-color .22s ease"}},
@@ -12719,7 +14949,7 @@ i("div",{className:"nx-fx",role:"button","aria-label":_T("Analyser"),tabIndex:0,
 (_NXPR.loading&&!res)?i("div",{style:{marginTop:"13px",fontSize:"12px",color:P.dim,lineHeight:1.55}},_T("Chargement de la base de menaces en cours… l analyse sera complète dans quelques secondes.")):null,
 res?i("div",{style:{marginTop:"14px",paddingTop:"14px",borderTop:"1px solid "+P.line}},
 i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.6,marginBottom:"10px"}},
-_T("Le bac a sable recupere la page et l inspecte sans rien executer : aucun script, aucune image, aucun cadre. Ton adresse IP sera visible du site.")),
+_T("Le bac a sable fait recuperer la page par le relais Nexium, puis l inspecte ici sans rien executer : aucun script, aucune image, aucun cadre. Le site ne voit ni ton adresse IP ni ton navigateur, et la chaine de redirections est affichee.")),
 i("div",{style:{display:"flex",gap:"7px",flexWrap:"wrap"}},
 i("div",{className:"nx-fx",role:"button","aria-label":_T("Inspecter en bac a sable"),tabIndex:0,onKeyDown:_NXkey,
 onClick:function(){var u=(res&&res.resolved)||(chk||"").trim();if(!u||sbxBusy)return;if(!/^https?:\/\//.test(u))u="https://"+u;
@@ -13976,18 +16206,53 @@ _NXBAN.remember(id);
 var localWhy=_NXBAN.lockHits();
 _NXBAN.local=!!localWhy;
 if(localWhy)_NXBAN.enforce(id,localWhy);
-_NXNETX.go(_NXBAN.URL+"?nx="+Date.now(),{cache:"no-store"},20000).then(function(r){if(!r||!r.ok)throw 0;return r.text();}).then(function(t){
-_NXBAN.echecs=0;
-var list=_NXBAN.parse(t);
-var why=_NXBAN.match(list,id);
-if(why){_NXBAN.enforce(id,why);_NXBAN.lock(why,id);}
-else{try{_NXDB.del(_NXBAN.KEY);}catch(_){}_NXBAN.lift();}
-try{_NXNETX.ok("ban");}catch(_){}
-}).catch(function(){
+// Deux sources, lues ensemble : le fichier du depot et la table du serveur.
+// `undefined` veut dire "source muette" ; on ne leve un bannissement que si
+// les deux ont repondu, et qu aucune ne le confirme.
+var depot=_NXNETX.go(_NXBAN.URL+"?nx="+Date.now(),{cache:"no-store"},20000)
+.then(function(r){if(!r||!r.ok)throw 0;return r.text();})
+.then(function(t){return _NXBAN.match(_NXBAN.parse(t),id)||null;})
+.catch(function(){return undefined;});
+Promise.all([depot,_NXBAN.serveur(id)]).then(function(deux){
+var d=deux[0],v=deux[1];
+var muettes=(d===undefined?1:0)+(v===undefined?1:0);
+var why="";
+if(d)why=d;
+if(!why&&v)why=v.genre+(v.raison?(" \u2014 "+v.raison):"");
+if(why){_NXBAN.echecs=0;_NXBAN.enforce(id,why);_NXBAN.lock(why,id);
+try{_NXNETX.ok("ban");}catch(_){}return;}
+if(muettes===2){
 _NXBAN.echecs=(_NXBAN.echecs||0)+1;
 if(_NXBAN.echecs>=3&&_NXBAN.local){try{_NXDB.del(_NXBAN.KEY);}catch(_){}_NXBAN.lift();}
-try{_NXNETX.retry("ban",function(){_NXBAN.check();});}catch(_){}});
+try{_NXNETX.retry("ban",function(){_NXBAN.check();});}catch(_){}
+return;}
+_NXBAN.echecs=0;
+try{_NXDB.del(_NXBAN.KEY);}catch(_){}
+_NXBAN.lift();
+try{_NXNETX.ok("ban");}catch(_){}});
 }catch(_){}};
+_NXBAN.RPC="https://emcoqnvxriyrchmfpunq.supabase.co/rest/v1/rpc/nx_ban_test";
+_NXBAN.CLE="sb_publishable_mhLyot9Dv_VCtWpCbYpngg_evMB79C3";
+_NXBAN.serveurEtat="jamais";
+// Interroge la table des bannissements. La reponse est soit une ligne, soit
+// rien : le serveur ne rend jamais la liste, seulement le verdict qui nous
+// concerne. Une panne rend `null` -- ce qui veut dire "je ne sais pas", et
+// surtout pas "personne n est banni".
+_NXBAN.serveur=function(id){try{
+return _NXNETX.go(_NXBAN.RPC,{method:"POST",
+headers:{apikey:_NXBAN.CLE,"Content-Type":"application/json",Accept:"application/json"},
+body:JSON.stringify({p_id:id||"",p_fp:_NXBAN.fp(),p_in:_NXBAN.install()}),
+cache:"no-store"},15000).then(function(r){
+if(!r||!r.ok)throw 0;
+return r.json();}).then(function(j){
+_NXBAN.serveurEtat="ok";
+var L=(j&&j.length!==undefined)?j:(j?[j]:[]);
+if(!L.length)return null;
+var x=L[0];
+if(!x||x.banni!==true)return null;
+return {genre:x.genre||"compte",raison:x.raison||"",expire:x.expire_le||null};
+}).catch(function(){_NXBAN.serveurEtat="injoignable";return undefined;});
+}catch(_){return Promise.resolve(undefined);}};
 _NXBAN.refs=function(){return {compte:_NXBAN.myId(),appareil:_NXBAN.fp(),installation:_NXBAN.install(),comptesVus:_NXBAN.seenIds(),actif:_NXBAN.active,motif:_NXBAN.reason};};
 try{setTimeout(_NXBAN.check,2000);setInterval(function(){if(!document.hidden)_NXBAN.check();},300000);}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXBAN");if(window._NXERR)_NXERR.push("module _NXBAN :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXBAN desactive:",_nxE);}catch(_){}}
@@ -14526,35 +16791,6 @@ _NXCPT.barre();}}catch(_){}};
 try{setTimeout(_NXCPT.barre,6500);
 _NXCPT.listeners.push(function(){try{_NXCPT.rafraichisBarre();}catch(_){}});}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXCPT");if(window._NXERR)_NXERR.push("module _NXCPT :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXCPT desactive:",_nxE);}catch(_){}}
-}
-var _NXLAB=window._NXLAB||(window._NXLAB={});
-if(!_NXLAB.boot){try{_NXLAB.boot=true;
-_NXLAB.KEY="nexium_labo";
-_NXLAB.listeners=[];
-_NXLAB.ESSAIS=[
-{k:"music_onde_fine",n:"Onde detaillee dans Music",
-d:"Double le nombre de barres de l onde du lecteur : 144 au lieu de 72.",
-c:"Purement visuel. Un peu plus de travail d affichage pendant la lecture.",
-etat:"essai"}];
-_NXLAB.cfg=(function(){var d;try{var r=_NXDB.get(_NXLAB.KEY);d=r?JSON.parse(r):null;}catch(e){d=null;}
-if(!d||typeof d!=="object")d={};return d;})();
-_NXLAB.def=function(k){try{
-for(var a=0;a<_NXLAB.ESSAIS.length;a++)if(_NXLAB.ESSAIS[a].k===k)return _NXLAB.ESSAIS[a];}catch(_){}return null;};
-_NXLAB.actif=function(k){try{return !!(_NXLAB.def(k)&&_NXLAB.cfg[k]);}catch(_){return false;}};
-_NXLAB.save=function(){try{_NXDB.set(_NXLAB.KEY,JSON.stringify(_NXLAB.cfg));}catch(_){}};
-_NXLAB.notify=function(){for(var a=0;a<_NXLAB.listeners.length;a++){try{_NXLAB.listeners[a]();}catch(_){}}};
-_NXLAB.bascule=function(k){try{
-if(!_NXLAB.def(k))return false;
-_NXLAB.cfg[k]=!_NXLAB.cfg[k];
-_NXLAB.save();_NXLAB.notify();
-return !!_NXLAB.cfg[k];}catch(_){return false;}};
-_NXLAB.tout=function(v){try{
-for(var a=0;a<_NXLAB.ESSAIS.length;a++)_NXLAB.cfg[_NXLAB.ESSAIS[a].k]=!!v;
-_NXLAB.save();_NXLAB.notify();}catch(_){}};
-_NXLAB.combien=function(){try{var n=0,a;
-for(a=0;a<_NXLAB.ESSAIS.length;a++)if(_NXLAB.cfg[_NXLAB.ESSAIS[a].k])n++;
-return n;}catch(_){return 0;}};
-}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXLAB");if(window._NXERR)_NXERR.push("module _NXLAB :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXLAB desactive:",_nxE);}catch(_){}}
 }
 var _NXPRV=window._NXPRV||(window._NXPRV={});
 if(!_NXPRV.boot){try{
@@ -15158,6 +17394,32 @@ _NXSTATUS.niveau=function(g){for(var a=0;a<_NXSTATUS.NIVEAUX.length;a++){if(_NXS
 _NXSTATUS.gravFr=function(g){var x=_NXSTATUS.niveau(g);return x?x.n:"Incident";};
 _NXSTATUS.couleur=function(g){var x=_NXSTATUS.niveau(g);return x?x.c:"#8a8a94";};
 _NXSTATUS.poids=function(g){var x=_NXSTATUS.niveau(g);return x?x.p:0;};
+// Reporter une alerte : elle disparait, et revient dans deux heures. Ce
+// n est pas la meme chose que "j ai compris", qui la retire pour de bon.
+_NXSTATUS.PLUSTARD=7200000;
+_NXSTATUS.reportees=function(){try{var r=_NXDB.get("nexium_alertes_plus_tard");var d=r?JSON.parse(r):null;return (d&&typeof d==="object")?d:{};}catch(_){return {};}};
+_NXSTATUS.reporte=function(id){try{
+var v=_NXSTATUS.reportees();v[id]=Date.now()+_NXSTATUS.PLUSTARD;
+var ks=Object.keys(v),now=Date.now();
+for(var a=0;a<ks.length;a++)if(v[ks[a]]<now)delete v[ks[a]];
+_NXDB.set("nexium_alertes_plus_tard",JSON.stringify(v));}catch(_){}};
+_NXSTATUS.estReportee=function(id){try{
+var v=_NXSTATUS.reportees();return !!(v[id]&&v[id]>Date.now());}catch(_){return false;}};
+// Demander a Nexium IA ce que cette panne veut dire, en clair. La question
+// part avec ce que l alerte dit, et rien d autre.
+_NXSTATUS.expliquer=function(al){try{
+if(!al||!window._NXIA)return false;
+var q="Une alerte du client Nexium vient de s afficher. Explique-moi en trois phrases simples "+
+"ce que cela veut dire pour moi, et ce que je peux faire en attendant.\n\n"+
+"Niveau : "+_NXSTATUS.gravFr(al.gravite)+"\n"+
+"Titre : "+String(al.titre||"")+"\n"+
+"Resume : "+String(al.resume||"")+
+(al.composant?("\nComposant : "+al.composant):"")+
+(al.versions_touchees?("\nVersions touchees : "+al.versions_touchees):"")+
+(al.correctif?("\nCorrige en : "+al.correctif):"");
+try{if(window._NXCP)_NXCP.goto("equicord_ia");}catch(_){}
+setTimeout(function(){try{_NXIA.envoyer(q);}catch(_){}},260);
+return true;}catch(_){return false;}};
 _NXSTATUS.vues=function(){try{var r=_NXDB.get("nexium_alertes_vues");var d=r?JSON.parse(r):null;return (d&&typeof d==="object")?d:{};}catch(_){return {};}};
 _NXSTATUS.marque=function(id){try{var v=_NXSTATUS.vues();v[id]=Date.now();var ks=Object.keys(v);if(ks.length>40){ks.sort(function(x,y){return v[x]-v[y];});for(var a=0;a<ks.length-30;a++)delete v[ks[a]];}_NXDB.set("nexium_alertes_vues",JSON.stringify(v));}catch(_){}};
 _NXSTATUS.charge=function(){try{
@@ -15181,7 +17443,7 @@ _NXSTATUS.ouvrePage=function(){try{
 if(window._NXP&&_NXP.open){_NXP.open(_NXSTATUS.PAGE);return true;}
 if(typeof VencordNative!=="undefined"&&VencordNative.native&&VencordNative.native.openExternal){VencordNative.native.openExternal(_NXSTATUS.PAGE);return true;}
 }catch(_){}return false;};
-_NXSTATUS.ferme=function(){try{var e=document.getElementById("nx-alerte");if(e&&e.parentNode)e.parentNode.removeChild(e);}catch(_){}};
+_NXSTATUS.ferme=function(){try{var e=document.getElementById("nx-alerte");if(e&&e.parentNode)e.parentNode.removeChild(e);var p=document.getElementById("nx-alerte-pile");if(p&&p.parentNode)p.parentNode.removeChild(p);}catch(_){}};
 _NXSTATUS.JT={
 fond:"var(--bg-surface-overlay,var(--background-floating,#111214))",
 fond2:"var(--bg-surface-raised,var(--background-secondary,#2b2d31))",
@@ -15197,28 +17459,113 @@ var T=_NXSTATUS.JT;
 var c=document.createElement("style");
 c.id="nx-alerte-style";
 c.textContent=
-"@keyframes nxAlerteEntre{from{opacity:0;transform:translate(-50%,-14px)}to{opacity:1;transform:translate(-50%,0)}}"+
-"#nx-alerte{animation:nxAlerteEntre .28s cubic-bezier(.16,1,.3,1) both;}"+
-"#nx-alerte .nxa-tete{display:flex;align-items:center;gap:8px;margin-bottom:5px;}"+
-"#nx-alerte .nxa-grav{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;}"+
-"#nx-alerte .nxa-compte{font-size:11px;color:"+T.doux+";margin-left:auto;font-variant-numeric:tabular-nums;}"+
-"#nx-alerte .nxa-titre{font-size:15px;font-weight:600;color:"+T.texte+";line-height:1.3;}"+
-"#nx-alerte .nxa-corps{font-size:13.5px;color:"+T.doux+";margin-top:5px;line-height:1.45;}"+
-"#nx-alerte .nxa-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;}"+
-"#nx-alerte .nxa-et{font-size:11px;color:"+T.doux+";border:1px solid "+T.bord+";border-radius:99px;padding:2px 9px;}"+
-"#nx-alerte .nxa-actes{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}"+
-"#nx-alerte .nxa-b{height:30px;padding:0 14px;border-radius:"+T.rayon+";font-size:13px;font-weight:500;"+
-"border:none;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;}"+
+"@keyframes nxaEntre{from{opacity:0;transform:translate(-50%,-18px) scale(.97)}to{opacity:1;transform:translate(-50%,0) scale(1)}}"+
+"@keyframes nxaSort{from{opacity:1;transform:translate(-50%,0) scale(1)}to{opacity:0;transform:translate(-50%,-14px) scale(.97)}}"+
+"@keyframes nxaHalo{0%,100%{opacity:.22;transform:scale(1)}50%{opacity:.55;transform:scale(1.22)}}"+
+"@keyframes nxaBalaye{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}"+
+"@keyframes nxaMonte{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}"+
+"#nx-alerte{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:1000;"+
+"width:calc(100% - 44px);max-width:620px;box-sizing:border-box;background:"+T.fond+";"+
+"border:1px solid "+T.bord+";border-radius:14px;padding:0;overflow:hidden;"+
+"box-shadow:0 18px 44px rgba(0,0,0,.42),0 2px 0 rgba(255,255,255,.03) inset;"+
+"font-family:"+T.police+";color:"+T.texte+";pointer-events:auto;"+
+"animation:nxaEntre .34s cubic-bezier(.16,1,.3,1) both;}"+
+"#nx-alerte.nxa-part{animation:nxaSort .24s ease forwards;}"+
+"#nx-alerte .nxa-liseret{position:absolute;top:0;left:0;right:0;height:2px;}"+
+"#nx-alerte .nxa-brille{position:absolute;top:0;left:0;height:2px;width:26%;"+
+"background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);"+
+"animation:nxaBalaye 3.2s cubic-bezier(.5,0,.5,1) infinite;}"+
+"#nx-alerte .nxa-int{display:flex;gap:14px;align-items:flex-start;padding:15px 16px 14px;}"+
+"#nx-alerte .nxa-past{position:relative;width:38px;height:38px;border-radius:12px;flex:0 0 auto;"+
+"display:flex;align-items:center;justify-content:center;}"+
+"#nx-alerte .nxa-halo{position:absolute;inset:-22%;border-radius:50%;pointer-events:none;"+
+"animation:nxaHalo 3.4s ease-in-out infinite;}"+
+"#nx-alerte .nxa-past svg{position:relative;width:19px;height:19px;}"+
+"#nx-alerte .nxa-corps{flex:1;min-width:0;}"+
+"#nx-alerte .nxa-tete{display:flex;align-items:center;gap:9px;margin-bottom:6px;flex-wrap:wrap;}"+
+"#nx-alerte .nxa-grav{font-size:9.5px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;}"+
+"#nx-alerte .nxa-etat{font-size:10px;font-weight:700;color:"+T.doux+";border:1px solid "+T.bord+";"+
+"border-radius:99px;padding:1px 8px;letter-spacing:.02em;}"+
+"#nx-alerte .nxa-compte{font-size:10.5px;color:"+T.doux+";margin-left:auto;font-variant-numeric:tabular-nums;"+
+"letter-spacing:.04em;}"+
+"#nx-alerte .nxa-titre{font-size:15.5px;font-weight:700;color:"+T.texte+";line-height:1.32;letter-spacing:-.01em;}"+
+"#nx-alerte .nxa-txt{font-size:13px;color:"+T.doux+";margin-top:6px;line-height:1.5;}"+
+"#nx-alerte .nxa-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}"+
+"#nx-alerte .nxa-et{font-size:10.5px;color:"+T.doux+";background:rgba(255,255,255,.035);"+
+"border:1px solid "+T.bord+";border-radius:7px;padding:3px 9px;display:inline-flex;align-items:center;gap:5px;}"+
+"#nx-alerte .nxa-fil{margin-top:11px;padding-left:12px;border-left:1px solid "+T.bord+";}"+
+"#nx-alerte .nxa-fil > div{font-size:11.5px;color:"+T.doux+";line-height:1.5;margin-bottom:5px;"+
+"animation:nxaMonte .35s ease both;}"+
+"#nx-alerte .nxa-fil > div:last-child{margin-bottom:0;}"+
+"#nx-alerte .nxa-fil b{color:"+T.texte+";font-weight:600;}"+
+"#nx-alerte .nxa-actes{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap;}"+
+"#nx-alerte .nxa-b{height:31px;padding:0 13px;border-radius:9px;font-size:12.5px;font-weight:600;"+
+"border:1px solid transparent;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;"+
+"transition:transform .15s cubic-bezier(.22,.8,.28,1),background-color .15s,border-color .15s;}"+
+"#nx-alerte .nxa-b:hover{transform:translateY(-1px);}"+
+"#nx-alerte .nxa-b:active{transform:scale(.98);}"+
+"#nx-alerte .nxa-b svg{width:13px;height:13px;}"+
 "#nx-alerte .nxa-b1{background:#5865f2;color:#fff;}"+
 "#nx-alerte .nxa-b1:hover{background:#4752c4;}"+
-"#nx-alerte .nxa-b2{background:#4e5058;color:#fff;}"+
-"#nx-alerte .nxa-b2:hover{background:#6d6f78;}"+
-"@media (prefers-reduced-motion: reduce){#nx-alerte{animation:none;}}";
+"#nx-alerte .nxa-b2{background:rgba(255,255,255,.055);color:"+T.texte+";border-color:"+T.bord+";}"+
+"#nx-alerte .nxa-b2:hover{background:rgba(255,255,255,.09);}"+
+"#nx-alerte .nxa-b3{background:transparent;color:"+T.doux+";}"+
+"#nx-alerte .nxa-b3:hover{color:"+T.texte+";background:rgba(255,255,255,.045);}"+
+"#nx-alerte .nxa-x{position:absolute;top:11px;right:11px;width:24px;height:24px;border-radius:7px;"+
+"display:flex;align-items:center;justify-content:center;color:"+T.doux+";cursor:pointer;"+
+"font-size:16px;line-height:1;transition:background-color .15s,color .15s;}"+
+"#nx-alerte .nxa-x:hover{background:rgba(255,255,255,.07);color:"+T.texte+";}"+
+"#nx-alerte-pile{position:fixed;top:16px;left:50%;z-index:999;pointer-events:none;"+
+"width:calc(100% - 44px);max-width:620px;transform:translateX(-50%);}"+
+"#nx-alerte-pile > div{position:absolute;left:0;right:0;height:44px;border-radius:14px;"+
+"background:"+T.fond+";border:1px solid "+T.bord+";}"+
+"@media (prefers-reduced-motion: reduce){#nx-alerte,#nx-alerte *{animation:none!important;transition:none!important;}}";
 if(document.head)document.head.appendChild(c);}catch(_){}};
+_NXSTATUS.TRACES={
+securite:"M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z",
+critique:"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z",
+majeur:"M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z",
+mineur:"M11 7h2v2h-2V7zm0 4h2v6h-2v-6zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z",
+maintenance:"M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z",
+info:"M11 7h2v2h-2V7zm0 4h2v6h-2v-6zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"};
+_NXSTATUS.trace=function(g){return _NXSTATUS.TRACES[g]||_NXSTATUS.TRACES.info;};
+_NXSTATUS.teinte=function(col,a){try{
+var h=String(col||"").replace("#","");
+if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+var n=parseInt(h,16);
+return "rgba("+((n>>16)&255)+","+((n>>8)&255)+","+(n&255)+","+a+")";}catch(_){return "rgba(140,140,150,"+a+")";}};
+_NXSTATUS.depuis=function(t){try{
+if(!t)return "";
+var d=Date.now()-(new Date(t)).getTime();
+if(d<0||!isFinite(d))return "";
+var m=Math.floor(d/60000);
+if(m<1)return "a l instant";
+if(m<60)return "depuis "+m+" min";
+var h=Math.floor(m/60);
+if(h<48)return "depuis "+h+" h";
+return "depuis "+Math.floor(h/24)+" j";}catch(_){return "";}};
+_NXSTATUS.svg=function(d,z){try{
+var NS="http://www.w3.org/2000/svg";
+var e=document.createElementNS(NS,"svg");
+e.setAttribute("viewBox","0 0 24 24");e.setAttribute("fill","currentColor");
+e.setAttribute("aria-hidden","true");
+if(z){e.setAttribute("width",z);e.setAttribute("height",z);}
+var p=document.createElementNS(NS,"path");p.setAttribute("d",d);
+e.appendChild(p);return e;}catch(_){return document.createElement("span");}};
+_NXSTATUS.restantes=function(){try{
+var v=_NXSTATUS.vues(),out=[],a;
+for(a=0;a<_NXSTATUS.alertes.length;a++){
+var x=_NXSTATUS.alertes[a];
+if(v[x.id])continue;
+if(_NXSTATUS.estReportee(x.id))continue;
+out.push(x);}
+// Le plus grave en premier : une panne critique ne doit pas attendre
+// derriere une annonce.
+out.sort(function(p,q){return _NXSTATUS.poids(q.gravite)-_NXSTATUS.poids(p.gravite);});
+return out;}catch(_){return [];}};
 _NXSTATUS.affiche=function(){try{
 if(!document.body)return;
-var v=_NXSTATUS.vues(),restantes=[],a;
-for(a=0;a<_NXSTATUS.alertes.length;a++){if(!v[_NXSTATUS.alertes[a].id])restantes.push(_NXSTATUS.alertes[a]);}
+var restantes=_NXSTATUS.restantes();
 var vieux=document.getElementById("nx-alerte");
 if(!restantes.length){_NXSTATUS.ferme();return;}
 var cible=restantes[0];
@@ -15227,68 +17574,170 @@ _NXSTATUS.ferme();
 _NXSTATUS.styleBandeau();
 var T=_NXSTATUS.JT;
 var c=_NXSTATUS.couleur(cible.gravite);
-var box=document.createElement("div");
+var el=function(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;};
+
+// La pile : deux cartes a peine visibles derriere, quand il y a la suite.
+if(restantes.length>1){
+var pile=el("div");pile.id="nx-alerte-pile";
+var n=Math.min(2,restantes.length-1);
+for(var z=n;z>=1;z--){
+var f=el("div");
+f.style.cssText="top:"+(z*5)+"px;transform:scale("+(1-z*0.022)+");opacity:"+(0.5-z*0.14)+";";
+pile.appendChild(f);}
+document.body.appendChild(pile);}
+
+var box=el("div");
 box.id="nx-alerte";
 box.setAttribute("data-id",String(cible.id));
 box.setAttribute("role","status");
-box.style.cssText="position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:1000;"+
-"width:calc(100% - 44px);max-width:580px;box-sizing:border-box;background:"+T.fond+";"+
-"border:1px solid "+T.bord+";border-left:4px solid "+c+";border-radius:"+T.rayon+";"+
-"padding:13px 15px;box-shadow:"+T.ombre+";font-family:"+T.police+";color:"+T.texte+";"+
-"display:flex;gap:12px;align-items:flex-start;pointer-events:auto;";
-var corps=document.createElement("div");
-corps.style.cssText="flex:1;min-width:0;";
-var tete=document.createElement("div");
-tete.className="nxa-tete";
-var g=document.createElement("span");
-g.className="nxa-grav";g.style.color=c;g.textContent=_NXSTATUS.gravFr(cible.gravite);
+
+var lis=el("div","nxa-liseret");
+lis.style.background="linear-gradient(90deg,"+c+","+_NXSTATUS.teinte(c,.25)+" 62%,transparent)";
+box.appendChild(lis);
+if(_NXSTATUS.poids(cible.gravite)>=4){
+var br=el("div","nxa-brille");box.appendChild(br);}
+
+var inter=el("div","nxa-int");
+var past=el("div","nxa-past");
+past.style.background=_NXSTATUS.teinte(c,.13);
+past.style.border="1px solid "+_NXSTATUS.teinte(c,.3);
+past.style.color=c;
+var halo=el("div","nxa-halo");
+halo.style.background="radial-gradient(circle,"+_NXSTATUS.teinte(c,.4)+",transparent 68%)";
+past.appendChild(halo);
+past.appendChild(_NXSTATUS.svg(_NXSTATUS.trace(cible.gravite)));
+inter.appendChild(past);
+
+var corps=el("div","nxa-corps");
+var tete=el("div","nxa-tete");
+var g=el("span","nxa-grav",_NXSTATUS.gravFr(cible.gravite));g.style.color=c;
 tete.appendChild(g);
-if(restantes.length>1){
-var cpt=document.createElement("span");
-cpt.className="nxa-compte";
-cpt.textContent="1 sur "+restantes.length;
-tete.appendChild(cpt);}
-corps.appendChild(tete);
-var t2=document.createElement("div");
-t2.className="nxa-titre";t2.textContent=String(cible.titre||"");
-corps.appendChild(t2);
-var t3=document.createElement("div");
-t3.className="nxa-corps";t3.textContent=String(cible.resume||"").slice(0,300);
-corps.appendChild(t3);
-var meta=document.createElement("div");
-meta.className="nxa-meta";
 var etats={enquete:"En cours d\u2019analyse",identifie:"Cause identifi\u00e9e",surveille:"Sous surveillance"};
-if(etats[cible.etat]){var e1=document.createElement("span");e1.className="nxa-et";e1.textContent=etats[cible.etat];meta.appendChild(e1);}
-if(cible.versions_touchees){var e2=document.createElement("span");e2.className="nxa-et";e2.textContent="Versions : "+cible.versions_touchees;meta.appendChild(e2);}
-if(cible.correctif){var e3=document.createElement("span");e3.className="nxa-et";e3.textContent="Corrig\u00e9 en "+cible.correctif;meta.appendChild(e3);}
+if(etats[cible.etat])tete.appendChild(el("span","nxa-etat",etats[cible.etat]));
+if(restantes.length>1)tete.appendChild(el("span","nxa-compte","1 sur "+restantes.length));
+corps.appendChild(tete);
+corps.appendChild(el("div","nxa-titre",String(cible.titre||"")));
+corps.appendChild(el("div","nxa-txt",String(cible.resume||"").slice(0,340)));
+
+var meta=el("div","nxa-meta");
+var age=_NXSTATUS.depuis(cible.debut);
+if(age)meta.appendChild(el("span","nxa-et",age));
+if(cible.composant)meta.appendChild(el("span","nxa-et",String(cible.composant)));
+if(cible.versions_touchees)meta.appendChild(el("span","nxa-et","Versions : "+cible.versions_touchees));
+if(cible.correctif)meta.appendChild(el("span","nxa-et","Corrig\u00e9 en "+cible.correctif));
 if(meta.childNodes.length)corps.appendChild(meta);
-var actes=document.createElement("div");
-actes.className="nxa-actes";
-var b1=document.createElement("button");
-b1.type="button";b1.className="nxa-b nxa-b1";b1.textContent="Voir le statut";
-b1.onclick=function(){_NXSTATUS.ouvrePage();};
-var b2=document.createElement("button");
-b2.type="button";b2.className="nxa-b nxa-b2";
-b2.textContent=restantes.length>1?"Suivante":"J\u2019ai compris";
-b2.onclick=function(){try{_NXSTATUS.marque(cible.id);}catch(_){}_NXSTATUS.ferme();_NXSTATUS.affiche();};
-actes.appendChild(b1);actes.appendChild(b2);
+
+// Le fil des mises a jour : les deux dernieres, pas plus.
+try{
+var M=cible.maj;
+if(M&&M.length>1){
+var fil=el("div","nxa-fil");
+var deb=Math.max(0,M.length-2);
+for(var k=deb;k<M.length;k++){
+var ligne=el("div");
+var quand=el("b",null,_NXSTATUS.depuis(M[k].a)||"");
+ligne.appendChild(quand);
+ligne.appendChild(document.createTextNode(" \u00b7 "+String(M[k].texte||"").slice(0,160)));
+ligne.style.animationDelay=((k-deb)*70)+"ms";
+fil.appendChild(ligne);}
+corps.appendChild(fil);}}catch(_){}
+
+var actes=el("div","nxa-actes");
+var bouton=function(cls,txt,trace,fn){
+var b=document.createElement("button");
+b.type="button";b.className="nxa-b "+cls;
+if(trace)b.appendChild(_NXSTATUS.svg(trace));
+b.appendChild(document.createTextNode(txt));
+b.onclick=fn;return b;};
+actes.appendChild(bouton("nxa-b1","Voir le statut",
+"M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z",
+function(){_NXSTATUS.ouvrePage();}));
+if(window._NXIA)actes.appendChild(bouton("nxa-b2","Expliquer",
+"M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2z",
+function(){_NXSTATUS.expliquer(cible);_NXSTATUS.retire();}));
+actes.appendChild(bouton("nxa-b3","Plus tard",null,function(){
+try{_NXSTATUS.reporte(cible.id);}catch(_){}_NXSTATUS.retire(true);}));
+actes.appendChild(bouton("nxa-b2",restantes.length>1?"Suivante":"J\u2019ai compris",null,function(){
+try{_NXSTATUS.marque(cible.id);}catch(_){}_NXSTATUS.retire(true);}));
 corps.appendChild(actes);
-var x=document.createElement("div");
+inter.appendChild(corps);
+box.appendChild(inter);
+
+var x=el("div","nxa-x","\u00d7");
 x.setAttribute("role","button");
 x.setAttribute("aria-label","Fermer");
-x.style.cssText="flex:0 0 auto;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;"+
-"justify-content:center;color:"+T.doux+";cursor:pointer;font-size:17px;line-height:1;";
-x.textContent="\u00d7";
-x.onclick=function(){try{_NXSTATUS.marque(cible.id);}catch(_){}_NXSTATUS.ferme();};
-box.appendChild(corps);box.appendChild(x);
+x.onclick=function(){try{_NXSTATUS.marque(cible.id);}catch(_){}_NXSTATUS.retire();};
+box.appendChild(x);
 document.body.appendChild(box);}catch(_){}};
-_NXSTATUS.MIN=45000;
+// Sortir en douceur, puis eventuellement montrer la suivante.
+_NXSTATUS.retire=function(suite){try{
+var b=document.getElementById("nx-alerte");
+if(!b){if(suite)_NXSTATUS.affiche();return;}
+b.className="nxa-part";
+setTimeout(function(){try{_NXSTATUS.ferme();if(suite)_NXSTATUS.affiche();}catch(_){}},240);
+}catch(_){_NXSTATUS.ferme();}};
+_NXSTATUS.MIN=12000;
 _NXSTATUS.rafraichis=function(force){try{
 if(!force&&_NXSTATUS.at&&(Date.now()-_NXSTATUS.at)<_NXSTATUS.MIN)return;
 _NXSTATUS.charge();}catch(_){}};
-try{setTimeout(function(){_NXSTATUS.charge();},20000);
-setInterval(function(){if(!document.hidden)_NXSTATUS.rafraichis(true);},120000);
-document.addEventListener("visibilitychange",function(){if(!document.hidden)_NXSTATUS.rafraichis();});
+
+// --------------------------------------------------------------- le direct
+// Le sondage seul faisait attendre jusqu a deux minutes. La table des
+// alertes est diffusee : une ligne posee arrive ici en une seconde. Si la
+// liaison ne s etablit pas -- reseau ferme, proxy, service en panne -- le
+// sondage continue de son cote et rien n est perdu.
+_NXSTATUS.rt=null;_NXSTATUS.rtEtat="inactif";_NXSTATUS.rtEssais=0;
+_NXSTATUS.rtBat=null;_NXSTATUS.rtRef=0;_NXSTATUS.rtAu=0;
+_NXSTATUS.rtFerme=function(){try{
+if(_NXSTATUS.rtBat){clearInterval(_NXSTATUS.rtBat);_NXSTATUS.rtBat=null;}
+if(_NXSTATUS.rt){try{_NXSTATUS.rt.onclose=null;_NXSTATUS.rt.close();}catch(_){}_NXSTATUS.rt=null;}
+}catch(_){}};
+_NXSTATUS.direct=function(){try{
+if(typeof WebSocket!=="function")return false;
+if(_NXSTATUS.rt)return true;
+if(window._NXECO&&_NXECO.actif&&_NXECO.actif()&&_NXECO.cfg&&_NXECO.cfg.legerReseau)return false;
+var u=_NXSTATUS.URL.replace(/^http/,"ws")+"/realtime/v1/websocket?apikey="+
+encodeURIComponent(_NXSTATUS.CLE)+"&vsn=1.0.0";
+var w=new WebSocket(u);
+_NXSTATUS.rt=w;_NXSTATUS.rtEtat="connexion";
+w.onopen=function(){try{
+_NXSTATUS.rtEtat="ouvert";_NXSTATUS.rtEssais=0;
+w.send(JSON.stringify({topic:"realtime:nx-alertes",event:"phx_join",
+payload:{config:{postgres_changes:[{event:"*",schema:"public",table:"nx_alertes"}]}},
+ref:String(++_NXSTATUS.rtRef)}));
+_NXSTATUS.rtBat=setInterval(function(){try{
+if(!_NXSTATUS.rt||_NXSTATUS.rt.readyState!==1)return;
+_NXSTATUS.rt.send(JSON.stringify({topic:"phoenix",event:"heartbeat",payload:{},ref:String(++_NXSTATUS.rtRef)}));
+}catch(_){}},28000);
+}catch(_){}};
+w.onmessage=function(ev){try{
+var m=JSON.parse(ev.data);
+if(m&&m.event==="system"&&m.payload&&m.payload.status==="ok")_NXSTATUS.rtEtat="abonne";
+if(m&&m.event==="postgres_changes"){
+_NXSTATUS.rtAu=Date.now();
+// On ne fait pas confiance a la charge utile pour reconstruire l etat :
+// on relit la liste, une seule fois, tout de suite.
+_NXSTATUS.charge();}
+}catch(_){}};
+w.onerror=function(){try{_NXSTATUS.rtEtat="erreur";}catch(_){}};
+w.onclose=function(){try{
+_NXSTATUS.rt=null;_NXSTATUS.rtEtat="ferme";
+if(_NXSTATUS.rtBat){clearInterval(_NXSTATUS.rtBat);_NXSTATUS.rtBat=null;}
+// Reprise progressive : 5 s, 10 s, 20 s... jusqu a 5 minutes. Au-dela de
+// dix essais on abandonne le direct : le sondage suffit.
+_NXSTATUS.rtEssais++;
+if(_NXSTATUS.rtEssais>10){_NXSTATUS.rtEtat="abandonne";return;}
+var d=Math.min(300000,5000*Math.pow(2,_NXSTATUS.rtEssais-1));
+setTimeout(function(){if(!document.hidden)_NXSTATUS.direct();},d);
+}catch(_){}};
+return true;}catch(_){_NXSTATUS.rt=null;_NXSTATUS.rtEtat="indisponible";return false;}};
+_NXSTATUS.etatDirect=function(){try{
+return {etat:_NXSTATUS.rtEtat,essais:_NXSTATUS.rtEssais,
+dernier:_NXSTATUS.rtAu,ouvert:!!(_NXSTATUS.rt&&_NXSTATUS.rt.readyState===1)};}catch(_){return {};}};
+try{setTimeout(function(){_NXSTATUS.charge();},4000);
+setTimeout(function(){_NXSTATUS.direct();},6000);
+setInterval(function(){if(!document.hidden)_NXSTATUS.rafraichis(true);},30000);
+document.addEventListener("visibilitychange",function(){if(!document.hidden){_NXSTATUS.rafraichis();_NXSTATUS.direct();}});
 window.addEventListener("focus",function(){_NXSTATUS.rafraichis();});}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXSTATUS");if(window._NXERR)_NXERR.push("module _NXSTATUS :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXSTATUS desactive:",_nxE);}catch(_){}}
 }var _NXADMIN=window._NXADMIN||(window._NXADMIN={});
@@ -15304,7 +17753,90 @@ _NXADMIN.peutSupprimer=function(){return _NXADMIN.role==="proprietaire";};
 _NXADMIN.peutNiveau=function(g){try{
 if(_NXADMIN.role==="proprietaire")return true;
 return _NXSTATUS.poids(g)<4;}catch(_){return false;}};
-_NXADMIN.deconnexion=function(){try{_NXADMIN.jeton=null;_NXADMIN.role=null;_NXADMIN.pseudo=null;_NXADMIN.expire=0;_NXADMIN.alertes=[];_NXADMIN.journal=[];try{if(window._NXMP){_NXMP.ferme();_NXMP.rafraichisBarre();}}catch(_){}_NXADMIN.notify();}catch(_){}};
+// --------------------------------------------------------- rester connecte
+// Le jeton d acces expire vite -- c est voulu. Ce qui ne doit pas expirer,
+// c est la session : Supabase donne un jeton de renouvellement, et c est lui
+// qu on garde. Il est range brouille avec l identifiant d installation.
+// Ce brouillage n est PAS du chiffrement : il empeche une lecture de passage,
+// pas quelqu un qui a la main sur la machine. C est pourquoi il est
+// desactivable, et efface a la deconnexion.
+_NXADMIN.SKEY="nexium_admin_session";
+_NXADMIN.GARDE="nexium_admin_garde";
+_NXADMIN.frein=null;
+_NXADMIN.garde=function(){try{var v=_NXDB.get(_NXADMIN.GARDE);return v===null||v===undefined?true:v==="1";}catch(_){return true;}};
+_NXADMIN.setGarde=function(v){try{_NXDB.set(_NXADMIN.GARDE,v?"1":"0");if(!v)_NXADMIN.oublie();else _NXADMIN.retiens();}catch(_){}};
+_NXADMIN.sel=function(){try{return (window._NXBAN&&_NXBAN.install)?_NXBAN.install():"nexium";}catch(_){return "nexium";}};
+_NXADMIN.brouille=function(t){try{
+var k=_NXADMIN.sel(),out=[],a;
+for(a=0;a<t.length;a++)out.push(String.fromCharCode(t.charCodeAt(a)^k.charCodeAt(a%k.length)));
+return btoa(unescape(encodeURIComponent(out.join(""))));}catch(_){return "";}};
+_NXADMIN.debrouille=function(b){try{
+var t=decodeURIComponent(escape(atob(b))),k=_NXADMIN.sel(),out=[],a;
+for(a=0;a<t.length;a++)out.push(String.fromCharCode(t.charCodeAt(a)^k.charCodeAt(a%k.length)));
+return out.join("");}catch(_){return "";}};
+_NXADMIN.retiens=function(){try{
+if(!_NXADMIN.garde()||!_NXADMIN.renouv)return false;
+_NXDB.set(_NXADMIN.SKEY,JSON.stringify({v:1,p:_NXADMIN.pseudo||"",
+r:_NXADMIN.brouille(_NXADMIN.renouv),a:Date.now()}));
+return true;}catch(_){return false;}};
+_NXADMIN.oublie=function(){try{_NXDB.del(_NXADMIN.SKEY);}catch(_){}};
+_NXADMIN.pose=function(j,cb){try{
+if(!j||!j.access_token){if(cb)cb(false);return;}
+_NXADMIN.jeton=j.access_token;
+_NXADMIN.renouv=j.refresh_token||_NXADMIN.renouv||null;
+_NXADMIN.expire=Date.now()+(((j.expires_in||3600)*1000)-120000);
+_NXADMIN.retiens();
+_NXADMIN.planifie();
+if(cb)cb(true);}catch(_){if(cb)cb(false);}};
+// Un renouvellement pose deux minutes avant l echeance : la session ne se
+// coupe donc jamais pendant qu on s en sert.
+_NXADMIN.planifie=function(){try{
+if(_NXADMIN.frein){clearTimeout(_NXADMIN.frein);_NXADMIN.frein=null;}
+if(!_NXADMIN.renouv)return;
+var d=Math.max(30000,_NXADMIN.expire-Date.now()-60000);
+_NXADMIN.frein=setTimeout(function(){_NXADMIN.renouvelle();},d);}catch(_){}};
+_NXADMIN.renouvelle=function(cb){try{
+if(!_NXADMIN.renouv){if(cb)cb({err:"Aucune session a renouveler."});return;}
+if(_NXADMIN.enRenouv){if(cb)cb({err:"Renouvellement deja en cours."});return;}
+_NXADMIN.enRenouv=true;
+_NXNETX.go(_NXSTATUS.URL+"/auth/v1/token?grant_type=refresh_token",
+{method:"POST",headers:{apikey:_NXSTATUS.CLE,"Content-Type":"application/json"},
+body:JSON.stringify({refresh_token:_NXADMIN.renouv})},20000)
+.then(function(r){return r.json();}).then(function(j){
+_NXADMIN.enRenouv=false;
+if(!j||!j.access_token){_NXADMIN.oublie();_NXADMIN.deconnexion();
+if(cb)cb({err:"La session a expire. Reconnecte-toi."});return;}
+_NXADMIN.pose(j,function(){
+_NXADMIN.monRole(function(){
+if(!_NXADMIN.role){_NXADMIN.oublie();_NXADMIN.deconnexion();
+if(cb)cb({err:"Ce compte n est plus administrateur."});return;}
+_NXADMIN.notify();if(cb)cb({ok:true});});});
+}).catch(function(){_NXADMIN.enRenouv=false;if(cb)cb({err:"Serveur injoignable."});});
+}catch(_){_NXADMIN.enRenouv=false;if(cb)cb({err:"Erreur interne."});}};
+// Au demarrage : si une session a ete gardee et que le compte Discord est
+// bien celui d un membre de l equipe, on la reprend sans rien demander.
+_NXADMIN.reprend=function(cb){try{
+if(_NXADMIN.connecte()){if(cb)cb({ok:true});return;}
+if(!_NXADMIN.garde()||!_NXADMIN.estEquipe()){if(cb)cb({err:"rien a reprendre"});return;}
+var raw=_NXDB.get(_NXADMIN.SKEY);
+if(!raw){if(cb)cb({err:"rien a reprendre"});return;}
+var d=null;try{d=JSON.parse(raw);}catch(_){d=null;}
+if(!d||!d.r){if(cb)cb({err:"session illisible"});return;}
+_NXADMIN.renouv=_NXADMIN.debrouille(d.r);
+_NXADMIN.pseudo=d.p||null;
+if(!_NXADMIN.renouv){_NXADMIN.oublie();if(cb)cb({err:"session illisible"});return;}
+_NXADMIN.busy=true;_NXADMIN.notify();
+_NXADMIN.renouvelle(function(r){
+_NXADMIN.busy=false;
+if(r&&r.ok){try{_NXADMIN.charge();}catch(_){}try{if(window._NXMP)_NXMP.rafraichisBarre();}catch(_){}}
+_NXADMIN.notify();if(cb)cb(r);});
+}catch(_){if(cb)cb({err:"Erreur interne."});}};
+_NXADMIN.deconnexion=function(){try{_NXADMIN.jeton=null;_NXADMIN.role=null;_NXADMIN.pseudo=null;_NXADMIN.expire=0;_NXADMIN.alertes=[];_NXADMIN.journal=[];
+_NXADMIN.renouv=null;_NXADMIN.bans=[];_NXADMIN.credits=[];_NXADMIN.membres=[];_NXADMIN.chiffres=null;
+_NXADMIN.abos=[];_NXADMIN.tickets=[];_NXADMIN.fil=null;_NXADMIN.filId=null;
+if(_NXADMIN.frein){try{clearTimeout(_NXADMIN.frein);}catch(_){}_NXADMIN.frein=null;}
+_NXADMIN.oublie();
+try{if(window._NXMP){_NXMP.ferme();_NXMP.rafraichisBarre();}}catch(_){}_NXADMIN.notify();}catch(_){}};
 _NXADMIN.entetes=function(){var h={apikey:_NXSTATUS.CLE,"Content-Type":"application/json",Accept:"application/json"};if(_NXADMIN.connecte())h.Authorization="Bearer "+_NXADMIN.jeton;return h;};
 _NXADMIN.rest=function(chemin,opts,cb){try{
 var o=opts||{};var h=_NXADMIN.entetes();
@@ -15312,7 +17844,15 @@ if(o.prefer)h.Prefer=o.prefer;
 var q={method:o.method||"GET",headers:h,cache:"no-store"};
 if(o.body)q.body=o.body;
 _NXNETX.go(_NXSTATUS.URL+"/rest/v1/"+chemin,q,20000).then(function(r){
-if(r.status===401){_NXADMIN.deconnexion();cb({err:"Session expiree, reconnecte-toi."});return null;}
+if(r.status===401){
+// Le jeton vient d expirer : on le renouvelle et on rejoue la demande une
+// seule fois. C est ce qui evite d avoir a se reconnecter sans arret.
+if(_NXADMIN.renouv&&!o._rejoue){
+_NXADMIN.renouvelle(function(rr){
+if(rr&&rr.ok){var o2={};for(var kk in o)o2[kk]=o[kk];o2._rejoue=true;_NXADMIN.rest(chemin,o2,cb);}
+else cb({err:"Session expiree, reconnecte-toi."});});
+return null;}
+_NXADMIN.deconnexion();cb({err:"Session expiree, reconnecte-toi."});return null;}
 if(r.status===403){cb({err:"Refuse par le serveur : ton role ne permet pas cette action."});return null;}
 if(!r.ok){cb({err:"Le serveur a repondu "+r.status+"."});return null;}
 if(r.status===204){cb({ok:true,data:null});return null;}
@@ -15333,14 +17873,18 @@ body:JSON.stringify({email:p+"@nexium.local",password:String(mdp)})},20000).then
 return r.json();}).then(function(j){
 _NXADMIN.busy=false;
 if(!j||!j.access_token){cb({err:"Identifiant ou mot de passe incorrect."});_NXADMIN.notify();return;}
-_NXADMIN.jeton=j.access_token;
-_NXADMIN.expire=Date.now()+(((j.expires_in||3600)*1000)-60000);
 _NXADMIN.pseudo=p;
+_NXADMIN.pose(j);
 _NXADMIN.monRole(function(){
 if(!_NXADMIN.role){_NXADMIN.deconnexion();cb({err:"Ce compte n est pas administrateur."});return;}
 _NXADMIN.charge();try{if(window._NXMP)_NXMP.rafraichisBarre();}catch(_){}cb({ok:true});_NXADMIN.notify();});
 }).catch(function(){_NXADMIN.busy=false;cb({err:"Serveur injoignable."});_NXADMIN.notify();});
 }catch(_){_NXADMIN.busy=false;cb({err:"Erreur interne."});}};
+// Tout ce dont la page a besoin, en une fois.
+_NXADMIN.chargeTout=function(){try{
+_NXADMIN.charge();_NXADMIN.chargeJournal();_NXADMIN.chargeBans();
+_NXADMIN.chargeCredits();_NXADMIN.chargeChiffres();_NXADMIN.chargeMembres("");
+_NXADMIN.chargeOffres();_NXADMIN.chargeAbos("");_NXADMIN.chargeTickets(null);}catch(_){}};
 _NXADMIN.charge=function(cb){_NXADMIN.rest("nx_alertes?select="+_NXSTATUS.CHAMPS+"&order=debut.desc&limit=30",{},function(r){
 try{if(r.ok&&r.data&&r.data.length!==undefined)_NXADMIN.alertes=r.data;}catch(_){}
 try{_NXADMIN.chargeRelais();}catch(_){}
@@ -15392,11 +17936,175 @@ body:JSON.stringify({p_alerte:al.id,p_evenement:evenement||"manuel"})},function(
 try{if(r.ok&&r.data&&r.data.ok===false){cb({err:r.data.raison||"Renvoi refuse."});return;}}catch(_){}
 if(r.ok)try{setTimeout(function(){_NXADMIN.chargeRelais();},2500);}catch(_){}
 cb(r);});}catch(_){cb({err:"Erreur interne."});}};
+// --------------------------------------------------------- bannissements
+_NXADMIN.bans=[];
+_NXADMIN.chargeBans=function(cb){_NXADMIN.rest("rpc/nx_ban_liste",{method:"POST",body:"{}"},function(r){
+try{if(r.ok&&r.data&&r.data.length!==undefined)_NXADMIN.bans=r.data;}catch(_){}
+_NXADMIN.notify();if(cb)cb(r);});};
+_NXADMIN.GENRES=[
+["compte","Compte Discord","L identifiant du compte. 15 a 25 chiffres."],
+["appareil","Appareil","L empreinte materielle, partagee par tous les comptes de la machine."],
+["installation","Installation","L identifiant pose par le client dans ce profil."]];
+_NXADMIN.poseBan=function(o,cb){try{
+var cle=String((o&&o.cle)||"").trim();
+var genre=(o&&o.genre)||"compte";
+if(!cle){cb({err:"Indique la cible."});return;}
+if(genre==="compte"&&!/^[0-9]{15,25}$/.test(cle)){cb({err:"Un identifiant Discord est fait de 15 a 25 chiffres."});return;}
+var jours=(o&&o.jours)?parseInt(o.jours,10):null;
+if(jours!==null&&(!isFinite(jours)||jours<1||jours>3650)){cb({err:"La duree va de 1 a 3650 jours."});return;}
+if(cle===_NXADMIN.moiId()){cb({err:"Tu ne peux pas te bannir toi-meme."});return;}
+_NXADMIN.rest("rpc/nx_ban_pose",{method:"POST",body:JSON.stringify({
+p_cle:cle,p_genre:genre,p_raison:String((o&&o.raison)||"").slice(0,300),p_jours:jours})},function(r){
+try{if(r.ok&&r.data&&r.data.ok===false){cb({err:r.data.raison||"Refuse."});return;}}catch(_){}
+if(r.ok){_NXADMIN.chargeBans();_NXADMIN.chargeJournal();}
+cb(r);});}catch(_){cb({err:"Erreur interne."});}};
+_NXADMIN.leveBan=function(cle,cb){try{
+_NXADMIN.rest("rpc/nx_ban_leve",{method:"POST",body:JSON.stringify({p_cle:String(cle||"")})},function(r){
+try{if(r.ok&&r.data&&r.data.ok===false){cb({err:r.data.raison||"Refuse."});return;}}catch(_){}
+if(r.ok){_NXADMIN.chargeBans();_NXADMIN.chargeJournal();}
+cb(r);});}catch(_){cb({err:"Erreur interne."});}};
+
+// ---------------------------------------------------------------- credits
+_NXADMIN.credits=[];
+_NXADMIN.chargeCredits=function(cb){_NXADMIN.rest("rpc/ia_credits_liste",{method:"POST",body:"{}"},function(r){
+try{if(r.ok&&r.data&&r.data.length!==undefined)_NXADMIN.credits=r.data;}catch(_){}
+_NXADMIN.notify();if(cb)cb(r);});};
+_NXADMIN.donneCredits=function(id,montant,cb){try{
+var i2=String(id||"").trim();
+var n=parseInt(montant,10);
+if(!/^[0-9]{15,25}$/.test(i2)){cb({err:"Un identifiant Discord est fait de 15 a 25 chiffres."});return;}
+if(!isFinite(n)||n===0){cb({err:"Indique un montant, positif pour offrir, negatif pour retirer."});return;}
+if(n<-100000||n>100000){cb({err:"Le montant va de -100000 a 100000."});return;}
+_NXADMIN.rest("rpc/ia_credits_donne",{method:"POST",body:JSON.stringify({p_id:i2,p_montant:n})},function(r){
+try{if(r.ok&&r.data&&r.data.ok===false){cb({err:r.data.raison||"Refuse."});return;}}catch(_){}
+if(r.ok){_NXADMIN.chargeCredits();_NXADMIN.chargeJournal();}
+cb(r);});}catch(_){cb({err:"Erreur interne."});}};
+
+// ----------------------------------------------------------- utilisateurs
+_NXADMIN.membres=[];_NXADMIN.chiffres=null;
+_NXADMIN.chargeMembres=function(q,cb){_NXADMIN.rest("rpc/nx_membres_detail",{method:"POST",
+body:JSON.stringify({p_q:q||null,p_limite:60})},function(r){
+try{if(r.ok&&r.data&&r.data.length!==undefined)_NXADMIN.membres=r.data;}catch(_){}
+_NXADMIN.notify();if(cb)cb(r);});};
+_NXADMIN.chargeChiffres=function(cb){_NXADMIN.rest("rpc/nx_membres_chiffres",{method:"POST",body:"{}"},function(r){
+try{if(r.ok&&r.data&&typeof r.data==="object")_NXADMIN.chiffres=r.data;}catch(_){}
+_NXADMIN.notify();if(cb)cb(r);});};
+
+// ------------------------------------------------------ redaction assistee
+// Une note jetee en vitesse devient un titre, un resume et un niveau. Le
+// modele PROPOSE : rien n est publie sans qu un humain relise et valide.
+_NXADMIN.iaBusy=false;
+_NXADMIN.CONSIGNE="Tu rediges une alerte d incident pour les utilisateurs d un client Discord. "+
+"A partir de la note brute, rends UNIQUEMENT un objet JSON, sans texte autour, sans balise de code, "+
+"avec exactement ces clefs : titre (une phrase de 8 a 90 caracteres, factuelle, sans point final), "+
+"resume (2 a 4 phrases, ce qui se passe, qui est touche, quoi faire en attendant ; 80 a 600 caracteres), "+
+"gravite (une valeur parmi securite, critique, majeur, mineur, maintenance, info), "+
+"composant (un ou deux mots, ou une chaine vide). "+
+"Ecris en francais simple, sans jargon, sans promettre de delai de correction.";
+_NXADMIN.redigeIA=function(brut,cb){try{
+var t=String(brut||"").trim();
+if(t.length<10){cb({err:"Ecris d abord quelques mots sur ce qui se passe."});return;}
+if(!window._NXIA){cb({err:"Nexium IA n est pas disponible."});return;}
+_NXADMIN.iaBusy=true;_NXADMIN.notify();
+fetch(_NXIA.URL,{method:"POST",headers:{"Content-Type":"application/json"},
+body:JSON.stringify({messages:[{role:"system",content:_NXADMIN.CONSIGNE},{role:"user",content:t}],
+moi:_NXADMIN.moiId(),palier:"S",reflexion:"normal",temperature:0.2})})
+.then(function(r){return r.text();}).then(function(txt){
+_NXADMIN.iaBusy=false;
+var j=null;try{j=JSON.parse(txt);}catch(_){}
+if(!j||j.erreur){cb({err:(j&&j.detail)||"L assistant n a pas repondu."});_NXADMIN.notify();return;}
+var c=String(j.content||"");
+var d=_NXADMIN.litJSON(c);
+if(!d){cb({err:"La reponse n etait pas exploitable. Reessaie."});_NXADMIN.notify();return;}
+cb({ok:true,data:d});_NXADMIN.notify();})
+.catch(function(){_NXADMIN.iaBusy=false;cb({err:"Serveur injoignable."});_NXADMIN.notify();});
+}catch(_){_NXADMIN.iaBusy=false;cb({err:"Erreur interne."});}};
+// Le modele encadre parfois son JSON de trois accents graves, ou d une
+// phrase. On prend le premier objet complet et on valide chaque champ.
+_NXADMIN.litJSON=function(t){try{
+var x=String(t||"").replace(/```[a-z]*\n?/gi,"").trim();
+var a=x.indexOf("{");if(a<0)return null;
+var prof=0,fin=-1,dans=false,ech=false,k;
+for(k=a;k<x.length;k++){var ch=x.charAt(k);
+if(dans){if(ech){ech=false;continue;}if(ch==="\\"){ech=true;continue;}if(ch==="\"")dans=false;continue;}
+if(ch==="\""){dans=true;continue;}
+if(ch==="{")prof++;else if(ch==="}"){prof--;if(prof===0){fin=k;break;}}}
+if(fin<0)return null;
+var j=JSON.parse(x.slice(a,fin+1));
+var g=String(j.gravite||"mineur").toLowerCase();
+var ok=false;for(k=0;k<_NXSTATUS.NIVEAUX.length;k++)if(_NXSTATUS.NIVEAUX[k].k===g)ok=true;
+if(!ok)g="mineur";
+var titre=String(j.titre||"").trim().slice(0,140);
+var resume=String(j.resume||"").trim().slice(0,2000);
+if(titre.length<3||resume.length<10)return null;
+return {titre:titre,resume:resume,gravite:g,composant:String(j.composant||"").trim().slice(0,40)};
+}catch(_){return null;}};
+
+// ------------------------------------------------------------ abonnements
+_NXADMIN.abos=[];_NXADMIN.offres=[];
+_NXADMIN.chargeOffres=function(cb){_NXADMIN.rest("rpc/nx_offres_liste",{method:"POST",body:"{}"},function(r){
+try{if(r.ok&&r.data&&r.data.length!==undefined)_NXADMIN.offres=r.data;}catch(_){}
+_NXADMIN.notify();if(cb)cb(r);});};
+_NXADMIN.chargeAbos=function(q,cb){_NXADMIN.rest("rpc/nx_abo_liste",{method:"POST",
+body:JSON.stringify({p_q:q||null})},function(r){
+try{if(r.ok&&r.data&&r.data.length!==undefined)_NXADMIN.abos=r.data;}catch(_){}
+_NXADMIN.notify();if(cb)cb(r);});};
+_NXADMIN.donneAbo=function(id,offre,jours,cb){try{
+var i2=String(id||"").replace(/[^0-9]/g,"");
+if(!/^[0-9]{15,25}$/.test(i2)){cb({err:"Un identifiant Discord est fait de 15 a 25 chiffres."});return;}
+if(!offre){cb({err:"Choisis une offre."});return;}
+var j=(jours===null||jours==="")?null:parseInt(jours,10);
+if(j!==null&&(!isFinite(j)||j<1||j>3650)){cb({err:"La duree va de 1 a 3650 jours."});return;}
+_NXADMIN.rest("rpc/nx_abo_donne",{method:"POST",
+body:JSON.stringify({p_id:i2,p_offre:offre,p_jours:j})},function(r){
+try{if(r.ok&&r.data&&r.data.ok===false){cb({err:r.data.raison||"Refuse."});return;}}catch(_){}
+if(r.ok){_NXADMIN.chargeAbos("");_NXADMIN.chargeJournal();}
+cb(r);});}catch(_){cb({err:"Erreur interne."});}};
+_NXADMIN.retireAbo=function(id,offre,cb){try{
+_NXADMIN.rest("rpc/nx_abo_retire",{method:"POST",
+body:JSON.stringify({p_id:String(id||""),p_offre:String(offre||"")})},function(r){
+try{if(r.ok&&r.data&&r.data.ok===false){cb({err:r.data.raison||"Refuse."});return;}}catch(_){}
+if(r.ok){_NXADMIN.chargeAbos("");_NXADMIN.chargeJournal();}
+cb(r);});}catch(_){cb({err:"Erreur interne."});}};
+// ---------------------------------------------------------------- tickets
+_NXADMIN.tickets=[];_NXADMIN.fil=null;_NXADMIN.filId=null;
+_NXADMIN.chargeTickets=function(etat,cb){_NXADMIN.rest("rpc/nx_tickets_liste",{method:"POST",
+body:JSON.stringify({p_etat:etat||null})},function(r){
+try{if(r.ok&&r.data&&r.data.length!==undefined)_NXADMIN.tickets=r.data;}catch(_){}
+_NXADMIN.notify();if(cb)cb(r);});};
+_NXADMIN.ouvreFil=function(id,cb){_NXADMIN.rest("rpc/nx_ticket_admin",{method:"POST",
+body:JSON.stringify({p_ticket:id})},function(r){
+try{if(r.ok&&r.data&&r.data.ok!==false){_NXADMIN.fil=r.data;_NXADMIN.filId=id;}}catch(_){}
+_NXADMIN.notify();if(cb)cb(r);});};
+_NXADMIN.repondTicket=function(id,texte,cb){try{
+var t=String(texte||"").trim();
+if(!t){cb({err:"Message vide."});return;}
+_NXADMIN.rest("rpc/nx_ticket_repond",{method:"POST",
+body:JSON.stringify({p_ticket:id,p_texte:t})},function(r){
+try{if(r.ok&&r.data&&r.data.ok===false){cb({err:r.data.raison||"Refuse."});return;}}catch(_){}
+if(r.ok){try{if(window._NXTK)_NXTK.signale(id);}catch(_){}
+_NXADMIN.ouvreFil(id);_NXADMIN.chargeTickets(null);}
+cb(r);});}catch(_){cb({err:"Erreur interne."});}};
+_NXADMIN.etatTicket=function(id,etat,cb){try{
+_NXADMIN.rest("rpc/nx_ticket_etat",{method:"POST",
+body:JSON.stringify({p_ticket:id,p_etat:etat})},function(r){
+try{if(r.ok&&r.data&&r.data.ok===false){cb({err:r.data.raison||"Refuse."});return;}}catch(_){}
+if(r.ok){try{if(window._NXTK)_NXTK.signale(id);}catch(_){}
+_NXADMIN.ouvreFil(id);_NXADMIN.chargeTickets(null);}
+cb(r);});}catch(_){cb({err:"Erreur interne."});}};
+_NXADMIN.enAttente=function(){try{
+var n=0;
+for(var a=0;a<_NXADMIN.tickets.length;a++){
+var t=_NXADMIN.tickets[a];
+if(t.attente&&(t.etat==="ouvert"||t.etat==="en_cours"))n++;}
+return n;}catch(_){return 0;}};
 _NXADMIN.supprime=function(al,cb){try{
 if(!_NXADMIN.peutSupprimer()){cb({err:"Seul le proprietaire peut supprimer une alerte."});return;}
 _NXADMIN.rest("nx_alertes?id=eq."+encodeURIComponent(al.id),{method:"DELETE"},function(r){
 if(r.ok)_NXADMIN.charge();cb(r);});
 }catch(_){cb({err:"Erreur interne."});}};
+// Reprendre la session sitot que Discord sait qui est connecte.
+try{setTimeout(function(){try{_NXADMIN.reprend();}catch(_){}},7000);}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXADMIN");if(window._NXERR)_NXERR.push("module _NXADMIN :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXADMIN desactive:",_nxE);}catch(_){}}
 }var _NXMP=window._NXMP||(window._NXMP={});
 if(!_NXMP.boot){try{_NXMP.boot=true;
@@ -15814,7 +18522,7 @@ _NXPR.toast("Ouvre les reglages Discord, puis "+(nom||"la section Nexium")+" dan
 return false;}catch(_){return false;}};
 _NXCP.items=function(){
 var L=[];
-var pages=[["equicord_ia","Nexium IA","Assistant, reglages, diagnostic"],["equicord_protect","Nexium Protect","Sécurité, liens, menaces"],["equicord_privacy","Nexium Privacy","Télémétrie et anonymat"],["equicord_stats","Nexium Stats","Statistiques d'usage"],["equicord_music","Nexium Music","Lecteur et playlist"],["equicord_comptes","Nexium Comptes","Plusieurs comptes, bascule rapide"],["equicord_auto","Nexium Auto","Automatisations et mode focus"],["equicord_labo","Nexium Labo","Fonctions en cours d essai"],["equicord_network","Nexium Réseau","Latence et stabilité"],["equicord_data","Nexium Données","Stockage, export, import"],["equicord_updater","Nexium Mise à jour","Version et journal"],["equicord_team","Nexium Team","L'équipe"],["equicord_sponsor","Nexium Sponsor","Partenariat"],["equicord_changelog","Changelog","Notes de version"]];
+var pages=[["equicord_ia","Nexium IA","Assistant, reglages, diagnostic"],["equicord_protect","Nexium Protect","Sécurité, liens, menaces"],["equicord_privacy","Nexium Privacy","Télémétrie et anonymat"],["equicord_stats","Nexium Stats","Statistiques d'usage"],["equicord_music","Nexium Music","Lecteur et playlist"],["equicord_comptes","Nexium Comptes","Plusieurs comptes, bascule rapide"],["equicord_auto","Nexium Auto","Automatisations et mode focus"],["equicord_network","Nexium Réseau","Latence et stabilité"],["equicord_data","Nexium Données","Stockage, export, import"],["equicord_updater","Nexium Mise à jour","Version et journal"],["equicord_team","Nexium Team","L'équipe"],["equicord_sponsor","Nexium Sponsor","Partenariat"],["equicord_changelog","Changelog","Notes de version"]];
 for(var a=0;a<pages.length;a++){(function(p){L.push({t:p[1],d:p[2],g:"Pages",run:function(){if(!_NXCP.goto(p[0]))_NXPR.toast("Ouvre les réglages Discord puis « "+p[1]+" »",1);}});})(pages[a]);}
 // L assistant depuis la palette : poser une question sans changer de page.
 try{if(window._NXIA){
@@ -15896,112 +18604,6 @@ if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==="M"||e.key==="m")){
 e.preventDefault();e.stopPropagation();
 try{if(window._NXV&&_NXV.maskBascule)_NXV.maskBascule();}catch(_){}}
 }catch(_){}},true);}catch(_){}
-}
-var NexiumLaboIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M15.96 4H8.04c-.42 0-.65.48-.39.81L9 6.5V11l-5.2 6.93A2 2 0 0 0 5.4 21h13.2a2 2 0 0 0 1.6-3.07L15 11V6.5l1.35-1.69c.26-.33.03-.81-.39-.81zM11 6.5V11l-2.1 2.8h6.2L13 11V6.5h-2z"}));};
-function NexiumLaboComp(){
-var force=F.useReducer(function(x){return x+1;},0)[1];
-F.useEffect(function(){
-if(!window._NXLAB)return;
-var maj=function(){force();};
-_NXLAB.listeners.push(maj);
-return function(){try{_NXLAB.listeners=_NXLAB.listeners.filter(function(f){return f!==maj;});}catch(_){}};},[]);
-var P=_NXpal;
-var L=window._NXLAB||null;
-var cActifs=_NXcount(F,L?L.combien():0,600);
-if(!L)return i(Kr,null,i("div",{style:{maxWidth:"680px",margin:"0 auto"}},
-_NXhead(_T("Essais"),"Nexium Labo",_T("Les fonctions en cours d essai, a activer une par une.")),
-_NXcard(i("div",{style:{fontSize:"12.5px",color:_NXpal.warn,lineHeight:1.6}},
-_T("Le module des essais n a pas demarre sur ce client.")),{mb:0})));
-
-var ETATS={
-essai:{n:"En essai",c:_NXpal.warn,d:"Peut changer ou disparaitre d une version a l autre."},
-stable:{n:"Bientot stable",c:_NXpal.ok,d:"Devrait rejoindre le client par defaut."},
-retire:{n:"En retrait",c:P.dim,d:"Sera retiree prochainement."}};
-
-function etat(e){return ETATS[e]||ETATS.essai;}
-
-function essai(x,rang){
-var on=L.actif(x.k);
-var E=etat(x.etat);
-return i("div",_NXMO.merge({key:x.k,style:{position:"relative",overflow:"hidden",
-padding:"16px 17px 15px 19px",borderRadius:"14px",marginBottom:"8px",
-background:on?P.inset:"transparent",
-border:"1px solid "+(on?P.edge:P.line)}},_NXMO.rise((rang%6)+1)),
-i("div",{"aria-hidden":"true",style:{position:"absolute",left:0,top:0,bottom:0,width:"3px",
-background:on?_NXpal.ok:P.faint,opacity:on?0.9:0.4}}),
-i("div",{style:{display:"flex",alignItems:"flex-start",gap:"14px"}},
-i("div",{style:{flex:1,minWidth:0}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"9px",flexWrap:"wrap",marginBottom:"6px"}},
-i("div",{style:{fontSize:"13.5px",fontWeight:"700",color:on?P.txt:P.pale}},x.n),
-i("span",{style:{fontSize:"9px",fontWeight:"800",letterSpacing:".1em",textTransform:"uppercase",
-color:E.c,border:"1px solid "+E.c,borderRadius:"99px",padding:"2px 7px"}},E.n)),
-i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.6}},x.d),
-i("div",{style:{fontSize:"11px",color:P.dim,lineHeight:1.6,marginTop:"7px",
-paddingLeft:"9px",borderLeft:"1px solid "+P.line}},x.c)),
-i("div",{className:"nx-fx",role:"button","aria-label":x.n,"aria-pressed":on?"true":"false",
-tabIndex:0,onKeyDown:_NXkey,onClick:function(){L.bascule(x.k);force();},
-style:{cursor:"pointer",marginTop:"2px",flexShrink:0}},
-i("div",{"data-nx-sw":"1","aria-hidden":"true",style:{width:"40px",height:"23px",borderRadius:"12px",
-background:on?_NXpal.ok:"transparent",border:"1px solid "+(on?_NXpal.ok:P.faint)}},
-i("div",{style:{width:"15px",height:"15px",borderRadius:"50%",margin:"3px",
-background:on?P.panel:P.faint,transform:on?"translateX(17px)":"none"}})))));}
-
-function mesure(lab,val,sub){
-return i("div",{style:{flex:"1 1 140px",minWidth:"130px"}},
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"20px",fontWeight:"800",color:P.txt,
-letterSpacing:"-.03em",fontVariantNumeric:"tabular-nums"}},val),
-i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"5px",lineHeight:1.4}},lab),
-sub?i("div",{style:{fontSize:"10px",color:P.faint,marginTop:"3px",fontFamily:_NXf.mono}},sub):null);}
-
-function capot(){
-var PR=window._NXPR||null;
-var R=(PR&&PR.remote)||null;
-var emp=(PR&&PR.empreintes)||null;
-var age=(R&&R.at)?Math.round((Date.now()-R.at)/60000):null;
-var morts=(window._NXFAIL||[]).length;
-var journal=(window._NXERR||[]).length;
-return _NXcard(i("div",null,
-_NXch(_T("Sous le capot"),_T("Les chiffres reels du client, tels quels. Utile pour un signalement.")),
-i("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap"}},
-mesure(_T("Domaines surveilles"),R?_NXn(R.n||0):"\u2014",
-emp?((emp.byteLength/1048576).toFixed(2)+" Mo en memoire"):null),
-mesure(_T("Base rafraichie il y a"),age===null?"\u2014":(age<60?(age+" min"):(Math.round(age/60)+" h")),
-R?(R.cached?"depuis la reserve":(R.stale?"reserve perimee":"telechargee")):null),
-mesure(_T("Modules en panne"),String(morts),morts?(window._NXFAIL||[]).join(", "):"aucun"),
-mesure(_T("Erreurs au journal"),String(journal),journal?"voir Nexium Donnees":"aucune")),
-(R&&R.err)?i("div",{style:{marginTop:"14px",fontSize:"12px",color:_NXpal.warn,lineHeight:1.6}},
-_T("Base de menaces")+" : "+R.err):null),{mb:12});}
-
-var n=L.combien(),total=L.ESSAIS.length;
-return i(Kr,null,i("div",{style:{maxWidth:"680px",margin:"0 auto"}},
-_NXhead(_T("Essais"),"Nexium Labo",
-_T("Ce qui est en cours d essai dans le client. Rien n est actif tant que tu ne l actives pas, et tout se coupe d un seul geste.")),
-i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
-borderRadius:"22px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",
-padding:"25px 24px",marginBottom:"14px"}},
-n?_NXscan(_NXteinte(_NXpal.warn,7)):null,
-i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"20px",flexWrap:"wrap"}},
-_NXring(total?Math.round(n/total*100):0,n?_NXpal.warn:P.dim,84,String(cActifs),_T("actives")),
-i("div",{style:{flex:1,minWidth:"200px"}},
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",
-color:P.faint,marginBottom:"9px"}},_T("Fonctions d essai")),
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"26px",fontWeight:"800",color:P.txt,
-letterSpacing:"-.035em",lineHeight:1.15}},
-n?(n+" "+_T(n>1?"essais en cours":"essai en cours")):_T("Aucun essai actif")),
-i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6,marginTop:"9px"}},
-_T("Une fonction d essai peut changer de comportement, ou disparaitre, d une version a l autre. Si le client se met a mal se comporter, coupe-les toutes : c est le premier reflexe."))))),
-_NXcard(i("div",null,
-_NXch(_T("Les essais"),total+" "+_T("fonction(s) proposee(s). Chacune dit ce qu elle change et ce qu elle coute.")),
-L.ESSAIS.map(essai),
-i("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap",marginTop:"14px",
-paddingTop:"14px",borderTop:"1px solid "+P.line}},
-_NXbtn(_T("Tout couper"),function(){L.tout(false);force();},n?"danger":null),
-_NXbtn(_T("Tout activer"),function(){L.tout(true);force();}))),{mb:12}),
-capot(),
-window._NXPRV?i(NexiumPreuveComp,{g:null,key:"preuve"}):null,
-_NXcard(i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.65}},
-_T("Une fonction quitte le labo quand elle a tenu assez longtemps sans casser : elle rejoint alors le client pour tout le monde, et disparait de cette page. Si une fonction d essai pose probleme, coupe-la ici et signale-le : c est exactement a ca que sert cette page.")),{mb:0}),
-_NXfoot("Nexium Labo \u00b7 rien n est actif par defaut")));
 }
 var NexiumComptesIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M9 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.33 0-6 1.34-6 3v2h9.35A5.98 5.98 0 0 1 11 15.5c0-.52.07-1.02.19-1.5H9zm9 .5-1.15 1.15L18 17H14v2h4l-1.15 1.15L18 21.5l3-3-3-3z"}));};
 function NexiumComptesComp(){
@@ -16437,25 +19039,7 @@ _T("Utiliser plusieurs comptes depuis un client modifie accroit le risque de san
 
 // ------------------------------------------------------------------ onglets
 var TABS=[["comptes","Comptes"],["profils","Profils"],["securite","Sécurité"]];
-function tabbar(){
-return i("div",{role:"tablist","aria-label":_T("Sections de Nexium Comptes"),
-style:{display:"flex",borderBottom:"1px solid "+P.line,marginBottom:"18px",
-overflowX:"auto",position:"relative"}},
-TABS.map(function(t){
-var on=tab===t[0];
-return i("div",{key:t[0],className:"nx-fx",role:"tab","aria-selected":on?"true":"false",
-tabIndex:0,onKeyDown:_NXkey,"data-nx-tab":"1","aria-label":_T(t[1]),
-onClick:function(){if(tab!==t[0]){setTab(t[0]);setQ("");}},
-style:{position:"relative",padding:"12px 15px",cursor:"pointer",fontSize:"10.5px",
-fontWeight:"700",letterSpacing:".11em",textTransform:"uppercase",
-color:on?P.txt:P.dim,whiteSpace:"nowrap"}},
-_T(t[1]),
-t[0]==="profils"&&profils.length?i("span",{style:{marginLeft:"7px",fontFamily:_NXf.mono,
-fontSize:"9.5px",color:P.faint}},String(profils.length)):null,
-i("span",{"aria-hidden":"true",style:{position:"absolute",left:"12px",right:"12px",
-bottom:"-1px",height:"2px",borderRadius:"2px",background:P.txt,
-transform:on?"scaleX(1)":"scaleX(0)",transformOrigin:"center",
-transition:"transform .28s cubic-bezier(.22,.8,.28,1)"}}));}));}
+function tabbar(){return _NXFX.onglets(TABS,tab,function(k){if(tab!==k){setTab(k);setQ("");}},{col:_NXpal.rose});}
 
 return i(Kr,null,i("div",{style:{maxWidth:"820px",margin:"0 auto",opacity:monte?1:0,
 transform:monte?"none":"translateY(6px)",transition:"opacity .32s ease,transform .32s ease"}},
@@ -16471,7 +19055,6 @@ _NXfoot("Nexium Comptes \u00b7 chiffre sur cette machine, jamais envoye")));
 }
 function NexiumHomeComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
-var _r0=F.useState(false);var reglages=_r0[0];var setReglages=_r0[1];
 F.useEffect(function(){
 var vivant=true,att=null;
 var maj=function(){try{if(!vivant||att)return;att=setTimeout(function(){att=null;if(vivant)force();},500);}catch(_){}};
@@ -16488,77 +19071,79 @@ var P=_NXpal;
 var PR=window._NXPR,G=window._NXGD,PV=window._NXP,NT=window._NXNET,V=window._NXV,DA=window._NXDATA;
 var menaces=((PR&&PR.stats&&PR.stats.blocked)||0);
 var sorties=(G&&G.total)?G.total():0;
-var interceptees=((PV&&PV.stats&&PV.stats.seen)||0);
+var vues=((PV&&PV.stats&&PV.stats.seen)||0);
 var arretees=((PV&&PV.stats&&PV.stats.blocked)||0);
 var analyses=((PR&&PR.stats&&PR.stats.scanned)||0);
 var sante=(DA&&DA.sante)?DA.sante():{total:0,vivants:0,morts:[],erreurs:0};
 var lat=(NT&&NT.stats)?NT.stats():{avg:0,n:0};
 var ver=(window._NXUP&&_NXUP.VERSION)||"?";
 var pctSante=sante.total?Math.round(sante.vivants/sante.total*100):100;
+var pctFiltre=vues?Math.round(arretees/vues*100):0;
 var tout=menaces+sorties+arretees;
-var etat=sante.morts.length?{t:_T("Attention requise"),c:_NXpal.warn}:
-(tout>0?{t:_T("Protection active"),c:_NXpal.ok}:{t:_T("En veille"),c:_NXpal.ok});
-var BLEU="#8ba3e8",ROSE="#d98aa8";
+var alerte=sante.morts.length>0;
+var etatC=alerte?P.warn:(tout>0?P.ok:P.info);
+var etatT=alerte?_T("Attention requise"):(tout>0?_T("Protection active"):_T("En veille"));
 
 function aller(cle,nom){try{
 if(window._NXCP&&_NXCP.ouvrir){_NXCP.ouvrir(cle,nom);return;}
 if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Ouvre les reglages Discord, puis la section Nexium."),1);
 }catch(_){}}
 
-// ------------------------------------------------------------ l illustration
-// Un bouclier, dessine avec le vocabulaire des autres pages : des anneaux
-// concentriques, et une orbite ou chaque point est un module du client. Les
-// points s allument selon l etat reel -- ce n est pas un decor, c est une
-// lecture de plus.
-function blason(){
-var C=104,R0=82;
+// ---------------------------------------------------------- la constellation
+// Le bouclier au centre, les modules en orbite. Chaque point est un module
+// reel du client : allume s il tourne, eteint sinon. Ce n est pas un decor.
+function constellation(){
+var C=110,R0=88;
 var mods=[
-{n:"Protect",on:!!(PR&&PR.boot),c:_NXpal.danger},
-{n:"Privacy",on:!!(PV&&PV.boot),c:_NXpal.ok},
-{n:"Gardes",on:!!(G&&G.cfg&&G.cfg.egressGuard),c:BLEU},
-{n:"Réseau",on:!!(NT&&NT.boot),c:_NXpal.warn},
-{n:"Coffre",on:!!(V&&V.boot),c:ROSE},
-{n:"Assistant",on:!!(window._NXIA&&_NXIA.boot),c:P.sub}];
+{n:"Protect",on:!!(PR&&PR.boot),c:P.danger},
+{n:"Privacy",on:!!(PV&&PV.boot),c:P.ok},
+{n:"Gardes",on:!!(G&&G.cfg&&G.cfg.egressGuard),c:P.info},
+{n:"Reseau",on:!!(NT&&NT.boot),c:P.warn},
+{n:"Coffre",on:!!(V&&V.boot),c:P.rose},
+{n:"Assistant",on:!!(window._NXIA&&_NXIA.boot),c:P.mauve},
+{n:"Comptes",on:!!(window._NXCPT&&_NXCPT.boot),c:P.cyan},
+{n:"Donnees",on:!!(DA&&DA.boot),c:P.lime}];
+var an=_NXFX.anime();
 var pts=mods.map(function(m,k){
 var ang=(-90+k*(360/mods.length))*Math.PI/180;
 return {x:C+Math.cos(ang)*R0,y:C+Math.sin(ang)*R0,on:m.on,c:m.c,n:m.n,k:k};});
-return i("svg",{viewBox:"0 0 "+(C*2)+" "+(C*2),width:"100%",height:"100%",
-role:"img","aria-label":_T("Etat des modules du client"),
-style:{display:"block",maxWidth:"208px"}},
-// Les anneaux de fond
-[R0,R0-19,R0-38].map(function(r,k){
-return i("circle",{key:"a"+k,cx:C,cy:C,r:r,fill:"none",stroke:P.line,
-strokeWidth:k===0?1:1,opacity:k===0?.9:.5});}),
-// L arc de couverture : la part des modules qui tournent
-i("circle",{cx:C,cy:C,r:R0-19,fill:"none",stroke:etat.c,strokeWidth:2.5,
+var circ=2*Math.PI*(R0-22);
+return i("div",{style:{position:"relative",width:"100%",maxWidth:"228px",flexShrink:0}},
+an?i("div",{"data-nx-halo":"1","aria-hidden":"true",style:{position:"absolute",inset:"6%",
+borderRadius:"50%",background:"radial-gradient(circle,"+_NXteinte(etatC,.16)+",transparent 68%)",
+pointerEvents:"none"}}):null,
+i("svg",{viewBox:"0 0 "+(C*2)+" "+(C*2),width:"100%",height:"100%",role:"img",
+"aria-label":_T("Etat des modules du client"),style:{display:"block",position:"relative"}},
+i("circle",_NXFX.fusion({cx:C,cy:C,r:R0+11,fill:"none",stroke:_NXteinte(etatC,.14),
+strokeWidth:1,strokeDasharray:"2 8"},
+an?{"data-nx-spin":"1",style:{transformOrigin:"50% 50%",animationDuration:"52s"}}:{})),
+i("circle",{cx:C,cy:C,r:R0,fill:"none",stroke:P.line,strokeWidth:1}),
+i("circle",{cx:C,cy:C,r:R0-44,fill:_NXteinte(etatC,.05),stroke:P.hair,strokeWidth:1}),
+i("circle",{cx:C,cy:C,r:R0-22,fill:"none",stroke:P.line,strokeWidth:1,opacity:.6}),
+i("circle",_NXFX.fusion({cx:C,cy:C,r:R0-22,fill:"none",stroke:etatC,strokeWidth:2.5,
 strokeLinecap:"round",transform:"rotate(-90 "+C+" "+C+")",
-strokeDasharray:2*Math.PI*(R0-19),
-strokeDashoffset:2*Math.PI*(R0-19)*(1-(monte?pctSante/100:0)),
-style:{transition:"stroke-dashoffset 1.1s cubic-bezier(.22,.8,.28,1)"}}),
-// Le bouclier, au centre
-i("path",{d:"M104 58 74 70v22c0 19 12.8 35.4 30 40 17.2-4.6 30-21 30-40V70l-30-12z",
-fill:"none",stroke:etat.c,strokeWidth:2,strokeLinejoin:"round",
-opacity:monte?.95:0,style:{transition:"opacity .8s ease .2s"}}),
-i("path",{d:"M92 101l9 9 21-21",fill:"none",stroke:etat.c,strokeWidth:2.5,
-strokeLinecap:"round",strokeLinejoin:"round",
-opacity:monte?1:0,
-style:{transition:"opacity .5s ease .7s"}}),
-// L orbite des modules
+strokeDasharray:circ.toFixed(1),
+strokeDashoffset:(circ*(1-(monte?pctSante/100:0))).toFixed(1)},
+an?{"data-nx-ring":"1"}:{})),
+i("g",{transform:"translate("+(C-26)+","+(C-30)+")",fill:"none",stroke:etatC,
+strokeWidth:2.2,strokeLinejoin:"round",strokeLinecap:"round"},
+i("path",{d:"M26 2 4 10v18c0 14 9.4 26 22 30 12.6-4 22-16 22-30V10L26 2z"}),
+i("path",{d:"M15 30l8 8 15-16"})),
 pts.map(function(p){
 return i("g",{key:"m"+p.k},
-i("circle",{cx:p.x,cy:p.y,r:p.on?5:3.5,
-fill:p.on?p.c:P.line,
-opacity:monte?(p.on?1:.6):0,
-style:{transition:"opacity .5s ease "+(300+p.k*90)+"ms"}},
-i("title",null,p.n+" \u00b7 "+(p.on?_T("actif"):_T("inactif")))),
-p.on?i("circle",{cx:p.x,cy:p.y,r:9,fill:"none",stroke:p.c,strokeWidth:1,
-opacity:monte?.28:0,
-style:{transition:"opacity .6s ease "+(400+p.k*90)+"ms"}}):null);}));}
+i("line",{x1:C,y1:C,x2:p.x,y2:p.y,stroke:p.on?_NXteinte(p.c,.16):P.line,strokeWidth:1,
+opacity:monte?1:0,style:{transition:"opacity .6s ease "+(200+p.k*70)+"ms"}}),
+p.on?i("circle",_NXFX.fusion({cx:p.x,cy:p.y,r:10,fill:"none",stroke:p.c,strokeWidth:1,
+opacity:monte?.3:0,style:{transition:"opacity .6s ease "+(340+p.k*70)+"ms"}},
+an?{"data-nx-breathe":"1"}:{})):null,
+i("circle",{cx:p.x,cy:p.y,r:p.on?5.5:3.5,fill:p.on?p.c:P.line,
+opacity:monte?(p.on?1:.55):0,
+style:{transition:"opacity .5s ease "+(260+p.k*70)+"ms"}},
+i("title",null,p.n+" · "+(p.on?_T("actif"):_T("inactif")))));})));}
 
 // ------------------------------------------------- la courbe des 24 dernieres h
-// Les donnees existaient deja dans Privacy sans etre montrees ici.
-function courbe(){
-var H=[],max=1;
+function heures(){
+var H=[];
 try{
 var st=(PV&&PV.stats)||{};
 var maintenant=new Date();
@@ -16566,207 +19151,671 @@ for(var h=23;h>=0;h--){
 var d=new Date(maintenant.getTime()-h*3600000);
 var cle=d.getFullYear()+"-"+PV.pad(d.getMonth()+1)+"-"+PV.pad(d.getDate())+"-"+PV.pad(d.getHours());
 var e=(st.hours&&st.hours[cle])||{seen:0,blocked:0};
-H.push({h:d.getHours(),s:e.seen||0,b:e.blocked||0});
-if((e.seen||0)>max)max=e.seen;}
+H.push({h:d.getHours(),s:e.seen||0,b:e.blocked||0});}
 }catch(_){return null;}
-var total=0;
-for(var a=0;a<H.length;a++)total+=H[a].b;
-if(!H.length)return null;
-return i("div",{style:{marginTop:"22px",paddingTop:"19px",borderTop:"1px solid "+P.line}},
+return H.length?H:null;}
+
+function courbe(){
+var H=heures();
+if(!H)return null;
+var total=0,a;
+for(a=0;a<H.length;a++)total+=H[a].b;
+return i("div",{style:{marginTop:"4px"}},
 i("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"baseline",
-gap:"12px",marginBottom:"10px",flexWrap:"wrap"}},
+gap:"12px",marginBottom:"12px",flexWrap:"wrap"}},
 i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".14em",
 textTransform:"uppercase",color:P.faint}},_T("Les vingt-quatre dernieres heures")),
-i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.dim}},
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:total?P.ok:P.dim}},
 total?(_NXn(total)+" "+_T("arretees")):_T("rien a signaler"))),
-i("div",{style:{display:"flex",alignItems:"flex-end",gap:"2px",height:"42px"}},
-H.map(function(e,k){
-var ht=Math.max(2,Math.round(e.s/max*40));
-var hb=e.s?Math.round(e.b/e.s*ht):0;
-return i("div",{key:k,title:e.h+"h \u00b7 "+e.s+" "+_T("vues")+" \u00b7 "+e.b+" "+_T("arretees"),
-style:{flex:1,minWidth:0,height:(monte?ht:2)+"px",background:P.line,borderRadius:"2px",
-overflow:"hidden",display:"flex",flexDirection:"column",justifyContent:"flex-end",
-transition:"height .6s cubic-bezier(.22,.8,.28,1)",transitionDelay:(k*12)+"ms"}},
-hb?i("div",{style:{height:hb+"px",background:_NXpal.ok,borderRadius:"2px"}}):null);})),
-i("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"7px",
+_NXFX.courbe(H.map(function(e){return e.s;}),P.info,54,{plein:.18}),
+i("div",{style:{marginTop:"8px"}},
+_NXFX.barres(H.map(function(e){return {v:e.b,t:e.h+"h · "+e.b+" "+_T("arretees"),hi:e.b>0};}),P.ok,26)),
+i("div",{style:{display:"flex",justifyContent:"space-between",marginTop:"8px",
 fontFamily:_NXf.mono,fontSize:"9.5px",color:P.faint,letterSpacing:".04em"}},
-i("span",null,"-24 h"),i("span",null,_T("maintenant"))));}
-
-function grand(v,lab,c){return i("div",{style:{flex:1,minWidth:"92px"}},
-i("div",{key:"h"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"25px",fontWeight:"800",
-color:c||P.txt,letterSpacing:"-.04em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
-i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"6px",lineHeight:1.4}},lab));}
-
-// ------------------------------------------------------------------ les tuiles
-// Groupees par intention, et chacune porte sa couleur : dix tuiles grises
-// identiques ne se distinguaient que par leur texte.
-var GROUPES=[
-{n:_T("Te proteger"),l:[
-{k:"equicord_protect",n:"Nexium Protect",d:_T("Liens, arnaques, fichiers"),ic:NexiumProtectIcon,
-c:_NXpal.danger,v:_NXn(menaces),u:_T("bloquees")},
-{k:"equicord_privacy",n:"Nexium Privacy",d:_T("Ce qui sort de ta machine"),ic:NexiumPrivacyIcon,
-c:_NXpal.ok,v:_NXn(arretees),u:_T("arretees")},
-{k:"equicord_comptes",n:"Nexium Comptes",d:_T("Coffre chiffre et profils"),ic:NexiumComptesIcon,
-c:ROSE,v:_NXn(((window._NXCPT&&_NXCPT.comptes)||[]).length),u:_T("comptes")}]},
-{n:_T("Comprendre ton client"),l:[
-{k:"equicord_network",n:"Nexium Réseau",d:_T("Latence et hotes contactes"),ic:NexiumNetworkIcon,
-c:_NXpal.warn,v:lat.n?(lat.avg+" ms"):"\u2014",u:_T("moyenne")},
-{k:"equicord_stats",n:"Nexium Stats",d:_T("Ton usage, en local"),ic:NexiumStatsIcon,
-c:BLEU,v:_NXn((window._NXS&&_NXS.data&&_NXS.data.msgCount)||0),u:_T("messages")},
-{k:"equicord_data",n:"Nexium Données",d:_T("Stockage, sauvegardes, sante"),ic:NexiumDataIcon,
-c:P.sub,v:(DA&&DA.fmtTaille)?DA.fmtTaille(DA.total()):"\u2014",u:_T("stockes")},
-{k:"equicord_updater",n:"Mise à jour",d:_T("Version, notes et reparation"),ic:NexiumUpdateIcon,
-c:P.sub,v:"v"+ver,u:""}]},
-{n:_T("T aider au quotidien"),l:[
-{k:"equicord_ia",n:"Nexium IA",d:_T("Un assistant qui connait ton client"),ic:NexiumIAIcon,
-c:P.acc,v:_NXn((window._NXIA&&_NXIA.nbCaps)?_NXIA.nbCaps():0),u:_T("acces")},
-{k:"equicord_music",n:"Nexium Music",d:_T("Lecteur et playlist"),ic:NexiumMusicIcon,
-c:ROSE,v:_NXn(((window._NXM&&_NXM.cfg&&_NXM.cfg.tracks)||[]).length),u:_T("pistes")},
-{k:"equicord_auto",n:"Nexium Auto",d:_T("Automatisations et rappels"),ic:NexiumAutoIcon,
-c:BLEU,v:_NXn((((window._NXAU&&_NXAU.data&&_NXAU.data.tasks)||[]).length)||0),u:_T("regles")},
-{k:"equicord_team",n:"Nexium Team",d:_T("Qui construit le client"),ic:NexiumTeamIcon,
-c:P.sub,v:"",u:""}]}];
-
-function tuile(t,k){
-var vif=!!(t.v&&t.v!=="0"&&t.v!=="\u2014");
-return i("div",{key:t.k,className:"nx-fx","data-nx-tile":"1",role:"button","aria-label":t.n,
-tabIndex:0,onKeyDown:_NXkey,onClick:function(){aller(t.k,t.n);},
-style:{position:"relative",overflow:"hidden",padding:"15px 15px",borderRadius:"16px",
-cursor:"pointer",background:P.panel,border:"1px solid "+P.line,
-display:"flex",flexDirection:"column",gap:"12px",
-transition:"border-color .22s ease,background .22s ease"}},
-i("div",{"aria-hidden":"true",style:{position:"absolute",right:"-26px",top:"-26px",
-width:"84px",height:"84px",borderRadius:"50%",pointerEvents:"none",
-background:"radial-gradient(circle,"+_NXteinte(t.c,vif?14:6)+",transparent 70%)"}}),
-i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"11px"}},
-i("div",{style:{width:"34px",height:"34px",borderRadius:"11px",flexShrink:0,
-background:_NXteinte(t.c,10),border:"1px solid "+_NXteinte(t.c,24),color:t.c,
-display:"flex",alignItems:"center",justifyContent:"center"}},
-(typeof t.ic==="function")?i(t.ic,{width:17,height:17}):null),
-i("div",{style:{flex:1,minWidth:0}},
-i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt,letterSpacing:"-.012em",
-overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},t.n),
-i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"3px",lineHeight:1.4,
-overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},t.d)),
-i("span",{"aria-hidden":"true",style:{flexShrink:0,color:P.faint,fontSize:"13px",
-opacity:.55}},"\u203a")),
-t.v?i("div",{style:{position:"relative",display:"flex",alignItems:"baseline",gap:"5px"}},
-i("span",{style:{fontFamily:_NXf.disp,fontSize:"17px",fontWeight:"800",
-color:vif?t.c:P.faint,letterSpacing:"-.03em",fontVariantNumeric:"tabular-nums"}},t.v),
-t.u?i("span",{style:{fontSize:"10px",color:P.faint}},t.u):null):null);}
+i("span",null,"-24 h"),
+i("span",null,_T("vues")+" / "+_T("arretees")),
+i("span",null,_T("maintenant"))));}
 
 // ------------------------------------------------------------ actions rapides
 function actions(){
 var A=[
-{n:_T("Demander a l assistant"),d:"M12 2.5 13.7 8l5.5 1.7-5.5 1.7L12 17l-1.7-5.6L4.8 9.7 10.3 8 12 2.5z",
-f:function(){try{if(window._NXIA&&_NXIA.ouvrirPanneau){_NXIA.ouvrirPanneau();return;}}catch(_){}
+{n:_T("Demander a l assistant"),ic:"etincelle",c:P.mauve,f:function(){
+try{if(window._NXIA&&_NXIA.ouvrirPanneau){_NXIA.ouvrirPanneau();return;}}catch(_){}
 aller("equicord_ia","Nexium IA");}},
-{n:_T("Verifier un lien"),d:"M3.9 12a5 5 0 0 1 5-5h3V5h-3a7 7 0 0 0 0 14h3v-2h-3a5 5 0 0 1-5-5zm4 1h8v-2h-8v2zm7-8h-3v2h3a5 5 0 0 1 0 10h-3v2h3a7 7 0 0 0 0-14z",
-f:function(){aller("equicord_protect","Nexium Protect");}},
-{n:_T("Chercher une mise a jour"),d:"M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z",
-f:function(){try{if(window._NXUP&&!_NXUP.busy)_NXUP.check();}catch(_){}
-aller("equicord_updater","Mise a jour");}}];
-return i("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap",marginBottom:"16px"}},
+{n:_T("Verifier un lien"),ic:"lien",c:P.danger,f:function(){aller("equicord_protect","Nexium Protect");}},
+{n:_T("Chercher une mise a jour"),ic:"maj",c:P.info,hv:"tourne",f:function(){
+try{if(window._NXUP&&!_NXUP.busy)_NXUP.check();}catch(_){}
+aller("equicord_updater",_T("Mise a jour"));}},
+{n:_T("Voir ce qui est stocke"),ic:"base",c:P.lime,f:function(){aller("equicord_data","Nexium Donnees");}}];
+return i("div",{style:{display:"flex",gap:"8px",flexWrap:"wrap"}},
 A.map(function(x,k){
-return i("div",{key:k,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
-"aria-label":x.n,onClick:x.f,
-style:{display:"flex",alignItems:"center",gap:"8px",padding:"9px 15px",
-borderRadius:"999px",cursor:"pointer",background:P.panel,
-border:"1px solid "+P.line,color:P.sub,fontSize:"11.5px",fontWeight:"700"}},
-i("svg",{viewBox:"0 0 24 24",width:13,height:13,fill:"currentColor","aria-hidden":"true",
-style:{flexShrink:0,opacity:.8}},i("path",{d:x.d})),
-x.n);}));}
+return i("div",_NXFX.fusion({key:k,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+onClick:x.f,"data-nx-lift":"1",
+style:{display:"inline-flex",alignItems:"center",gap:"8px",padding:"9px 14px",
+borderRadius:"11px",cursor:"pointer",background:P.inset,
+border:"1px solid "+P.line,color:P.pale,fontSize:"12px",fontWeight:"700"}},
+_NXFX.a({"data-nx-rise":String(k+1)})),
+_NXFX.ico(x.ic,15,{col:x.c,hv:x.hv||"saute"}),
+i("span",null,x.n));}));}
 
-function activite(){
-var L=[];
-try{var A=(PR&&PR.stats&&PR.stats.recent)||[];
-for(var a=0;a<A.length&&a<6;a++)L.push({t:A[a].t,k:_T("Protect"),d:PR.kindFr(A[a].k),c:_NXpal.danger});}catch(_){}
-try{var B=(G&&G.stats&&G.stats.recent)||[];
-for(var b=0;b<B.length&&b<6;b++)L.push({t:B[b].t,k:_T("Gardes"),d:B[b].d,c:BLEU});}catch(_){}
-try{var C=(PV&&Array.isArray(PV.blocked))?PV.blocked:[];
-for(var c=0;c<C.length&&c<6;c++)L.push({t:C[c].t,k:_T("Privacy"),d:PV.kindFr(C[c].k),c:_NXpal.ok});}catch(_){}
-L.sort(function(x,y){return (y.t||0)-(x.t||0);});
-return L.slice(0,8);}
-var ACT=activite();
-function horodate(t){try{
-var d=new Date(t||Date.now()),au=new Date();
-var hh=("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
-if(d.getFullYear()===au.getFullYear()&&d.getMonth()===au.getMonth()&&d.getDate()===au.getDate())return hh;
-return ("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2)+" "+hh;}catch(_){return "";}}
+// ------------------------------------------------------------------ les tuiles
+var GROUPES=[
+{n:_T("Te proteger"),ic:"bouclier",c:P.danger,l:[
+{k:"equicord_protect",n:"Nexium Protect",d:_T("Liens, arnaques, fichiers"),ic:"bouclierOk",
+c:P.danger,v:_NXn(menaces),u:_T("bloquees"),hv:"secoue"},
+{k:"equicord_privacy",n:"Nexium Privacy",d:_T("Ce qui sort de ta machine"),ic:"oeilBarre",
+c:P.ok,v:_NXn(arretees),u:_T("arretees"),hv:"penche"},
+{k:"equicord_comptes",n:"Nexium Comptes",d:_T("Coffre chiffre et profils"),ic:"comptes",
+c:P.rose,v:_NXn(((window._NXCPT&&_NXCPT.comptes)||[]).length),u:_T("comptes"),hv:"saute"}]},
+{n:_T("Comprendre ton client"),ic:"graphe",c:P.info,l:[
+{k:"equicord_network",n:"Nexium Reseau",d:_T("Latence et hotes contactes"),ic:"reseau",
+c:P.warn,v:lat.n?(lat.avg+" ms"):"—",u:_T("moyenne"),hv:"pousse"},
+{k:"equicord_stats",n:"Nexium Stats",d:_T("Ton usage, en local"),ic:"graphe",
+c:P.info,v:_NXn((window._NXS&&_NXS.data&&_NXS.data.msgCount)||0),u:_T("messages"),hv:"saute"},
+{k:"equicord_data",n:"Nexium Donnees",d:_T("Stockage, sauvegardes, sante"),ic:"base",
+c:P.lime,v:(DA&&DA.fmtTaille)?DA.fmtTaille(DA.total()):"—",u:_T("stockes"),hv:"penche"},
+{k:"equicord_updater",n:_T("Mise a jour"),d:_T("Version, notes et reparation"),ic:"maj",
+c:P.cyan,v:"v"+ver,u:"",hv:"tourne"}]},
+{n:_T("T aider au quotidien"),ic:"etincelle",c:P.mauve,l:[
+{k:"equicord_ia",n:"Nexium IA",d:_T("Un assistant qui connait ton client"),ic:"etincelle",
+c:P.mauve,v:_NXn((window._NXIA&&_NXIA.nbCaps)?_NXIA.nbCaps():0),u:_T("acces"),hv:"secoue"},
+{k:"equicord_music",n:"Nexium Music",d:_T("Lecteur et playlist"),ic:"note",
+c:P.rose,v:_NXn(((window._NXM&&_NXM.cfg&&_NXM.cfg.tracks)||[]).length),u:_T("pistes"),hv:"saute"},
+{k:"equicord_auto",n:"Nexium Auto",d:_T("Automatisations et messages"),ic:"eclair",
+c:P.warn,v:_NXn((((window._NXAU&&_NXAU.data&&_NXAU.data.tasks)||[]).length)||0),u:_T("regles"),hv:"penche"},
+{k:"equicord_team",n:"Nexium Team",d:_T("Qui construit le client"),ic:"equipe",
+c:P.sub,v:"",u:"",hv:"saute"},
+{k:"equicord_sponsor",n:"Nexium Sponsor",d:_T("Soutenir le client"),ic:"coeur",
+c:P.rose,v:"",u:"",hv:"secoue"}]}];
 
-return i(Kr,null,i("div",{style:{maxWidth:"760px",margin:"0 auto"}},
-i("div",{"data-nx-panel":"1"},
-i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",border:"1px solid "+P.hair,
-borderRadius:"24px",background:"linear-gradient(158deg,"+P.panel+","+P.bg+")",
-padding:"28px 26px",marginBottom:"14px"}},
-i("div",{"data-nx-breathe":"1","aria-hidden":"true",style:{position:"absolute",right:"-90px",top:"-110px",
-width:"300px",height:"300px",borderRadius:"50%",
-background:"radial-gradient(circle,"+_NXteinte(etat.c,11)+",transparent 70%)",pointerEvents:"none"}}),
-i("div",{style:{position:"relative",display:"flex",gap:"26px",alignItems:"center",flexWrap:"wrap"}},
+function tuile(t){
+var vif=!!(t.v&&t.v!=="0"&&t.v!=="—");
+return _NXFX.tuile({key:t.k,icone:t.ic,col:t.c,hv:t.hv,halo:vif,ruban:vif,
+titre:t.n,texte:t.d,onClick:function(){aller(t.k,t.n);},
+droite:_NXFX.ico("chevron",14,{col:P.faint,hv:"pousse"}),
+bas:t.v?i("div",{style:{display:"flex",alignItems:"baseline",gap:"5px"}},
+i("span",{style:{fontFamily:_NXf.disp,fontSize:"18px",fontWeight:"800",
+color:vif?t.c:P.faint,letterSpacing:"-.03em",fontVariantNumeric:"tabular-nums"}},t.v),
+t.u?i("span",{style:{fontSize:"10px",color:P.faint}},t.u):null):null});}
+
+// --------------------------------------------------- demarrage et apparence
+function reglagesVisuels(){
+var B=window._NXBOOT,MO=window._NXMO;
+return _NXcard(i("div",null,
+_NXch(_T("Demarrage et mouvement"),
+_T("Ce que tu vois quand le client s ouvre, et combien il bouge ensuite.")),
+_NXFX.grille([
+_NXFX.tuile({key:"b",icone:"lecture",col:P.acc,rang:1,hv:"pousse",
+titre:_T("Animation d ouverture"),
+sous:(B&&B.veut())?_T("active"):_T("desactivee"),
+texte:_T("Un ecran couvre le client pendant qu il se prepare, et s efface des qu il est pret."),
+bas:i("div",{style:{display:"flex",gap:"7px",flexWrap:"wrap"}},
+_NXFX.bouton({t:(B&&B.veut())?_T("Desactiver"):_T("Activer"),petit:true,creux:true,col:P.sub,
+onClick:function(){try{B.set(!B.veut());force();}catch(_){}}}),
+_NXFX.bouton({t:_T("Revoir"),icone:"maj",hv:"tourne",petit:true,col:P.acc,plein:true,
+onClick:function(){try{B.rejoue();}catch(_){}}}))}),
+_NXFX.tuile({key:"m",icone:"etincelle",col:P.mauve,rang:2,hv:"secoue",
+titre:_T("Animations des pages"),
+sous:(MO&&MO.on)?_T("actives"):_T("coupees"),
+texte:_T("Les entrees, les survols et les jauges. Le systeme peut aussi les couper de son cote."),
+bas:_NXFX.bouton({t:(MO&&MO.on)?_T("Couper"):_T("Remettre"),petit:true,creux:true,col:P.sub,
+onClick:function(){try{MO.set(!MO.on);force();}catch(_){}}})}),
+_NXFX.tuile({key:"e",icone:"batterie",col:P.lime,rang:3,hv:"saute",
+titre:_T("Mode economie"),
+sous:(window._NXECO&&_NXECO.actif())?_T("actif"):_T("au repos"),
+texte:_T("Sur une machine modeste, le client se fait plus discret : moins de mouvement, moins de reseau."),
+bas:_NXFX.bouton({t:_T("Regler"),petit:true,creux:true,col:P.sub,
+onClick:function(){aller("equicord_data","Nexium Donnees");}})})],250)),{mb:12});}
+
+var etatDirect=(window._NXSTATUS&&_NXSTATUS.etatDirect)?_NXSTATUS.etatDirect():{};
+
+return i(Kr,null,i("div",{style:{maxWidth:"860px",margin:"0 auto"}},
+// ----------------------------------------------------------------- l entete
+i("div",_NXFX.fusion({style:{position:"relative",marginBottom:"22px"}},_NXFX.a({"data-nx-fade":"1"})),
+i("div",{"aria-hidden":"true",style:{position:"absolute",left:"-80px",top:"-90px",
+width:"460px",height:"260px",pointerEvents:"none",
+background:"radial-gradient(50% 62% at 10% 40%,"+_NXteinte(etatC,.1)+",transparent 72%)"}}),
+i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"26px",flexWrap:"wrap"}},
+constellation(),
 i("div",{style:{flex:1,minWidth:"260px"}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap",marginBottom:"12px"}},
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".2em",
-textTransform:"uppercase",color:P.faint}},"Nexium Client"),
-i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.dim,padding:"2px 8px",
-borderRadius:"99px",border:"1px solid "+P.line}},"v"+ver),
-i("div",{style:{display:"flex",alignItems:"center",gap:"6px"}},
-i("span",{"data-nx-dot":"1","aria-hidden":"true",style:{width:"6px",height:"6px",
-borderRadius:"50%",background:etat.c,flexShrink:0}}),
-i("span",{style:{fontSize:"11px",fontWeight:"700",color:etat.c}},etat.t))),
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"31px",fontWeight:"800",color:P.txt,
-letterSpacing:"-.045em",lineHeight:1.12,marginBottom:"10px"}},
-tout>0?(_NXn(tout)+" "+_T(tout>1?"choses arretees avant toi":"chose arretee avant toi"))
-:_T("Ton client veille, rien a signaler")),
-i("div",{style:{fontSize:"13px",color:P.sub,lineHeight:1.65}},
-_T("Discord repris en main : un bouclier en temps reel, un pare-feu sortant, et pas une ligne de tes donnees qui quitte cette machine."))),
-i("div",{style:{flexShrink:0,width:"208px",maxWidth:"100%",margin:"0 auto"}},blason())),
-i("div",{style:{position:"relative",display:"flex",gap:"16px",flexWrap:"wrap",marginTop:"22px",
-paddingTop:"19px",borderTop:"1px solid "+P.line}},
-grand(_NXn(menaces),_T("Menaces bloquees"),menaces?_NXpal.danger:P.txt),
-grand(_NXn(sorties),_T("Sorties arretees"),sorties?_NXpal.ok:P.txt),
-grand(_NXn(interceptees),_T("Requetes vues")),
-grand(_NXn(analyses),_T("Liens analyses")),
-grand(pctSante+"%",_T("Modules actifs"),pctSante===100?_NXpal.ok:_NXpal.warn)),
-courbe())),
-sante.morts.length?_NXcard(i("div",null,
-i("div",{style:{fontSize:"13.5px",fontWeight:"800",color:_NXpal.warn,marginBottom:"6px"}},
-_T("Certains modules n ont pas demarre")),
-i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6,marginBottom:"12px"}},
-sante.morts.join(", ")+". "+_T("Le reste du client fonctionne normalement.")),
-_NXbtn(_T("Voir le detail"),function(){aller("equicord_data");})),{mb:12,glow:"rgba(240,178,108,.12)"}):null,
-actions(),
-GROUPES.map(function(g,k){
-return i("div",{key:k},
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",
-color:P.faint,marginBottom:"11px",marginTop:k?"18px":"4px"}},g.n),
-i("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(206px,1fr))",gap:"10px"}},
-g.l.map(tuile)));}),
-i("div",{style:{height:"14px"}}),
-ACT.length?_NXcard(i("div",null,
-_NXch(_T("Dernieres interventions"),_T("Ce que le client a fait sans rien te demander."),
-_NXbtn(_T("Tout voir"),function(){aller("equicord_protect");})),
-ACT.map(function(o,k,arr){
-return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"11px",padding:"10px 0",
-borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
-i("span",{"aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",
-background:o.c,flexShrink:0}}),
-i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,flexShrink:0,
-minWidth:"38px"}},horodate(o.t)),
-i("span",{style:{fontSize:"10.5px",fontWeight:"700",color:P.dim,flexShrink:0,
-textTransform:"uppercase",letterSpacing:".06em",width:"52px"}},o.k),
-i("span",{style:{flex:1,minWidth:0,fontSize:"12px",color:P.sub,
-overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},String(o.d||"")));})),{mb:12}):
-_NXcard(i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.65}},
-_T("Rien n a encore ete arrete depuis l installation. C est bon signe : les protections tournent, elles n ont juste pas eu a intervenir.")),{mb:12}),
+i("div",_NXFX.fusion({style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"10px"}},
+_NXFX.a({"data-nx-slidel":"1"})),
+i("span",_NXFX.fusion({style:{width:"7px",height:"7px",borderRadius:"50%",background:etatC,
+boxShadow:"0 0 12px "+_NXteinte(etatC,.6)}},_NXFX.a({"data-nx-dot":"1"}))),
+i("span",{style:{fontSize:"10.5px",fontWeight:"800",letterSpacing:".22em",
+color:P.sub,textTransform:"uppercase"}},etatT),
+i("span",{style:{marginLeft:"4px",fontFamily:_NXf.mono,fontSize:"10px",color:P.faint,
+border:"1px solid "+P.hair,borderRadius:"99px",padding:"1px 8px"}},"v"+ver)),
+i("div",_NXFX.fusion({style:{fontFamily:_NXf.disp,fontSize:"38px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.04em",lineHeight:1.02}},_NXFX.a({"data-nx-blurin":"1"})),"Nexium Client"),
+i("div",{style:{fontSize:"13.5px",color:P.sub,marginTop:"12px",lineHeight:1.65,maxWidth:"430px"}},
+_T("Tout ce que le client fait pour toi, sur une seule page. Rien ne quitte cette machine sans que tu le saches.")),
+i("div",{style:{marginTop:"18px"}},actions()))),
+i("div",{style:{position:"relative",height:"1px",marginTop:"24px",
+background:"linear-gradient(90deg,"+_NXteinte(etatC,.34)+","+P.hair+" 34%,transparent)"}})),
+
+// -------------------------------------------------------------- les jauges
 _NXcard(i("div",null,
-_NXch(_T("Réglages avancés du client"),
-_T("Greffons, themes, raccourcis et options d Equicord. Rien n a ete retire."),
-_NXbtn(reglages?_T("Replier"):_T("Deplier"),function(){setReglages(!reglages);force();})),
-reglages?i("div",{"data-nx-fade":"1",style:{marginTop:"6px",paddingTop:"14px",borderTop:"1px solid "+P.line}},
-i(zT,null)):
-i("div",{style:{fontSize:"12px",color:P.dim,lineHeight:1.6}},
-_T("Tous les reglages d origine restent disponibles ici."))),{mb:0}),
-_NXfoot("Nexium Client v"+ver+" \u00b7 tout est calcule et garde sur cette machine")));
+_NXch(_T("Ou en est le client"),_T("Quatre mesures, prises maintenant, sur cette machine.")),
+i("div",{style:{display:"flex",gap:"18px",flexWrap:"wrap",justifyContent:"space-around",
+alignItems:"center"}},
+i("div",_NXFX.fusion({style:{textAlign:"center"}},_NXFX.a({"data-nx-rise":"1"})),
+_NXFX.jauge(pctSante,alerte?P.warn:P.ok,116,pctSante+"%",_T("Modules")),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"9px"}},
+sante.total?(sante.vivants+" / "+sante.total+" "+_T("en service")):_T("inconnu"))),
+i("div",_NXFX.fusion({style:{textAlign:"center"}},_NXFX.a({"data-nx-rise":"2"})),
+_NXFX.jauge(Math.min(100,menaces?100:(analyses?12:0)),P.danger,116,_NXn(menaces),_T("Menaces")),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"9px"}},
+_NXn(analyses)+" "+_T("liens analyses"))),
+i("div",_NXFX.fusion({style:{textAlign:"center"}},_NXFX.a({"data-nx-rise":"3"})),
+_NXFX.jauge(pctFiltre,P.ok,116,pctFiltre+"%",_T("Filtre")),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"9px"}},
+_NXn(arretees)+" / "+_NXn(vues)+" "+_T("requetes"))),
+i("div",_NXFX.fusion({style:{textAlign:"center"}},_NXFX.a({"data-nx-rise":"4"})),
+_NXFX.jauge(lat.n?Math.max(4,100-Math.min(100,lat.avg/8)):0,
+(lat.avg&&lat.avg>400)?P.warn:P.info,116,lat.n?(lat.avg+""):"—",_T("Latence")),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"9px"}},
+lat.n?(_NXn(lat.n)+" "+_T("mesures")):_T("aucune mesure")))),
+i("div",{style:{marginTop:"22px",paddingTop:"20px",borderTop:"1px solid "+P.line}},courbe())),{mb:12}),
+
+alerte?_NXFX.note({col:P.warn,icone:"alerte",titre:_T("Des modules ne tournent pas"),
+texte:sante.morts.slice(0,4).join(", ")+
+(sante.morts.length>4?(" … "+(sante.morts.length-4)+" "+_T("de plus")):"")+
+" — "+_T("le detail est dans Nexium Donnees."),
+droite:_NXFX.bouton({t:_T("Voir"),petit:true,creux:true,col:P.warn,
+onClick:function(){aller("equicord_data","Nexium Donnees");}})}):null,
+
+// -------------------------------------------------------------- les tuiles
+GROUPES.map(function(g,k){
+return _NXcard(i("div",{key:g.n},
+i("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"15px"}},
+_NXFX.pastille(g.ic,{col:g.c,taille:30,hv:"penche"}),
+i("div",{style:{fontSize:"11px",fontWeight:"800",letterSpacing:".14em",
+color:P.dim,textTransform:"uppercase"}},g.n),
+i("div",{style:{flex:1,height:"1px",background:P.line}})),
+_NXFX.grille(g.l.map(tuile),238)),{mb:12});}),
+
+reglagesVisuels(),
+
+// ------------------------------------------------------------------ le pied
+_NXcard(i("div",null,
+_NXch(_T("En un coup d oeil"),_T("Ce que le client sait de lui-meme a cet instant.")),
+i("div",{style:{display:"flex",gap:"26px",flexWrap:"wrap"}},
+_NXFX.chiffre({k:_T("Menaces bloquees"),v:_NXn(menaces),col:menaces?P.danger:P.faint,rang:1}),
+_NXFX.chiffre({k:_T("Sorties arretees"),v:_NXn(sorties),col:sorties?P.info:P.faint,rang:2}),
+_NXFX.chiffre({k:_T("Requetes filtrees"),v:_NXn(arretees),col:arretees?P.ok:P.faint,rang:3}),
+_NXFX.chiffre({k:_T("Alertes en direct"),v:etatDirect.ouvert?_T("oui"):_T("non"),
+col:etatDirect.ouvert?P.ok:P.faint,rang:4}),
+_NXFX.chiffre({k:_T("Version"),v:"v"+ver,rang:5}))),{mb:0}),
+_NXfoot("Nexium Client v"+ver+" · "+_T("tout est calcule et garde sur cette machine"))));
+}
+var NexiumTicketIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M20 4H4a2 2 0 0 0-2 2v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V6a2 2 0 0 0-2-2zm-6 3h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z"}));};
+function NexiumTicketComp(){
+var force=F.useReducer(function(x){return x+1;},0)[1];
+var P=_NXpal;
+var T=window._NXTK;
+var vue=F.useState("liste");
+var cat=F.useState((T&&T.pre&&T.pre.categorie)||"question");
+var suj=F.useState((T&&T.pre&&T.pre.sujet)||"");
+var msg=F.useState("");
+var envoi=F.useState("");
+var avis=F.useState(null),setAvis=avis[1];
+var offre=F.useState((T&&T.pre&&T.pre.offre)||null);
+var fil=F.useRef?F.useRef(null):{current:null};
+var colle=F.useRef?F.useRef(true):{current:true};
+
+F.useEffect(function(){
+if(!T)return;
+T.listeners.push(force);
+T.rafraichis();
+// Une demande venue de la page des abonnements ouvre directement le
+// formulaire, deja rempli.
+if(T.pre){vue[1]("neuf");T.pre=null;}
+var iv=setInterval(function(){try{
+if(typeof document!=="undefined"&&document.hidden)return;
+// Le sondage ne sert que de filet : quand le canal direct est etabli, il
+// se fait rare.
+if(T.filId&&(!T.etatDirect().ouvert))T.lis(T.filId);
+else T.rafraichis();}catch(_){}},T.filId?5000:25000);
+return function(){
+try{T.listeners=T.listeners.filter(function(f){return f!==force;});}catch(_){}
+try{clearInterval(iv);}catch(_){}
+try{T.ferme();}catch(_){}};},[]);
+
+var etat=(T&&T.fil&&T.fil.messages)||[];
+F.useEffect(function(){try{
+var el=fil&&fil.current;
+if(!el||!colle.current)return;
+el.scrollTop=el.scrollHeight;}catch(_){}},[etat.length,vue[0]]);
+
+if(!T)return i(Kr,null,i("div",{style:{maxWidth:"760px",margin:"0 auto"}},
+_NXFX.entete({cle:_T("Support"),titre:"Nexium Ticket",icone:"courrier",col:P.info,
+texte:_T("Le module de support n a pas demarre sur ce client.")}),
+_NXfoot("Nexium Ticket")));
+
+function dire(e,bon){setAvis(e?{t:e,ko:true}:{t:bon,ko:false});
+setTimeout(function(){try{setAvis(null);}catch(_){}},6000);}
+function quand(t){try{
+if(!t)return "";
+var d=Date.now()-(new Date(t)).getTime();
+var m=Math.floor(d/60000);
+if(m<1)return _T("a l instant");
+if(m<60)return m+" min";
+var h=Math.floor(m/60);
+if(h<48)return h+" h";
+return Math.floor(h/24)+" j";}catch(_){return "";}}
+function couleurEtat(e){
+return e==="ouvert"?P.warn:(e==="en_cours"?P.info:(e==="resolu"?P.ok:P.faint));}
+
+// ------------------------------------------------------------ le formulaire
+function neuf(){
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+_NXcard(i("div",null,
+_NXch(_T("Ouvrir un ticket"),
+_T("Un fil prive entre toi et l equipe. Il reste quinze jours apres le dernier message, puis disparait.")),
+i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".13em",color:P.dim,
+textTransform:"uppercase",marginBottom:"9px"}},_T("Motif")),
+i("div",{style:{display:"flex",gap:"7px",flexWrap:"wrap",marginBottom:"16px"}},
+T.CATS.map(function(c){
+var on=cat[0]===c[0];
+return i("div",_NXFX.fusion({key:c[0],className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){cat[1](c[0]);},
+style:{display:"flex",alignItems:"center",gap:"8px",padding:"9px 14px",borderRadius:"11px",
+cursor:"pointer",border:"1px solid "+(on?P.acc:P.line),
+background:on?_NXteinte(P.acc,.1):"transparent",
+color:on?P.txt:P.sub,fontSize:"12px",fontWeight:"700"}},_NXFX.a({"data-nx-appui":"1"})),
+_NXFX.ico(c[2],14,{hv:"saute"}),
+i("span",null,_T(c[1])));})),
+offre[0]?_NXFX.note({col:P.warn,icone:"etoile",titre:_T("Demande d abonnement"),
+texte:_T("Ce ticket porte sur")+" : "+offre[0]+". "+
+_T("Un administrateur peut le poser sur ton compte directement depuis le ticket."),
+droite:_NXFX.bouton({t:_T("Retirer"),petit:true,creux:true,col:P.faint,
+onClick:function(){offre[1](null);}})}):null,
+_NXFX.champ({k:_T("Sujet"),v:suj[0],ph:_T("en une ligne"),
+onChange:function(e){suj[1](e.target.value);}}),
+_NXFX.champ({k:_T("Ta demande"),multi:true,lignes:5,v:msg[0],
+ph:_T("Explique ce dont tu as besoin. Plus c est precis, plus la reponse est rapide."),
+onChange:function(e){msg[1](e.target.value);}}),
+i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
+_NXFX.bouton({t:T.busy?_T("Envoi…"):_T("Ouvrir le ticket"),icone:"envoi",plein:true,
+col:P.acc,off:T.busy,onClick:function(){
+T.ouvre({sujet:suj[0],categorie:cat[0],message:msg[0],offre:offre[0]},function(e,id){
+if(e){dire(e);return;}
+suj[1]("");msg[1]("");offre[1](null);
+T.lis(id,function(){T.suit(id,function(){T.lis(id);});vue[1]("fil");});
+dire(null,_T("Ticket ouvert."));});}}),
+_NXFX.bouton({t:_T("Annuler"),creux:true,col:P.sub,onClick:function(){vue[1]("liste");}})),
+_NXFX.note({col:P.info,icone:"info",serre:true,
+texte:_T("Ce fil n est lisible que par toi et par l equipe. La preuve d acces est gardee sur cette machine : si tu effaces les donnees du client, tu perds l acces a tes anciens tickets.")})),{mb:0})));}
+
+// ----------------------------------------------------------------- la liste
+function liste(){
+var L=T.liste||[];
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+_NXcard(i("div",null,
+_NXch(_T("Tes tickets"),L.length?(L.length+" "+_T("fil(s)")):_T("Aucun ticket pour l instant."),
+_NXFX.bouton({t:_T("Rafraichir"),icone:"maj",hv:"tourne",petit:true,creux:true,col:P.sub,
+onClick:function(){T.rafraichis();}})),
+L.length?L.map(function(t,k){
+var c=couleurEtat(t.etat);
+var repondu=t.reponses>0;
+return _NXFX.rangee({key:t.id,premier:k===0,rang:Math.min(6,k+1),
+icone:t.categorie==="abonnement"?"etoile":(t.categorie==="probleme"?"alerte":
+(t.categorie==="signalement"?"bouclier":"question")),
+col:c,titre:t.sujet,
+texte:(T.ETATS[t.etat]||t.etat)+" · "+_T("mis a jour il y a")+" "+quand(t.maj_le)+
+(repondu?(" · "+t.reponses+" "+_T("reponse(s)")):" · "+_T("pas encore de reponse")),
+onClick:function(){T.lis(t.id,function(e){
+if(e){dire(e);return;}
+T.suit(t.id,function(){T.lis(t.id);});
+colle.current=true;vue[1]("fil");});},
+droite:i("div",{style:{display:"flex",gap:"6px",alignItems:"center"}},
+repondu?_NXFX.badge(String(t.reponses),P.ok,{icone:"courrier"}):null,
+_NXFX.badge(T.ETATS[t.etat]||t.etat,c,{point:t.etat==="ouvert"}),
+_NXFX.ico("chevron",13,{col:P.faint,hv:"pousse"}))});})
+:_NXFX.vide({icone:"courrier",titre:_T("Aucun ticket"),
+texte:_T("Une question, un souci, un abonnement a prendre : ouvre un fil, la reponse arrive ici."),
+action:_NXFX.bouton({t:_T("Ouvrir un ticket"),icone:"plus",plein:true,col:P.acc,
+onClick:function(){vue[1]("neuf");}})})),{mb:12}),
+L.length?_NXFX.note({col:P.dim,icone:"horloge",serre:true,
+texte:_T("Un ticket disparait quinze jours apres son dernier message. Tant qu il vit, il reste ici.")}):null));}
+
+// -------------------------------------------------------------------- le fil
+function bulle(m,k){
+var moi=m.auteur==="client";
+var sys=m.auteur==="systeme";
+if(sys)return i("div",{key:k,style:{textAlign:"center",padding:"8px 0"}},
+i("span",{style:{fontSize:"10.5px",color:P.faint,fontFamily:_NXf.mono,
+border:"1px solid "+P.line,borderRadius:"99px",padding:"3px 11px"}},m.contenu));
+return i("div",_NXFX.fusion({key:k,style:{display:"flex",justifyContent:moi?"flex-end":"flex-start",
+marginBottom:"11px"}},_NXFX.a({"data-nx-zoom":"1"})),
+i("div",{style:{maxWidth:"78%"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginBottom:"5px",
+justifyContent:moi?"flex-end":"flex-start"}},
+moi?null:_NXFX.ico("couronne",11,{col:P.warn}),
+i("span",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".1em",
+textTransform:"uppercase",color:moi?P.dim:P.warn}},
+moi?_T("Toi"):_T("Equipe Nexium")),
+i("span",{style:{fontSize:"10px",color:P.faint,fontFamily:_NXf.mono}},quand(m.a))),
+i("div",{style:{padding:"11px 14px",borderRadius:moi?"14px 14px 4px 14px":"14px 14px 14px 4px",
+background:moi?P.raise:_NXteinte(P.warn,.08),
+border:"1px solid "+(moi?P.hair:_NXteinte(P.warn,.22)),
+color:P.txt,fontSize:"13px",lineHeight:1.65,whiteSpace:"pre-wrap",
+overflowWrap:"anywhere",userSelect:"text",WebkitUserSelect:"text"}},m.contenu)));}
+
+function vueFil(){
+var f=T.fil;
+if(!f||!f.ticket)return _NXFX.vide({icone:"courrier",titre:_T("Ticket introuvable"),
+texte:_T("Il a peut-etre expire."),
+action:_NXFX.bouton({t:_T("Retour"),petit:true,creux:true,col:P.sub,
+onClick:function(){vue[1]("liste");}})});
+var t=f.ticket;
+var c=couleurEtat(t.etat);
+var d=T.etatDirect();
+var jours=Math.max(0,Math.ceil(((new Date(t.expire_le)).getTime()-Date.now())/86400000));
+var ferme=(t.etat==="ferme");
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+_NXcard(i("div",null,
+i("div",{style:{display:"flex",alignItems:"center",gap:"11px",marginBottom:"14px",flexWrap:"wrap"}},
+_NXFX.bouton({t:_T("Retour"),icone:"retour",petit:true,creux:true,col:P.sub,
+onClick:function(){T.ferme();T.filId=null;vue[1]("liste");T.rafraichis();}}),
+_NXFX.pastille(t.categorie==="abonnement"?"etoile":"courrier",{col:c,taille:30,hv:"penche"}),
+i("div",{style:{flex:1,minWidth:"140px"}},
+i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt}},t.sujet),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"3px"}},
+_T("ouvert il y a")+" "+quand(t.cree_le)+" · "+_T("efface dans")+" "+jours+" "+_T("jour(s)"))),
+_NXFX.badge(T.ETATS[t.etat]||t.etat,c,{point:t.etat==="ouvert",gros:true}),
+_NXFX.badge(d.ouvert?_T("en direct"):_T("verifie regulierement"),
+d.ouvert?P.ok:P.faint,{point:d.ouvert})),
+i("div",{ref:fil,onScroll:function(e){try{var el=e.target;
+colle.current=(el.scrollHeight-el.scrollTop-el.clientHeight)<48;}catch(_){}},
+style:{maxHeight:"46vh",minHeight:"180px",overflowY:"auto",overflowX:"hidden",
+padding:"4px 2px",background:P.bg,borderRadius:"14px",border:"1px solid "+P.line}},
+i("div",{style:{padding:"12px"}},(f.messages||[]).map(bulle))),
+ferme?_NXFX.note({col:P.faint,icone:"cadenas",serre:true,
+texte:_T("Ce ticket est ferme. Ouvres-en un nouveau si tu as encore besoin d aide.")})
+:i("div",{style:{marginTop:"12px"}},
+_NXFX.champ({multi:true,lignes:3,serre:true,v:envoi[0],
+ph:_T("Ecris ta reponse…"),
+onChange:function(e){envoi[1](e.target.value);},
+onKeyDown:function(e){try{e.stopPropagation();
+if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();
+var v=envoi[0];if(!v.trim())return;
+envoi[1]("");colle.current=true;
+T.ecrit(t.id,v,function(er){if(er)dire(er);});}}catch(_){}}}),
+i("div",{style:{display:"flex",gap:"9px",alignItems:"center",flexWrap:"wrap"}},
+_NXFX.bouton({t:_T("Envoyer"),icone:"envoi",plein:true,col:P.acc,onClick:function(){
+var v=envoi[0];if(!v.trim())return;
+envoi[1]("");colle.current=true;
+T.ecrit(t.id,v,function(er){if(er)dire(er);});}}),
+i("span",{style:{fontFamily:_NXf.mono,fontSize:"10px",color:P.faint}},
+_T("Entree pour envoyer, Maj+Entree pour aller a la ligne"))))),{mb:0})));}
+
+var enAttente=T.enAttente();
+return i(Kr,null,i("div",{style:{maxWidth:"780px",margin:"0 auto"}},
+_NXFX.entete({cle:_T("Support"),titre:"Nexium Ticket",icone:"courrier",col:P.info,
+texte:_T("Un fil prive avec l equipe : une question, un probleme, ou un abonnement a prendre. La reponse arrive ici, pas ailleurs."),
+chiffres:[{k:_T("Ouverts"),v:enAttente,col:enAttente?P.warn:P.faint},
+{k:_T("Au total"),v:(T.liste||[]).length},
+{k:_T("Conservation"),v:"15 j",col:P.dim}]}),
+avis[0]?_NXFX.note({col:avis[0].ko?P.danger:P.ok,
+icone:avis[0].ko?"alerte":"check",texte:avis[0].t}):null,
+vue[0]!=="fil"?i("div",{style:{display:"flex",gap:"8px",marginBottom:"16px",flexWrap:"wrap"}},
+_NXFX.bouton({t:_T("Mes tickets"),icone:"liste",col:vue[0]==="liste"?P.acc:P.sub,
+plein:vue[0]==="liste",creux:vue[0]!=="liste",onClick:function(){vue[1]("liste");}}),
+_NXFX.bouton({t:_T("Ouvrir un ticket"),icone:"plus",col:vue[0]==="neuf"?P.acc:P.sub,
+plein:vue[0]==="neuf",creux:vue[0]!=="neuf",onClick:function(){vue[1]("neuf");}})):null,
+vue[0]==="neuf"?neuf():(vue[0]==="fil"?vueFil():liste()),
+_NXfoot("Nexium Ticket · "+_T("fil prive, efface quinze jours apres le dernier message"))));
+}
+var NexiumAboIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21 12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2z"}));};
+function NexiumAboComp(){
+var force=F.useReducer(function(x){return x+1;},0)[1];
+F.useEffect(function(){
+if(!window._NXABO)return;
+_NXABO.listeners.push(force);
+_NXABO.charge(true);
+_NXABO.catalogue();
+return function(){try{_NXABO.listeners=_NXABO.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
+var P=_NXpal;
+var copie=F.useState(false),setCopie=copie[1];
+var onglet=F.useState("etat");
+var an=_NXFX.anime();
+var A=window._NXABO;
+
+if(!A)return i(Kr,null,i("div",{style:{maxWidth:"760px",margin:"0 auto"}},
+_NXFX.entete({cle:_T("Abonnement"),titre:"Nexium Abonnement",icone:"etoile",col:P.warn,
+texte:_T("Le module d abonnement n a pas demarre sur ce client.")}),
+_NXfoot("Nexium Abonnement")));
+
+// Ouvrir un ticket, plutot que copier un pseudo : la demande arrive dans la
+// file de l equipe, avec l offre visee, et la reponse revient dans le client.
+function ticket(o){try{
+if(window._NXTK){
+_NXTK.pre={categorie:"abonnement",offre:o?o.nom:null,
+sujet:o?(_T("Abonnement")+" : "+o.nom):_T("Demande d abonnement")};
+if(window._NXCP)_NXCP.ouvrir("equicord_ticket","Nexium Ticket");
+return;}
+DiscordNative.clipboard.copy("5dj0");
+setCopie(true);setTimeout(function(){try{setCopie(false);}catch(_){}},2200);
+if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Pseudo copie : 5dj0"),1);}catch(_){}}
+function contact(){ticket(null);}
+
+var res=A.resume();
+var niv={ia:A.niveau("ia"),pr:A.niveau("pr"),pv:A.niveau("pv")};
+var mesOffres=A.offres();
+var prochaine=A.prochaine();
+
+// Ce que chaque niveau ouvre, domaine par domaine. C est la meme grille que
+// celle appliquee par le client et par le relais : elle est ecrite une fois.
+var PALIERS={
+pr:[[0,_T("Le socle"),_T("Liens dangereux, hameconnage, fichiers pieges, garde console, coffre anti-vol.")],
+[1,_T("Les pieges"),_T("Caracteres invisibles, adresses de portefeuille, liens prives d inconnus, fuite de webhook, vagues coordonnees, noms de fichiers truques, QR de connexion, cles d acces.")],
+[2,_T("L avance"),_T("Autorisations d application, schemas executables, inversion du sens de lecture, liens vers une IP brute, demande de code de verification.")],
+[3,_T("La sortie"),_T("Pare-feu sortant, gardien des webhooks, anti-balise invisible, gardien du DOM.")]],
+pv:[[0,_T("La telemetrie"),_T("Mesure d usage, rapports de plantage, moisson, analytique, promotions.")],
+[1,_T("Les signaux sociaux"),_T("Frappe silencieuse, accuses de lecture, inactivite, affinites, contacts, evenements, partage d activite.")],
+[2,_T("L empreinte"),_T("Canvas, carte graphique, audio, ecran, greffons, batterie, indices de client, IP locale, materiel, STUN, tests A/B.")],
+[3,_T("Les donnees"),_T("Metadonnees des images, liens envoyes nettoyes, noms de fichiers anonymises, presse-papiers, purge a la fermeture.")]],
+ia:[[0,_T("Rapide"),_T("Nexium IA 0.9, reflexion rapide et normale, 30 credits par tranche de sept heures.")],
+[1,_T("Plus"),_T("Ajoute Nexium IA 1.0 et 1.0.2, et porte la reserve a 100 credits.")],
+[2,_T("Pro"),_T("Ajoute Nexium IA 1.2, l analyse de conversation, et porte la reserve a 200 credits.")],
+[3,_T("Ultra"),_T("Ajoute la reflexion profonde en deux temps, et porte la reserve a 400 credits.")]]};
+var DOMS=[["pr","Nexium Protect","bouclierOk",P.danger],
+["pv","Nexium Privacy","oeilBarre",P.ok],
+["ia","Nexium IA","etincelle",P.mauve]];
+
+// ------------------------------------------------------------------ l etat
+function bandeau(){
+var libre=A.libre();
+var c=res.etat==="admin"?P.warn:(res.etat==="pionnier"?P.lime:(res.etat==="abonne"?P.info:P.sub));
+var t=res.etat==="admin"?_T("Compte d equipe")
+:res.etat==="pionnier"?_T("Membre des debuts")
+:res.etat==="abonne"?_T("Abonne")
+:res.etat==="inconnu"?_T("Etat inconnu"):_T("Offre libre");
+return i("div",_NXFX.fusion({style:{position:"relative",overflow:"hidden",borderRadius:"22px",
+border:"1px solid "+_NXteinte(c,.3),background:"linear-gradient(158deg,"+_NXteinte(c,.1)+","+P.panel+" 66%)",
+padding:"26px 24px",marginBottom:"14px"}},_NXFX.a({"data-nx-carte":"1"})),
+an?i("div",{"data-nx-breathe":"1","aria-hidden":"true",style:{position:"absolute",right:"-60px",top:"-80px",
+width:"280px",height:"280px",borderRadius:"50%",pointerEvents:"none",
+background:"radial-gradient(circle,"+_NXteinte(c,.16)+",transparent 68%)"}}):null,
+i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"18px",flexWrap:"wrap"}},
+_NXFX.blason(res.etat==="pionnier"?"couronne":(res.etat==="admin"?"cle":(res.etat==="abonne"?"etoile":"boussole")),c,78),
+i("div",{style:{flex:1,minWidth:"220px"}},
+i("div",{style:{fontSize:"10px",fontWeight:"900",letterSpacing:".2em",textTransform:"uppercase",
+color:P.faint,marginBottom:"9px"}},_T("Ton offre")),
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"30px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.035em",lineHeight:1.06}},t),
+i("div",{style:{fontSize:"13px",color:P.sub,marginTop:"10px",lineHeight:1.6,maxWidth:"440px"}},
+res.texte),
+libre?null:i("div",{style:{marginTop:"14px"}},
+_NXFX.bouton({t:_T("S abonner"),icone:"courrier",plein:true,col:P.acc,
+onClick:function(){ticket(null);}})))),
+prochaine?i("div",{style:{position:"relative",marginTop:"18px",paddingTop:"16px",
+borderTop:"1px solid "+P.line,display:"flex",alignItems:"center",gap:"11px",flexWrap:"wrap"}},
+_NXFX.ico("horloge",14,{col:(A.jours(new Date(prochaine.t).toISOString())<=5)?P.warn:P.dim}),
+i("span",{style:{fontSize:"12px",color:P.sub}},
+_T("Prochaine echeance")+" : "+prochaine.nom+" "+_T("dans")+" "+
+A.jours(new Date(prochaine.t).toISOString())+" "+_T("jour(s)"))):null);}
+
+// -------------------------------------------------------- ce que tu as, la
+function domaine(d,k){
+var cle=d[0],nom=d[1],ic=d[2],col=d[3];
+var n=niv[cle];
+var L=PALIERS[cle];
+return i("div",_NXFX.fusion({key:cle,style:{padding:"16px",borderRadius:"16px",
+background:P.inset,border:"1px solid "+P.line}},_NXFX.a({"data-nx-rise":String(k+1)})),
+i("div",{style:{display:"flex",alignItems:"center",gap:"11px",marginBottom:"14px"}},
+_NXFX.pastille(ic,{col:col,taille:32,halo:n>0,hv:"penche"}),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt}},nom),
+i("div",{style:{fontSize:"10.5px",color:P.dim,marginTop:"3px",fontFamily:_NXf.mono}},
+_T("niveau")+" "+n+" / 3")),
+_NXFX.badge(n>=3?_T("complet"):(n>0?(_T("niveau")+" "+n):_T("socle")),
+n>=3?P.ok:(n>0?col:P.faint))),
+i("div",{style:{marginBottom:"12px"}},_NXFX.barre(n/3*100,col,5)),
+L.map(function(p,z){
+var ouvert=n>=p[0];
+return i("div",{key:z,style:{display:"flex",gap:"10px",alignItems:"flex-start",
+padding:"8px 0",borderTop:z?"1px solid "+P.line:"none",opacity:ouvert?1:.5}},
+i("div",{style:{flexShrink:0,marginTop:"2px",color:ouvert?col:P.faint,display:"flex"}},
+_NXFX.svg(ouvert?"check":"cadenas",13)),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"12px",fontWeight:"700",color:ouvert?P.txt:P.dim}},p[1]),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"3px",lineHeight:1.5}},p[2])));}));}
+
+// ------------------------------------------------------------- le catalogue
+var FAM=[["general",_T("Tout Nexium"),_T("Les trois modules d un coup, au niveau correspondant."),"etoile",P.warn],
+["ia",_T("Nexium IA"),_T("Des paliers plus capables, et une reserve de credits plus large."),"etincelle",P.mauve],
+["privacy",_T("Nexium Privacy"),_T("Les signaux sociaux, l empreinte, puis l hygiene des donnees."),"oeilBarre",P.ok],
+["securite",_T("Nexium Security"),_T("Les pieges, les gardes avancees, puis le pare-feu sortant."),"bouclierOk",P.danger]];
+
+function carteOffre(o,col,vedette){
+var a=A.expire(o.offre);
+var jours=A.jours(a);
+var mienne=false,z;
+for(z=0;z<mesOffres.length;z++)if(mesOffres[z].offre===o.offre)mienne=true;
+return i("div",_NXFX.fusion({key:o.offre,style:{position:"relative",flex:"1 1 190px",minWidth:"178px",
+padding:vedette?"20px 16px 16px":"17px 16px 16px",borderRadius:"17px",
+background:mienne?_NXteinte(P.ok,.07):(vedette?_NXteinte(col,.08):P.inset),
+border:"1px solid "+(mienne?_NXteinte(P.ok,.34):(vedette?_NXteinte(col,.34):P.line))}},
+_NXFX.a({"data-nx-tile":"1"})),
+mienne?i("div",{style:{position:"absolute",top:"-9px",left:"50%",transform:"translateX(-50%)",
+padding:"3px 10px",borderRadius:"99px",background:P.ok,color:P.ink,
+fontSize:"9px",fontWeight:"900",letterSpacing:".1em",textTransform:"uppercase",
+whiteSpace:"nowrap"}},_T("Actif")):null,
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}},
+i("span",{style:{fontSize:"9.5px",fontWeight:"900",letterSpacing:".13em",
+textTransform:"uppercase",color:col}},_T("niveau")+" "+o.rang)),
+i("div",{style:{fontSize:"13.5px",fontWeight:"700",color:P.txt,marginBottom:"9px",
+lineHeight:1.3}},o.nom),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"4px",marginBottom:"13px"}},
+i("span",{style:{fontFamily:_NXf.disp,fontSize:"25px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.04em"}},String(o.prix).replace(".00","").replace(".",",")+" €"),
+i("span",{style:{fontSize:"11px",color:P.dim}},"/ "+(o.periode||"mois"))),
+mienne?i("div",{style:{fontSize:"11px",color:P.ok,fontWeight:"600"}},
+jours===null?_T("sans echeance"):(jours+" "+_T("jour(s) restant(s)")))
+:_NXFX.bouton({t:_T("Creer un ticket"),petit:true,large:true,creux:!vedette,plein:vedette,col:col,
+onClick:function(){ticket(o);}}));}
+
+function ongletOffres(){
+var cat=A.CAT||[];
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+_NXFX.note({col:P.info,icone:"info",titre:_T("Comment souscrire"),
+texte:_T("Tu ouvres un ticket depuis le client, tu dis quelle offre, et l equipe te repond dans le meme fil. Aucune reconduction automatique : quand la date passe, l offre s arrete."),
+droite:_NXFX.bouton({t:_T("Ouvrir un ticket"),petit:true,
+icone:"courrier",col:P.acc,plein:true,onClick:function(){ticket(null);}})}),
+FAM.map(function(f,k){
+var L=[],z;
+for(z=0;z<cat.length;z++)if(cat[z].famille===f[0])L.push(cat[z]);
+if(!L.length)return null;
+return _NXcard(i("div",{key:f[0]},
+i("div",{style:{display:"flex",alignItems:"center",gap:"11px",marginBottom:"6px"}},
+_NXFX.pastille(f[3],{col:f[4],taille:30,hv:"secoue"}),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13.5px",fontWeight:"800",color:P.txt}},f[1]),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"3px",lineHeight:1.5}},f[2]))),
+i("div",{style:{display:"flex",gap:"10px",flexWrap:"wrap",marginTop:"14px",
+alignItems:"stretch"}},
+L.map(function(o){return carteOffre(o,f[4],f[0]==="general"&&o.rang===2);}))),{mb:12});}),
+cat.length?null:_NXFX.vide({icone:"nuage",titre:_T("Catalogue indisponible"),
+texte:_T("Les offres n ont pas pu etre lues. Elles reviendront a la prochaine connexion."),
+action:_NXFX.bouton({t:_T("Reessayer"),icone:"maj",hv:"tourne",petit:true,creux:true,col:P.sub,
+onClick:function(){A.catAt=0;A.catalogue();}})})));}
+
+// ------------------------------------------------------------- mes abonnements
+function ongletMiens(){
+return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+_NXcard(i("div",null,
+_NXch(_T("Ce que tu as en cours"),
+mesOffres.length?(mesOffres.length+" "+_T("abonnement(s) actif(s)")):_T("Aucun abonnement en cours."),
+_NXFX.bouton({t:_T("Rafraichir"),icone:"maj",hv:"tourne",petit:true,creux:true,col:P.sub,
+onClick:function(){A.charge(true);}})),
+mesOffres.length?mesOffres.map(function(o,k){
+var j=A.jours(o.expire_le);
+var urgent=(j!==null&&j<=5);
+return _NXFX.rangee({key:o.offre,premier:k===0,rang:Math.min(6,k+1),
+icone:o.famille==="ia"?"etincelle":(o.famille==="privacy"?"oeilBarre":
+(o.famille==="securite"?"bouclierOk":"etoile")),
+col:urgent?P.warn:P.ok,
+titre:o.nom,
+texte:o.expire_le
+?(_T("jusqu au")+" "+new Date(o.expire_le).toLocaleDateString("fr-FR")+
+" · "+j+" "+_T("jour(s) restant(s)"))
+:_T("sans echeance"),
+droite:_NXFX.badge(o.expire_le?(j+" j"):_T("a vie"),urgent?P.warn:P.ok,{point:!urgent})});})
+:_NXFX.vide({icone:"etoile",titre:_T("Pas encore d abonnement"),
+texte:A.libre()?_T("Et tu n en as pas besoin : ton compte a deja tout.")
+:_T("Le socle protecteur reste actif. Un abonnement ouvre les protections avancees."),
+action:A.libre()?null:_NXFX.bouton({t:_T("Voir les offres"),icone:"etoile",petit:true,plein:true,
+col:P.acc,onClick:function(){onglet[1]("offres");}})})),{mb:12}),
+_NXcard(i("div",null,
+_NXch(_T("Ce que ton compte ouvre"),_T("Le detail, domaine par domaine, tel que le serveur le calcule.")),
+_NXFX.grille(DOMS.map(domaine),248)),{mb:12}),
+A.pionnier()?_NXFX.note({col:P.lime,icone:"couronne",titre:_T("Tu etais la avant"),
+texte:_T("Ton compte etait connu du serveur avant la mise en place des abonnements. Tout est ouvert, sans echeance et sans rien payer. Cela ne se retire pas.")}):null,
+A.admin()?_NXFX.note({col:P.warn,icone:"cle",titre:_T("Compte d equipe"),
+texte:_T("Les limites d abonnement ne s appliquent pas aux administrateurs du client.")}):null));}
+
+// --------------------------------------------------------------- questions
+var QUESTIONS=[
+[_T("Suis-je moins protege sans abonnement ?"),
+_T("Non. Le socle reste actif pour tout le monde : liens dangereux, hameconnage, fichiers pieges, garde console, coffre anti-vol, telemetrie de base. Un compte sans abonnement est protege ; il l est simplement moins finement qu un compte abonne.")],
+[_T("Pourquoi certains ont tout gratuitement ?"),
+_T("Parce qu ils utilisaient le client avant que les abonnements existent. Cette promesse-la est inscrite dans la base : leur date de premiere venue est comparee a la date de bascule, et rien dans le client ne peut la changer.")],
+[_T("Comment on paie ?"),
+_T("Tu ouvres un ticket depuis la page Support : l equipe repond dans le fil et convient du paiement avec toi. Il n y a ni page de paiement ni prelevement automatique : tu payes une fois, pour la duree choisie, et l abonnement s arrete de lui-meme a la date prevue.")],
+[_T("Que se passe-t-il a l expiration ?"),
+_T("Les protections au-dela de ton niveau se remettent au repos, et la page te le dit. Rien n est efface : si tu reprends un abonnement, tout revient tel que tu l avais regle.")],
+[_T("Puis-je forcer une protection sans payer ?"),
+_T("Le fichier du client est sur ta machine, donc oui, techniquement. Deux choses limitent la portee : un reglage verrouille trouve actif est remis au repos au demarrage et toutes les cinq minutes ; et pour Nexium IA, la limite est appliquee par le relais, qui ne repondra pas au-dela de ton niveau quoi que fasse le client.")],
+[_T("Un abonnement par module ou l offre generale ?"),
+_T("Trois modules au premier palier coutent 3 euros ; Nexium Plus en coute 5 mais monte les trois d un cran. L offre generale devient interessante des que deux modules t interessent vraiment.")]];
+
+var TABS=[["etat",_T("Mon offre"),"etoile",""],
+["offres",_T("Les offres"),"jeton",""],
+["questions",_T("Questions"),"question",""]];
+
+return i(Kr,null,i("div",{style:{maxWidth:"820px",margin:"0 auto"}},
+_NXFX.entete({cle:_T("Abonnement"),titre:"Nexium Abonnement",icone:"etoile",col:P.warn,
+marque:res.etat==="pionnier"?_T("a vie"):(res.etat==="admin"?_T("equipe"):null),
+texte:_T("Ce que ton compte ouvre aujourd hui, ce que les offres ajoutent, et comment souscrire. Aucune reconduction automatique, aucun prelevement."),
+chiffres:[{k:"Protect",v:niv.pr+"/3",col:niv.pr>=3?P.ok:P.danger},
+{k:"Privacy",v:niv.pv+"/3",col:niv.pv>=3?P.ok:P.info},
+{k:"Nexium IA",v:niv.ia+"/3",col:niv.ia>=3?P.ok:P.mauve},
+{k:_T("Abonnements"),v:mesOffres.length,col:mesOffres.length?P.lime:P.faint}]}),
+bandeau(),
+_NXFX.onglets(TABS,onglet[0],onglet[1],{col:P.warn}),
+onglet[0]==="etat"?ongletMiens():
+onglet[0]==="offres"?ongletOffres():
+i("div",_NXFX.a({"data-nx-panel":"1"}),_NXcard(i("div",null,
+_NXch(_T("Questions"),_T("Ce qui revient le plus souvent.")),
+QUESTIONS.map(function(q,k){
+return i("div",{key:k,style:{padding:"14px 0",borderTop:k?"1px solid "+P.line:"none"}},
+i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt,marginBottom:"7px"}},q[0]),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.65}},q[1]));})),{mb:0})),
+_NXfoot("Nexium Abonnement · "+
+(A.err?_T("etat lu depuis la derniere reponse connue"):_T("etat verifie sur le serveur")))));
 }
 var NexiumSponsorIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M5 16 3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 3h14v2H5v-2z"}));};
 function fmtN(n){if(n==null)return "—";if(n>=1000)return (n/1000).toFixed(n>=10000?0:1).replace(".0","")+"k";return ""+n;}
@@ -16817,143 +19866,270 @@ i("div",{style:{flexShrink:0,padding:"9px 16px",borderRadius:"10px",border:"1px 
 }
 function NexiumSponsorComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
-F.useEffect(function(){_NXSP.listeners.push(force);_NXSP.loadSlots();return function(){_NXSP.listeners=_NXSP.listeners.filter(function(f){return f!==force;});};},[]);
-var P=_NXpal;var BR="#5865f2";
-var st=F.useState(false);var wasCopied=st[0];var setCopied=st[1];
-var _fq=F.useState(-1);var ouvQ=_fq[0];var setOuvQ=_fq[1];
+F.useEffect(function(){_NXSP.listeners.push(force);_NXSP.loadSlots();
+return function(){_NXSP.listeners=_NXSP.listeners.filter(function(f){return f!==force;});};},[]);
+var P=_NXpal;
+var copie=F.useState(false),setCopie=copie[1];
+var ouvQ=F.useState(-1);
 var monte=_NXmounted(F);
-function copyContact(){try{DiscordNative.clipboard.copy("5dj0");setCopied(true);setTimeout(function(){try{setCopied(false);}catch(_){}},2000);if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Pseudo copié : 5dj0"),1);}catch(_){}}
+var an=_NXFX.anime();
 var f=_NXSP.free();
-function stat(v,label,accent){
-return i("div",{style:{flex:"1 1 130px",minWidth:"118px"}},
-i("div",{key:"s"+v,"data-nx-pop":"1",style:{fontFamily:_NXf.disp,fontSize:"26px",fontWeight:"800",color:accent||P.txt,letterSpacing:"-.035em",lineHeight:1,fontVariantNumeric:"tabular-nums"}},v),
-i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"5px",lineHeight:1.4}},label));}
-function pt(txt,color){
-return i("div",{style:{display:"flex",gap:"9px",alignItems:"flex-start",marginBottom:"8px"}},
-i("svg",{viewBox:"0 0 24 24",width:14,height:14,fill:color||P.sub,style:{flexShrink:0,marginTop:"2px"}},i("path",{d:"M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"})),
-i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.55}},txt));}
-function tier(o){
-var featured=!!o.featured;
-var used=(f.byTier[o.key]||0);
-return i("div",{"data-nx-tile":"1",style:{position:"relative",flex:"1 1 250px",minWidth:"232px",borderRadius:"18px",padding:featured?"24px 20px":"22px 20px",
-background:featured?("linear-gradient(168deg,"+o.color+"14,"+P.panel+" 62%)"):P.panel,
-border:"1px solid "+(featured?(o.color+"66"):P.line),
-boxShadow:featured?("0 14px 44px "+o.color+"1f"):"none",transform:featured?"translateY(-4px)":"none"}},
-featured?i("div",{"data-nx-shine":"1",style:{position:"absolute",top:"-11px",left:"50%",transform:"translateX(-50%)",padding:"4px 13px",borderRadius:"99px",background:"linear-gradient(100deg,"+o.color+","+P.txt+","+o.color+")",color:"#fff",fontSize:"9.5px",fontWeight:"800",letterSpacing:".12em",textTransform:"uppercase",whiteSpace:"nowrap"}},_T("Le plus demandé")):null,
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".14em",textTransform:"uppercase",color:o.color,marginBottom:"9px"}},o.badge),
-i("div",{style:{display:"flex",alignItems:"baseline",gap:"6px",marginBottom:"4px"}},
-i("span",{style:{fontFamily:_NXf.disp,fontSize:"29px",fontWeight:"800",color:P.txt,letterSpacing:"-.04em"}},o.price),
-i("span",{style:{fontSize:"12px",color:P.dim,fontWeight:"600"}},o.unit)),
-i("div",{style:{fontSize:"13.5px",fontWeight:"700",color:P.txt,marginBottom:"5px"}},o.title),
-i("div",{style:{fontSize:"12px",color:P.dim,lineHeight:1.55,marginBottom:"13px",minHeight:"34px"}},o.desc),
+var libres=f.left;
+// Combien de clients voient cette page. Le chiffre vient du meme service que
+// les badges : il n est pas invente, et s il manque on ne l affiche pas.
+var audience=0;
+try{audience=(window._NXBADGE&&_NXBADGE.count)||0;}catch(_){}
+
+function contact(){try{
+DiscordNative.clipboard.copy("5dj0");
+setCopie(true);setTimeout(function(){try{setCopie(false);}catch(_){}},2200);
+if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Pseudo copie : 5dj0"),1);}catch(_){}}
+
+// ------------------------------------------------------------ les emplacements
+// Ce que voit un utilisateur aujourd hui. Une place libre est montree comme
+// libre : c est l argument le plus honnete, et le plus efficace.
+function emplacement(s,k){
+var c=_NXSP.cards[s.code]||{};
+var g=c.guild;
+var col=s.tier.color;
+return i("div",_NXFX.fusion({key:s.code,style:{position:"relative",overflow:"hidden",
+padding:"15px",borderRadius:"16px",background:_NXteinte(col,.06),
+border:"1px solid "+_NXteinte(col,.26)}},
+_NXFX.a({"data-nx-tile":"1","data-nx-rise":String(Math.min(6,k+1))})),
+i("div",{style:{display:"flex",alignItems:"center",gap:"13px"}},
+g&&_NXSP.iconUrl(g)?i("img",{src:_NXSP.iconUrl(g),alt:"",
+style:{width:"46px",height:"46px",borderRadius:"14px",flexShrink:0,display:"block",
+border:"1px solid "+P.hair}})
+:_NXFX.pastille("globe",{col:col,taille:46,halo:true,hv:"penche"}),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginBottom:"4px"}},
+_NXFX.badge(s.tier.label,col),
+c.loading?i("span",{style:{fontSize:"10px",color:P.faint}},_T("chargement…")):null),
+i("div",{style:{fontSize:"14px",fontWeight:"700",color:P.txt,
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},
+g?g.name:("discord.gg/"+s.code)),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"3px"}},
+(c.members!=null)?(_NXn(c.members)+" "+_T("membres")+
+(c.online!=null?(" · "+_NXn(c.online)+" "+_T("en ligne")):"")):
+(c.err?_T("invitation expiree"):_T("invitation Discord"))))),
+i("div",{style:{marginTop:"12px"}},
+_NXFX.bouton({t:_T("Rejoindre"),icone:"externe",large:true,col:col,plein:true,
+onClick:function(){_NXSP.join(s.code);}})));}
+
+function placeLibre(k){
+return i("div",_NXFX.fusion({key:"libre"+k,style:{position:"relative",overflow:"hidden",
+padding:"15px",borderRadius:"16px",background:P.inset,
+border:"1px dashed "+P.edge,minHeight:"128px",display:"flex",flexDirection:"column",
+alignItems:"center",justifyContent:"center",textAlign:"center",gap:"10px"}},
+_NXFX.a({"data-nx-tile":"1","data-nx-rise":String(Math.min(6,k+1))})),
+i("div",_NXFX.fusion({style:{color:P.faint}},an?{"data-nx-float":"1"}:{}),_NXFX.svg("plus",26)),
+i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.pale}},_T("Place libre")),
+i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.5,maxWidth:"200px"}},
+_T("Ton serveur, ici, vu par tous ceux qui ouvrent cette page.")),
+_NXFX.bouton({t:_T("La prendre"),icone:"fleche",petit:true,creux:true,col:P.acc,onClick:contact}));}
+
+// ---------------------------------------------------------------- avantages
+// Chacun dit ce qu il est vraiment. Ce qui depend d un geste humain est
+// annonce comme tel : promettre de l automatique qui n existe pas serait
+// le meilleur moyen de perdre la personne au deuxieme mois.
+var AVANTAGES=[
+{ic:"grille",c:P.acc,t:_T("Un emplacement dans le client"),
+d:_T("Ton serveur apparait sur cette page, avec son icone, son nom et son nombre de membres, chez chaque personne qui ouvre Nexium."),
+e:_T("en place, automatique")},
+{ic:"jeton",c:P.lime,t:_T("Des credits Nexium IA chaque mois"),
+d:_T("Un lot de credits pose sur ton compte Discord. Ils sont depenses avant le quota normal, et rendus si une demande echoue."),
+e:_T("en place, credite a la main")},
+{ic:"etoile",c:P.warn,t:_T("Ton nom au generique"),
+d:_T("Cite dans les notes de version publiees avec le client, et sur la page de l equipe."),
+e:_T("a chaque version")},
+{ic:"maj",c:P.info,t:_T("Les versions en avance"),
+d:_T("Tu recois la version avant sa publication, avec ce qui change et ce qui reste a verifier."),
+e:_T("avant chaque sortie")},
+{ic:"courrier",c:P.mauve,t:_T("Une ligne directe"),
+d:_T("Un message prive au createur, sans passer par un serveur ni une file. Une reponse sous 48 h."),
+e:_T("pas de serveur a rejoindre")},
+{ic:"cible",c:P.cyan,t:_T("Tes demandes passent devant"),
+d:_T("Une fonction, un reglage, une protection : ta demande est etudiee en premier, et tu sais pourquoi si elle est refusee."),
+e:_T("priorite reelle, pas garantie d acceptation")}];
+
+// ------------------------------------------------------------------ formules
+function formule(o,k){
+var vedette=!!o.vedette;
+var pris=(f.byTier[o.k]||0);
+var reste=Math.max(0,(o.places||1)-pris);
+return i("div",_NXFX.fusion({key:o.k,style:{position:"relative",flex:"1 1 236px",minWidth:"224px",
+borderRadius:"20px",padding:vedette?"26px 20px 22px":"22px 20px",
+background:vedette?("linear-gradient(168deg,"+_NXteinte(o.c,.13)+","+P.panel+" 62%)"):P.panel,
+border:"1px solid "+(vedette?_NXteinte(o.c,.45):P.line),
+boxShadow:vedette?("0 16px 46px "+_NXteinte(o.c,.13)):"none"}},
+_NXFX.a({"data-nx-tile":"1","data-nx-rise":String(k+1)})),
+vedette?i("div",_NXFX.fusion({style:{position:"absolute",top:"-11px",left:"50%",
+transform:"translateX(-50%)",padding:"4px 13px",borderRadius:"99px",
+background:"linear-gradient(100deg,"+o.c+","+P.txt+","+o.c+")",color:P.ink,
+fontSize:"9.5px",fontWeight:"900",letterSpacing:".12em",textTransform:"uppercase",
+whiteSpace:"nowrap"}},an?{"data-nx-shine":"1"}:{}),_T("Le plus demande")):null,
+i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"12px"}},
+_NXFX.pastille(o.ic,{col:o.c,taille:32,halo:vedette,hv:"secoue"}),
+i("div",{style:{fontSize:"10px",fontWeight:"900",letterSpacing:".14em",
+textTransform:"uppercase",color:o.c}},o.label)),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"6px",marginBottom:"5px"}},
+i("span",{style:{fontFamily:_NXf.disp,fontSize:"31px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.04em"}},o.prix),
+i("span",{style:{fontSize:"12px",color:P.dim,fontWeight:"600"}},o.unite)),
+i("div",{style:{fontSize:"12px",color:P.dim,lineHeight:1.55,marginBottom:"14px",minHeight:"36px"}},o.d),
 i("div",{style:{height:"1px",background:P.line,marginBottom:"13px"}}),
-o.pts.map(function(x,k){return i("div",{key:k},pt(x,o.color));}),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:copyContact,
-style:{marginTop:"15px",textAlign:"center",padding:"11px",borderRadius:"11px",cursor:"pointer",
-background:featured?o.color:"transparent",border:"1px solid "+(featured?o.color:P.line),
-color:featured?"#fff":P.sub,fontSize:"12.5px",fontWeight:"800"}},
-f.left>0?_T("Réserver une place"):_T("Réserver dès qu'une place se libère")));}
+o.pts.map(function(x,z){
+return i("div",{key:z,style:{display:"flex",gap:"9px",alignItems:"flex-start",marginBottom:"9px"}},
+i("div",{style:{color:o.c,flexShrink:0,marginTop:"1px",display:"flex"}},_NXFX.svg("check",13)),
+i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.55}},x));}),
+i("div",{style:{marginTop:"15px"}},
+_NXFX.bouton({t:reste>0?_T("Reserver cette place"):_T("Etre prevenu"),
+icone:reste>0?"fleche":"cloche",large:true,plein:vedette,col:o.c,onClick:contact})),
+i("div",{style:{marginTop:"9px",textAlign:"center",fontSize:"10.5px",
+color:reste>0?P.dim:P.faint}},
+reste>0?(reste+" "+_T("place(s) sur")+" "+o.places):_T("complet pour le moment")));}
 
-return i(Kr,null,i("div",{style:{maxWidth:"780px",margin:"0 auto"}},
+var FORMULES=[
+{k:"decouverte",label:_T("Decouverte"),c:P.ok,ic:"boussole",prix:"10 €",unite:_T("/ semaine"),places:2,
+d:_T("Pour essayer sans engagement, et voir ce que ca ramene."),
+pts:[_T("Emplacement dans le client, 7 jours"),_T("100 credits Nexium IA"),
+_T("Ton nom au generique de la version en cours")]},
+{k:"standard",label:_T("Standard"),c:P.info,ic:"couches",prix:"30 €",unite:_T("/ mois"),places:1,vedette:true,
+d:_T("La formule courante : visible en continu, et tu comptes dans les decisions."),
+pts:[_T("Emplacement dans le client, 30 jours"),_T("400 credits Nexium IA par mois"),
+_T("Les versions en avance"),_T("Ligne directe, reponse sous 48 h"),
+_T("Tes demandes etudiees en premier")]},
+{k:"exclusif",label:_T("Exclusif"),c:P.warn,ic:"couronne",prix:"75 €",unite:_T("/ trimestre"),places:1,
+d:_T("Une seule place, en tete de page, pendant trois mois."),
+pts:[_T("Emplacement en tete, 90 jours"),_T("1500 credits Nexium IA"),
+_T("Les versions en avance"),_T("Ligne directe, reponse sous 24 h"),
+_T("Une fonction de ton choix etudiee en priorite"),_T("Retrait possible au prorata")]}];
 
-i("div",{style:{position:"relative",overflow:"hidden",borderRadius:"22px",border:"1px solid "+P.line,background:P.panel,padding:"30px 26px",marginBottom:"14px"}},
-i("div",{"data-nx-breathe":"1","aria-hidden":"true",style:{position:"absolute",left:0,top:0,right:0,bottom:0,background:"radial-gradient(115% 130% at 88% -18%, "+BR+"2e, transparent 58%)",pointerEvents:"none"}}),
+var ETAPES=[
+{ic:"courrier",t:_T("Tu ecris"),d:_T("Un message prive a 5dj0 sur Discord, avec ton serveur et la formule visee.")},
+{ic:"loupe",t:_T("On regarde"),d:_T("Le serveur est verifie : pas d arnaque, pas de contenu interdit, pas de revente de comptes.")},
+{ic:"jeton",t:_T("Tu payes"),d:_T("Une fois, pour la duree choisie. Aucun prelevement automatique, aucune reconduction cachee.")},
+{ic:"check",t:_T("C est en ligne"),d:_T("Ton emplacement apparait chez tout le monde a la prochaine ouverture du client.")}];
+
+var QUESTIONS=[
+[_T("Faut-il rejoindre un serveur Discord ?"),
+_T("Non, et il n y en a pas. Tout se fait par message prive avec le createur du client. C est plus court, et personne n a a s inscrire quelque part.")],
+[_T("Combien de personnes voient cette page ?"),
+audience?(_NXn(audience)+" "+_T("comptes utilisent le client aujourd hui. Une partie ouvre cette page ; le chiffre exact n est pas mesure, parce que le client ne suit personne.")):
+_T("Le client ne compte pas les visites : il ne suit personne. Ce qui est verifiable, c est le nombre de comptes qui l utilisent, affiche sur la page Nexium Team.")],
+[_T("Que se passe-t-il si mon serveur ne ramene rien ?"),
+_T("La formule Exclusif est retirable au prorata. Pour les autres, la duree est courte exprès : tu essaies une semaine avant de t engager plus.")],
+[_T("Les credits Nexium IA, c est quoi ?"),
+_T("La monnaie de l assistant integre au client. Un lot est pose sur ton compte Discord ; il est depense avant le quota normal, et rendu si une demande echoue.")],
+[_T("Quels serveurs sont refuses ?"),
+_T("Ceux qui vendent des comptes, du nitro, des services de raid, ou qui hebergent du contenu illegal. Le client existe pour proteger ses utilisateurs : le contredire en page d accueil n aurait aucun sens.")],
+[_T("Puis-je changer de serveur en cours de route ?"),
+_T("Oui, une fois par periode. Le nouveau serveur passe la meme verification que le premier.")]];
+
+return i(Kr,null,i("div",{style:{maxWidth:"820px",margin:"0 auto"}},
+
+// -------------------------------------------------------------------- l appel
+i("div",_NXFX.fusion({style:{position:"relative",overflow:"hidden",borderRadius:"24px",
+border:"1px solid "+P.hair,background:"linear-gradient(162deg,"+P.panel+","+P.bg+")",
+padding:"32px 28px",marginBottom:"14px"}},_NXFX.a({"data-nx-carte":"1"})),
+i("div",_NXFX.fusion({"aria-hidden":"true",style:{position:"absolute",inset:0,pointerEvents:"none",
+background:"radial-gradient(112% 128% at 86% -20%,"+_NXteinte(P.mauve,.16)+",transparent 58%)"}},
+an?{"data-nx-breathe":"1"}:{})),
 i("div",{style:{position:"relative"}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap",marginBottom:"10px"}},
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".2em",textTransform:"uppercase",color:P.faint}},_T("Partenariat Nexium")),
-i("div",{style:{display:"flex",alignItems:"center",gap:"6px",padding:"3px 9px",borderRadius:"99px",
-background:f.left>0?"rgba(87,242,135,.10)":"rgba(240,178,108,.12)",
-border:"1px solid "+(f.left>0?_NXpal.ok:_NXpal.warn)}},
-i("span",{"data-nx-dot":"1","aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",
-background:f.left>0?_NXpal.ok:_NXpal.warn,flexShrink:0}}),
-i("span",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".08em",textTransform:"uppercase",
-color:f.left>0?_NXpal.ok:_NXpal.warn}},
-f.left>0?(f.left+" "+_T(f.left>1?"places libres":"place libre")):_T("complet")))),
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"31px",fontWeight:"800",color:P.txt,letterSpacing:"-.04em",lineHeight:1.12,marginBottom:"11px"}},_T("Ton serveur, devant 6 500 personnes")),
-i("div",{style:{fontSize:"14px",color:P.sub,lineHeight:1.65,marginBottom:"22px",maxWidth:"540px"}},_T("Nexium est installé sur plus de 6 500 machines. L'emplacement sponsorisé s'affiche dans le client lui-même, à chaque ouverture des paramètres — pas dans un flux qu'on fait défiler.")),
-i("div",{style:{display:"flex",flexWrap:"wrap",gap:"20px"}},
-stat("6 500+",_T("utilisateurs du client"),BR),
-stat("100 %",_T("le voient, sans exception")),
-stat("24/7",_T("affiché en permanence")),
-stat(f.left>0?String(f.left):"0",f.left>0?_T("place(s) encore libre(s)"):_T("complet, liste d'attente"),f.left>0?_NXpal.ok:_NXpal.warn)))),
+i("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap",marginBottom:"14px"}},
+_NXFX.pastille("coeur",{col:P.rose,taille:34,halo:true,mv:an?"beat":null}),
+i("div",{style:{fontSize:"10px",fontWeight:"900",letterSpacing:".2em",
+textTransform:"uppercase",color:P.faint}},_T("Partenariat Nexium")),
+libres>0?_NXFX.badge(libres+" "+_T("place(s) libre(s)"),P.ok,{point:true,gros:true})
+:_NXFX.badge(_T("complet"),P.warn,{gros:true})),
+i("div",_NXFX.fusion({style:{fontFamily:_NXf.disp,fontSize:"36px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.042em",lineHeight:1.06,maxWidth:"560px"}},_NXFX.a({"data-nx-blurin":"1"})),
+_T("Ton serveur, devant tous ceux qui ouvrent Nexium.")),
+i("div",{style:{fontSize:"14px",color:P.sub,marginTop:"14px",lineHeight:1.65,maxWidth:"540px"}},
+_T("Quatre emplacements, pas un de plus. Pas de banniere, pas de fenetre qui surgit : une carte propre, avec ton icone et ton nombre de membres en direct, sur une page que les gens ouvrent d eux-memes.")),
+i("div",{style:{display:"flex",gap:"26px",flexWrap:"wrap",marginTop:"22px"}},
+_NXFX.chiffre({k:_T("Emplacements"),v:_NXSP.MAX,rang:1}),
+_NXFX.chiffre({k:_T("Libres"),v:libres,col:libres?P.ok:P.warn,rang:2}),
+audience?_NXFX.chiffre({k:_T("Comptes actifs"),v:_NXn(audience),col:P.info,rang:3}):null,
+_NXFX.chiffre({k:_T("Engagement"),v:_T("aucun"),col:P.lime,rang:4})),
+i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap",marginTop:"22px"}},
+_NXFX.bouton({t:copie[0]?_T("Pseudo copie : 5dj0"):_T("Reserver une place"),
+icone:copie[0]?"check":"fleche",plein:true,col:copie[0]?P.ok:P.acc,onClick:contact}),
+_NXFX.bouton({t:_T("Voir les formules"),icone:"couches",creux:true,col:P.sub,
+onClick:function(){try{var e=document.getElementById("nx-sponsor-formules");
+if(e&&e.scrollIntoView)e.scrollIntoView({behavior:"smooth",block:"start"});}catch(_){}}})))),
 
-i("div",{style:{display:"flex",gap:"11px",flexWrap:"wrap",marginBottom:"22px"}},
-i("div",{style:{flex:"1 1 240px",padding:"15px 17px",borderRadius:"14px",background:P.inset,border:"1px solid "+P.line}},
-i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:P.txt,marginBottom:"4px"}},_T("Une audience captive")),
-i("div",{style:{fontSize:"12px",color:P.dim,lineHeight:1.55}},_T("Ce ne sont pas des passants : ce sont des utilisateurs qui ouvrent le client tous les jours."))),
-i("div",{style:{flex:"1 1 240px",padding:"15px 17px",borderRadius:"14px",background:P.inset,border:"1px solid "+P.line}},
-i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:P.txt,marginBottom:"4px"}},_T("Quatre places, pas une de plus")),
-i("div",{style:{fontSize:"12px",color:P.dim,lineHeight:1.55}},_T("L'espace est volontairement limité. Aucune rotation, aucune surcharge : ton serveur reste visible.")))),
-
-i("div",{style:{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:"12px",flexWrap:"wrap",marginBottom:"11px"}},
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint}},_T("Les emplacements, en ce moment même")),
-i("div",{style:{fontSize:"11.5px",color:P.dim}},f.taken+"/"+_NXSP.MAX+" "+_T("occupées"))),
-_NXSP.slotsBusy&&!_NXSP.slots.length?i("div",{style:{padding:"18px",textAlign:"center",fontSize:"12.5px",color:P.dim,border:"1px solid "+P.line,borderRadius:"15px"}},_T("Chargement des emplacements…")):null,
-_NXSP.slots.map(function(s,k){return SlotCard(s,k);}),
-(function(){var out=[];for(var a=0;a<f.left;a++)out.push(FreeSlot(a,copyContact));return out;})(),
-i("div",{style:{fontSize:"12px",color:P.dim,textAlign:"center",marginTop:"9px",marginBottom:"26px",lineHeight:1.5}},_T("Cartes en direct : nom, membres, personnes connectées et bouton Rejoindre. C'est exactement ce que verront les 6 500 utilisateurs.")),
-
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"14px"}},_T("Choisis ta formule")),
-i("div",{style:{display:"flex",gap:"12px",flexWrap:"wrap",alignItems:"stretch",marginBottom:"24px"}},
-tier({key:"decouverte",badge:_T("Découverte"),color:_NXpal.ok,price:"10 €",unit:_T("/ semaine"),
-title:_T("Tester sans risque"),desc:_T("Une semaine complète pour mesurer ce que ça t'apporte, sans engagement."),
-pts:[_T("7 jours d'affichage continu"),_T("Carte d'invitation en direct"),_T("Bouton Rejoindre intégré"),_T("Bilan des arrivées à la fin")]}),
-tier({key:"standard",badge:_T("Standard"),color:BR,price:"30 €",unit:_T("/ mois"),featured:true,
-title:_T("La formule qui convertit"),desc:_T("Un mois entier devant toute la communauté. Le temps que ton serveur s'installe dans les habitudes."),
-pts:[_T("30 jours d'affichage continu"),_T("Mise en avant renforcée dans le client"),_T("Annonce dédiée sur le serveur Nexium"),_T("Ton logo dans la page d'accueil du client"),_T("Bilan détaillé chaque semaine")]}),
-tier({key:"exclusif",badge:_T("Exclusif"),color:_NXpal.warn,price:"75 €",unit:_T("/ trimestre"),
-title:_T("Le trimestre réservé"),desc:_T("Trois mois verrouillés à ton nom. Personne d'autre ne peut prendre la place."),
-pts:[_T("90 jours, emplacement réservé"),_T("Économie de 15 € sur le tarif mensuel"),_T("Bannière personnalisée de ton choix"),_T("Mention permanente dans les crédits"),_T("Priorité sur toute future formule"),_T("Contact direct avec l'équipe")]})),
-
-i("div",{style:{padding:"16px 18px",borderRadius:"14px",background:P.inset,border:"1px solid "+P.line,marginBottom:"22px"}},
-i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:P.txt,marginBottom:"6px"}},_T("Pas de budget ?")),
-i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.6}},_T("Amène 100 nouveaux utilisateurs au client et l'emplacement est à toi gratuitement pendant un mois. Parles-en, c'est tout."))),
-
+// ------------------------------------------------------------ ce qui est visible
 _NXcard(i("div",null,
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"13px"}},_T("Ce que voient les 6 500 utilisateurs")),
-i("div",{"data-nx-lift":"1",style:{position:"relative",overflow:"hidden",borderRadius:"15px",border:"1px solid "+BR+"55",
-background:"linear-gradient(150deg,"+BR+"14,"+P.inset+" 68%)",padding:"16px 17px"}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"13px",flexWrap:"wrap"}},
-i("div",{style:{width:"46px",height:"46px",borderRadius:"14px",flexShrink:0,
-background:"linear-gradient(140deg,"+BR+","+P.raise+")",display:"flex",alignItems:"center",justifyContent:"center",
-fontFamily:_NXf.disp,fontSize:"19px",fontWeight:"800",color:"#fff"}},"?"),
-i("div",{style:{flex:1,minWidth:"140px"}},
-i("div",{style:{fontSize:"14px",fontWeight:"800",color:P.txt,letterSpacing:"-.015em"}},_T("Le nom de ton serveur")),
-i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginTop:"5px"}},
-i("span",{"data-nx-dot":"1","aria-hidden":"true",style:{width:"6px",height:"6px",borderRadius:"50%",background:_NXpal.ok}}),
-i("span",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.dim}},_T("membres et connectes, en direct")))),
-i("div",{style:{padding:"9px 17px",borderRadius:"10px",background:BR,color:"#fff",
-fontSize:"12.5px",fontWeight:"800",flexShrink:0}},_T("Rejoindre")))),
-i("div",{style:{fontSize:"11.5px",color:P.dim,lineHeight:1.6,marginTop:"11px"}},
-_T("Cette carte s affiche dans le client, pas dans un bandeau publicitaire : chiffres reels, bouton qui fonctionne, aucune image a fournir."))),{mb:12}),
+_NXch(_T("Ce que ca donne, en ce moment"),
+_T("Exactement ce que voit un utilisateur. Les places vides sont montrees vides."),
+_NXFX.bouton({t:_T("Rafraichir"),icone:"maj",hv:"tourne",petit:true,creux:true,col:P.sub,
+onClick:function(){_NXSP.loadSlots(true);}})),
+_NXFX.grille((function(){
+var out=[],k;
+for(k=0;k<_NXSP.slots.length;k++)out.push(emplacement(_NXSP.slots[k],k));
+for(k=_NXSP.slots.length;k<_NXSP.MAX;k++)out.push(placeLibre(k));
+return out;})(),238)),{mb:12}),
+
+// ------------------------------------------------------------------ avantages
 _NXcard(i("div",null,
-i("div",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".16em",textTransform:"uppercase",color:P.faint,marginBottom:"4px"}},_T("Les questions qu on nous pose")),
-[[_T("Combien de temps avant la mise en ligne ?"),_T("Dans la journee, souvent dans l heure. Il suffit d un lien d invitation permanent : la carte se construit toute seule a partir des donnees du serveur.")],
-[_T("Et si ca ne marche pas pour moi ?"),_T("La formule Decouverte existe exactement pour ca : une semaine, dix euros, et un bilan des arrivees a la fin. Si le compte n y est pas, tu t arretes la.")],
-[_T("Pourquoi seulement quatre places ?"),_T("Parce qu au-dela, plus personne ne regarde. Quatre cartes tiennent a l ecran sans defilement et sans rotation : ton serveur est visible en permanence, pas une fois sur douze.")],
-[_T("Qui voit vraiment cet emplacement ?"),_T("Tous les utilisateurs du client, sans exception : la page n est ni masquable ni desactivable. Ce sont des gens qui ouvrent Discord tous les jours, pas des visiteurs de passage.")],
-[_T("Comment on paie ?"),_T("On en parle en message prive. Aucun paiement automatique, aucun abonnement qui se renouvelle tout seul : tu decides a chaque echeance.")]].map(function(o,k,arr){
-var op=ouvQ===k;
-return i("div",{key:k,style:{borderBottom:k===arr.length-1?"none":"1px solid "+P.line}},
-i("div",{className:"nx-fx",role:"button","aria-label":o[0],"aria-expanded":op?"true":"false",tabIndex:0,onKeyDown:_NXkey,
-onClick:function(){setOuvQ(op?-1:k);},
-style:{display:"flex",alignItems:"center",gap:"12px",padding:"14px 0",cursor:"pointer"}},
-i("div",{style:{flex:1,minWidth:0,fontSize:"13.5px",fontWeight:"600",color:op?P.txt:P.sub}},o[0]),
-i("span",{"aria-hidden":"true",style:{flexShrink:0,color:P.faint,fontSize:"12px",
-transform:op?"rotate(90deg)":"none",transition:"transform .2s ease"}},"\u203a")),
-op?i("div",{"data-nx-fade":"1",style:{fontSize:"12.5px",color:P.dim,lineHeight:1.7,paddingBottom:"15px",paddingRight:"22px"}},o[1]):null);})),{mb:12}),
+_NXch(_T("Ce que tu obtiens"),
+_T("Six choses concretes. Ce qui demande un geste humain est annonce comme tel.")),
+_NXFX.grille(AVANTAGES.map(function(x,k){
+return _NXFX.tuile({key:x.t,icone:x.ic,col:x.c,rang:k+1,hv:"secoue",halo:true,
+titre:x.t,texte:x.d,
+bas:_NXFX.badge(x.e,x.c)});}),252)),{mb:12}),
+
+// ------------------------------------------------------------------ formules
+i("div",{id:"nx-sponsor-formules"},
 _NXcard(i("div",null,
-i("div",{style:{textAlign:"center"}},
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"19px",fontWeight:"800",color:P.txt,letterSpacing:"-.02em",marginBottom:"7px"}},f.left>0?_T("Réserver ta place"):_T("Entrer sur la liste d'attente")),
-i("div",{style:{fontSize:"13px",color:P.sub,lineHeight:1.6,marginBottom:"17px",maxWidth:"430px",margin:"0 auto 17px"}},
-f.left>0?_T("Un message privé suffit. Dis-nous quel serveur et quelle formule, on s'occupe du reste — mise en ligne dans la journée.")
-:_T("Les quatre places sont prises. Écris-nous : tu seras contacté en priorité dès qu'une se libère.")),
-i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,onClick:copyContact,
-style:{display:"inline-flex",alignItems:"center",gap:"11px",padding:"14px 26px",borderRadius:"13px",background:P.acc,color:P.light?"#fff":_NXpal.ink,fontSize:"14.5px",fontWeight:"800",cursor:"pointer"}},
-i("svg",{viewBox:"0 0 24 24",width:17,height:17,fill:"currentColor"},i("path",{d:"M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"})),
-wasCopied?_T("Pseudo copié !"):_T("Écrire à 5dj0")),
-i("div",{style:{fontSize:"11.5px",color:P.faint,marginTop:"11px",fontFamily:_NXf.mono}},wasCopied?_T("colle-le dans la recherche Discord"):_T("clique pour copier le pseudo")))),{mb:0,glow:BR+"12"}),
-_NXfoot(_T("Nexium — projet communautaire indépendant"))));
+_NXch(_T("Les formules"),_T("Trois durees, trois prix. Rien ne se reconduit tout seul.")),
+i("div",{style:{display:"flex",gap:"12px",flexWrap:"wrap",alignItems:"stretch",
+paddingTop:"12px"}},FORMULES.map(formule))),{mb:12})),
+
+// --------------------------------------------------------------- le deroule
+_NXcard(i("div",null,
+_NXch(_T("Comment ca se passe"),_T("Quatre etapes, une seule personne en face.")),
+i("div",{style:{display:"flex",gap:"10px",flexWrap:"wrap"}},
+ETAPES.map(function(e,k){
+return i("div",_NXFX.fusion({key:k,style:{flex:"1 1 168px",minWidth:"160px",padding:"15px",
+borderRadius:"15px",background:P.inset,border:"1px solid "+P.line,position:"relative"}},
+_NXFX.a({"data-nx-tile":"1","data-nx-rise":String(k+1)})),
+i("div",{style:{position:"absolute",right:"13px",top:"11px",fontFamily:_NXf.disp,
+fontSize:"22px",fontWeight:"800",color:P.line,lineHeight:1}},String(k+1)),
+_NXFX.pastille(e.ic,{col:P.acc,taille:30,hv:"saute"}),
+i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt,marginTop:"11px"}},e.t),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"5px",lineHeight:1.5}},e.d));}))),{mb:12}),
+
+// ------------------------------------------------------------------ questions
+_NXcard(i("div",null,
+_NXch(_T("Questions"),_T("Les six qui reviennent le plus.")),
+QUESTIONS.map(function(q,k){
+var on=ouvQ[0]===k;
+return i("div",{key:k,style:{borderTop:k?"1px solid "+P.line:"none"}},
+i("div",{className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+onClick:function(){ouvQ[1](on?-1:k);},
+style:{display:"flex",alignItems:"center",gap:"11px",padding:"14px 2px",cursor:"pointer"}},
+i("div",{style:{color:on?P.acc:P.faint,display:"flex",flexShrink:0,
+transform:on?"rotate(90deg)":"none",transition:an?"transform .22s cubic-bezier(.22,.8,.28,1)":"none"}},
+_NXFX.svg("chevron",14)),
+i("div",{style:{flex:1,fontSize:"13px",fontWeight:on?"700":"600",
+color:on?P.txt:P.pale}},q[0])),
+on?i("div",_NXFX.fusion({style:{padding:"0 2px 15px 26px",fontSize:"12.5px",color:P.sub,
+lineHeight:1.65}},_NXFX.a({"data-nx-zoom":"1"})),q[1]):null);})),{mb:12}),
+
+// -------------------------------------------------------------------- contact
+_NXcard(i("div",null,
+_NXch(_T("Prendre contact"),_T("Un message prive, c est tout. Pas de formulaire, pas de serveur.")),
+i("div",{style:{display:"flex",alignItems:"center",gap:"14px",flexWrap:"wrap"}},
+_NXFX.pastille("courrier",{col:P.acc,taille:44,halo:true,mv:an?"float":null}),
+i("div",{style:{flex:1,minWidth:"180px"}},
+i("div",{style:{fontFamily:_NXf.mono,fontSize:"16px",fontWeight:"700",color:P.txt}},"5dj0"),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"4px"}},
+_T("createur du client · reponse sous 48 h"))),
+_NXFX.bouton({t:copie[0]?_T("Copie"):_T("Copier le pseudo"),
+icone:copie[0]?"check":"copie",plein:true,col:copie[0]?P.ok:P.acc,onClick:contact}))),{mb:0}),
+_NXfoot("Nexium Sponsor · "+_T("quatre places, aucune reconduction automatique"))));
 }
 
 function Mst(){
@@ -17148,7 +20324,7 @@ _NXfoot("Nexium Changelog · lu depuis le dépôt, aucune donnée envoyée")));
     height: calc(1rem + 4px);
     max-height: calc(1rem + 4px)
 }
-`,classNames:{},dom:null});Wye="src/plugins/_api/messageDecorations/style.css"});var QT,Qye=h(()=>{"use strict";d();O();R();Kye();QT=A({name:"MessageDecorationsAPI",description:"API to add decorations to messages",authors:[w.TheSun],managedStyle:Wye,patches:[{find:"#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",replacement:{match:/#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,replace:"$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"}}]})});var ZT,Zye=h(()=>{"use strict";d();O();R();ZT=A({name:"MessageEventsAPI",description:"Api required by anything using message events.",authors:[w.Arjix,w.hunt,w.Ven],patches:[{find:"#{intl::EDIT_TEXTAREA_HELP}",replacement:{match:/(?<=,channel:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,replace:(e,t)=>`async ${e}if(await Vencord.Api.MessageEvents._handlePreEdit(${t}))return Promise.resolve({shouldClear:false,shouldRefocus:true});`}},{find:".handleSendMessage,onResize:",replacement:{match:/let (\i)=\i\.\i\.parse\((\i),.+?\.getSendMessageOptions\(\{.+?\}\)?;(?=.+?(\i)\.flags=)(?<=\)\(({.+?})\)\.then.+?)/,replace:(e,t,n,o,r)=>e+`if(await Vencord.Api.MessageEvents._handlePreSend(${n}.id,${t},${r},${o}))return{shouldClear:false,shouldRefocus:true};`}},{find:'("interactionUsernameProfile',replacement:{match:/let\{id:\i}=(\i),{id:\i}=(\i);return \i\.useCallback\((\i)=>\{/,replace:(e,t,n,o)=>`const vcMsg=${t},vcChan=${n};${e}Vencord.Api.MessageEvents._handleClick(vcMsg,vcChan,${o});`}}]})});var YT,Yye=h(()=>{"use strict";d();O();R();YT=A({name:"MessagePopoverAPI",description:"API to add buttons to message popovers.",authors:[w.KingFish,w.Ven,w.Nuckyz],patches:[{find:"#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",replacement:{match:/(?<=\]\}\)),(.{0,40}togglePopout:.+?\}\))\]\}\):null,(?<=\((\i\.\i),\{label:.+?:null,(\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,replace:(e,t,n,o,r)=>`]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${n},${r}),${o}?${t}:null,`}}]})});var JT,Jye=h(()=>{"use strict";d();O();R();JT=A({name:"MessageUpdaterAPI",description:"API for updating and re-rendering messages.",authors:[w.Nuckyz],patches:[{find:"}renderStickersAccessories(",replacement:{match:/(?<=this.props,\i,\[)"message",/,replace:""}}]})});var XT,Xye=h(()=>{"use strict";d();O();R();XT=A({name:"NicknameIconsAPI",description:"API to add icons to the nickname, in profiles",authors:[w.Nuckyz],patches:[{find:"#{intl::USER_PROFILE_PRONOUNS}",replacement:[{match:/(?<=children:\i\}\):\i,)null!=\i/,replace:"($&||!!Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"},{match:/(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)(?=\}\)\])/,replace:"children:[...Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id}),$1]"}]}]})});var VT,Vye=h(()=>{"use strict";d();O();R();VT=A({name:"NoticesAPI",description:"Fixes notices being automatically dismissed",authors:[w.Ven],required:!0,patches:[{find:'"NoticeStore"',replacement:[{match:/(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,replace:"if(Vencord.Api.Notices.currentNotice)return false;$&"},{match:/(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,replace:(e,t)=>`if(${t}?.id=="EquicordNotice")return(${t}=null,Vencord.Api.Notices.nextNotice(),true);${e}`}]}]})});var e9,eve=h(()=>{"use strict";d();O();R();e9=A({name:"ServerListAPI",authors:[w.kemo],description:"Api required for plugins that modify the server list",patches:[{find:"#{intl::DISCODO_DISABLED}",replacement:{match:/(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:"friends-list".+?}\))(?=}function)/,replace:"[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"}},{find:".setGuildsTree(",replacement:[{match:/(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,replace:"Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"},{match:/lastTargetNode.{0,25}\?null:\i,/,replace:"$&...Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below),"}]}]})});var t9,tve=h(()=>{"use strict";d();O();R();t9=A({name:"UserSettingsAPI",description:"Patches Discord's UserSettings to expose their group and name.",authors:[w.Nuckyz],patches:[{find:",updateSetting:",replacement:[{match:/\.updateAsync\(.+?(?=,useSetting:)/,replace:"$&,userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1]"},{match:/updateSetting:.{0,100}SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"},{match:/updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"}]}]})});var n9,nve=h(()=>{"use strict";d();O();R();T();n9=A({name:"ConcatenatedComponentExtractor",description:"Extract components that have been concatenated by the bundler",authors:[w.sadan],required:!0,patches:[{find:"#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}),focusProps:",replacement:{match:/(?=function (\i)\(\i\)\{let\{onChange:\i,onClose:\i,[^}]+?showEyeDropper:)/,replace:"$self.setColorPicker($1);"}},{find:/="ltr",orientation:\i="vertical"[^}]+?customTheme:/,replacement:{match:/(?=function (\i)\(\i,\i,\i\)\{.{0,20}?return \i\.forwardRef\(function\(\i,\i\)\{let\{[^}]+?="ltr",orientation:)/,replace:"$self.setCreateScroller($1);"}}],setCreateScroller:qH,setColorPicker:jH})});var ove,o9,rve=h(()=>{"use strict";d();q();O();Xe();R();ove=M({disableAnalytics:{type:3,description:"Disable Discord's tracking (analytics/'science')",default:!0,restartNeeded:!0}}),o9=A({name:"NoTrack",description:"Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",authors:[w.Cyn,w.Ven,w.Nuckyz,w.Arrow],required:!0,settings:ove,patches:[{find:"AnalyticsActionHandlers.handle",predicate:()=>ove.store.disableAnalytics,replacement:{match:/\(0,\i\.analyticsTrackingStoreMaker\)/,replace:"(()=>{})"}},{find:".METRICS_V2",replacement:[{match:/this\._intervalId=/,replace:"this._intervalId=void 0&&"},{match:/(?:increment|distribution)\(\i(?:,\i)?\){/g,replace:"$&return;"}]},{find:".BetterDiscord||null!=",replacement:{match:/(?=let \i=window;)/,replace:"return false;"}}],flux:{TRACK(e){e?.resolve?.()}},startAt:"Init",start(){Object.defineProperty(Function.prototype,"d",{configurable:!0,set(e){Object.defineProperty(this,"d",{value:e,configurable:!0,enumerable:!0,writable:!0});let{stack:t}=new Error;if(this.c!=null||!t?.includes("http")||!String(this).includes("exports:{}"))return;let n=t.match(/http.+?(?=:\d+?:\d+?$)/m)?.[0];if(!n)return;let o=new XMLHttpRequest;if(o.open("GET",n,!1),o.send(),!!o.responseText.includes(".DiscordSentry="))throw new ce("NoTrack","#8caaee").info("Disabling Sentry by erroring its WebpackInstance"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry"),new Error("Sentry successfully disabled")}}),Object.defineProperty(window,"DiscordSentry",{configurable:!0,set(){new ce("NoTrack","#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry")}})}})});var Jv,KK,li,lf=h(()=>{"use strict";d();q();bt();Da();Gv();O();Zl();R();se();Jv={SECTION:1,SIDEBAR_ITEM:2,PANEL:3,CATEGORY:5,CUSTOM:19};uo(["SECTION","SIDEBAR_ITEM","PANEL","CUSTOM"],e=>Jv=e);KK=M({settingsLocation:{type:4,description:"Where to put the Nexium Client settings section",options:[{label:"At the very top",value:"top"},{label:"Above the Nitro section",value:"aboveNitro",default:!0},{label:"Below the Nitro section",value:"belowNitro"},{label:"Above Activity Settings",value:"aboveActivity"},{label:"Below Activity Settings",value:"belowActivity"},{label:"At the very bottom",value:"bottom"}]},includeVencordInfoWhenCopying:{type:3,description:"Also copy Nexium info (Nexium, Electron, Chromium) when clicking the version info in the bottom left area of the Settings page",default:!0}}),li=A({name:"Settings",description:"Adds Settings UI and debug info",authors:[w.Ven,w.Megu],required:!0,settings:KK,patches:[{find:"#{intl::COPY_VERSION}",replacement:[{match:/\.RELEASE_CHANNEL/,replace:"$&.replace(/^./, c => c.toUpperCase())"},{match:/"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,replace:(e,t,n,o,r)=>(r=r.replace(/children:\[.+\]/,""),`${e},$self.makeInfoElements(${o},${r}).map(e=>${n}e})),`)},{match:/copyValue:\i\.join\(" "\)/g,replace:"$& + $self.getInfoString()"}]},{find:".buildLayout().map",replacement:{match:/(\i)\.buildLayout\(\)(?=\.map)/,replace:"$self.buildLayout($1)"}}],buildEntry(e){let{key:t,title:n,panelTitle:o=n,Component:r,Icon:a}=e,s={key:t+"_panel",type:Jv.PANEL,useTitle:()=>o,buildLayout:()=>[{type:Jv.CATEGORY,key:t+"_category",buildLayout:()=>[{type:Jv.CUSTOM,key:t+"_custom",Component:r,useSearchTerms:()=>[n]}]}]};return{key:t,type:Jv.SIDEBAR_ITEM,useTitle:()=>n,icon:()=>i(a,{width:20,height:20}),buildLayout:()=>[s]}},buildLayout(e){let t=e.buildLayout();if(e.key!=="$Root"||!Array.isArray(t)||t.some(u=>u?.key==="equicord_section"))return t;let{buildEntry:n}=this,mkS=(k,ti,li)=>({key:k,type:Jv.SECTION,useTitle:()=>ti,buildLayout:()=>li.filter(fl)}),r=[mkS("equicord_section","Nexium",[n({key:"equicord_main",title:"Nexium Client",panelTitle:"Nexium Client",Component:_NXsafe(NexiumHomeComp,"Nexium Client"),Icon:NexiumHomeIcon}),n({key:"equicord_ia",title:"Nexium IA",panelTitle:"Nexium IA",Component:_NXsafe(NexiumIAComp,"Nexium IA"),Icon:NexiumIAIcon}),n({key:"equicord_comptes",title:"Nexium Comptes",panelTitle:"Nexium Comptes",Component:_NXsafe(NexiumComptesComp,"Nexium Comptes"),Icon:NexiumComptesIcon}),n({key:"equicord_updater",title:"Mise à jour",panelTitle:"Nexium — Mise à jour",Component:_NXsafe(NexiumUpdateComp,"Mise à jour"),Icon:NexiumUpdateIcon}),n({key:"equicord_changelog",title:"Changelog",Component:ST,Icon:j5}),...(window._NXADMIN&&_NXADMIN.estEquipe()?[n({key:"equicord_nexium_admin",title:"Nexium Admins",panelTitle:"Nexium Admins",Component:_NXsafe(NexiumAdminComp,"Nexium Admins"),Icon:NexiumAdminIcon})]:[])]),mkS("equicord_section_protection","Protection",[n({key:"equicord_protect",title:"Nexium Protect",panelTitle:"Nexium Protect",Component:_NXsafe(NexiumProtectComp,"Nexium Protect"),Icon:NexiumProtectIcon}),n({key:"equicord_privacy",title:"Nexium Privacy",panelTitle:"Nexium Privacy",Component:_NXsafe(NexiumPrivacyComp,"Nexium Privacy"),Icon:NexiumPrivacyIcon}),n({key:"equicord_network",title:"Nexium Réseau",panelTitle:"Nexium Réseau",Component:_NXsafe(NexiumNetworkComp,"Nexium Réseau"),Icon:NexiumNetworkIcon})]),mkS("equicord_section_espace","Ton espace",[n({key:"equicord_stats",title:"Nexium Stats",panelTitle:"Nexium Stats",Component:_NXsafe(NexiumStatsComp,"Nexium Stats"),Icon:NexiumStatsIcon}),n({key:"equicord_auto",title:"Nexium Auto",panelTitle:"Nexium Auto",Component:_NXsafe(NexiumAutoComp,"Nexium Auto"),Icon:NexiumAutoIcon}),n({key:"equicord_music",title:"Nexium Music",panelTitle:"Nexium Music",Component:_NXsafe(NexiumMusicComp,"Nexium Music"),Icon:NexiumMusicIcon})]),mkS("equicord_section_perso","Personnalisation",[n({key:"equicord_plugins",title:"Plugins",Component:Gx,Icon:rH}),n({key:"equicord_themes",title:"Themes",Component:_NXthemeWrap(Mx),Icon:Mm}),n({key:"equicord_labo",title:"Nexium Labo",panelTitle:"Nexium Labo",Component:_NXsafe(NexiumLaboComp,"Nexium Labo"),Icon:NexiumLaboIcon})]),mkS("equicord_section_aide","Données et aide",[n({key:"equicord_data",title:"Nexium Données",panelTitle:"Nexium Données",Component:_NXsafe(NexiumDataComp,"Nexium Données"),Icon:NexiumDataIcon}),n({key:"equicord_backup_restore",title:"Backup & Restore",Component:MT,Icon:iH}),n({key:"equicord_team",title:"Team",panelTitle:"Nexium — Team",Component:_NXsafe(NexiumTeamComp,"Team"),Icon:NexiumTeamIcon}),n({key:"equicord_sponsor",title:"Sponsor",panelTitle:"Nexium — Sponsor",Component:_NXsafe(NexiumSponsorComp,"Sponsor"),Icon:NexiumSponsorIcon}),VA&&n({key:"equicord_patch_helper",title:"Patch Helper",Component:VA,Icon:aH}),...this.customEntries.map(n)])].filter(x=>x.buildLayout().length),{settingsLocation:a}=KK.store,s={top:"user_section",aboveNitro:"billing_section",belowNitro:"billing_section",aboveActivity:"activity_section",belowActivity:"activity_section",bottom:"utility_section"},l=s[a]??s.top,c=t.findIndex(u=>typeof u?.key=="string"&&u.key===l);return c===-1?c=2:a.startsWith("below")&&(c+=1),t.splice(c,0,...r),t},customSections:[],customEntries:[],get electronVersion(){return VencordNative.native.getVersions().electron??window.legcord?.electron??null},get chromiumVersion(){try{return VencordNative.native.getVersions().chrome??navigator.userAgentData?.brands?.find(e=>e.brand==="Chromium"||e.brand==="Google Chrome")?.version??null}catch{return null}},getVersionInfo(e=!0){let t="";return e&&t?` (${t})`:t},getInfoRows(){let{electronVersion:e,chromiumVersion:t,getVersionInfo:n}=this,o=[`Nexium Client ${t0}${n()}`];return e&&o.push(`Electron ${e}`),t&&o.push(`Chromium ${t}`),o},getInfoString(){return KK.store.includeVencordInfoWhenCopying?`
+`,classNames:{},dom:null});Wye="src/plugins/_api/messageDecorations/style.css"});var QT,Qye=h(()=>{"use strict";d();O();R();Kye();QT=A({name:"MessageDecorationsAPI",description:"API to add decorations to messages",authors:[w.TheSun],managedStyle:Wye,patches:[{find:"#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",replacement:{match:/#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,replace:"$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"}}]})});var ZT,Zye=h(()=>{"use strict";d();O();R();ZT=A({name:"MessageEventsAPI",description:"Api required by anything using message events.",authors:[w.Arjix,w.hunt,w.Ven],patches:[{find:"#{intl::EDIT_TEXTAREA_HELP}",replacement:{match:/(?<=,channel:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,replace:(e,t)=>`async ${e}if(await Vencord.Api.MessageEvents._handlePreEdit(${t}))return Promise.resolve({shouldClear:false,shouldRefocus:true});`}},{find:".handleSendMessage,onResize:",replacement:{match:/let (\i)=\i\.\i\.parse\((\i),.+?\.getSendMessageOptions\(\{.+?\}\)?;(?=.+?(\i)\.flags=)(?<=\)\(({.+?})\)\.then.+?)/,replace:(e,t,n,o,r)=>e+`if(await Vencord.Api.MessageEvents._handlePreSend(${n}.id,${t},${r},${o}))return{shouldClear:false,shouldRefocus:true};`}},{find:'("interactionUsernameProfile',replacement:{match:/let\{id:\i}=(\i),{id:\i}=(\i);return \i\.useCallback\((\i)=>\{/,replace:(e,t,n,o)=>`const vcMsg=${t},vcChan=${n};${e}Vencord.Api.MessageEvents._handleClick(vcMsg,vcChan,${o});`}}]})});var YT,Yye=h(()=>{"use strict";d();O();R();YT=A({name:"MessagePopoverAPI",description:"API to add buttons to message popovers.",authors:[w.KingFish,w.Ven,w.Nuckyz],patches:[{find:"#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",replacement:{match:/(?<=\]\}\)),(.{0,40}togglePopout:.+?\}\))\]\}\):null,(?<=\((\i\.\i),\{label:.+?:null,(\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,replace:(e,t,n,o,r)=>`]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${n},${r}),${o}?${t}:null,`}}]})});var JT,Jye=h(()=>{"use strict";d();O();R();JT=A({name:"MessageUpdaterAPI",description:"API for updating and re-rendering messages.",authors:[w.Nuckyz],patches:[{find:"}renderStickersAccessories(",replacement:{match:/(?<=this.props,\i,\[)"message",/,replace:""}}]})});var XT,Xye=h(()=>{"use strict";d();O();R();XT=A({name:"NicknameIconsAPI",description:"API to add icons to the nickname, in profiles",authors:[w.Nuckyz],patches:[{find:"#{intl::USER_PROFILE_PRONOUNS}",replacement:[{match:/(?<=children:\i\}\):\i,)null!=\i/,replace:"($&||!!Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"},{match:/(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)(?=\}\)\])/,replace:"children:[...Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id}),$1]"}]}]})});var VT,Vye=h(()=>{"use strict";d();O();R();VT=A({name:"NoticesAPI",description:"Fixes notices being automatically dismissed",authors:[w.Ven],required:!0,patches:[{find:'"NoticeStore"',replacement:[{match:/(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,replace:"if(Vencord.Api.Notices.currentNotice)return false;$&"},{match:/(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,replace:(e,t)=>`if(${t}?.id=="EquicordNotice")return(${t}=null,Vencord.Api.Notices.nextNotice(),true);${e}`}]}]})});var e9,eve=h(()=>{"use strict";d();O();R();e9=A({name:"ServerListAPI",authors:[w.kemo],description:"Api required for plugins that modify the server list",patches:[{find:"#{intl::DISCODO_DISABLED}",replacement:{match:/(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:"friends-list".+?}\))(?=}function)/,replace:"[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"}},{find:".setGuildsTree(",replacement:[{match:/(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,replace:"Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"},{match:/lastTargetNode.{0,25}\?null:\i,/,replace:"$&...Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below),"}]}]})});var t9,tve=h(()=>{"use strict";d();O();R();t9=A({name:"UserSettingsAPI",description:"Patches Discord's UserSettings to expose their group and name.",authors:[w.Nuckyz],patches:[{find:",updateSetting:",replacement:[{match:/\.updateAsync\(.+?(?=,useSetting:)/,replace:"$&,userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1]"},{match:/updateSetting:.{0,100}SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"},{match:/updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"}]}]})});var n9,nve=h(()=>{"use strict";d();O();R();T();n9=A({name:"ConcatenatedComponentExtractor",description:"Extract components that have been concatenated by the bundler",authors:[w.sadan],required:!0,patches:[{find:"#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}),focusProps:",replacement:{match:/(?=function (\i)\(\i\)\{let\{onChange:\i,onClose:\i,[^}]+?showEyeDropper:)/,replace:"$self.setColorPicker($1);"}},{find:/="ltr",orientation:\i="vertical"[^}]+?customTheme:/,replacement:{match:/(?=function (\i)\(\i,\i,\i\)\{.{0,20}?return \i\.forwardRef\(function\(\i,\i\)\{let\{[^}]+?="ltr",orientation:)/,replace:"$self.setCreateScroller($1);"}}],setCreateScroller:qH,setColorPicker:jH})});var ove,o9,rve=h(()=>{"use strict";d();q();O();Xe();R();ove=M({disableAnalytics:{type:3,description:"Disable Discord's tracking (analytics/'science')",default:!0,restartNeeded:!0}}),o9=A({name:"NoTrack",description:"Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",authors:[w.Cyn,w.Ven,w.Nuckyz,w.Arrow],required:!0,settings:ove,patches:[{find:"AnalyticsActionHandlers.handle",predicate:()=>ove.store.disableAnalytics,replacement:{match:/\(0,\i\.analyticsTrackingStoreMaker\)/,replace:"(()=>{})"}},{find:".METRICS_V2",replacement:[{match:/this\._intervalId=/,replace:"this._intervalId=void 0&&"},{match:/(?:increment|distribution)\(\i(?:,\i)?\){/g,replace:"$&return;"}]},{find:".BetterDiscord||null!=",replacement:{match:/(?=let \i=window;)/,replace:"return false;"}}],flux:{TRACK(e){e?.resolve?.()}},startAt:"Init",start(){Object.defineProperty(Function.prototype,"d",{configurable:!0,set(e){Object.defineProperty(this,"d",{value:e,configurable:!0,enumerable:!0,writable:!0});let{stack:t}=new Error;if(this.c!=null||!t?.includes("http")||!String(this).includes("exports:{}"))return;let n=t.match(/http.+?(?=:\d+?:\d+?$)/m)?.[0];if(!n)return;let o=new XMLHttpRequest;if(o.open("GET",n,!1),o.send(),!!o.responseText.includes(".DiscordSentry="))throw new ce("NoTrack","#8caaee").info("Disabling Sentry by erroring its WebpackInstance"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry"),new Error("Sentry successfully disabled")}}),Object.defineProperty(window,"DiscordSentry",{configurable:!0,set(){new ce("NoTrack","#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry")}})}})});var Jv,KK,li,lf=h(()=>{"use strict";d();q();bt();Da();Gv();O();Zl();R();se();Jv={SECTION:1,SIDEBAR_ITEM:2,PANEL:3,CATEGORY:5,CUSTOM:19};uo(["SECTION","SIDEBAR_ITEM","PANEL","CUSTOM"],e=>Jv=e);KK=M({settingsLocation:{type:4,description:"Where to put the Nexium Client settings section",options:[{label:"At the very top",value:"top"},{label:"Above the Nitro section",value:"aboveNitro",default:!0},{label:"Below the Nitro section",value:"belowNitro"},{label:"Above Activity Settings",value:"aboveActivity"},{label:"Below Activity Settings",value:"belowActivity"},{label:"At the very bottom",value:"bottom"}]},includeVencordInfoWhenCopying:{type:3,description:"Also copy Nexium info (Nexium, Electron, Chromium) when clicking the version info in the bottom left area of the Settings page",default:!0}}),li=A({name:"Settings",description:"Adds Settings UI and debug info",authors:[w.Ven,w.Megu],required:!0,settings:KK,patches:[{find:"#{intl::COPY_VERSION}",replacement:[{match:/\.RELEASE_CHANNEL/,replace:"$&.replace(/^./, c => c.toUpperCase())"},{match:/"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,replace:(e,t,n,o,r)=>(r=r.replace(/children:\[.+\]/,""),`${e},$self.makeInfoElements(${o},${r}).map(e=>${n}e})),`)},{match:/copyValue:\i\.join\(" "\)/g,replace:"$& + $self.getInfoString()"}]},{find:".buildLayout().map",replacement:{match:/(\i)\.buildLayout\(\)(?=\.map)/,replace:"$self.buildLayout($1)"}}],buildEntry(e){let{key:t,title:n,panelTitle:o=n,Component:r,Icon:a}=e,s={key:t+"_panel",type:Jv.PANEL,useTitle:()=>o,buildLayout:()=>[{type:Jv.CATEGORY,key:t+"_category",buildLayout:()=>[{type:Jv.CUSTOM,key:t+"_custom",Component:r,useSearchTerms:()=>[n]}]}]};return{key:t,type:Jv.SIDEBAR_ITEM,useTitle:()=>n,icon:()=>i(a,{width:20,height:20}),buildLayout:()=>[s]}},buildLayout(e){let t=e.buildLayout();if(e.key!=="$Root"||!Array.isArray(t)||t.some(u=>u?.key==="equicord_section"))return t;let{buildEntry:n}=this,mkS=(k,ti,li)=>({key:k,type:Jv.SECTION,useTitle:()=>ti,buildLayout:()=>li.filter(fl)}),r=[mkS("equicord_section","Nexium",[n({key:"equicord_main",title:"Nexium Client",panelTitle:"Nexium Client",Component:_NXsafe(NexiumHomeComp,"Nexium Client"),Icon:NexiumHomeIcon}),n({key:"equicord_ia",title:"Nexium IA",panelTitle:"Nexium IA",Component:_NXsafe(NexiumIAComp,"Nexium IA"),Icon:NexiumIAIcon}),n({key:"equicord_comptes",title:"Nexium Comptes",panelTitle:"Nexium Comptes",Component:_NXsafe(NexiumComptesComp,"Nexium Comptes"),Icon:NexiumComptesIcon}),n({key:"equicord_data",title:"Nexium Données",panelTitle:"Nexium Données",Component:_NXsafe(NexiumDataComp,"Nexium Données"),Icon:NexiumDataIcon}),n({key:"equicord_abo",title:"Abonnement",panelTitle:"Nexium Abonnement",Component:_NXsafe(NexiumAboComp,"Nexium Abonnement"),Icon:NexiumAboIcon}),n({key:"equicord_ticket",title:"Support",panelTitle:"Nexium Ticket",Component:_NXsafe(NexiumTicketComp,"Nexium Ticket"),Icon:NexiumTicketIcon}),n({key:"equicord_updater",title:"Mise à jour",panelTitle:"Nexium — Mise à jour",Component:_NXsafe(NexiumUpdateComp,"Mise à jour"),Icon:NexiumUpdateIcon}),n({key:"equicord_changelog",title:"Changelog",Component:ST,Icon:j5}),...(window._NXADMIN&&_NXADMIN.estEquipe()?[n({key:"equicord_nexium_admin",title:"Nexium Admins",panelTitle:"Nexium Admins",Component:_NXsafe(NexiumAdminComp,"Nexium Admins"),Icon:NexiumAdminIcon})]:[])]),mkS("equicord_section_protection","Protection",[n({key:"equicord_protect",title:"Nexium Protect",panelTitle:"Nexium Protect",Component:_NXsafe(NexiumProtectComp,"Nexium Protect"),Icon:NexiumProtectIcon}),n({key:"equicord_privacy",title:"Nexium Privacy",panelTitle:"Nexium Privacy",Component:_NXsafe(NexiumPrivacyComp,"Nexium Privacy"),Icon:NexiumPrivacyIcon}),n({key:"equicord_network",title:"Nexium Réseau",panelTitle:"Nexium Réseau",Component:_NXsafe(NexiumNetworkComp,"Nexium Réseau"),Icon:NexiumNetworkIcon})]),mkS("equicord_section_espace","Ton espace",[n({key:"equicord_stats",title:"Nexium Stats",panelTitle:"Nexium Stats",Component:_NXsafe(NexiumStatsComp,"Nexium Stats"),Icon:NexiumStatsIcon}),n({key:"equicord_auto",title:"Nexium Auto",panelTitle:"Nexium Auto",Component:_NXsafe(NexiumAutoComp,"Nexium Auto"),Icon:NexiumAutoIcon}),n({key:"equicord_music",title:"Nexium Music",panelTitle:"Nexium Music",Component:_NXsafe(NexiumMusicComp,"Nexium Music"),Icon:NexiumMusicIcon})]),mkS("equicord_section_perso","Personnalisation",[n({key:"equicord_plugins",title:"Plugins",Component:Gx,Icon:rH}),n({key:"equicord_themes",title:"Themes",Component:_NXthemeWrap(Mx),Icon:Mm})]),mkS("equicord_section_aide","Aide et sauvegardes",[n({key:"equicord_backup_restore",title:"Backup & Restore",Component:MT,Icon:iH}),n({key:"equicord_team",title:"Team",panelTitle:"Nexium — Team",Component:_NXsafe(NexiumTeamComp,"Team"),Icon:NexiumTeamIcon}),n({key:"equicord_sponsor",title:"Sponsor",panelTitle:"Nexium — Sponsor",Component:_NXsafe(NexiumSponsorComp,"Sponsor"),Icon:NexiumSponsorIcon}),VA&&n({key:"equicord_patch_helper",title:"Patch Helper",Component:VA,Icon:aH}),...this.customEntries.map(n)])].filter(x=>x.buildLayout().length),{settingsLocation:a}=KK.store,s={top:"user_section",aboveNitro:"billing_section",belowNitro:"billing_section",aboveActivity:"activity_section",belowActivity:"activity_section",bottom:"utility_section"},l=s[a]??s.top,c=t.findIndex(u=>typeof u?.key=="string"&&u.key===l);return c===-1?c=2:a.startsWith("below")&&(c+=1),t.splice(c,0,...r),t},customSections:[],customEntries:[],get electronVersion(){return VencordNative.native.getVersions().electron??window.legcord?.electron??null},get chromiumVersion(){try{return VencordNative.native.getVersions().chrome??navigator.userAgentData?.brands?.find(e=>e.brand==="Chromium"||e.brand==="Google Chrome")?.version??null}catch{return null}},getVersionInfo(e=!0){let t="";return e&&t?` (${t})`:t},getInfoRows(){let{electronVersion:e,chromiumVersion:t,getVersionInfo:n}=this,o=[`Nexium Client ${t0}${n()}`];return e&&o.push(`Electron ${e}`),t&&o.push(`Chromium ${t}`),o},getInfoString(){return KK.store.includeVencordInfoWhenCopying?`
 `+this.getInfoRows().join(`
 `):""},makeInfoElements(e,t){return this.getInfoRows().map((n,o)=>i(e,{key:o,...t},n))}})});function Hct(e){C.show({message:e,type:C.Type.FAILURE,id:C.genId(),options:{position:C.Position.BOTTOM}})}function jct(){return new Promise(e=>{Ln.show({title:"Restart Required",body:i(f,null,i("p",{style:{textAlign:"center"}},"Some plugins require a restart to fully disable."),i("p",{style:{textAlign:"center"}},"Would you like to restart now?")),confirmText:"Restart Now",cancelText:"Later",onConfirm:()=>e(!0),onCancel:()=>e(!1)})})}async function _i(e){let t=!1;function n(){t=!0}async function o(u,p){return t?await jct()?(u.enabled=!p,location.reload(),!0):!1:!0}let r=Ge[e],a=Me.plugins[r.name],l=a.enabled??!1;if(!l){let{restartNeeded:u,failures:p}=Nv(r);if(p.length)return console.error(`Failed to start dependencies for ${r.name}: ${p.join(", ")}`),Ma("Failed to start dependencies: "+p.join(", "),"Close",()=>null),!1;if(u)return a.enabled=!0,n(),await o(a,l)}if(r.patches?.length)return n(),await o(a,l);if(l&&!r.started)return a.enabled=!l,await o(a,l);if(!(l?Qm(r):Km(r))){a.enabled=!1;let u=`Error while ${l?"stopping":"starting"} plugin ${r.name}`;return console.error(u),Hct(u),!1}return a.enabled=!l,await o(a,l)}function qct(e){let t=parseInt(e.split(".")[2]);return t>=22e3?"Windows 11":t>=10240?"Windows 10":t>=9200?"Windows 8.1":t>=7600?"Windows 7":`Windows (${e})`}function Wct(e){let t=parseInt(e.split(".")[0]);return t===25?"MacOS 26 (Tahoe)":t===24?"MacOS 15 (Sequoia)":t===23?"MacOS 14 (Sonoma)":t===22?"MacOS 13 (Ventura)":t===21?"MacOS 12 (Monterey)":t===20?"MacOS 11 (Big Sur)":t===19?"MacOS 10.15 (Catalina)":`MacOS (${e})`}function QK(){return typeof DiscordNative>"u"?navigator.platform:DiscordNative.process.platform==="win32"?`${qct(DiscordNative.os.release)}`:DiscordNative.process.platform==="darwin"?`${Wct(DiscordNative.os.release)} (${DiscordNative.process.arch==="arm64"?"Apple Silicon":"Intel Silicon"})`:DiscordNative.process.platform==="linux"?`${navigator.platform} (${DiscordNative.os.release})`:DiscordNative.process.platform}var md=h(()=>{"use strict";d();Vg();Qt();q();T()});var ZK,l0,YK=h(()=>{"use strict";d();Vg();q();O();R();T();ZK=M({idleTimeout:{description:"Minutes before Discord goes idle (0 to disable auto-idle)",type:5,markers:cn(0,60,5),default:10,stickToMarkers:!1,restartNeeded:!0},remainInIdle:{description:"When you come back to Discord, remain idle until you confirm you want to go online",type:3,default:!0}}),l0=A({name:"CustomIdle",description:"Allows you to set the time before Discord goes idle (or disable auto-idle)",tags:["Activity","Customisation"],authors:[w.newwares],settings:ZK,patches:[{find:'type:"IDLE",idle:',replacement:[{match:/(?<=Date\.now\(\)-\i>)\i\.\i\|\|/,replace:"$self.getIdleTimeout()||"},{match:/Math\.min\((\i\*\i\.\i\.\i\.SECOND),\i\.\i\)/,replace:"$1"},{match:/\i\.\i\.dispatch\({type:"IDLE",idle:!1}\)/,replace:"$self.handleOnline()"}]}],handleOnline(){if(!ZK.store.remainInIdle){G.dispatch({type:"IDLE",idle:!1});return}let e="Welcome back! Click the button to go online. Click the X to stay idle until reload.";Ox?.[1]===e||qA.some(([,t])=>t===e)||Ma(e,"Exit idle",()=>{ad(),G.dispatch({type:"IDLE",idle:!1})})},getIdleTimeout(){let{idleTimeout:e}=ZK.store;return e===0?1/0:e*6e4}})});async function ive(){let e=await ql();return e&&(await Ym(),ii()),e}function XK(){return{name:"Discord Desktop",version:DiscordNative.app.getVersion()}}async function ave(){let{RELEASE_CHANNEL:e}=window.GLOBAL_ENV,t=XK(),n=`${t.name}`;n+=`${t.version?` v${t.version}`:""}`,n+=`${t.info?` \u2022 ${t.info}`:""}`,n+=`${t.shortHash?` \u2022 [${t.shortHash}](<https://github.com/Omega-devj/nexium-client/commit/${t.hash}>)`:""}`;let o=null,r=o?.spoofed?`${QK()} (spoofed from ${o.originalPlatform})`:QK(),a={"Nexium Client":`v1.14.13.1 \u2022 [${t0}](<https://github.com/Omega-devj/nexium-client/commit/${Pa}>)${li.getVersionInfo()} - ${Intl.DateTimeFormat("en-US",{dateStyle:"medium"}).format(1780518166381)}`,Client:`${e} ~ ${n}`,Platform:r};a["Last Crash Reason"]=(await TA(()=>DiscordNative.processUtils.getLastCrash(),void 0))?.rendererCrashReason??"N/A";let s=(["NoRPC","NoProfileThemes","NoMosaic","NoRoleHeaders","NoSystemBadge","AlwaysAnimate","ClientTheme","SoundTroll","Ingtoninator","NeverPausePreviews","IdleAutoRestart"].filter(Be)??[]).sort();Be(l0.name)&&l0.settings.store.idleTimeout===0&&s.push(l0.name);let c={"Activity Sharing Disabled":TA(()=>!Yct.getSetting(),!1),"Link Embeds Disabled":TA(()=>!Jct.getSetting(),!1),"Nexium Client DevBuild":!0,"Nexium Desktop DevBuild":!1,"Platform Spoofed":o?.spoofed??!1,"Has UserPlugins":Object.values(la).some(p=>p.userPlugin),">2 Weeks Outdated":1780518166381<Date.now()-12096e5,[`Potentially Problematic Plugins: ${s.join(", ")}
 -# Note: These plugins might not be the cause of your problem. They are simply plugins that cause common issues.`]:s.length},u=`>>> ${Object.entries(a).map(([p,m])=>`**${p}**: ${m}`).join(`
