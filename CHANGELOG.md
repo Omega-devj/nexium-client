@@ -1,5 +1,211 @@
 # Nexium Client — Notes de version
 
+## v192 - Il repere les arnaques qui n ont pas de lien
+
+### Le detecteur de manipulation
+
+Nexium Protect examinait des adresses. Il ne voyait rien quand quelqu un
+manipule en francais correct sans jamais coller de lien -- et c est la
+plupart des arnaques qui font mal : le faux support qui reclame ton code a
+six chiffres, le vendeur qui veut etre paye en PayPal entre amis, celui qui
+te fait coller un code dans la console.
+
+Ce detecteur lit la FORME de l echange, pas son contenu :
+
+- onze procedes reconnus : urgence fabriquee, autorite revendiquee, mise a
+  l ecart, dette inventee, appat, demande de donnees, paiement difficile a
+  annuler, menace, intimite trop rapide, installation demandee, et le code
+  a coller dans la console
+- une meme tactique ne compte qu une fois : repeter "vite" cinq fois ne
+  declenche rien
+- deux procedes distincts dans un meme fil pesent plus que leur somme. Un
+  procede isole se defend -- un collegue presse ecrit "depeche toi". Deux,
+  beaucoup moins
+- "colle ca dans la console" alerte a lui seul : il n existe aucune raison
+  honnete de demander ca, et c est comme ca qu un jeton part
+
+Le calcul est entierement local. Des expressions, des compteurs, aucune
+requete : il marche pour tout le monde, gratuitement, hors ligne, et il ne
+coute rien au relais. Il n examine que les messages prives, et jamais ceux
+d un ami -- Discord sait qui sont tes amis, on lui demande.
+
+Verifie sur six vraies tentatives et cinq conversations ordinaires : les six
+sont reperees, les cinq restent silencieuses. Un detecteur qui crie au loup
+est desinstalle dans la semaine.
+
+### Nexium IA 2.0, en essai
+
+Un assistant qui connait ton monde, qui regarde de lui-meme, et qui ecrit
+dans ta facon d ecrire. Les trois coutent du relais : cette branche est donc
+reservee au niveau 2 et au-dessus, elle s allume a la main, et elle se
+referme d elle-meme si l abonnement s arrete.
+
+Cinq fonctions, cinq cases, et chaque case dit ce qu elle coute :
+
+- **le contexte** : l assistant sait quels serveurs tu frequentes, a quelle
+  heure tu vis et de quoi tu parles, au lieu de repartir de zero a chaque
+  question. Il n observe rien de neuf -- il assemble ce que Nexium Stats
+  compte deja. Gratuit
+- **le detecteur de manipulation**, ci-dessus. Gratuit
+- **l IA qui veille** : elle regarde d elle-meme et ne parle que quand ca
+  compte. Regarder ne coute rien ; un seul appel par jour au maximum
+- **le repondant** : il apprend ta facon d ecrire et propose des brouillons
+  dans ton registre. A la demande
+- **le compte rendu vocal** : ce qui s est passe dans une vocale que tu as
+  ratee. A la demande
+
+Le budget est la piece maitresse. Une fonction que tu declenches se paye sur
+ton quota habituel, comme avant. Une fonction AUTOMATIQUE a son propre
+plafond quotidien, plus bas, reglable jusqu a zero : a zero, la veille
+continue de regarder et de te prevenir, mais elle n appelle jamais le relais.
+
+Et la page montre le texte exact qui partirait avec tes questions, tel quel,
+avec son compteur de caracteres. Une case "envoyer mon contexte" qu on ne
+peut pas relire ne se coche pas de bonne foi.
+
+### Ce qui regarde ne coute rien
+
+La veille lit des compteurs que le client tient deja : les fils signales, le
+plancher de version, les tickets non lus, le rythme de la semaine. Aucune
+requete pour decider s il y a quelque chose a dire.
+
+Presque rien ne merite un appel. "Tu as trois tickets avec une reponse" est
+une phrase que le client sait ecrire seul : trois des quatre situations
+surveillees donnent un avis purement local. Une seule merite du langage --
+une conversation que le detecteur a signalee et a laquelle tu as repondu
+quand meme, parce que la le bandeau est deja passe et il n a pas suffi.
+
+Elle n envoie jamais le contenu d un message : ce qui part, c est le nom des
+procedes reperes. La demande fait six cents caracteres, aucune conversation
+privee ne quitte la machine, et rien de ce qu un inconnu a ecrit n entre
+dans la consigne du modele -- envoyer le message lui-meme, ce serait laisser
+l arnaqueur ecrire dans le prompt.
+
+### Le repondant
+
+Un assistant qui propose "Bonjour, je vous remercie de votre message" a
+quelqu un qui ecrit "slt jsp tkt" ne sert a rien.
+
+Le profil de style se construit tout seul, au fil de l eau, sur les messages
+que tu ecris toi : longueur habituelle, majuscules, accents, points, emojis,
+abreviations, tutoiement. Une quinzaine de nombres et huit de tes phrases
+courtes, gardes sur ta machine, effacables d un bouton. Aucune requete.
+
+La page montre en toutes lettres ce qu il croit savoir de toi. Une fonction
+qui apprend sans montrer ce qu elle a appris ne merite pas qu on la laisse
+tourner.
+
+Le brouillon, lui, est demande : il se paye sur ton quota habituel, jamais
+sur le budget automatique. Et il ne s envoie pas tout seul -- il se copie,
+c est toi qui colles.
+
+### Le compte rendu vocal, sans enregistrer personne
+
+Il n enregistre aucune voix et il ne transcrit rien. Ce n est pas un oubli :
+
+- enregistrer une conversation privee sans l accord de ceux qui y
+  participent n est pas une option a cocher
+- aucun moteur de transcription n existe dans ce client, et en embarquer un
+  voudrait dire telecharger des dizaines de mega-octets de modele puis le
+  faire tourner en continu : la fin des petites machines
+- envoyer l audio a un service de transcription coute, par minute de parole,
+  un ordre de grandeur de plus que tout le reste
+
+A la place il repond a la vraie question -- "j ai rate la vocale, il s est
+passe quoi ?" -- en notant ce que Discord montre deja a tout le monde : qui
+est arrive, qui est parti, qui a parle et combien de temps, et ce qui a ete
+ECRIT dans le salon pendant l appel. Un echantillon toutes les deux
+secondes, sur la machine, pour rien.
+
+Et il s annonce. Le message part dans le salon AVANT que le releve commence,
+et si l annonce ne part pas, le releve ne commence pas. Ce n est pas un
+reglage : c est la condition.
+
+### Une case par outil
+
+Sept permissions commandaient trente-sept outils. Accorder "Lire l etat du
+client" en ouvrait dix-huit d un coup, dont le coffre de comptes, le journal
+de traque et l audit de confidentialite.
+
+Les trente-sept sont maintenant listes, chacun avec sa case, groupes par
+permission. Sept d entre eux n etaient affiches nulle part : ceux qui ne
+dependent d aucune permission -- les listes de taches, la memoire des
+preferences, le catalogue d outils.
+
+La hierarchie se lit dans un sens et un seul : la permission dit le domaine,
+la case dit l exception. Une permission fermee ferme tous ses outils ; on ne
+peut pas ouvrir un outil sous une permission fermee.
+
+Decocher interdit vraiment. L outil ne part meme pas dans la liste envoyee
+au modele, et un second verrou refuse son execution s il etait appele quand
+meme. Moins d outils proposes, c est aussi une demande plus petite -- donc
+moins de jetons a chaque question.
+
+### Le fil de conversation, refait
+
+Chaque message etait une bande pleine largeur separee de la suivante par un
+filet, avec un avatar de vingt-huit pixels et un nom en gras. On lisait un
+journal d evenements, pas une conversation -- et la reponse etait indentee
+derriere la colonne de l avatar, ce qui lui retirait quarante-trois pixels
+de largeur de lecture sur toute sa hauteur.
+
+- ce que tu ecris part a droite, dans une bulle fermee et bornee
+- ce que l assistant repond reste a gauche, sans bulle, sur toute la largeur
+- l asymetrie dit qui parle : le nom ne s ecrit plus a chaque tour
+- les tours sont separes par du vide, pas par un trait
+- la reponse s ecrit a la meme encre que ta question. L ecrire plus pale que
+  ce qu on a tape soi-meme et qu on ne relit jamais etait a l envers
+
+Le composeur est plus haut, plus rond, et son bouton d envoi se remplit des
+qu il y a quelque chose a envoyer.
+
+### Les couleurs du client etaient invisibles
+
+`_NXteinte(couleur, alpha)` divise l alpha par cent : l argument est un
+pourcentage. Quatre-vingt-six appels l ecrivaient en fraction.
+`_NXteinte(P.mauve, .3)` rendait donc trois millemes d opacite au lieu de
+trente pour cent. Mesure dans le navigateur, pas suppose : la bordure de la
+marque de l assistant sortait a `rgba(199,162,238,0.004)`.
+
+Ce n etait pas un choix. Multipliees par cent, les quatre-vingt-six valeurs
+tombent exactement sur le meme jeu que les vingt-huit appels deja corrects :
+6, 7, 12, 13, 22, 24, 26, 28, 30, 34, 40. Deux manieres d ecrire la meme
+intention, dont une seule marchait.
+
+Les anneaux du tableau de bord, les bordures des cartes de protection, la
+rosace derriere le medaillon d abonnement et les pastilles teintees
+reapparaissent.
+
+### Une seule fenetre a la fois
+
+A la premiere ouverture, six ecrans pouvaient s afficher ensemble : accueil,
+nouvelle generation, annonce de version, ecran de version, mise a jour, fete
+d abonnement. On fermait tout sans rien lire -- et on apprenait a fermer les
+fenetres de Nexium sans regarder.
+
+Un arbitre laisse passer un ecran, puis impose deux secondes et demie de
+repos. A la premiere ouverture, seul l ecran de bienvenue reste : les
+annonces des versions precedentes sont marquees comme vues plutot que
+rejouees.
+
+### Faire servir ce qui est construit
+
+Une fonction que personne ne trouve n existe pas. Deux leviers, et aucun des
+deux n est une annonce au demarrage :
+
+- **le point neuf** : une entree des reglages qui a change recemment et ou
+  tu n es pas repasse porte un point. Il part a la premiere visite, pour
+  toujours
+- **l invitation meritee** : une fonction ne se propose qu au moment ou elle
+  AURAIT AGI, en disant ce qu elle aurait fait. Quand le detecteur signale
+  une conversation et que la branche 2.0 est fermee, il propose de l ouvrir
+
+Trois bornes, parce qu un bon mecanisme d adoption devient une nuisance
+exactement comme les autres : une invitation par session, deux fois en tout
+pour une fonction donnee, et un refus est definitif. Pas "plus tard" :
+jamais. Et jamais a quelqu un qui n y a pas droit -- proposer l inaccessible
+serait une publicite, pas une invitation.
+
 ## v191 - Un client qui se laisse comprendre
 
 ### A quoi ca sert ?
