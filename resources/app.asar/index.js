@@ -14,7 +14,7 @@ const RAW_APP = "https://raw.githubusercontent.com/Omega-devj/nexium-client/refs
 // Version de CE fichier. A incrementer des qu'on le modifie : c'est ce qui declenche
 // son remplacement chez les utilisateurs. Jusqu'a la v146 il ne se mettait jamais a jour,
 // et une erreur ici obligeait a reinstaller tout le parc a la main.
-const NEXIUM_INDEX_V = 2;
+const NEXIUM_INDEX_V = 4;
 const IDX = __filename;
 const IDXBAK = IDX + ".bak";
 const IDXPEND = IDX + ".pending";
@@ -341,5 +341,145 @@ var NX_REPAIR = false;
         } catch (_) {}
     } catch (e) { log("syncUpdate exception: " + (e && e.message)); }
 })();
+
+// ---------------------------------------------------------------------------
+// Demarrage avec Windows
+//
+// Le reglage vit dans les reglages Vencord, sous plugins.NexiumDemarrage :
+// c est le seul fichier que le renderer sache ecrire. On le lit ici, on
+// applique, et on reecrit a cote ce qu on a REELLEMENT obtenu -- la page
+// affiche donc un fait verifie, pas une intention.
+const NX_DEM_CLE = "NexiumDemarrage";
+const NX_DEM_NOM = "Nexium Client";
+
+function nxFichiersReglages() {
+    const out = [];
+    const vu = {};
+    const ajoute = (f) => {
+        if (vu[f]) return;
+        try { if (fs.statSync(f).isFile()) { vu[f] = 1; out.push(f); } } catch (_) {}
+    };
+    try {
+        const roaming = process.env.APPDATA
+            || path.join(require("os").homedir(), "AppData", "Roaming");
+        // Les marques connues d abord : c est le cas courant, et ca evite de
+        // dependre de l ordre de lecture du disque.
+        for (const marque of ["NanoCord", "Equicord", "Vencord"]) {
+            ajoute(path.join(roaming, marque, "settings", "settings.json"));
+        }
+        // Puis tout dossier de %APPDATA% qui porte la meme structure : le jour
+        // ou la marque change encore, le reglage continue d etre trouve.
+        let noms = [];
+        try { noms = fs.readdirSync(roaming); } catch (_) { noms = []; }
+        for (const nom of noms) {
+            if (out.length >= 8) break;
+            ajoute(path.join(roaming, nom, "settings", "settings.json"));
+        }
+    } catch (_) {}
+    return out;
+}
+// On ne devine pas lequel des deux fichiers est le bon : on prend celui qui
+// porte notre reglage, et a defaut le plus recemment ecrit.
+function nxLitReglages() {
+    let avecCle = null, recent = null;
+    for (const f of nxFichiersReglages()) {
+        try {
+            const st = fs.statSync(f);
+            const d = JSON.parse(fs.readFileSync(f, "utf8"));
+            const cand = { f, d, t: st.mtimeMs };
+            if (d && d.plugins && d.plugins[NX_DEM_CLE]) {
+                if (!avecCle || cand.t > avecCle.t) avecCle = cand;
+            }
+            if (!recent || cand.t > recent.t) recent = cand;
+        } catch (_) {}
+    }
+    return avecCle || recent;
+}
+function nxEcritEtat(fichier, etat) {
+    try {
+        // Relecture juste avant l ecriture : si Vencord a touche au fichier
+        // entre-temps, on ne perd pas ses modifications.
+        const d = JSON.parse(fs.readFileSync(fichier, "utf8"));
+        if (!d.plugins) d.plugins = {};
+        if (!d.plugins[NX_DEM_CLE]) d.plugins[NX_DEM_CLE] = {};
+        d.plugins[NX_DEM_CLE].etat = etat;
+        const tmp = fichier + ".nxtmp";
+        fs.writeFileSync(tmp, JSON.stringify(d, null, 4));
+        fs.renameSync(tmp, fichier);
+    } catch (e) { log("demarrage: etat non ecrit (" + (e && e.message) + ")"); }
+}
+
+let nxDemDernier = null;
+function nxAppliqueDemarrage(source) {
+    try {
+        const { app } = require("electron");
+        if (!app || typeof app.setLoginItemSettings !== "function") return;
+        const r = nxLitReglages();
+        const cfg = r && r.d && r.d.plugins && r.d.plugins[NX_DEM_CLE];
+        // Rien n a jamais ete demande : on ne touche a rien, mais on le dit.
+        if (!cfg || typeof cfg.avecWindows !== "boolean") {
+            if (source === "ouverture") {
+                log("demarrage Windows : aucun reglage trouve ("
+                    + nxFichiersReglages().length + " fichier(s) examine(s))");
+            }
+            return;
+        }
+        const veut = !!cfg.avecWindows;
+        const args = cfg.reduit === false ? [] : ["--start-minimized"];
+        if (nxDemDernier === veut) return;
+        app.setLoginItemSettings({
+            openAtLogin: veut,
+            path: process.execPath,
+            args: args,
+            name: NX_DEM_NOM,
+            enabled: veut,
+        });
+        // On relit ce que Windows a reellement retenu. C est la seule preuve
+        // qui vaille : l appel precedent peut echouer sans rien dire.
+        let obtenu = veut;
+        try {
+            const lu = app.getLoginItemSettings({ path: process.execPath, args: args, name: NX_DEM_NOM });
+            if (lu && typeof lu.openAtLogin === "boolean") obtenu = lu.openAtLogin;
+        } catch (_) {}
+        nxDemDernier = veut;
+        log("demarrage Windows " + (veut ? "active" : "desactive")
+            + " (" + source + ") -> verifie : " + obtenu);
+        if (r && r.f) nxEcritEtat(r.f, {
+            demande: veut, applique: obtenu, reduit: args.length > 0,
+            quand: Date.now(), chemin: process.execPath, nom: NX_DEM_NOM,
+        });
+    } catch (e) { log("demarrage Windows: " + (e && e.message)); }
+}
+
+function nxSurveilleDemarrage() {
+    try {
+        const { app } = require("electron");
+        if (!app || typeof app.whenReady !== "function") return;
+        app.whenReady().then(() => nxAppliqueDemarrage("ouverture")).catch(() => {});
+        // Le guetteur : cocher la case dans le client doit agir tout de suite,
+        // pas au redemarrage suivant. Un seul guetteur, sur un seul fichier.
+        const aSurveiller = [];
+        const choisi = nxLitReglages();
+        if (choisi && choisi.f) aSurveiller.push(choisi.f);
+        for (const f of nxFichiersReglages()) {
+            if (aSurveiller.length >= 3) break;
+            if (aSurveiller.indexOf(f) < 0) aSurveiller.push(f);
+        }
+        for (const f of aSurveiller) {
+            try {
+                let attente = null;
+                fs.watch(f, { persistent: false }, () => {
+                    if (attente) return;
+                    attente = setTimeout(() => {
+                        attente = null;
+                        nxAppliqueDemarrage("reglage modifie");
+                    }, 600);
+                });
+            } catch (_) {}
+        }
+    } catch (e) { log("demarrage Windows, guetteur: " + (e && e.message)); }
+}
+
+nxSurveilleDemarrage();
 
 bootPatcher();

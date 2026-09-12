@@ -1,5 +1,122 @@
 # Nexium Client — Notes de version
 
+## v191 - Un client qui se laisse comprendre
+
+### A quoi ca sert ?
+
+Chaque page porte un bouton qui deplie trois reponses courtes : ce que la
+page fait, ce que ca change sur cette machine, et ce que ca ne fait jamais.
+La troisieme est la plus utile -- elle dit ou s arrete le client. Dix-sept
+pages y repondent, ecrites au meme endroit pour qu on les relise d affilee.
+
+### L ecran d ouverture, refait
+
+Il garde ses cinq etapes reelles, mais il montre desormais l avancement :
+
+- une jauge qui avance par echelle, jamais par largeur : une largeur
+  declenche une mise en page, une echelle reste sur la couche de composition
+- cinq jalons, un cadran a deux anneaux contrarotatifs, un point en orbite
+- l avancement gagne un peu de terrain pendant l attente, sans depasser le
+  palier suivant : un ecran fige se lit comme un ecran bloque
+- passe six secondes, il dit qu on peut cliquer pour passer
+
+Deux cent trente images par seconde au banc. Sous quarante-cinq il se calme,
+sous vingt-quatre le decor mobile part et seul ce qui informe reste.
+
+### Les reglages, reorganises
+
+Six sections courtes au lieu de cinq longues, aucune au-dela de six entrees,
+et l abonnement a la sienne, en deuxieme position. Trois titres disent
+quelque chose : l abonnement affiche l echeance quand elle approche, le
+support le nombre de fils ouverts, la mise a jour qu une version attend.
+
+### Nexium Abonnement, refait
+
+La page repondait par des niveaux. Elle repond maintenant par une carte.
+
+- Trois tours -- Protect, Privacy, IA -- quatre etages chacune : ce qui est
+  ouvert est eclaire, le reste porte un cadenas.
+- Choisir une offre allume en pointille les etages qu elle ouvrirait, et une
+  phrase dit combien : les douze offres s essaient sans rien acheter.
+- Les trois offres generales sont trois colonnes hautes : meme liste de
+  lignes, prix en grand, prix par jour, et un ruban sur celle du milieu.
+- Le nombre de paliers fermes est affiche tel quel : c est exactement ce
+  qu un abonnement ouvre.
+
+### La celebration
+
+Quand une offre apparait sur le compte -- offerte ou payee -- une carte
+s ouvre : le nom, ce que ca ouvre, l echeance. Eclat, roue de rayons, ondes,
+lisere tournant, sillage sur le titre, confettis qui tombent et etincelles
+qui montent. Elle ne fete que ce qui vient d apparaitre, jamais la premiere
+fois qu on regarde -- sinon tout le monde recevrait des confettis le jour de
+la mise a jour. Les particules sont retirees six secondes plus tard :
+soixante-et-onze animations tombent a vingt-deux.
+
+### La mise a jour donne envie
+
+L invitation disait "une nouvelle version est prete" et rien d autre. Elle
+montre maintenant ce que la version apporte -- les vraies lignes du changelog
+publie -- et ce que ca coute : un redemarrage, quelques secondes, les
+reglages conserves. Le flou plein ecran a disparu.
+
+### Le support, cote aspect
+
+Le fil est devenu une conversation : figures d auteur, messages consecutifs
+groupes, separateurs de jour, heures. La liste est passee en cartes a rail
+colore, et les quatre motifs portent enfin leurs icones.
+
+### Nexium demarre avec Windows, pour de vrai
+
+La page decrivait un raccourci que l installateur etait cense poser. Mesure
+faite : il n y en avait aucun, ni dans le dossier Demarrage, ni dans la cle
+Run. Le reglage etait un texte, pas une fonction.
+
+C est maintenant un interrupteur. La page n a pas acces au disque ; le
+lanceur, lui, a l API Electron qui ecrit l entree de session. La page lui
+parle par le fichier de reglages, qu il surveille pendant la session : cocher
+la case agit tout de suite, sans redemarrer.
+
+- L entree est posee au nom de ton compte seulement, jamais comme service
+- Le lanceur relit ce que Windows a REELLEMENT retenu et le renvoie a la
+  page : elle affiche un fait verifie, pas une intention
+- Si Windows refuse -- strategie de groupe, antivirus -- la page le dit
+- Une option pour demarrer reduit dans la barre des taches
+- Le dossier des reglages suit la marque interne du client : le lanceur ne
+  devine plus de nom, il examine ceux qui portent la bonne structure
+- Vingt-neuf essais couvrent la chaine, y compris le cas ou Windows refuse
+
+### Les icones
+
+Les soixante-quatorze icones etaient pleines, dans le gout des bibliotheques
+courantes ; tout le reste du client est au trait fin. Elles sont redessinees
+sur la meme grille, avec une seconde couche de detail sur la moitie d entre
+elles : l echo interieur d un bouclier, l iris d un oeil, les graduations
+d une horloge. Les seize icones de la colonne lisent la meme planche.
+
+L epaisseur, elle, etait a l envers. Exprimee sur une grille de vingt-quatre,
+elle vaut a l ecran epaisseur fois taille divisee par vingt-quatre : les
+petites icones, celles qu on voit partout, recevaient 0,72 pixel de trait a
+douze pixels, les grandes 2,22. Sous un pixel, un trait se devine en gris au
+lieu de se dessiner. Elle compense maintenant la taille, pour un trait
+constant de 1,75 pixel partout -- et huit dessins trop charges pour un trait
+gras ont perdu un element : une puce reste une puce avec quatre pattes.
+
+### Ce qui ne rame plus
+
+Trois animations redessinaient au lieu de composer. Invisibles sur une bonne
+machine, et exactement ce qui fait ramer un petit portable : un flou anime
+sur le titre de chaque page, recalcule a chaque image sur toute la surface du
+texte ; une ombre portee qui pulsait en boucle sans fin ; un fond en degrade
+qui se deplacait en boucle, repeignant son element a chaque image. Les trois
+font la meme chose a l oeil avec les deux seules proprietes que le
+compositeur traite seul, et le reflet de l ecran d accueil s arrete apres
+trois passages.
+
+Le mode economie, enfin, ne decide plus sur une fiche technique. Le nombre de
+coeurs annonce est une promesse ; les images comptees au demarrage sont une
+mesure, et elle passe devant, dans les deux sens.
+
 ## v190 - Abonnements, tickets, et un client qui s ouvre sur quelque chose
 
 Cette version rassemble le travail des versions 185 a 190. Elle apporte trois

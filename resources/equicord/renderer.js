@@ -299,7 +299,7 @@ _NXM.setPopup=function(on){_NXM.cfg.popup=!!on;_NXM.save();if(on){_NXM.buildUI()
 setTimeout(function(){_NXM.loadRemote();},3000);
 try{window.addEventListener("beforeunload",function(){try{_NXM.memoPos();}catch(_){}});}catch(_){}
 }
-var NexiumMusicIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18a3 3 0 1 0 3 3V8h3V6h-5z"}));};
+var NexiumMusicIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("casque",z):null;};
 var _NXBoundary=null;
 try{if(typeof F!=="undefined"&&F&&F.Component){
 _NXBoundary=function(p){F.Component.call(this,p);this.state={err:false,msg:""};};
@@ -864,12 +864,12 @@ _NXMO.CSS=[
 +'background:linear-gradient(90deg,transparent,rgba(255,255,255,.045),transparent);animation:nx-sheen 1.5s linear infinite}',
 '.nx-anim [data-nx-dot]{animation:nx-pulse 2.4s ease-in-out infinite}',
 '@keyframes nx-breathe{0%,100%{opacity:.34}50%{opacity:.9}}',
-'@keyframes nx-shine{0%{background-position:0% 50%}100%{background-position:200% 50%}}',
+'@keyframes nx-shine{0%{transform:translate3d(-130%,0,0)}100%{transform:translate3d(330%,0,0)}}',
 '@keyframes nx-pop{from{opacity:0;transform:translate3d(0,4px,0) scale(.94)}to{opacity:1;transform:none}}',
 '@keyframes nx-swipe{from{opacity:0;transform:translate3d(0,6px,0)}to{opacity:1;transform:none}}',
 '.nx-anim [data-nx-pop]{animation:nx-pop .3s cubic-bezier(.22,.8,.28,1) both;will-change:transform,opacity}',
 '.nx-anim [data-nx-breathe]{animation:nx-breathe 3.6s ease-in-out infinite;will-change:opacity}',
-'.nx-anim [data-nx-shine]{background-size:220% 100%;animation:nx-shine 3.4s linear infinite}',
+'.nx-anim [data-nx-shine]{position:relative;overflow:hidden;}','.nx-anim [data-nx-shine]::after{content:"";position:absolute;top:0;bottom:0;left:0;width:42%;pointer-events:none;transform:translate3d(-130%,0,0);will-change:transform;background:linear-gradient(100deg,transparent,rgba(255,255,255,.42),transparent);animation:nx-shine 3.4s linear infinite}',
 '.nx-anim [data-nx-panel]{animation:nx-swipe .26s cubic-bezier(.22,.8,.28,1) both}',
 '.nx-anim [data-nx-ring]{transition:stroke-dashoffset .9s cubic-bezier(.22,.8,.28,1),stroke .3s ease}',
 '.nx-anim [data-nx-panel] > * > *{animation:nx-rise .36s cubic-bezier(.22,.8,.28,1) both}',
@@ -912,12 +912,12 @@ _NXMO.CSS=[
 '@keyframes nx-draw{from{stroke-dashoffset:var(--nx-len,140)}to{stroke-dashoffset:0}}',
 '@keyframes nx-orbit{from{transform:rotate(0) translateX(var(--nx-r,7px)) rotate(0)}to{transform:rotate(360deg) translateX(var(--nx-r,7px)) rotate(-360deg)}}',
 '@keyframes nx-tick{0%{transform:scale(.35);opacity:0}60%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}',
-'@keyframes nx-glow{0%,100%{filter:drop-shadow(0 0 0 currentColor)}50%{filter:drop-shadow(0 0 5px currentColor)}}',
+'@keyframes nx-glow{0%,100%{opacity:.62;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}',
 '@keyframes nx-shake{0%,100%{transform:translate3d(0,0,0)}20%{transform:translate3d(-2px,0,0)}40%{transform:translate3d(2px,0,0)}60%{transform:translate3d(-1px,0,0)}80%{transform:translate3d(1px,0,0)}}',
 '@keyframes nx-zoom{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}',
 '@keyframes nx-slidel{from{opacity:0;transform:translate3d(-14px,0,0)}to{opacity:1;transform:none}}',
 '@keyframes nx-slider{from{opacity:0;transform:translate3d(14px,0,0)}to{opacity:1;transform:none}}',
-'@keyframes nx-blurin{from{opacity:0;filter:blur(7px)}to{opacity:1;filter:blur(0)}}',
+'@keyframes nx-blurin{from{opacity:0;transform:translateY(9px) scale(.984)}to{opacity:1;transform:none}}',
 '@keyframes nx-wave{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-5px,0)}}',
 '@keyframes nx-dash{to{stroke-dashoffset:-64}}',
 '@keyframes nx-ripple{0%{transform:scale(.55);opacity:.45}100%{transform:scale(2.2);opacity:0}}',
@@ -1018,91 +1018,198 @@ _NXFX.fusion=function(base,extra){try{var o={},k;for(k in base)o[k]=base[k];if(e
 // Tout est dessine sur une grille de 24, en aplat : une seule couleur, celle
 // du texte courant. Une icone ne porte donc jamais sa propre teinte -- c est
 // son contenant qui decide, et le survol peut la changer d un seul reglage.
+// Les icones, redessinees au trait.
+//
+// Elles etaient pleines, dans le gout des bibliotheques d icones courantes.
+// Tout le reste du client est au trait fin -- le cadran du demarrage, les
+// filets, les equerres, les jauges en arc -- et deux vocabulaires se
+// disputaient chaque page. Elles sont maintenant tracees sur la meme grille
+// de 24, avec la meme epaisseur, les memes bouts arrondis, et un dessin
+// geometrique plutot que mime.
+//
+// Une seule contrainte a tenir : ce sont des donnees de chemin, rendues par
+// _NXFX.svg avec `fill:none` et un trait. Un point ferme se dessine donc par
+// un segment nul a bout rond, jamais par un disque.
 _NXFX.D={
-accueil:"M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z",
-etincelle:"M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 10l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9.9-2.6z",
-comptes:"M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z",
-maj:"M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z",
-liste:"M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h12v2H3v-2z",
-bouclier:"M12 2 4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z",
-bouclierOk:"M12 2 4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z",
-oeil:"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
-oeilBarre:"M12 7a5 5 0 0 1 5 5c0 .65-.13 1.26-.36 1.83l2.92 2.92A11.8 11.8 0 0 0 23 12c-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.15 2.15C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46A11.8 11.8 0 0 0 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65a3 3 0 0 0 3 3c.22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53a5 5 0 0 1-5-5c0-.79.2-1.53.53-2.2z",
-graphe:"M3.5 18.5l6-6 4 4L22 6.92 20.59 5.5l-7.09 8.09-4-4L2 16.5l1.5 2z",
-eclair:"M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z",
-note:"M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z",
-base:"M12 2C7 2 3 3.6 3 5.5v13C3 20.4 7 22 12 22s9-1.6 9-3.5v-13C21 3.6 17 2 12 2zm0 2c4.4 0 7 1.3 7 1.5S16.4 7 12 7 5 5.7 5 5.5 7.6 4 12 4zM5 8.2C6.7 9.1 9.2 9.5 12 9.5s5.3-.4 7-1.3v3.1c0 .2-2.6 1.5-7 1.5s-7-1.3-7-1.5V8.2zm0 5.5C6.7 14.6 9.2 15 12 15s5.3-.4 7-1.3v3.1c0 .2-2.6 1.5-7 1.5s-7-1.3-7-1.5v-3.1z",
-equipe:"M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.18.68-2.26 1.76-2.73 1.17-.52 2.61-.91 4.24-.91zM4 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c-.37-.06-.74-.1-1.13-.1-.99 0-1.93.21-2.78.58A2.01 2.01 0 0 0 0 16.43V18h4.5v-1.61c0-.83.23-1.61.63-2.29zM20 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4 3.43c0-.81-.48-1.53-1.22-1.85A6.95 6.95 0 0 0 20 14c-.39 0-.76.04-1.13.1.4.68.63 1.46.63 2.29V18H24v-1.57zM12 6c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z",
-coeur:"M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z",
-reseau:"M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.07 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z",
-check:"M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z",
-croix:"M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
-alerte:"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z",
-info:"M11 7h2v2h-2V7zm0 4h2v6h-2v-6zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z",
-cadenas:"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z",
-cadenasOuvert:"M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6h1.9c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z",
-cle:"M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z",
-horloge:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z",
-loupe:"M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
-plus:"M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
-moins:"M19 13H5v-2h14v2z",
-poubelle:"M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z",
-crayon:"M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
-copie:"M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z",
-telecharge:"M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z",
-televerse:"M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z",
-envoi:"M2.01 21 23 12 2.01 3 2 10l15 2-15 2z",
-lecture:"M8 5v14l11-7z",
-pause:"M6 19h4V5H6v14zm8-14v14h4V5h-4z",
-reglages:"M19.14 12.94a7.07 7.07 0 0 0 0-1.88l2.03-1.58a.5.5 0 0 0 .12-.63l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.2 7.2 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 2h-3.84a.5.5 0 0 0-.49.42l-.36 2.54c-.59.24-1.13.56-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.67 8.48a.5.5 0 0 0 .12.63l2.03 1.58a7.07 7.07 0 0 0 0 1.88l-2.03 1.58a.5.5 0 0 0-.12.63l1.92 3.32c.12.22.38.3.6.22l2.39-.96c.5.38 1.04.7 1.63.94l.36 2.54c.04.24.25.42.49.42h3.84c.24 0 .45-.18.49-.42l.36-2.54c.59-.24 1.13-.56 1.63-.94l2.39.96c.22.08.48 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.63l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z",
-etoile:"M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z",
-feu:"M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36A10.54 10.54 0 0 0 4 12a8 8 0 1 0 16 0c0-4.84-2.34-9.16-6.5-11.33zM11.71 19a3.2 3.2 0 0 1-3.21-3.15c0-1.6 1.03-2.73 2.76-3.08 1.74-.35 3.53-1.19 4.53-2.54.38 1.26.58 2.59.58 3.94A4.71 4.71 0 0 1 11.71 19z",
-cadeau:"M20 6h-2.18A3 3 0 0 0 13 2.5L12 3.6l-1-1.1A3 3 0 0 0 6.18 6H4a2 2 0 0 0-2 2v2h9V8h2v2h9V8a2 2 0 0 0-2-2zM9 6a1 1 0 1 1 0-2c.5 0 .9.3 1.2.7L11 6H9zm6 0h-2l.8-1.3A1.4 1.4 0 0 1 15 4a1 1 0 1 1 0 2zM2 12v8a2 2 0 0 0 2 2h7V12H2zm11 10h7a2 2 0 0 0 2-2v-8h-9v10z",
-jeton:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15.93V19h-2v-1.08a4 4 0 0 1-3-3.42h2a2 2 0 0 0 2 1.75c1.1 0 2-.6 2-1.4 0-.72-.5-1.1-2.2-1.5-1.9-.45-3.6-1.1-3.6-3.1a3.4 3.4 0 0 1 2.8-3.2V5h2v1.06a3.6 3.6 0 0 1 2.9 3.19h-2c-.1-.9-.8-1.5-1.9-1.5-1.1 0-1.9.55-1.9 1.3 0 .68.55 1.02 2.2 1.42 1.95.47 3.6 1.15 3.6 3.2a3.5 3.5 0 0 1-2.9 3.26z",
-banni:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM4 12a8 8 0 0 1 12.9-6.32L5.68 16.9A7.96 7.96 0 0 1 4 12zm8 8a7.96 7.96 0 0 1-4.9-1.68L18.32 7.1A8 8 0 0 1 12 20z",
-couronne:"M5 16 3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 3h14v2H5v-2z",
-cloche:"M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z",
-courrier:"M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z",
-lien:"M3.9 12a3.1 3.1 0 0 1 3.1-3.1h4V7H7a5 5 0 0 0 0 10h4v-1.9H7A3.1 3.1 0 0 1 3.9 12zM8 13h8v-2H8v2zm9-6h-4v1.9h4a3.1 3.1 0 1 1 0 6.2h-4V17h4a5 5 0 0 0 0-10z",
-globe:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.93 6h-2.95a15.6 15.6 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.93 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14A7.8 7.8 0 0 1 4 12c0-.69.1-1.36.26-2h3.38a16.5 16.5 0 0 0 0 4H4.26zm.81 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.99 7.99 0 0 1 5.07 16zm2.95-8H5.07a7.99 7.99 0 0 1 4.33-3.56A15.6 15.6 0 0 0 8.02 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82A13.7 13.7 0 0 1 12 19.96zM14.34 14H9.66a14.7 14.7 0 0 1 0-4h4.68a14.7 14.7 0 0 1 0 4zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14a16.5 16.5 0 0 0 0-4h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z",
-puce:"M15 9H9v6h6V9zm-2 4h-2v-2h2v2zm8-2V9h-2V7a2 2 0 0 0-2-2h-2V3h-2v2h-2V3H9v2H7a2 2 0 0 0-2 2v2H3v2h2v2H3v2h2v2a2 2 0 0 0 2 2h2v2h2v-2h2v2h2v-2h2a2 2 0 0 0 2-2v-2h2v-2h-2v-2h2zm-4 6H7V7h10v10z",
-terminal:"M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 14H4V8h16v10zM6.5 10 5 11.5 7.5 14 5 16.5 6.5 18l4-4-4-4zM12 16.5h6V18h-6v-1.5z",
-code:"M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z",
-livre:"M18 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM6 4h5v8l-2.5-1.5L6 12V4z",
-question:"M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14a4 4 0 0 0-4 4h2a2 2 0 1 1 4 0c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5a4 4 0 0 0-4-4z",
-fleche:"M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z",
-retour:"M12 4l1.41 1.41L7.83 11H20v2H7.83l5.58 5.59L12 20l-8-8z",
-chevron:"M9.29 6.71a1 1 0 0 0 0 1.41L13.17 12l-3.88 3.88a1 1 0 1 0 1.42 1.41l4.59-4.59a1 1 0 0 0 0-1.41L10.71 6.7a1 1 0 0 0-1.42 0z",
-externe:"M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z",
-baguette:"M7.5 5.6 5 7l1.4-2.5L5 2l2.5 1.4L10 2 8.6 4.5 10 7 7.5 5.6zm12 9.8L22 14l-1.4 2.5L22 19l-2.5-1.4L17 19l1.4-2.5L17 14l2.5 1.4zM22 2l-1.4 2.5L22 7l-2.5-1.4L17 7l1.4-2.5L17 2l2.5 1.4L22 2zm-8.7 6.29a1 1 0 0 0-1.41 0l-9.6 9.6a1 1 0 0 0 0 1.41l1.41 1.41a1 1 0 0 0 1.41 0l9.6-9.6a1 1 0 0 0 0-1.41l-1.41-1.41z",
-cible:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm0-14a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z",
-drapeau:"M14.4 6 14 4H5v17h2v-7h5.6l.4 2h7V6z",
-couches:"M12 2 1 8l11 6 9-4.91V17h2V8L12 2zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z",
-grille:"M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z",
-calendrier:"M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 18H5V9h14v12z",
-pouls:"M20 12h-2.5l-2.1 6.3a1 1 0 0 1-1.9-.02L9.9 6.9l-1.6 4.77a1 1 0 0 1-.95.68H4v-2h2.63l2.42-7.22a1 1 0 0 1 1.9.02l3.6 11.4 1.55-4.66a1 1 0 0 1 .95-.69H20v2z",
-image:"M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z",
-dossier:"M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z",
-etiquette:"M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7c0 .55.22 1.05.59 1.42l9 9A2 2 0 0 0 13 22a2 2 0 0 0 1.41-.59l7-7A2 2 0 0 0 22 13a2 2 0 0 0-.59-1.42zM5.5 7A1.5 1.5 0 1 1 5.5 4a1.5 1.5 0 0 1 0 3z",
-filtre:"M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z",
-boussole:"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm2.19 12.19L6 18l3.81-8.19L18 6l-3.81 8.19zM12 10.9a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2z",
-robot:"M20 9V7a2 2 0 0 0-2-2h-3V3h-2v2h-2V3H9v2H6a2 2 0 0 0-2 2v2H2v4h2v2a2 2 0 0 0 2 2h3v2h2v-2h2v2h2v-2h3a2 2 0 0 0 2-2v-2h2V9h-2zM9.5 14a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z",
-boite:"M12 2 3 7v10l9 5 9-5V7l-9-5zm0 2.31L18.5 8 12 11.69 5.5 8 12 4.31zM5 9.72l6 3.41v6.15l-6-3.33V9.72zm8 9.56v-6.15l6-3.41v6.23l-6 3.33z",
-nuage:"M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.99 5.99 0 0 0 6 20h13a5 5 0 0 0 .35-9.96z",
-batterie:"M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z",
-micro:"M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z",
-casque:"M12 1a9 9 0 0 0-9 9v7a3 3 0 0 0 3 3h3v-8H5v-2a7 7 0 1 1 14 0v2h-4v8h3a3 3 0 0 0 3-3v-7a9 9 0 0 0-9-9z",
-point:"M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"};
+accueil:"M4 10.4 12 4.2l8 6.2M6.4 9.2v10h4v-5.2h3.2v5.2h4v-10",
+etincelle:"M12 3.4 13.5 8.3 18.4 9.8 13.5 11.3 12 16.2 10.5 11.3 5.6 9.8 10.5 8.3Z M18.4 14.4l.6 1.9 1.9.6-1.9.6-.6 1.9-.6-1.9-1.9-.6 1.9-.6Z",
+comptes:"M9.2 11.3a3.1 3.1 0 1 0 0-6.2 3.1 3.1 0 0 0 0 6.2M3.6 19.6c0-2.9 2.5-4.8 5.6-4.8s5.6 1.9 5.6 4.8M16.2 5.4a3.1 3.1 0 0 1 0 5.6M17.6 15.1c1.9.6 3.2 1.9 3.2 4.5",
+maj:"M20.2 12a8.2 8.2 0 1 1-2.6-6M20.2 4.2v5.6h-5.6",
+liste:"M9 6.8h10.4M9 12h10.4M9 17.2h10.4M4.8 6.8h.01M4.8 12h.01M4.8 17.2h.01",
+bouclier:"M12 3.6 19.2 6.3v5.4c0 4.2-2.9 7.3-7.2 8.7-4.3-1.4-7.2-4.5-7.2-8.7V6.3Z",
+bouclierOk:"M12 3.6 19.2 6.3v5.4c0 4.2-2.9 7.3-7.2 8.7-4.3-1.4-7.2-4.5-7.2-8.7V6.3Z M8.8 11.9l2.3 2.3 4.1-4.5",
+oeil:"M2.8 12S6.4 6.6 12 6.6 21.2 12 21.2 12 17.6 17.4 12 17.4 2.8 12 2.8 12Z M12 14.6a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2",
+oeilBarre:"M4.3 9.2C3.3 10.3 2.8 12 2.8 12S6.4 17.4 12 17.4c1.5 0 2.8-.4 4-1M9.4 7c.8-.2 1.7-.4 2.6-.4 5.6 0 9.2 5.4 9.2 5.4s-.8 1.2-2.2 2.5M10.2 10.2a2.6 2.6 0 0 0 3.6 3.6M4.4 4.4l15.2 15.2",
+graphe:"M4.2 4.4v15.2h15.6M7.6 16.4V11.2M11.8 16.4V6.8M16 16.4v-7",
+eclair:"M13.6 3.2 6.4 13.2h5L10.4 20.8 17.6 10.8h-5Z",
+note:"M6.4 4.2h7.8l4.4 4.4v11.2H6.4Z M14.2 4.2v4.4h4.4M9.6 14.4h5.4",
+base:"M12 7.6c3.8 0 6.9-1 6.9-2.2S15.8 3.2 12 3.2 5.1 4.2 5.1 5.4 8.2 7.6 12 7.6Z M5.1 5.4v13.2c0 1.2 3.1 2.2 6.9 2.2s6.9-1 6.9-2.2V5.4",
+equipe:"M9.4 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6M3.6 19.6c0-3 2.6-5 5.8-5s5.8 2 5.8 5M16.4 5.6a3 3 0 0 1 0 5.8M17.8 15.2c1.9.6 3.2 1.9 3.2 4.4",
+coeur:"M12 20C7.2 16.6 4 13.9 4 10.5a4.2 4.2 0 0 1 8-2 4.2 4.2 0 0 1 8 2c0 3.4-3.2 6.1-8 9.5Z",
+reseau:"M12 2.8a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6M5.2 15.6a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6M18.8 15.6a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6M10.4 7.6 6.8 14.8M13.6 7.6l3.6 7.2M8 18.4h8",
+check:"M5.2 12.6 9.8 17.2 18.8 7.4",
+croix:"M6.6 6.6 17.4 17.4M17.4 6.6 6.6 17.4",
+alerte:"M12 4 21 19.6H3Z M12 10v4.2M12 17h.01",
+info:"M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8M12 11v5.4M12 7.8h.01",
+cadenas:"M6.8 10.4h10.4v9.2H6.8Z M9 10.4V8a3 3 0 0 1 6 0v2.4M12 14v2.4",
+cadenasOuvert:"M6.8 10.4h10.4v9.2H6.8Z M9 10.4V8a3 3 0 0 1 5.8-1M12 14v2.4",
+cle:"M8.4 7.2a4.2 4.2 0 1 0 0 8.4 4.2 4.2 0 0 0 0-8.4M12.6 11.4h7M16.4 11.4v3.2M19.6 11.4v2.6",
+horloge:"M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8M12 7.4V12l3 2",
+loupe:"M10.8 4.4a6.4 6.4 0 1 0 0 12.8 6.4 6.4 0 0 0 0-12.8M15.6 15.6 20 20",
+plus:"M12 5.4v13.2M5.4 12h13.2",
+moins:"M5.4 12h13.2",
+poubelle:"M4.8 7h14.4M9.4 7V4.8h5.2V7M6.8 7v12.4h10.4V7M10 10.6v5.4M14 10.6v5.4",
+crayon:"M16.4 4.2 19.8 7.6 8.6 18.8 4.4 19.6 5.2 15.4Z M14.4 6.2l3.4 3.4",
+copie:"M8.6 8.6h10.6v10.6H8.6Z M15.4 8.6V5.4H4.8V16h3.2",
+telecharge:"M12 4v10.6M7.6 10.6 12 15l4.4-4.4M4.8 19.4h14.4",
+televerse:"M12 19.4V8.8M7.6 12.8 12 8.4l4.4 4.4M4.8 4.6h14.4",
+envoi:"M20.4 3.6 3.6 10.2l6.6 2.8M20.4 3.6 13.8 20.4l-3.6-7.4M20.4 3.6l-10.2 9.4",
+lecture:"M7.6 4.8 19 12 7.6 19.2Z",
+pause:"M8.6 5.4v13.2M15.4 5.4v13.2",
+reglages:"M4.4 7.6h6M14 7.6h5.6M4.4 16.4h4M11.6 16.4h7.8M12.2 4.8v5.6M9.6 13.6v5.6",
+etoile:"M12 3.8 14.5 9l5.7.8-4.1 4 1 5.6L12 16.8 6.9 19.4l1-5.6-4.1-4 5.7-.8Z",
+feu:"M12 3.4c3 3.4 5.6 5.7 5.6 9.2A5.6 5.6 0 0 1 6.4 12.6c0-1.4.5-2.6 1.4-3.8.4 1.2 1.2 1.9 2 2 0-3 1-5.4 2.2-7.4Z",
+cadeau:"M4.8 10.6h14.4v9.4H4.8Z M3.4 7h17.2v3.6H3.4Z M12 7v13M8.6 7a2.4 2.4 0 1 1 3.4-2.4A2.4 2.4 0 1 1 15.4 7",
+jeton:"M12 3.2a8.8 8.8 0 1 0 0 17.6 8.8 8.8 0 0 0 0-17.6M8.4 12h7.2",
+banni:"M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8M6 6 18 18",
+couronne:"M3.8 7.8 7 13l5-6.6L17 13l3.2-5.2v10.8H3.8Z M3.8 18.6h16.4",
+cloche:"M6.6 10.4a5.4 5.4 0 0 1 10.8 0c0 4 1.6 5.6 1.6 5.6H5s1.6-1.6 1.6-5.6ZM10.2 19a2 2 0 0 0 3.6 0",
+courrier:"M4 6h16v12H4Z M4 6.8 12 13l8-6.2",
+lien:"M10 13.6a3.6 3.6 0 0 0 5.2.2l3-3a3.6 3.6 0 0 0-5.2-5.2l-1.6 1.6M14 10.4a3.6 3.6 0 0 0-5.2-.2l-3 3a3.6 3.6 0 0 0 5.2 5.2l1.6-1.6",
+globe:"M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8M3.8 12h16.4M12 3.6c2 2.4 3.1 5.3 3.1 8.4S14 18 12 20.4c-2-2.4-3.1-5.3-3.1-8.4S10 6 12 3.6Z",
+puce:"M6.6 6.6h10.8v10.8H6.6Z M12 6.6V4M12 20V17.4M6.6 12H4M20 12H17.4M12 12h.01",
+terminal:"M3.4 5h17.2v14H3.4Z M7 9.4 10.4 12 7 14.6M12.8 15h4.6",
+code:"M8.6 8 4.4 12l4.2 4M15.4 8l4.2 4-4.2 4M13.4 5.6l-2.8 12.8",
+livre:"M12 6.8C10.4 5.4 8 5 4.2 5v12.8c3.8 0 6.2.4 7.8 1.8M12 6.8c1.6-1.4 4-1.8 7.8-1.8v12.8c-3.8 0-6.2.4-7.8 1.8",
+question:"M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8M9.6 9.6a2.4 2.4 0 1 1 3.3 2.2c-.6.3-.9.8-.9 1.4v.6M12 16.8h.01",
+fleche:"M4.6 12h14.2M13.4 6.6 19.4 12l-6 5.4",
+retour:"M19.4 12H5.2M10.6 6.6 4.6 12l6 5.4",
+chevron:"M9.6 5.6 16 12l-6.4 6.4",
+externe:"M13.4 4.6h6v6M19.4 4.6 11 13M17.2 13.6v5.8H4.6V6.8h5.8",
+baguette:"M15.6 4.4 19.6 8.4 8.4 19.6 4.4 15.6Z M13.6 6.4l4 4M4.6 4.6l1.2 1.2M9.4 3.4v1.8M3.4 9.4h1.8M19.6 18.4l1.2 1.2",
+cible:"M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 11.2a.8.8 0 1 0 0 1.6.8.8 0 0 0 0-1.6",
+drapeau:"M5.4 20V4.2M5.4 5h12.2l-2.4 3.8 2.4 3.8H5.4",
+couches:"M12 3.4 20.8 8 12 12.6 3.2 8Z M3.2 13.2 12 17.8l8.8-4.6",
+grille:"M4.6 4.6h6v6h-6ZM13.4 4.6h6v6h-6ZM4.6 13.4h6v6h-6ZM13.4 13.4h6v6h-6Z",
+calendrier:"M4.6 6.4h14.8v13H4.6Z M4.6 10.4h14.8M8.6 4v4.4M15.4 4v4.4",
+pouls:"M3 12h4l2.2-5.4 3.6 11L15.4 12h5.6",
+image:"M4.4 5.2h15.2v13.6H4.4Z M9 10.4a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2M4.4 16.2l4.8-4.6 4 3.8 2.8-2.4 3.6 3.2",
+dossier:"M3.8 6.4h5.6l2 2.4h8.8v10.8H3.8Z",
+etiquette:"M3.8 3.8h7.6l8.8 8.8-7.6 7.6-8.8-8.8Z M7.6 7.6h.01",
+filtre:"M4 5.4h16l-6.2 7.2v6.2l-3.6 1.8v-8Z",
+boussole:"M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8M15.4 8.6 13.6 13.6 8.6 15.4 10.4 10.4Z",
+robot:"M5.6 8.2h12.8v10H5.6Z M12 4.6v3.6M9.4 13.2h.01M14.6 13.2h.01M12 2.4a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4",
+boite:"M12 3.4 20.4 7.8v8.4L12 20.6 3.6 16.2V7.8Z M3.6 7.8 12 12.2l8.4-4.4M12 12.2v8.4",
+nuage:"M7.4 18.4a4.4 4.4 0 0 1-.4-8.8 5.4 5.4 0 0 1 10.3 1.4 3.7 3.7 0 0 1-.5 7.4Z",
+batterie:"M3.2 7.8h14.4v8.4H3.2Z M19.8 10.4v3.2M6.6 12h4",
+micro:"M12 3.6a3.2 3.2 0 0 0-3.2 3.2v4.6a3.2 3.2 0 0 0 6.4 0V6.8A3.2 3.2 0 0 0 12 3.6Z M6.2 11.2a5.8 5.8 0 0 0 11.6 0M12 17.2v3.2",
+casque:"M4.6 15.4v-3.2a7.4 7.4 0 0 1 14.8 0v3.2M4.6 13.4h2.6v6H6a1.4 1.4 0 0 1-1.4-1.4ZM19.4 13.4h-2.6v6H18a1.4 1.4 0 0 0 1.4-1.4Z",
+point:"M12 12h.01"};
 _NXFX.trace=function(nom){try{return _NXFX.D[nom]||_NXFX.D.point;}catch(_){return "";}};
+// La seconde couche des icones.
+//
+// Un trait unique donne des pictogrammes lisibles, mais plats. On ajoute donc
+// a celles qu on voit le plus une couche de detail, tracee plus finement et
+// plus discrete : l echo interieur d un bouclier, l iris d un oeil, les
+// graduations d une horloge, la fenetre d une maison. Rien d indispensable --
+// c est justement ce qui fait qu une icone a l air dessinee plutot que
+// generee.
+//
+// Une icone sans entree ici reste au trait simple, et ne coute rien de plus.
+_NXFX.A={
+accueil:"M13.6 10.4h2.6v2.6h-2.6Z",
+etincelle:"M5.6 15.2l.5 1.4 1.4.5-1.4.5-.5 1.4-.5-1.4-1.4-.5 1.4-.5Z",
+bouclier:"M12 6.6 16.4 8.2v3.3c0 2.5-1.8 4.4-4.4 5.3-2.6-.9-4.4-2.8-4.4-5.3V8.2Z",
+bouclierOk:"M12 6.6 16.4 8.2v1",
+oeil:"M12 13.3a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6",
+oeilBarre:"M12 6.6c-.6 0-1.2.05-1.7.15",
+graphe:"M7.6 13.6 11.8 9.4l4.2 3",
+eclair:"M12.4 6.6 9.4 11h2.6",
+base:"M5.1 12c0 1.2 3.1 2.2 6.9 2.2s6.9-1 6.9-2.2",
+coeur:"M8 9.6a2.2 2.2 0 0 1 2.2-2",
+cadenas:"M12 13.6a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4",
+cadenasOuvert:"M12 13.6a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4",
+horloge:"M12 5.6v.9M18.4 12h-.9M12 18.4v-.9M5.6 12h.9",
+etoile:"M12 7.6 13.2 10l2.6.4-1.9 1.8.5 2.6L12 13.6 9.6 14.8l.5-2.6L8.2 10.4 10.8 10Z",
+couronne:"M7.4 16.2h.01M12 16.2h.01M16.6 16.2h.01",
+cadeau:"M4.6 14.6h14.8",
+jeton:"M12 8.4v-2.2M12 17.8v-2.2",
+courrier:"M8.6 15.4h6.8",
+globe:"M5.4 8.6h13.2M5.4 15.4h13.2",
+robot:"M9.8 16.2h4.4",
+casque:"M12.6 19.4h3.4a1.4 1.4 0 0 0 1.4-1.4",
+terminal:"M3.8 8.4h16.4",
+boussole:"M12 3.6v1.4M12 20.4v-1.4M3.6 12h1.4M20.4 12h-1.4",
+livre:"M7 9.4h2.8M7 12.6h2.8",
+nuage:"M9.4 13.6a2.2 2.2 0 0 1 4.2-.6",
+boite:"M16.2 5.4v4.2",
+reseau:"M12 9.5v1.6",
+equipe:"M12 15.8v3.4",
+puce:"M9.8 9.8h4.4v4.4H9.8Z",
+baguette:"M11 8.8l2.2 2.2",
+comptes:"M9.2 8.2h.01",
+maj:"M12 8.4v3.6l2.4 1.4",
+filtre:"M9.4 9.4h5.2",
+calendrier:"M8.4 13.6h.01M12 13.6h.01M15.6 13.6h.01",
+dossier:"M6.6 12.4h10.8",
+image:"M4.4 12.6h4",
+note:"M9.6 17.6h5.4",
+pouls:"M3 12h1.6",
+drapeau:"M5.4 9h6",
+cible:"M12 3.6v2M12 18.4v2M3.6 12h2M18.4 12h2",
+couches:"M12 3.6 21 8.2 12 12.8 3 8.2Z",
+grille:"M7.6 7.6h.01M16.4 7.6h.01M7.6 16.4h.01M16.4 16.4h.01",
+batterie:"M11.8 12h4",
+micro:"M12 6.4v3.6",
+feu:"M12 17.6a2.6 2.6 0 0 1-2.6-2.6c0-1.2.9-2.1 1.6-3 .2.8.7 1.2 1.2 1.3 0-1.4.5-2.5 1.1-3.5",
+loupe:"M8.6 8.6a3.1 3.1 0 0 0-.9 2.2",
+question:"M12 13.8v.01",
+info:"M10.6 11h1.4",
+alerte:"M12 7.4v1.2",
+lien:"M9.6 14.4l4.8-4.8",
+cle:"M8.4 11.4h.01M12.4 13.4v-2",
+crayon:"M6 16.2l1.8 1.8",
+poubelle:"M12 10.6v5.4",
+telecharge:"M12 4v2.6",
+televerse:"M12 19.4v-2.6",
+envoi:"M10.2 13 20.4 3.6",
+liste:"M9 9.4h7.4M9 14.6h7.4"};
+// Le detail se dessine plus fin et plus discret que le trait principal :
+// c est ce qui empeche l icone de devenir une grille de lignes.
+// En dessous de cette taille, le detail se lit comme une rature.
+_NXFX.SEUIL_ACCENT=22;
+_NXFX.accent=function(nom){try{return _NXFX.A[nom]||null;}catch(_){return null;}};
 
 // Une icone nue. `mv` nomme l animation permanente eventuelle (float, bob,
 // beat, swing, glow) ; `hv` celle du survol du contenant (tourne, penche,
 // saute, secoue, pousse). Les deux sont ignorees si l animation est coupee.
+// Au trait, avec une epaisseur qui suit legerement la taille : a 13 px un
+// trait de 1,65 boucherait les details, a 40 px il serait trop maigre.
+// Le trait est exprime sur la grille de 24 : a l ecran il vaut
+// `epaisseur x taille / 24`. On vise 1,4 pixel quelle que soit la taille --
+// c est la seule facon qu une icone de 13 px soit aussi nette qu une de 26.
+// Les bornes evitent les extremes : une icone minuscule ne doit pas devenir
+// une tache, une grande ne doit pas devenir un dessin au feutre.
+_NXFX.CIBLE=1.75;
+_NXFX.EPAIS=function(z){try{
+var e=(24/(z||18))*_NXFX.CIBLE;
+if(e>3.4)e=3.4;
+if(e<1.1)e=1.1;
+return Math.round(e*100)/100;}catch(_){return 1.6;}};
 _NXFX.svg=function(nom,z,opt){try{
 opt=opt||{};z=z||18;
-var att={viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"};
+var e=nom==="point"?4.4:_NXFX.EPAIS(z);
+var att={viewBox:"0 0 24 24",fill:"none",stroke:"currentColor",
+strokeWidth:e,strokeLinecap:"round",strokeLinejoin:"round",
+width:z,height:z,"aria-hidden":"true"};
 if(opt.style)att.style=opt.style;
-return i("svg",att,i("path",{d:_NXFX.trace(nom)}));}catch(_){return null;}};
+// Le detail n apparait qu a partir de 15 px : plus petit, il epaissit le
+// dessin au lieu de l enrichir.
+var a=(z>=_NXFX.SEUIL_ACCENT&&!opt.nu)?_NXFX.accent(nom):null;
+if(!a)return i("svg",att,i("path",{d:_NXFX.trace(nom)}));
+return i("svg",att,
+i("path",{d:_NXFX.trace(nom)}),
+i("path",{d:a,strokeWidth:e*0.82,opacity:.44}));}catch(_){return null;}};
 _NXFX.ico=function(nom,z,opt){try{
 opt=opt||{};
 var att={"data-nx-ico":opt.hv||"1",style:_NXFX.fusion({color:opt.col||"inherit",lineHeight:0},opt.style)};
@@ -1155,7 +1262,8 @@ o.marque?i("div",{style:{marginLeft:"4px",fontFamily:_NXf.mono,fontSize:"10px",c
 border:"1px solid "+P.hair,borderRadius:"99px",padding:"1px 8px"}},o.marque):null),
 i("div",_NXFX.fusion({style:{fontFamily:_NXf.disp,fontSize:"33px",fontWeight:"800",color:P.txt,
 letterSpacing:"-.035em",lineHeight:1.03}},_NXFX.a({"data-nx-blurin":"1"})),o.titre||""),
-o.texte?i("div",{style:{fontSize:"13.5px",color:P.sub,marginTop:"11px",lineHeight:1.62,maxWidth:"560px"}},o.texte):null)),
+o.texte?i("div",{style:{fontSize:"13.5px",color:P.sub,marginTop:"11px",lineHeight:1.62,maxWidth:"560px"}},o.texte):null,
+o.aide?i(_NXFX.Aide,{aide:o.aide,col:c}):null)),
 o.chiffres&&o.chiffres.length?i("div",{style:{position:"relative",display:"flex",gap:"22px",marginTop:"20px",flexWrap:"wrap"}},
 o.chiffres.map(function(x,k){return i("div",_NXFX.fusion({key:k,style:{minWidth:"84px"}},_NXFX.a({"data-nx-rise":String(k+1)})),
 i("div",{style:{fontFamily:_NXf.disp,fontSize:"21px",fontWeight:"800",color:x.col||P.txt,letterSpacing:"-.02em",
@@ -1386,12 +1494,27 @@ if(!_NXBOOT.boot){try{_NXBOOT.boot=true;
 // de chargement de Discord a disparu, l ossature est en place). Si un de ces
 // faits n arrive jamais, une borne dure retire l ecran de toute facon : mieux
 // vaut un demarrage sans decor qu un client invisible.
+//
+// Trois regles tenues par le harnais, chacune payee par un bug reel :
+//   1. Aucune image de depart n est invisible. Chromium gele la ligne de temps
+//      des animations tant que la fenetre n a pas ete peinte, et la fenetre de
+//      Discord n apparait qu a la fin du demarrage. Une animation gelee
+//      applique son image de depart : si elle est transparente, l ecran est
+//      noir et le reste. L etat de repos EST l etat visible ; le mouvement
+//      n est ajoute qu au premier battement reellement peint.
+//   2. Le noeud n est jamais deplace. Deplacer un element redemarre toutes ses
+//      animations CSS -- ce qui se lisait comme un blocage au milieu du
+//      demarrage.
+//   3. Rien de ce qui bouge n est en SVG. Chromium calcule les animations SVG
+//      sur le fil principal, celui-la meme que Discord occupe pour monter son
+//      interface : elles s arretent net juste avant la fin. Tout ce qui bouge
+//      ici est un element HTML transforme, que le compositeur prend en charge.
 _NXBOOT.ID="nx-boot";
 _NXBOOT.KEY="nexium_boot_anim";
-_NXBOOT.MIN=1600;      // le temps d affichage UNE FOIS le client pret
+_NXBOOT.MIN=1500;      // le temps d affichage UNE FOIS le client pret
 _NXBOOT.MAX=12000;     // la borne dure depuis le chargement du script
 _NXBOOT.tPret=0;       // quand l ossature est apparue, fenetre visible
-_NXBOOT.SORTIE=460;    // la duree du fondu de sortie
+_NXBOOT.SORTIE=520;    // la duree du fondu de sortie
 _NXBOOT.t0=Date.now();
 _NXBOOT.fini=false;
 _NXBOOT.el=null;
@@ -1435,91 +1558,153 @@ _NXBOOT.css=function(){return ""+
 "#nx-boot{position:fixed;inset:0;z-index:2147483646;background:#08080a;"+
 "display:flex;align-items:center;justify-content:center;flex-direction:column;"+
 "font-family:'gg sans','Noto Sans',Helvetica,Arial,sans-serif;color:#f4f4f5;"+
-"opacity:1;transition:opacity "+_NXBOOT.SORTIE+"ms cubic-bezier(.4,0,.2,1);}"+
+"opacity:1;transform:scale(1);contain:strict;"+
+"transition:opacity "+_NXBOOT.SORTIE+"ms cubic-bezier(.32,0,.24,1),"+
+"transform "+_NXBOOT.SORTIE+"ms cubic-bezier(.32,0,.24,1);}"+
 "#nx-boot.nxb-part{opacity:0;pointer-events:none;}"+
-// --- le fond : une grille fine, une lumiere rasante, une vignette ---------
+"#nx-boot i,#nx-boot b{font-style:normal;}"+
+// --- le fond ---------------------------------------------------------------
+// Tout y est peint une seule fois : deux trames, une lumiere, une vignette.
+// Rien n y bouge, donc rien n y coute apres la premiere image.
+"#nx-boot .nxb-aube{position:absolute;left:50%;top:44%;width:min(980px,104vw);"+
+"height:min(980px,104vw);transform:translate(-50%,-50%);pointer-events:none;"+
+"border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.070) 0%,"+
+"rgba(255,255,255,.026) 34%,transparent 66%);}"+
 "#nx-boot .nxb-trame{position:absolute;inset:0;pointer-events:none;"+
-"background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),"+
-"linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);"+
-"background-size:52px 52px;"+
-"-webkit-mask-image:radial-gradient(58% 54% at 50% 46%,#000,transparent 76%);"+
-"mask-image:radial-gradient(58% 54% at 50% 46%,#000,transparent 76%);}"+
-"#nx-boot .nxb-jour{position:absolute;left:50%;top:46%;width:min(760px,86vw);height:min(760px,86vw);"+
-"transform:translate(-50%,-50%);pointer-events:none;border-radius:50%;"+
-"background:radial-gradient(circle,rgba(255,255,255,.055),transparent 62%);}"+
+"background-image:linear-gradient(rgba(255,255,255,.020) 1px,transparent 1px),"+
+"linear-gradient(90deg,rgba(255,255,255,.020) 1px,transparent 1px);"+
+"background-size:44px 44px;"+
+"-webkit-mask-image:radial-gradient(56% 52% at 50% 44%,#000,transparent 74%);"+
+"mask-image:radial-gradient(56% 52% at 50% 44%,#000,transparent 74%);}"+
+"#nx-boot .nxb-trame2{position:absolute;inset:0;pointer-events:none;"+
+"background-image:linear-gradient(rgba(255,255,255,.030) 1px,transparent 1px),"+
+"linear-gradient(90deg,rgba(255,255,255,.030) 1px,transparent 1px);"+
+"background-size:220px 220px;"+
+"-webkit-mask-image:radial-gradient(70% 66% at 50% 44%,#000,transparent 82%);"+
+"mask-image:radial-gradient(70% 66% at 50% 44%,#000,transparent 82%);}"+
 "#nx-boot .nxb-vignette{position:absolute;inset:0;pointer-events:none;"+
-"background:radial-gradient(76% 70% at 50% 46%,transparent 42%,rgba(0,0,0,.66) 100%);}"+
-"#nx-boot .nxb-cadre{position:relative;display:flex;flex-direction:column;align-items:center;"+
-"padding:0 24px;}"+
-// --- la marque : un trait, rien d autre -----------------------------------
-"#nx-boot .nxb-marque{position:relative;width:104px;height:104px;}"+
+"background:radial-gradient(74% 68% at 50% 44%,transparent 40%,rgba(0,0,0,.70) 100%);}"+
+// Quatre equerres : le cadre d un instrument, pas d une fenetre.
+"#nx-boot .nxb-coin{position:absolute;width:22px;height:22px;pointer-events:none;"+
+"border:1px solid rgba(255,255,255,.10);}"+
+"#nx-boot .nxb-c1{top:26px;left:26px;border-right:0;border-bottom:0;}"+
+"#nx-boot .nxb-c2{top:26px;right:26px;border-left:0;border-bottom:0;}"+
+"#nx-boot .nxb-c3{bottom:26px;left:26px;border-right:0;border-top:0;}"+
+"#nx-boot .nxb-c4{bottom:26px;right:26px;border-left:0;border-top:0;}"+
+"#nx-boot .nxb-cadre{position:relative;display:flex;flex-direction:column;"+
+"align-items:center;padding:0 24px;}"+
+// --- la marque -------------------------------------------------------------
+// Deux anneaux qui tournent en sens contraire, un point en orbite, et la
+// lettre au trait. Les trois mobiles sont des DIV : le compositeur les fait
+// tourner sans reveiller le fil principal.
+"#nx-boot .nxb-marque{position:relative;width:118px;height:118px;}"+
 "#nx-boot .nxb-marque svg{position:absolute;inset:0;overflow:visible;}"+
 "#nx-boot .nxb-trace{fill:none;stroke:#f4f4f5;stroke-width:3;"+
 "stroke-linecap:square;stroke-linejoin:miter;stroke-dasharray:var(--l,250);stroke-dashoffset:0;}"+
-"#nx-boot .nxb-cadran{fill:none;stroke:rgba(255,255,255,.13);stroke-width:1;}"+
-// L anneau qui tourne est en HTML, pas en SVG : le compositeur sait le
-// faire tourner tout seul, meme quand le fil principal est occupe.
-"#nx-boot .nxb-arc{position:absolute;inset:4px;border-radius:50%;"+
-"border:1.4px solid transparent;border-top-color:rgba(255,255,255,.72);"+
-"border-right-color:rgba(255,255,255,.20);"+
+"#nx-boot .nxb-cadran{fill:none;stroke:rgba(255,255,255,.12);stroke-width:1;}"+
+"#nx-boot .nxb-tic{stroke:rgba(255,255,255,.20);stroke-width:1;}"+
+"#nx-boot .nxb-arc{position:absolute;inset:6px;border-radius:50%;"+
+"border:1.4px solid transparent;border-top-color:rgba(255,255,255,.78);"+
+"border-right-color:rgba(255,255,255,.16);"+
 "will-change:transform;transform:translateZ(0);}"+
-"#nx-boot .nxb-tic{stroke:rgba(255,255,255,.22);stroke-width:1;}"+
-// --- le texte --------------------------------------------------------------
-"#nx-boot .nxb-nom{position:relative;overflow:hidden;margin-top:32px;padding:2px 0;"+
-"transform:translateZ(0);"+
-"font-size:15px;font-weight:700;letter-spacing:.74em;text-indent:.74em;"+
+"#nx-boot .nxb-arc2{position:absolute;inset:19px;border-radius:50%;"+
+"border:1px solid transparent;border-bottom-color:rgba(255,255,255,.30);"+
+"border-left-color:rgba(255,255,255,.09);"+
+"will-change:transform;transform:translateZ(0);}"+
+"#nx-boot .nxb-orbe{position:absolute;inset:-5px;border-radius:50%;"+
+"will-change:transform;transform:translateZ(0);}"+
+"#nx-boot .nxb-orbe i{position:absolute;top:0;left:50%;width:4px;height:4px;"+
+"margin-left:-2px;border-radius:50%;background:#fff;"+
+"box-shadow:0 0 9px rgba(255,255,255,.85);}"+
+// --- le nom ----------------------------------------------------------------
+"#nx-boot .nxb-nom{display:flex;margin-top:30px;padding:2px 0;"+
+"font-size:15px;font-weight:700;letter-spacing:.70em;text-indent:.70em;"+
 "text-transform:uppercase;color:#f4f4f5;}"+
-"#nx-boot .nxb-nom::after{content:'';position:absolute;top:0;bottom:0;left:0;width:40%;"+
-"pointer-events:none;transform:translate3d(-180%,0,0);will-change:transform;"+
-"background:linear-gradient(100deg,transparent,rgba(255,255,255,.22),transparent);}"+
-"#nx-boot .nxb-filet{width:216px;height:1px;margin-top:22px;position:relative;overflow:hidden;"+
-"background:rgba(255,255,255,.10);transform:translateZ(0);}"+
-"#nx-boot .nxb-filet::after{content:'';position:absolute;top:0;bottom:0;left:0;width:34%;"+
-"background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);"+
+"#nx-boot .nxb-nom i{display:block;}"+
+// --- la jauge --------------------------------------------------------------
+// L avancement passe par une echelle, jamais par une largeur : une largeur
+// declenche une mise en page, une echelle reste sur la couche de composition.
+"#nx-boot .nxb-filet{width:262px;height:2px;margin-top:24px;position:relative;"+
+"overflow:hidden;border-radius:2px;background:rgba(255,255,255,.085);"+
+"transform:translateZ(0);}"+
+"#nx-boot .nxb-jauge{position:absolute;inset:0;transform-origin:left center;"+
+"transform:scaleX(.03);will-change:transform;border-radius:2px;"+
+"background:linear-gradient(90deg,rgba(255,255,255,.42),rgba(255,255,255,.96));"+
+"transition:transform .62s cubic-bezier(.22,1,.36,1);}"+
+"#nx-boot .nxb-filet::after{content:'';position:absolute;top:0;bottom:0;left:0;"+
+"width:32%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.80),transparent);"+
 "transform:translate3d(-120%,0,0);will-change:transform;}"+
-"#nx-boot .nxb-lecture{display:flex;align-items:center;gap:14px;margin-top:20px;"+
+// --- les jalons ------------------------------------------------------------
+"#nx-boot .nxb-pips{display:flex;gap:9px;margin-top:14px;}"+
+"#nx-boot .nxb-pip{width:5px;height:5px;border-radius:50%;"+
+"background:rgba(255,255,255,.14);"+
+"transition:background .34s ease,transform .34s cubic-bezier(.22,1,.36,1);}"+
+"#nx-boot .nxb-pip.nxb-on{background:rgba(255,255,255,.92);transform:scale(1.34);}"+
+// --- la ligne de lecture ---------------------------------------------------
+"#nx-boot .nxb-lecture{display:flex;align-items:center;gap:13px;margin-top:16px;"+
 "font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;"+
-"font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#57545f;}"+
+"font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#57545f;}"+
 "#nx-boot .nxb-lecture b{font-weight:600;color:#c9c6d2;font-variant-numeric:tabular-nums;}"+
-"#nx-boot .nxb-sep{width:1px;height:10px;background:rgba(255,255,255,.14);}"+
-"#nx-boot .nxb-pied{position:absolute;bottom:26px;left:0;right:0;text-align:center;"+
+"#nx-boot .nxb-sep{width:1px;height:10px;background:rgba(255,255,255,.13);}"+
+"#nx-boot .nxb-astuce{margin-top:22px;height:12px;"+
+"font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;"+
+"font-size:9px;letter-spacing:.20em;text-transform:uppercase;color:#3d3a45;}"+
+"#nx-boot .nxb-pied{position:absolute;bottom:28px;left:0;right:0;text-align:center;"+
 "font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;"+
 "font-size:9px;color:#332f3a;letter-spacing:.24em;text-transform:uppercase;}"+
 // --- ce qui bouge, une fois la premiere image peinte -----------------------
 "#nx-boot.nxb-vif .nxb-cadre{animation:nxb-entre 1s cubic-bezier(.2,.9,.3,1) both;}"+
-"#nx-boot.nxb-vif .nxb-arc{animation:nxb-tourne 5.4s linear infinite;}"+
-"#nx-boot.nxb-vif .nxb-nom{animation:nxb-monte .8s cubic-bezier(.2,.9,.3,1) .1s both;}"+
-"#nx-boot.nxb-vif .nxb-nom::after{animation:nxb-brille 5s cubic-bezier(.5,0,.5,1) 1.4s infinite;}"+
-"#nx-boot.nxb-vif .nxb-filet{animation:nxb-monte .7s cubic-bezier(.2,.9,.3,1) .24s both;}"+
-"#nx-boot.nxb-vif .nxb-filet::after{animation:nxb-court 1.9s cubic-bezier(.45,0,.55,1) infinite;}"+
-"#nx-boot.nxb-vif .nxb-lecture{animation:nxb-monte .7s cubic-bezier(.2,.9,.3,1) .36s both;}"+
-"#nx-boot.nxb-vif .nxb-pied{animation:nxb-monte .8s cubic-bezier(.2,.9,.3,1) .5s both;}"+
-"@keyframes nxb-entre{from{transform:scale(.97)}to{transform:none}}"+
-"@keyframes nxb-monte{from{transform:translateY(10px)}to{transform:none}}"+
+"#nx-boot.nxb-vif .nxb-marque{animation:nxb-monte .8s cubic-bezier(.2,.9,.3,1) both;}"+
+"#nx-boot.nxb-vif .nxb-arc{animation:nxb-tourne 6.2s linear infinite;}"+
+"#nx-boot.nxb-vif .nxb-arc2{animation:nxb-tourne-inv 9.4s linear infinite;}"+
+"#nx-boot.nxb-vif .nxb-orbe{animation:nxb-tourne 3.8s linear infinite;}"+
+"#nx-boot.nxb-vif .nxb-nom i{animation:nxb-lettre .72s cubic-bezier(.2,.9,.3,1) both;}"+
+"#nx-boot.nxb-vif .nxb-nom i:nth-child(1){animation-delay:.10s;}"+
+"#nx-boot.nxb-vif .nxb-nom i:nth-child(2){animation-delay:.15s;}"+
+"#nx-boot.nxb-vif .nxb-nom i:nth-child(3){animation-delay:.20s;}"+
+"#nx-boot.nxb-vif .nxb-nom i:nth-child(4){animation-delay:.25s;}"+
+"#nx-boot.nxb-vif .nxb-nom i:nth-child(5){animation-delay:.30s;}"+
+"#nx-boot.nxb-vif .nxb-nom i:nth-child(6){animation-delay:.35s;}"+
+"#nx-boot.nxb-vif .nxb-filet{animation:nxb-monte .7s cubic-bezier(.2,.9,.3,1) .30s both;}"+
+"#nx-boot.nxb-vif .nxb-filet::after{animation:nxb-court 2.1s cubic-bezier(.45,0,.55,1) infinite;}"+
+"#nx-boot.nxb-vif .nxb-pips{animation:nxb-monte .7s cubic-bezier(.2,.9,.3,1) .38s both;}"+
+"#nx-boot.nxb-vif .nxb-lecture{animation:nxb-monte .7s cubic-bezier(.2,.9,.3,1) .46s both;}"+
+"#nx-boot.nxb-vif .nxb-pied{animation:nxb-monte .8s cubic-bezier(.2,.9,.3,1) .58s both;}"+
+"@keyframes nxb-entre{from{transform:scale(.965)}to{transform:none}}"+
+"@keyframes nxb-monte{from{transform:translateY(11px)}to{transform:none}}"+
+"@keyframes nxb-lettre{from{transform:translateY(16px)}to{transform:none}}"+
 "@keyframes nxb-tourne{to{transform:rotate(360deg)}}"+
-"@keyframes nxb-brille{0%{transform:translate3d(-180%,0,0)}100%{transform:translate3d(400%,0,0)}}"+
+"@keyframes nxb-tourne-inv{to{transform:rotate(-360deg)}}"+
 "@keyframes nxb-court{0%{transform:translate3d(-120%,0,0)}100%{transform:translate3d(420%,0,0)}}"+
 // Mettre en pause, et non couper : couper redemarrerait l animation le
 // jour ou on la remet, et changer `animation` force un recalcul complet.
-"#nx-boot.nxb-sobre .nxb-arc,#nx-boot.nxb-sobre .nxb-nom::after,"+
+"#nx-boot.nxb-sobre .nxb-arc,#nx-boot.nxb-sobre .nxb-arc2,"+
+"#nx-boot.nxb-sobre .nxb-orbe,"+
 "#nx-boot.nxb-sobre .nxb-filet::after{animation-play-state:paused!important;}"+
+// Dernier palier : sur une machine qui ne suit pas, le decor mobile
+// disparait au lieu de sauter. Ce qui informe -- jauge, jalons, texte --
+// reste entier.
+"#nx-boot.nxb-fixe .nxb-orbe,#nx-boot.nxb-fixe .nxb-arc2,"+
+"#nx-boot.nxb-fixe .nxb-trame2{visibility:hidden;}"+
 "@media (prefers-reduced-motion: reduce){#nx-boot *{animation:none!important;}}";};
-// Le monogramme : un cadran gradue, un arc qui tourne, et la lettre au trait.
-// Aucun degrade, aucune lueur -- le contraste fait tout le travail.
+// Le monogramme : un cadran gradue, deux anneaux, un point en orbite, et la
+// lettre au trait. Aucun degrade, aucune lueur -- le contraste fait tout.
 _NXBOOT.marque=function(){
 var tics="";
 for(var a=0;a<12;a++){
 var ang=(a*30)*Math.PI/180;
-var x1=52+Math.cos(ang)*46,y1=52+Math.sin(ang)*46;
-var x2=52+Math.cos(ang)*(a%3===0?40:43),y2=52+Math.sin(ang)*(a%3===0?40:43);
+var x1=59+Math.cos(ang)*52,y1=59+Math.sin(ang)*52;
+var x2=59+Math.cos(ang)*(a%3===0?45:48),y2=59+Math.sin(ang)*(a%3===0?45:48);
 tics+='<line class="nxb-tic" x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+
 '" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'"/>';}
 return ''+
 '<div class="nxb-arc"></div>'+
-'<svg viewBox="0 0 104 104" aria-hidden="true">'+
-'<circle class="nxb-cadran" cx="52" cy="52" r="47"/>'+
+'<div class="nxb-arc2"></div>'+
+'<div class="nxb-orbe"><i></i></div>'+
+'<svg viewBox="0 0 118 118" aria-hidden="true">'+
+'<circle class="nxb-cadran" cx="59" cy="59" r="53"/>'+
 tics+
-'<path class="nxb-trace" style="--l:200" d="M35 70 V34 L69 70 V34"/>'+
+'<path class="nxb-trace" style="--l:200" d="M42 77 V41 L76 77 V41"/>'+
 '</svg>';};
 _NXBOOT.pose=function(){try{
 if(_NXBOOT.el)return true;
@@ -1539,19 +1724,27 @@ d.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483646
 "color:#f4f4f5;font-family:'gg sans','Noto Sans',Helvetica,Arial,sans-serif;";
 d.setAttribute("role","status");
 d.setAttribute("aria-label","Nexium Client demarre");
+var pips="",b=0;
+for(b=0;b<_NXBOOT.ETAPES.length;b++)pips+='<i class="nxb-pip"></i>';
+var nom="",lettres="NEXIUM";
+for(b=0;b<lettres.length;b++)nom+='<i>'+lettres.charAt(b)+'</i>';
 d.innerHTML=
-'<div class="nxb-jour"></div><div class="nxb-trame"></div>'+
-'<div class="nxb-vignette"></div>'+
+'<div class="nxb-aube"></div><div class="nxb-trame"></div>'+
+'<div class="nxb-trame2"></div><div class="nxb-vignette"></div>'+
+'<div class="nxb-coin nxb-c1"></div><div class="nxb-coin nxb-c2"></div>'+
+'<div class="nxb-coin nxb-c3"></div><div class="nxb-coin nxb-c4"></div>'+
 '<div class="nxb-cadre">'+
 '<div class="nxb-marque">'+_NXBOOT.marque()+'</div>'+
-'<div class="nxb-nom">Nexium</div>'+
-'<div class="nxb-filet"></div>'+
+'<div class="nxb-nom">'+nom+'</div>'+
+'<div class="nxb-filet"><div class="nxb-jauge" id="nx-boot-jauge"></div></div>'+
+'<div class="nxb-pips" id="nx-boot-pips">'+pips+'</div>'+
 '<div class="nxb-lecture">'+
 '<b id="nx-boot-pas">01 / 0'+_NXBOOT.ETAPES.length+'</b>'+
 '<span class="nxb-sep"></span>'+
 '<span id="nx-boot-mot"></span>'+
 '<span class="nxb-sep"></span>'+
-'<b id="nx-boot-pct">0%</b></div></div>'+
+'<b id="nx-boot-pct">0%</b></div>'+
+'<div class="nxb-astuce" id="nx-boot-astuce"></div></div>'+
 '<div class="nxb-pied" id="nx-boot-pied">Nexium Client</div>';
 document.body.appendChild(d);
 _NXBOOT.el=d;
@@ -1564,16 +1757,18 @@ requestAnimationFrame(function(){requestAnimationFrame(function(){try{
 _NXBOOT.vif=true;_NXBOOT.classe();_NXBOOT.mesure();}catch(_){}});});
 else{_NXBOOT.vif=true;_NXBOOT.classe();}}catch(_){}
 return true;}catch(_){return false;}};
-// La classe de l ecran, composee a partir de son etat. Trois drapeaux, une
+// La classe de l ecran, composee a partir de son etat. Quatre drapeaux, une
 // seule ecriture : c est ce qui evite qu une transition en efface une autre.
 _NXBOOT.classe=function(){try{
 if(!_NXBOOT.el)return;
-var c=(_NXBOOT.vif?"nxb-vif":"")+(_NXBOOT.sobre?" nxb-sobre":"");
+var c=(_NXBOOT.vif?"nxb-vif":"")+(_NXBOOT.sobre?" nxb-sobre":"")+
+(_NXBOOT.fixe?" nxb-fixe":"");
 // N ecrire que si la valeur change : une ecriture identique suffit a faire
 // repartir les animations sur certains moteurs.
 if(_NXBOOT.el.className!==c)_NXBOOT.el.className=c;}catch(_){}};
 // Compter les images reellement rendues. Aucune supposition sur la machine :
-// c est le seul chiffre qui dise si le decor passe ou non.
+// c est le seul chiffre qui dise si le decor passe ou non. Deux paliers, pour
+// que le meme ecran tienne sur un portable d entree de gamme.
 _NXBOOT.fps=0;
 _NXBOOT.mesure=function(){try{
 if(_NXBOOT._mes||typeof requestAnimationFrame!=="function")return;
@@ -1585,9 +1780,14 @@ var battement=function(){try{
 if(_NXBOOT.fini)return;
 n++;
 var t=maintenant();
-if((t-t0)<700){requestAnimationFrame(battement);return;}
-_NXBOOT.fps=Math.round(n/((t-t0)/1000));
-if(_NXBOOT.fps<45){_NXBOOT.sobre=true;_NXBOOT.classe();}
+// La borne sur n protege des horloges a faible resolution : sans elle,
+// une horloge qui n avance pas ferait boucler ce compteur sans fin.
+if((t-t0)<700&&n<180){requestAnimationFrame(battement);return;}
+var dt=t-t0;if(dt<=0)dt=1;
+_NXBOOT.fps=Math.round(n/(dt/1000));
+if(_NXBOOT.fps<45){_NXBOOT.sobre=true;}
+if(_NXBOOT.fps<24){_NXBOOT.fixe=true;}
+if(_NXBOOT.sobre||_NXBOOT.fixe)_NXBOOT.classe();
 }catch(_){}};
 requestAnimationFrame(battement);}catch(_){}};
 _NXBOOT.peint=function(){try{
@@ -1595,20 +1795,40 @@ if(!_NXBOOT.el)return;
 var n=_NXBOOT.avance();
 if(n>_NXBOOT.pas)_NXBOOT.pas=n;
 var total=_NXBOOT.ETAPES.length;
-var pc=Math.round((_NXBOOT.pas/total)*100);
+// L avancement affiche glisse vers l etape atteinte au lieu d y sauter, et
+// gagne un peu de terrain tant qu on attend -- sans jamais depasser le
+// palier suivant. Un ecran qui ne bouge plus se lit comme un ecran bloque.
+var sol=Math.round((_NXBOOT.pas/total)*100);
+var plafond=Math.round((Math.min(total,_NXBOOT.pas+1)/total)*100)-2;
+if(plafond<sol)plafond=sol;
+var pc=_NXBOOT._pc>sol?_NXBOOT._pc:sol;
+if(pc<plafond)pc=pc+1;
+if(pc>100)pc=100;
 // Une ecriture inutile dans le document est un recalcul de style de plus,
-// huit fois par seconde, pendant que Discord se charge.
+// cinq fois par seconde, pendant que Discord se charge.
 if(_NXBOOT._pc!==pc){_NXBOOT._pc=pc;
 var p2=document.getElementById("nx-boot-pct");
 if(p2)p2.textContent=pc+"%";
+var j=document.getElementById("nx-boot-jauge");
+if(j)j.style.transform="scaleX("+Math.max(.03,pc/100).toFixed(3)+")";}
+if(_NXBOOT._ps!==_NXBOOT.pas){_NXBOOT._ps=_NXBOOT.pas;
 var e=document.getElementById("nx-boot-mot");
 if(e){var k=Math.min(_NXBOOT.pas,total-1);e.textContent=_NXBOOT.ETAPES[k][0];}
 var ps=document.getElementById("nx-boot-pas");
 if(ps){var n2=Math.min(total,Math.max(1,_NXBOOT.pas+(_NXBOOT.pas<total?1:0)));
-ps.textContent=("0"+n2).slice(-2)+" / "+("0"+total).slice(-2);}}
+ps.textContent=("0"+n2).slice(-2)+" / "+("0"+total).slice(-2);}
+var pp=document.getElementById("nx-boot-pips");
+if(pp&&pp.children){for(var q=0;q<pp.children.length;q++){
+var cl=q<_NXBOOT.pas?"nxb-pip nxb-on":"nxb-pip";
+if(pp.children[q].className!==cl)pp.children[q].className=cl;}}}
 if(!_NXBOOT._ver){var p=document.getElementById("nx-boot-pied");
 var v="";try{v=(window._NXUP&&_NXUP.VERSION)?("v"+_NXUP.VERSION):"";}catch(_){}
-if(p&&v){p.textContent="Nexium Client — "+v;_NXBOOT._ver=true;}}
+if(p&&v){p.textContent="Nexium Client "+String.fromCharCode(0xB7)+" "+v;_NXBOOT._ver=true;}}
+// Passe une certaine attente, on dit comment passer outre. Avant, ce serait
+// inviter a couper un ecran qui allait de toute facon disparaitre.
+if(!_NXBOOT._astuce&&(Date.now()-_NXBOOT.t0)>6500){_NXBOOT._astuce=true;
+var as=document.getElementById("nx-boot-astuce");
+if(as)as.textContent="Clique pour passer";}
 }catch(_){}};
 _NXBOOT.pret=function(){try{
 if(_NXBOOT.pas<_NXBOOT.ETAPES.length)return false;
@@ -1625,14 +1845,19 @@ _NXBOOT.raison=pourquoi||"pret";
 _NXBOOT.duree=Date.now()-_NXBOOT.t0;
 try{_NXDB.set("nexium_boot_trace",JSON.stringify({a:Date.now(),d:_NXBOOT.duree,
 r:_NXBOOT.raison,p:_NXBOOT.pas,att:_NXBOOT.tPret?(_NXBOOT.tPret-_NXBOOT.t0):0,
-essais:_NXBOOT.essais||0,vu:!!_NXBOOT.vif,fps:_NXBOOT.fps||0,sobre:!!_NXBOOT.sobre}));}catch(_){}
+essais:_NXBOOT.essais||0,vu:!!_NXBOOT.vif,fps:_NXBOOT.fps||0,sobre:!!_NXBOOT.sobre,
+fixe:!!_NXBOOT.fixe}));}catch(_){}
 if(_NXBOOT.iv){try{clearInterval(_NXBOOT.iv);}catch(_){}_NXBOOT.iv=null;}
 var d=_NXBOOT.el;
 if(!d)return;
-try{var j=document.getElementById("nx-boot-jauge");if(j)j.style.width="100%";}catch(_){}
+// La jauge finit sa course avant que l ecran ne parte : sinon elle s efface
+// sur un chiffre qui n a jamais atteint cent.
+try{var j=document.getElementById("nx-boot-jauge");if(j)j.style.transform="scaleX(1)";
+var p2=document.getElementById("nx-boot-pct");if(p2)p2.textContent="100%";}catch(_){}
 // Le fondu passe par le style, pas par une classe : ajouter une classe
 // relancerait les animations en cours au moment meme ou l ecran s efface.
-try{d.style.opacity="0";d.style.pointerEvents="none";}catch(_){}
+try{d.style.opacity="0";d.style.pointerEvents="none";
+if(!_NXBOOT.calme())d.style.transform="scale(1.028)";}catch(_){}
 setTimeout(function(){try{
 if(d&&d.parentNode)d.parentNode.removeChild(d);
 var s=document.getElementById("nx-boot-style");
@@ -1660,29 +1885,31 @@ if((Date.now()-_NXBOOT.t0)>_NXBOOT.MAX)_NXBOOT.retire("borne");
 }catch(_){}};
 _NXBOOT.lance=function(){try{
 if(!_NXBOOT.veut())return false;
-// Une fenetre detachee de Discord n est pas un demarrage du client.
+// Une fenetre detachee -- un appel, un lecteur -- n est pas un demarrage.
 try{if(String(location.pathname||"").indexOf("popout")>=0)return false;}catch(_){}
 if(_NXBOOT.calme()){_NXBOOT.MIN=350;_NXBOOT.MAX=4000;}
 try{document.addEventListener("readystatechange",_NXBOOT.insiste);
 document.addEventListener("DOMContentLoaded",_NXBOOT.insiste);}catch(_){}
 if(!_NXBOOT.pose()){_NXBOOT.insiste();
-// La borne dure vaut aussi pour les essais : jamais de voile oublie.
+// Meme sans jamais reussir a se poser, la borne doit tomber : rien ne doit
+// pouvoir laisser un voile en place.
 try{setTimeout(function(){_NXBOOT.retire("borne");},_NXBOOT.MAX+1500);}catch(_){}
 return true;}
 _NXBOOT.peint();
 _NXBOOT.demarre();
-// Une securite de plus, independante de la boucle : si l intervalle est
-// tue par autre chose, l ecran s efface quand meme.
-setTimeout(function(){_NXBOOT.retire("borne");},_NXBOOT.MAX+800);
+try{setTimeout(function(){_NXBOOT.retire("borne");},_NXBOOT.MAX+800);}catch(_){}
 return true;}catch(_){return false;}};
-// Revoir l ecran d ouverture sans redemarrer le client.
+// Revoir l ecran sans redemarrer le client : la page Accueil s en sert.
 _NXBOOT.rejoue=function(){try{
 _NXBOOT.fini=false;_NXBOOT.pas=0;_NXBOOT.tPret=0;_NXBOOT._ver=false;
-_NXBOOT.vif=false;_NXBOOT.part=false;_NXBOOT.sobre=false;_NXBOOT._mes=false;
-_NXBOOT._pc=-1;_NXBOOT._vu=0;
+_NXBOOT.vif=false;_NXBOOT.part=false;_NXBOOT.sobre=false;_NXBOOT.fixe=false;
+_NXBOOT._mes=false;_NXBOOT._astuce=false;
+_NXBOOT._pc=-1;_NXBOOT._ps=-1;_NXBOOT._vu=0;
 _NXBOOT.t0=Date.now();
-try{var v=document.getElementById("nx-boot");if(v&&v.parentNode)v.parentNode.removeChild(v);}catch(_){}
-try{var w=document.getElementById("nx-boot-style");if(w&&w.parentNode)w.parentNode.removeChild(w);}catch(_){}
+var v=document.getElementById(_NXBOOT.ID);
+if(v&&v.parentNode)v.parentNode.removeChild(v);
+var s=document.getElementById("nx-boot-style");
+if(s&&s.parentNode)s.parentNode.removeChild(s);
 _NXBOOT.el=null;
 if(!_NXBOOT.pose())return false;
 _NXBOOT.peint();
@@ -1693,11 +1920,12 @@ if((Date.now()-_NXBOOT.t0)>8000)_NXBOOT.retire("borne");
 }catch(_){_NXBOOT.retire("erreur");}},200);
 return true;}catch(_){return false;}};
 _NXBOOT.dernier=function(){try{
-var r=_NXDB.get("nexium_boot_trace");return r?JSON.parse(r):null;}catch(_){return null;}};
+return JSON.parse(_NXDB.get("nexium_boot_trace")||"null");}catch(_){return null;}};
 _NXBOOT.etat=function(){try{
 return {actif:_NXBOOT.veut(),pose:!!_NXBOOT.el,fini:_NXBOOT.fini,
 pas:_NXBOOT.pas,total:_NXBOOT.ETAPES.length,
-duree:_NXBOOT.duree||0,raison:_NXBOOT.raison||"",fps:_NXBOOT.fps||0,sobre:!!_NXBOOT.sobre,
+duree:_NXBOOT.duree||0,raison:_NXBOOT.raison||"",fps:_NXBOOT.fps||0,
+sobre:!!_NXBOOT.sobre,fixe:!!_NXBOOT.fixe,
 attenteClient:_NXBOOT.tPret?(_NXBOOT.tPret-_NXBOOT.t0):0};}catch(_){return {};}};
 try{_NXBOOT.lance();}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXBOOT");if(window._NXERR)_NXERR.push("module _NXBOOT :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXBOOT desactive:",_nxE);
@@ -1842,6 +2070,17 @@ _NXABO.notify();if(cb)cb(_NXABO.CAT);})
 .catch(function(){if(cb)cb(_NXABO.CAT);});
 }catch(_){if(cb)cb(_NXABO.CAT);}};
 
+// Le titre de l entree dans la colonne. Il porte l information qui merite
+// un coup d oeil : une echeance proche, ou le nombre d offres actives.
+_NXABO.titreOnglet=function(){try{
+var e=_NXABO.courant();
+if(!e||e.admin||e.pionnier)return "Abonnement";
+var p=_NXABO.prochaine();
+if(p){var j=_NXABO.jours(new Date(p.t).toISOString());
+if(j!==null&&j<=7)return "Abonnement · "+j+" j";}
+var L=e.offres||[];
+if(!L.length)return "Abonnement";
+return "Abonnement · "+L.length;}catch(_){return "Abonnement";}};
 _NXABO.resume=function(){try{
 var e=_NXABO.courant();
 if(!e)return {etat:"inconnu",texte:"Etat d abonnement inconnu pour le moment."};
@@ -2001,6 +2240,9 @@ if(!_NXTK.rt||_NXTK.rt.readyState!==1)return false;
 _NXTK.rt.send(JSON.stringify({topic:"realtime:nxt-"+String(tid),event:"broadcast",
 payload:{type:"broadcast",event:"nx",payload:{t:Date.now()}},ref:String(++_NXTK.rtRef)}));
 return true;}catch(_){return false;}};
+_NXTK.titreOnglet=function(){try{
+var n=_NXTK.enAttente?_NXTK.enAttente():0;
+return n?("Support · "+n):"Support";}catch(_){return "Support";}};
 _NXTK.etatDirect=function(){try{
 return {etat:_NXTK.rtEtat,ouvert:!!(_NXTK.rt&&_NXTK.rt.readyState===1),topic:_NXTK.rtTopic};}catch(_){return {};}};
 
@@ -2021,57 +2263,61 @@ if(!_NXANN.boot){try{_NXANN.boot=true;
 // entierement lisible -- et tout ce qui bouge le fait en transform, pour ne
 // pas dependre du fil principal pendant que Discord travaille.
 _NXANN.KEY="nexium_annonce";
-_NXANN.VER="190";
+_NXANN.VER="191";
 _NXANN.ID="nx-annonce";
 _NXANN.el=null;_NXANN.page=0;
 _NXANN.vu=function(){try{return _NXDB.get(_NXANN.KEY)===_NXANN.VER;}catch(_){return false;}};
 _NXANN.marque=function(){try{_NXDB.set(_NXANN.KEY,_NXANN.VER);}catch(_){}};
 
 _NXANN.PAGES=[
-{c:"Nouveau",t:"Le client s ouvre sur quelque chose",
-d:"Un ecran d ouverture couvre Discord pendant qu il se prepare. Il n avance pas sur une minuterie : il avance sur des faits, et s efface une fois et demie apres que le client soit reellement la.",
-l:["Le logo se trace, la barre suit les cinq etapes reelles du demarrage",
-"Il mesure sa propre fluidite et se calme tout seul si la machine peine",
-"Desactivable, et rejouable depuis la page d accueil"],
-ic:"M12 2 2 12h3v8h6v-6h2v6h6v-8h3L12 2z"},
-{c:"Nouveau",t:"Abonnements et tickets",
-d:"Trois offres generales, neuf offres par module, et un vrai fil de support pour les demander. Les utilisateurs presents avant cette version gardent tout, a vie.",
-l:["Nexium Plus, Pro et Ultra, plus neuf offres par module a partir d un euro",
-"Une page Abonnement qui dit exactement ce que ton compte ouvre",
-"Une page Support : tu ouvres un ticket, l equipe repond dans le meme fil",
-"Le fil est efface quinze jours apres son dernier message"],
-ic:"M12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21 12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2z"},
-{c:"Repare",t:"Le bac a sable fonctionne enfin",
-d:"Il ne pouvait pas marcher : depuis Discord, lire une page d un autre domaine est refuse par le navigateur avant meme que la requete parte. Un relais va la chercher a ta place.",
-l:["La chaine de redirections est affichee : un lien raccourci ne cache plus rien",
-"Le site inspecte ne voit ni ton adresse IP ni ton navigateur",
-"Les en-tetes de securite de la page sont rapportees"],
-ic:"M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5z"},
-{c:"Ameliore",t:"Protect parle moins, protege pareil",
-d:"Ecrire a quelqu un declenchait une suite de bandeaux. Une conversation peut desormais etre marquee de confiance, et un mode discret coupe les avis d ambiance partout.",
-l:["Ce qui est dangereux reste bloque dans tous les cas",
-"Le code a coller dans la console se dit toujours : c est l arnaque qui vide un compte",
-"Vingt-cinq actions sensibles de ton compte peuvent etre confirmees avant de partir"],
-ic:"M12 2 4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z"},
-{c:"Refait",t:"Nexium IA ressemble a un vrai chat",
-d:"Le fil est devenu une colonne unique : une rangee pleine largeur par tour, le texte sur une colonne de lecture fixe, une figure et un nom pour chaque interlocuteur.",
-l:["Le panneau flottant s etire par une poignee, et retient sa taille",
-"Des credits peuvent etre offerts a un compte, et sont depenses avant le quota",
-"Le relais applique les niveaux d abonnement de son cote"],
-ic:"M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2z"},
-{c:"Nouveau",t:"Une administration qui sert",
-d:"Offrir des credits, bannir depuis le client, accorder un abonnement, repondre a un ticket en direct. Et une session qui ne se coupe plus toutes les dix minutes.",
-l:["Les alertes de panne arrivent en une seconde au lieu de deux minutes",
-"Une note jetee en vrac devient un titre et un resume, ecrits par Nexium IA",
-"Le bandeau d alerte propose d expliquer l incident, ou de le repousser"],
-ic:"M5 16 3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 3h14v2H5v-2z"},
-{c:"Partout",t:"Une seule esthetique",
-d:"Soixante-dix icones partagees avec leurs animations, une entete commune a quinze pages, une barre d onglets unique. Neuf barres presque identiques ont disparu.",
-l:["Tout le mouvement s efface si le systeme demande moins d animation",
-"Nexium Donnees remonte dans la section principale, Nexium Labo est retire",
-"Nexium Auto sait envoyer des messages, sous plafond et avec journal"],
-ic:"M7.5 5.6 5 7l1.4-2.5L5 2l2.5 1.4L10 2 8.6 4.5 10 7 7.5 5.6zm12 9.8L22 14l-1.4 2.5L22 19l-2.5-1.4L17 19l1.4-2.5L17 14l2.5 1.4zM22 2l-1.4 2.5L22 7l-2.5-1.4L17 7l1.4-2.5L17 2l2.5 1.4L22 2zm-8.7 6.29a1 1 0 0 0-1.41 0l-9.6 9.6a1 1 0 0 0 0 1.41l1.41 1.41a1 1 0 0 0 1.41 0l9.6-9.6a1 1 0 0 0 0-1.41l-1.41-1.41z"}];
-
+{c:"Nouveau",t:"A quoi ca sert ?",
+d:"Chaque page porte un bouton qui deplie trois reponses courtes. La troisieme est celle qui manquait : ce que le client ne fait jamais.",
+l:["Ce que fait la page, ce que ca change chez toi, ce que ca ne fait jamais",
+"Dix-sept pages y repondent, en trois phrases chacune",
+"Ecrites au meme endroit, pour qu on puisse les relire d affilee"],
+ic:"M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8M9.6 9.6a2.4 2.4 0 1 1 3.3 2.2c-.6.3-.9.8-.9 1.4v.6M12 16.8h.01"},
+{c:"Refait",t:"L ecran d ouverture",
+d:"Il garde ses cinq etapes reelles, mais il montre enfin ou il en est. Deux cent trente images par seconde, mesurees.",
+l:["Une jauge qui avance, cinq jalons qui s allument, un cadran a deux anneaux",
+"Il gagne un peu de terrain pendant l attente : un ecran fige se lit comme un ecran bloque",
+"Sous vingt-quatre images par seconde, le decor part et seul ce qui informe reste"],
+ic:"M12 3.6a8.4 8.4 0 1 0 0 16.8 8.4 8.4 0 0 0 0-16.8M12 7.4V12l3 2"},
+{c:"Refait",t:"Une carte, plutot que des niveaux",
+d:"La page Abonnement repondait par des chiffres. Elle repond maintenant par trois tours de quatre etages : ce qui est ouvert est eclaire, le reste porte un cadenas.",
+l:["Choisis une offre : les etages qu elle ouvrirait s allument en pointille",
+"Les douze offres sont essayables sans rien acheter",
+"Trois colonnes hautes, le prix en grand, et le prix par jour en dessous"],
+ic:"M4.6 4.6h6v6h-6ZM13.4 4.6h6v6h-6ZM4.6 13.4h6v6h-6ZM13.4 13.4h6v6h-6Z"},
+{c:"Nouveau",t:"Quand un abonnement s ouvre",
+d:"Une carte s ouvre toute seule : le nom, ce que ca ouvre, l echeance. Eclat, rayons, ondes, confettis qui tombent et etincelles qui montent.",
+l:["Elle ne fete que ce qui vient d apparaitre, jamais ce qui etait deja la",
+"Les particules sont retirees six secondes plus tard",
+"Rejouable depuis la page Abonnement"],
+ic:"M4.6 10.8h14.8v9.2H4.6Z M3.6 7.4h16.8v3.4H3.6Z M12 7.4v12.6"},
+{c:"Reorganise",t:"La colonne des reglages",
+d:"Six sections courtes au lieu de cinq longues. Aucune ne depasse six entrees, et l abonnement a la sienne, en deuxieme position.",
+l:["L abonnement affiche son echeance quand elle approche",
+"Le support affiche le nombre de fils ouverts",
+"La mise a jour signale qu une version attend"],
+ic:"M9 6.8h10.4M9 12h10.4M9 17.2h10.4M4.8 6.8h.01M4.8 12h.01M4.8 17.2h.01"},
+{c:"Refait",t:"Les icones, au trait",
+d:"Soixante-quatorze icones redessinees sur la meme grille que le reste du client, avec une seconde couche de detail sur la moitie d entre elles.",
+l:["L echo interieur d un bouclier, l iris d un oeil, les graduations d une horloge",
+"Les seize icones de la colonne lisent la meme planche que les pages",
+"Le detail n apparait qu a partir de quinze pixels"],
+ic:"M12 3.4 20.4 7.8v8.4L12 20.6 3.6 16.2V7.8Z M3.6 7.8 12 12.2l8.4-4.4M12 12.2v8.4"},
+{c:"Nouveau",t:"Nexium demarre avec Windows",
+d:"La page decrivait un raccourci qui n existait pas. C est maintenant un interrupteur, applique par le lanceur, qui agit sans redemarrer.",
+l:["L entree est posee au nom de ton compte seulement, jamais comme service",
+"La page affiche ce que Windows a reellement retenu, pas ce qu on lui a demande",
+"Si Windows refuse, elle le dit au lieu de pretendre que c est actif"],
+ic:"M3.2 5.6 10 4.6v6.6H3.2ZM11.4 4.4 20.8 3v8.2h-9.4ZM3.2 12.8H10v6.6l-6.8-1ZM11.4 12.8h9.4V21l-9.4-1.4Z"},
+{c:"Plus rapide",t:"Ce qui ne rame plus",
+d:"Trois animations redessinaient au lieu de composer. Invisibles sur une bonne machine, et exactement ce qui fait ramer un petit portable.",
+l:["Le titre de chaque page arrivait par un flou anime, recalcule a chaque image",
+"Une ombre portee et un degrade tournaient en boucle, sans fin",
+"Le mode economie decide desormais sur les images comptees au demarrage, pas sur une fiche technique"],
+ic:"M13.6 3.2 6.4 13.2h5L10.4 20.8 17.6 10.8h-5Z"}];
 _NXANN.css=function(){return ""+
 "#nx-annonce{position:fixed;inset:0;z-index:2147483000;background:rgba(6,6,9,.86);"+
 "display:flex;align-items:center;justify-content:center;padding:24px;"+
@@ -2150,7 +2396,9 @@ try{
 var NS="http://www.w3.org/2000/svg";
 var sv=document.createElementNS(NS,"svg");
 sv.setAttribute("viewBox","0 0 24 24");sv.setAttribute("width","24");sv.setAttribute("height","24");
-sv.setAttribute("fill","currentColor");
+sv.setAttribute("fill","none");sv.setAttribute("stroke","currentColor");
+sv.setAttribute("stroke-width","1.6");sv.setAttribute("stroke-linecap","round");
+sv.setAttribute("stroke-linejoin","round");
 var pa=document.createElementNS(NS,"path");pa.setAttribute("d",p.ic);
 sv.appendChild(pa);ico.appendChild(sv);}catch(_){}
 c.appendChild(ico);
@@ -2262,6 +2510,539 @@ if(pret&&!voile){_NXANN.montre();return;}
 if(essais<60)setTimeout(voir,1000);}catch(_){}};
 voir();}catch(_){}},6000);}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXANN");if(window._NXERR)_NXERR.push("module _NXANN :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXANN desactive:",_nxE);}catch(_){}}
+}
+var _NXFETE=window._NXFETE||(window._NXFETE={});
+if(!_NXFETE.boot){try{_NXFETE.boot=true;
+// La celebration d un abonnement qui s ouvre.
+//
+// Elle se declenche toute seule : a chaque reponse du serveur, on compare les
+// offres actives a celles qu on avait deja vues sur ce compte. Une offre qui
+// apparait est une offre offerte ou payee a l instant -- c est le seul moment
+// ou il y a quelque chose a feter. La toute premiere comparaison ne fete rien
+// et se contente d enregistrer : sinon, tout le monde recevrait des confettis
+// le jour de la mise a jour, pour quelque chose qui n a pas change.
+//
+// Meme discipline visuelle que l ecran d ouverture : ce qui bouge est un
+// element HTML transforme, jamais un flou ni une couleur animee, et tout le
+// mouvement s efface si le systeme demande moins d animation.
+_NXFETE.ID="nx-fete";
+_NXFETE.KEY="nexium_abo_vu";
+_NXFETE.el=null;
+_NXFETE.minuteur=null;
+// Meme regle que partout ailleurs dans le client : c est _NXFX qui decide,
+// et a defaut on relit les memes trois sources.
+_NXFETE.anime=function(){try{
+if(window._NXFX&&_NXFX.anime)return _NXFX.anime();
+if(!window._NXMO||!_NXMO.on)return false;
+if(_NXMO.reduced&&_NXMO.reduced())return false;
+if(window._NXECO&&_NXECO.actif&&_NXECO.actif()&&_NXECO.cfg&&_NXECO.cfg.legerAnim)return false;
+return true;}catch(_){return false;}};
+_NXFETE.grains=function(){try{
+if(!_NXFETE.anime())return 0;
+if(window._NXECO&&_NXECO.actif&&_NXECO.actif())return 14;
+return 34;}catch(_){return 20;}};
+
+// Ce que chaque offre ouvre reellement, dans les mots de la page. Trois
+// lignes : au-dela, ce n est plus une bonne nouvelle, c est un contrat.
+_NXFETE.APPORTS={
+ia:[["Cent demandes par jour, au lieu de trente",
+"Le modele rapide et le modele attentif",
+"Les reponses gardent le fil de la conversation"],
+["Deux cents demandes par jour",
+"Le modele soigne s ajoute aux deux autres",
+"L analyse d image et de fichier s ouvre"],
+["Quatre cents demandes par jour",
+"Tous les modeles, y compris la reflexion longue",
+"Aucun palier ne se referme avant l echeance"]],
+securite:[["Les pieges a jetons et les fausses pages sont bloques",
+"La console est gardee contre le collage d un code",
+"Les fichiers douteux ne partent plus en telechargement"],
+["L analyse avancee des liens raccourcis et des redirections",
+"Le bac a sable ouvre une page sans y aller",
+"Les pieces jointes sont pesees avant d etre ouvertes"],
+["Le controle des sorties reseau du client",
+"Le coffre anti-vol et la quarantaine complete",
+"Tout Nexium Protect, sans reglage ferme"]],
+privacy:[["La telemetrie de Discord est coupee plus loin",
+"Les accuses de lecture et de frappe se taisent",
+"Les liens de suivi sont nettoyes avant l ouverture"],
+["L empreinte du navigateur est brouillee",
+"Les identifiants de session ne sont plus rejoues",
+"Les images distantes passent par un relais"],
+["Le controle complet des donnees qui sortent",
+"L export et l effacement de ce qui est garde ici",
+"Tout Nexium Privacy, sans reglage ferme"]],
+general:[["Nexium IA, Protect et Privacy montent d un cran",
+"Cent demandes par jour a l assistant",
+"Le socle protecteur s etend aux pieges connus"],
+["Les trois domaines au deuxieme palier",
+"Deux cents demandes, et l analyse de fichiers",
+"Le bac a sable et l empreinte brouillee"],
+["Les trois domaines ouverts en entier",
+"Quatre cents demandes, tous les modeles",
+"Plus aucun reglage ferme dans le client"]]};
+_NXFETE.apport=function(fam,rang){try{
+var t=_NXFETE.APPORTS[fam]||_NXFETE.APPORTS.general;
+var k=Math.max(1,Math.min(3,rang||1))-1;
+return t[k]||t[0];}catch(_){return [];}};
+// La famille et le rang se lisent dans la cle de l offre : le client n a pas
+// besoin du catalogue pour dire ce qu il vient de recevoir.
+// Le meme mot ne vaut pas le meme rang partout : "plus" est le premier
+// palier du general et de l IA, mais le deuxieme de Privacy et de Security.
+// On lit donc une table, on ne devine pas.
+_NXFETE.RANGS={plus:1,pro:2,ultra:3,
+ia_plus:1,ia_pro:2,ia_ultra:3,
+pv_one:1,pv_plus:2,pv_extra:3,
+se_one:1,se_plus:2,se_extra:3};
+_NXFETE.devine=function(cle){try{
+var c=String(cle||"");
+var fam=c.indexOf("ia_")===0?"ia":(c.indexOf("pv_")===0?"privacy":
+(c.indexOf("se_")===0?"securite":"general"));
+return {famille:fam,rang:_NXFETE.RANGS[c]||1};}catch(_){return {famille:"general",rang:1};}};
+
+_NXFETE.css=function(){return ""+
+"#nx-fete{position:fixed;inset:0;z-index:2147483644;display:flex;"+
+"align-items:center;justify-content:center;padding:24px;"+
+"font-family:'gg sans','Noto Sans',Helvetica,Arial,sans-serif;"+
+"background:rgba(4,4,6,.74);opacity:1;"+
+"transition:opacity .32s cubic-bezier(.32,0,.24,1);}"+
+"#nx-fete.nxg-part{opacity:0;pointer-events:none;}"+
+"#nx-fete.nxg-part .nxg-carte{transform:translateY(14px) scale(.95);"+
+"transition:transform .32s cubic-bezier(.32,0,.24,1);}"+
+"#nx-fete *{box-sizing:border-box;}"+
+// --- l eclat du premier instant --------------------------------------------
+// Une seule nappe blanche, opacite seule : le compositeur ne redessine rien.
+"#nx-fete .nxg-flash{position:absolute;inset:0;pointer-events:none;opacity:0;"+
+"background:radial-gradient(46% 40% at 50% 46%,rgba(255,255,255,.42),transparent 70%);}"+
+// --- la carte --------------------------------------------------------------
+"#nx-fete .nxg-cadre{position:relative;width:min(438px,100%);"+
+"max-height:calc(100vh - 48px);}"+
+// Le liseré : un balayage conique qui tourne derriere la carte, et que la
+// carte recouvre partout sauf sur un cheveu de bord.
+"#nx-fete .nxg-liseret{position:absolute;inset:-1px;border-radius:21px;"+
+"overflow:hidden;pointer-events:none;}"+
+"#nx-fete .nxg-liseret i{position:absolute;left:50%;top:50%;width:150%;"+
+"padding-bottom:150%;margin:-75% 0 0 -75%;display:block;"+
+"background:conic-gradient(from 0deg,transparent 0deg,rgba(255,255,255,.50) 26deg,"+
+"transparent 62deg,transparent 180deg,rgba(199,162,238,.42) 208deg,transparent 250deg);"+
+"will-change:transform;transform:translateZ(0);}"+
+"#nx-fete .nxg-carte{position:relative;"+
+"background:linear-gradient(180deg,#141418,#0b0b0d);"+
+"border:1px solid rgba(255,255,255,.09);border-radius:20px;"+
+"box-shadow:0 34px 96px rgba(0,0,0,.70);padding:32px 28px 24px;"+
+"max-height:calc(100vh - 48px);overflow-x:hidden;overflow-y:auto;"+
+"text-align:center;color:#f4f4f5;}"+
+"#nx-fete .nxg-halo{position:absolute;left:50%;top:-40%;width:150%;"+
+"padding-bottom:150%;margin-left:-75%;pointer-events:none;border-radius:50%;"+
+"background:conic-gradient(from 0deg,rgba(199,162,238,.22),rgba(127,211,196,.10),"+
+"rgba(233,163,193,.20),rgba(195,217,138,.08),rgba(199,162,238,.22));"+
+"-webkit-mask-image:radial-gradient(closest-side,#000 22%,transparent 64%);"+
+"mask-image:radial-gradient(closest-side,#000 22%,transparent 64%);"+
+"will-change:transform;transform:translateZ(0);}"+
+"#nx-fete .nxg-dedans{position:relative;}"+
+// --- le sceau --------------------------------------------------------------
+"#nx-fete .nxg-boite{position:relative;width:92px;height:92px;margin:0 auto 22px;}"+
+// Les rayons : une roue de traits fins, masquee en couronne.
+"#nx-fete .nxg-rayons{position:absolute;left:50%;top:50%;width:280px;height:280px;"+
+"margin:-140px 0 0 -140px;pointer-events:none;opacity:.34;"+
+"background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.42) 0deg,"+
+"rgba(255,255,255,.42) 1.4deg,transparent 1.4deg,transparent 15deg);"+
+"-webkit-mask-image:radial-gradient(closest-side,transparent 28%,#000 46%,transparent 78%);"+
+"mask-image:radial-gradient(closest-side,transparent 28%,#000 46%,transparent 78%);"+
+"will-change:transform;transform:translateZ(0);}"+
+"#nx-fete .nxg-sceau{position:absolute;inset:5px;"+
+"border-radius:50%;border:1px solid rgba(255,255,255,.18);"+
+"background:radial-gradient(circle at 50% 32%,rgba(255,255,255,.16),rgba(255,255,255,.03));"+
+"display:flex;align-items:center;justify-content:center;"+
+"will-change:transform;}"+
+"#nx-fete .nxg-anneau{position:absolute;inset:-6px;border-radius:50%;"+
+"border:1px solid transparent;border-top-color:rgba(255,255,255,.60);"+
+"border-right-color:rgba(255,255,255,.15);"+
+"will-change:transform;transform:translateZ(0);}"+
+// Trois ondes qui s ecartent du sceau, trois fois, puis se taisent.
+"#nx-fete .nxg-onde{position:absolute;inset:5px;border-radius:50%;"+
+"border:1px solid rgba(255,255,255,.34);pointer-events:none;opacity:0;"+
+"will-change:transform,opacity;}"+
+"#nx-fete .nxg-sceau svg{position:relative;}"+
+// --- le texte --------------------------------------------------------------
+"#nx-fete .nxg-sur{font-size:10.5px;font-weight:800;letter-spacing:.22em;"+
+"text-transform:uppercase;color:#8a8a92;margin-bottom:10px;}"+
+"#nx-fete .nxg-nom{position:relative;overflow:hidden;font-size:28px;font-weight:800;"+
+"letter-spacing:-.03em;line-height:1.14;margin-bottom:8px;padding:1px 0;}"+
+// Le sillage : une bande claire qui traverse le titre. Elle ne fait que se
+// deplacer -- aucun degrade n est recalcule.
+"#nx-fete .nxg-nom::after{content:'';position:absolute;top:0;bottom:0;left:0;width:32%;"+
+"pointer-events:none;transform:translate3d(-190%,0,0);will-change:transform;"+
+"background:linear-gradient(100deg,transparent,rgba(255,255,255,.19),transparent);}"+
+"#nx-fete .nxg-sous{font-size:13px;color:#a6a6ac;line-height:1.6;"+
+"margin:0 auto 20px;max-width:334px;}"+
+"#nx-fete .nxg-liste{text-align:left;border:1px solid rgba(255,255,255,.08);"+
+"border-radius:13px;padding:11px 15px;background:rgba(255,255,255,.022);"+
+"margin-bottom:18px;}"+
+"#nx-fete .nxg-li{display:flex;gap:9px;align-items:flex-start;"+
+"font-size:12.5px;color:#c9c9d2;line-height:1.5;padding:5px 0;}"+
+"#nx-fete .nxg-li s{flex:0 0 auto;width:5px;height:5px;margin-top:6px;"+
+"border-radius:50%;background:rgba(255,255,255,.45);text-decoration:none;}"+
+"#nx-fete .nxg-ech{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;"+
+"font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:#6c6c74;"+
+"margin-bottom:18px;}"+
+// --- les boutons -----------------------------------------------------------
+"#nx-fete .nxg-actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;}"+
+"#nx-fete .nxg-b{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.14);"+
+"border-radius:10px;padding:10px 18px;font-size:12.5px;font-weight:700;cursor:pointer;"+
+"background:transparent;color:#c9c9d2;font-family:inherit;"+
+"transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease;}"+
+"#nx-fete .nxg-b:hover{background:rgba(255,255,255,.07);color:#f4f4f5;transform:translateY(-1px);}"+
+"#nx-fete .nxg-b1{background:#f4f4f5;color:#0a0a0a;border-color:#f4f4f5;}"+
+"#nx-fete .nxg-b1:hover{background:#fff;color:#0a0a0a;}"+
+"#nx-fete .nxg-b1::after{content:'';position:absolute;top:0;bottom:0;left:0;width:38%;"+
+"pointer-events:none;transform:translate3d(-190%,0,0);will-change:transform;"+
+"background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);}"+
+// --- les particules --------------------------------------------------------
+// Deux familles : ce qui tombe, et ce qui monte. Ensemble elles remplissent
+// l ecran sans qu aucune des deux n ait besoin d etre nombreuse.
+"#nx-fete .nxg-pluie{position:absolute;inset:0;overflow:hidden;pointer-events:none;}"+
+"#nx-fete .nxg-g{position:absolute;top:-24px;width:7px;height:11px;border-radius:2px;"+
+"will-change:transform;transform:translate3d(0,-60px,0);}"+
+"#nx-fete .nxg-e{position:absolute;bottom:-14px;width:4px;height:4px;border-radius:50%;"+
+"will-change:transform,opacity;transform:translate3d(0,20px,0);opacity:0;}"+
+// --- le mouvement ----------------------------------------------------------
+"#nx-fete.nxg-vif .nxg-flash{animation:nxg-eclair .70s cubic-bezier(.2,.8,.3,1) both;}"+
+"#nx-fete.nxg-vif .nxg-liseret i{animation:nxg-tourne 7.5s linear infinite;}"+
+"#nx-fete.nxg-vif .nxg-carte{animation:nxg-arrive .74s cubic-bezier(.16,1.12,.3,1) both;}"+
+"#nx-fete.nxg-vif .nxg-halo{animation:nxg-tourne 16s linear infinite;}"+
+"#nx-fete.nxg-vif .nxg-rayons{animation:nxg-jaillit 1.1s cubic-bezier(.16,1,.3,1) .06s both,"+
+"nxg-tourne 26s linear 1.1s infinite;}"+
+"#nx-fete.nxg-vif .nxg-anneau{animation:nxg-tourne 4.6s linear infinite;}"+
+"#nx-fete.nxg-vif .nxg-sceau{animation:nxg-pop .82s cubic-bezier(.16,1.6,.3,1) .10s both,"+
+"nxg-flotte 4.4s ease-in-out .92s infinite;}"+
+"#nx-fete.nxg-vif .nxg-onde{animation:nxg-onde 2.1s cubic-bezier(.22,.6,.3,1) 3 both;}"+
+"#nx-fete.nxg-vif .nxg-o2{animation-delay:.62s;}"+
+"#nx-fete.nxg-vif .nxg-o3{animation-delay:1.24s;}"+
+"#nx-fete.nxg-vif .nxg-sur{animation:nxg-monte .6s cubic-bezier(.2,.9,.3,1) .20s both;}"+
+"#nx-fete.nxg-vif .nxg-nom{animation:nxg-monte .6s cubic-bezier(.2,.9,.3,1) .26s both;}"+
+"#nx-fete.nxg-vif .nxg-nom::after{animation:nxg-sillage 4.2s cubic-bezier(.5,0,.5,1) 1s infinite;}"+
+"#nx-fete.nxg-vif .nxg-sous{animation:nxg-monte .6s cubic-bezier(.2,.9,.3,1) .32s both;}"+
+"#nx-fete.nxg-vif .nxg-liste{animation:nxg-monte .6s cubic-bezier(.2,.9,.3,1) .38s both;}"+
+"#nx-fete.nxg-vif .nxg-li{animation:nxg-glisse .55s cubic-bezier(.2,.9,.3,1) both;}"+
+"#nx-fete.nxg-vif .nxg-li:nth-child(1){animation-delay:.46s;}"+
+"#nx-fete.nxg-vif .nxg-li:nth-child(2){animation-delay:.54s;}"+
+"#nx-fete.nxg-vif .nxg-li:nth-child(3){animation-delay:.62s;}"+
+"#nx-fete.nxg-vif .nxg-li:nth-child(4){animation-delay:.70s;}"+
+"#nx-fete.nxg-vif .nxg-ech{animation:nxg-monte .6s cubic-bezier(.2,.9,.3,1) .70s both;}"+
+"#nx-fete.nxg-vif .nxg-actions{animation:nxg-monte .6s cubic-bezier(.2,.9,.3,1) .78s both;}"+
+"#nx-fete.nxg-vif .nxg-b1::after{animation:nxg-sillage 3.6s cubic-bezier(.5,0,.5,1) 1.6s infinite;}"+
+"#nx-fete.nxg-vif .nxg-g{animation:nxg-chute var(--d,3s) cubic-bezier(.28,.42,.62,1) var(--r,0s) both;}"+
+"#nx-fete.nxg-vif .nxg-e{animation:nxg-monte-etincelle var(--d,3s) cubic-bezier(.3,.5,.4,1) var(--r,0s) both;}"+
+"@keyframes nxg-eclair{0%{transform:scale(.7);opacity:0}"+
+"26%{opacity:.85}100%{transform:scale(1.5);opacity:0}}"+
+"@keyframes nxg-arrive{from{transform:translateY(30px) scale(.90)}to{transform:none}}"+
+"@keyframes nxg-monte{from{transform:translateY(10px)}to{transform:none}}"+
+"@keyframes nxg-glisse{from{transform:translateX(-9px)}to{transform:none}}"+
+"@keyframes nxg-pop{from{transform:scale(.58)}to{transform:none}}"+
+"@keyframes nxg-flotte{0%{transform:translateY(0)}50%{transform:translateY(-3.5px)}"+
+"100%{transform:translateY(0)}}"+
+"@keyframes nxg-jaillit{from{transform:scale(.34);opacity:0}to{transform:none;opacity:.34}}"+
+"@keyframes nxg-onde{0%{transform:scale(1);opacity:.55}"+
+"100%{transform:scale(2.5);opacity:0}}"+
+"@keyframes nxg-tourne{to{transform:rotate(360deg)}}"+
+"@keyframes nxg-sillage{0%{transform:translate3d(-190%,0,0)}"+
+"46%{transform:translate3d(280%,0,0)}100%{transform:translate3d(280%,0,0)}}"+
+"@keyframes nxg-chute{0%{transform:translate3d(0,-60px,0) rotate(0)}"+
+"52%{transform:translate3d(var(--m,0px),46vh,0) rotate(calc(var(--t,540deg) / 2))}"+
+"100%{transform:translate3d(var(--x,0px),108vh,0) rotate(var(--t,540deg))}}"+
+"@keyframes nxg-monte-etincelle{0%{transform:translate3d(0,20px,0) scale(.5);opacity:0}"+
+"18%{opacity:.9}72%{opacity:.7}"+
+"100%{transform:translate3d(var(--x,0px),-84vh,0) scale(1);opacity:0}}"+
+"@media (prefers-reduced-motion: reduce){#nx-fete *{animation:none!important;}}";};
+
+_NXFETE.COULEURS=["#c7a2ee","#7fd3c4","#e9a3c1","#c3d98a","#f4f4f5","#8fb4ea"];
+// Deux familles : des confettis qui tombent en tournant, et des
+// etincelles qui montent. Chacune tire ses chiffres au hasard une seule
+// fois, a la pose -- ensuite le compositeur travaille seul.
+_NXFETE.pluie=function(){try{
+var n=_NXFETE.grains();
+if(!n)return "";
+var h="",a,al=function(){return Math.random();};
+for(a=0;a<n;a++){
+var g=al()*100;
+var d=(2.6+al()*2.4).toFixed(2);
+var r=(al()*1.6).toFixed(2);
+var x=Math.round((al()*210)-105);
+var m=Math.round(x*(0.25+al()*0.5))+Math.round((al()*60)-30);
+var t=Math.round(320+al()*820);
+var c=_NXFETE.COULEURS[a%_NXFETE.COULEURS.length];
+var w=(5+Math.round(al()*4));
+h+='<i class="nxg-g" style="left:'+g.toFixed(1)+'%;background:'+c+';'+
+'width:'+w+'px;height:'+(w+4)+'px;'+
+'opacity:'+(0.5+al()*0.5).toFixed(2)+';'+
+'--d:'+d+'s;--r:'+r+'s;--x:'+x+'px;--m:'+m+'px;--t:'+t+'deg"></i>';}
+var e=Math.max(6,Math.round(n*0.42));
+for(a=0;a<e;a++){
+var g2=al()*100;
+var d2=(3.2+al()*2.6).toFixed(2);
+var r2=(al()*2.4).toFixed(2);
+var x2=Math.round((al()*120)-60);
+var c2=_NXFETE.COULEURS[(a+2)%_NXFETE.COULEURS.length];
+h+='<i class="nxg-e" style="left:'+g2.toFixed(1)+'%;background:'+c2+';'+
+'box-shadow:0 0 8px '+c2+';'+
+'--d:'+d2+'s;--r:'+r2+'s;--x:'+x2+'px"></i>';}
+return h;}catch(_){return "";}};
+
+_NXFETE.ferme=function(){try{
+var d=_NXFETE.el;
+if(!d)return;
+_NXFETE.el=null;
+if(_NXFETE.minuteur){clearTimeout(_NXFETE.minuteur);_NXFETE.minuteur=null;}
+try{if(_NXFETE._clav)document.removeEventListener("keydown",_NXFETE._clav,true);}catch(_){}
+try{d.className=(d.className+" nxg-part").replace(/^ /,"");}catch(_){}
+setTimeout(function(){try{
+if(d&&d.parentNode)d.parentNode.removeChild(d);
+// La feuille ne part que si plus aucune carte ne s en sert : rouvrir avant
+// la fin du fondu laissait la nouvelle carte sans style.
+if(!_NXFETE.el){
+var s=document.getElementById("nx-fete-style");
+if(s&&s.parentNode)s.parentNode.removeChild(s);}}catch(_){}},340);}catch(_){}};
+
+// o : {nom, cle, expire, cadeau, titre}
+_NXFETE.montre=function(o){try{
+o=o||{};
+if(_NXFETE.el)_NXFETE.ferme();
+// Une carte encore en cours de fondu doit partir tout de suite : deux
+// elements ne peuvent pas porter le meme identifiant.
+try{var _v=document.getElementById(_NXFETE.ID);
+if(_v&&_v.parentNode)_v.parentNode.removeChild(_v);}catch(_){}
+if(!document.body)return false;
+try{if(String(location.pathname||"").indexOf("popout")>=0)return false;}catch(_){}
+var g=_NXFETE.devine(o.cle||"");
+var lignes=o.lignes||_NXFETE.apport(g.famille,g.rang);
+if(!document.getElementById("nx-fete-style")){
+var st=document.createElement("style");
+st.id="nx-fete-style";st.textContent=_NXFETE.css();
+(document.head||document.documentElement).appendChild(st);}
+var d=document.createElement("div");
+d.id=_NXFETE.ID;
+d.setAttribute("role","dialog");
+d.setAttribute("aria-label","Abonnement active");
+var li="",a;
+for(a=0;a<lignes.length;a++)
+li+='<div class="nxg-li"><s></s><span>'+_NXFETE.ech(lignes[a])+'</span></div>';
+var ech="";
+if(o.expire){var j=null;
+try{j=(window._NXABO&&_NXABO.jours)?_NXABO.jours(o.expire):null;}catch(_){}
+ech=_NXFETE.dateFr(o.expire);
+if(j!==null)ech+="  "+String.fromCharCode(0xB7)+"  "+j+" jour"+(j>1?"s":"")+" restant"+(j>1?"s":"");}
+d.innerHTML=
+'<div class="nxg-flash"></div>'+
+'<div class="nxg-pluie">'+_NXFETE.pluie()+'</div>'+
+'<div class="nxg-cadre">'+
+'<div class="nxg-liseret"><i></i></div>'+
+'<div class="nxg-carte"><div class="nxg-halo"></div><div class="nxg-dedans">'+
+'<div class="nxg-boite">'+
+'<div class="nxg-rayons"></div>'+
+'<div class="nxg-onde nxg-o1"></div><div class="nxg-onde nxg-o2"></div>'+
+'<div class="nxg-onde nxg-o3"></div>'+
+'<div class="nxg-sceau"><div class="nxg-anneau"></div>'+
+'<svg viewBox="0 0 100 100" width="34" height="34" fill="none" stroke="#f4f4f5" '+
+'stroke-width="8" stroke-linecap="square"><path d="M28 72 V28 L72 72 V28"/></svg></div></div>'+
+'<div class="nxg-sur">'+_NXFETE.ech(o.titre||(o.cadeau?"Un cadeau pour toi":"Abonnement active"))+'</div>'+
+'<div class="nxg-nom">'+_NXFETE.ech(o.nom||"Nexium")+'</div>'+
+'<div class="nxg-sous">'+_NXFETE.ech(o.sous||
+(o.cadeau?"Quelqu un de l equipe vient de te l offrir. Il est deja actif sur ce client.":
+"C est actif tout de suite, sur ce client comme sur les autres."))+'</div>'+
+(li?('<div class="nxg-liste">'+li+'</div>'):"")+
+(ech?('<div class="nxg-ech">'+_NXFETE.ech(ech)+'</div>'):"")+
+'<div class="nxg-actions">'+
+'<button type="button" class="nxg-b nxg-b1">Voir mon abonnement</button>'+
+'<button type="button" class="nxg-b nxg-b2">Plus tard</button>'+
+'</div></div></div></div>';
+document.body.appendChild(d);
+_NXFETE.el=d;
+try{
+d.querySelector(".nxg-b1").onclick=function(){
+try{if(window._NXCP)_NXCP.ouvrir("equicord_abo","Nexium Abonnement");}catch(_){}
+_NXFETE.ferme();};
+d.querySelector(".nxg-b2").onclick=function(){_NXFETE.ferme();};
+d.onclick=function(e){try{if(e.target===d)_NXFETE.ferme();}catch(_){}};
+_NXFETE._clav=function(e){try{
+if(e.key==="Escape"){e.preventDefault();e.stopPropagation();_NXFETE.ferme();}}catch(_){}};
+document.addEventListener("keydown",_NXFETE._clav,true);}catch(_){}
+// Le mouvement n arrive qu a la premiere image peinte, comme partout ailleurs.
+try{if(typeof requestAnimationFrame==="function")
+requestAnimationFrame(function(){requestAnimationFrame(function(){try{
+if(_NXFETE.el)_NXFETE.el.className="nxg-vif";}catch(_){}});});
+else d.className="nxg-vif";}catch(_){}
+// Les particules ont fini leur course : on retire les deux calques. Une carte
+// posee longtemps ne doit pas continuer a faire composer soixante elements.
+try{_NXFETE.minuteur=setTimeout(function(){try{
+if(_NXFETE.el!==d)return;
+var p=d.querySelector(".nxg-pluie");if(p&&p.parentNode)p.parentNode.removeChild(p);
+var f=d.querySelector(".nxg-flash");if(f&&f.parentNode)f.parentNode.removeChild(f);
+}catch(_){}},6200);}catch(_){}
+return true;}catch(_){return false;}};
+
+_NXFETE.ech=function(t){try{
+return String(t===null||t===undefined?"":t)
+.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;");}catch(_){return "";}};
+_NXFETE.MOIS=["janvier","fevrier","mars","avril","mai","juin","juillet","aout",
+"septembre","octobre","novembre","decembre"];
+_NXFETE.dateFr=function(iso){try{
+var d=new Date(iso);
+if(!isFinite(d.getTime()))return "";
+return d.getDate()+" "+_NXFETE.MOIS[d.getMonth()]+" "+d.getFullYear();}catch(_){return "";}};
+
+// ------------------------------------------------------- ce qui la declenche
+_NXFETE.lis=function(){try{
+var r=_NXDB.get(_NXFETE.KEY);var d=r?JSON.parse(r):null;
+if(!d||typeof d!=="object"||!d.o||d.o.length===undefined)return null;
+return d;}catch(_){return null;}};
+_NXFETE.range=function(cles,id){try{
+_NXDB.set(_NXFETE.KEY,JSON.stringify({v:1,id:id||"",o:cles,a:Date.now()}));}catch(_){}};
+_NXFETE.cles=function(){try{
+var L=(window._NXABO&&_NXABO.offres)?_NXABO.offres():[];
+var out=[],a;
+for(a=0;a<L.length;a++)if(L[a]&&L[a].offre)out.push(String(L[a].offre));
+out.sort();
+return out;}catch(_){return [];}};
+// La comparaison. Elle ne fete que ce qui vient d apparaitre, une seule fois,
+// et jamais la premiere fois qu on regarde -- ce serait feter le passe.
+_NXFETE.veille=function(){try{
+if(!window._NXABO)return false;
+var e=_NXABO.courant();
+if(!e)return false;
+var id=_NXABO.moi?_NXABO.moi():"";
+var maintenant=_NXFETE.cles();
+var avant=_NXFETE.lis();
+if(!avant||(avant.id&&id&&avant.id!==id)){_NXFETE.range(maintenant,id);return false;}
+var neuves=[],a;
+for(a=0;a<maintenant.length;a++)
+if(avant.o.indexOf(maintenant[a])<0)neuves.push(maintenant[a]);
+_NXFETE.range(maintenant,id);
+if(!neuves.length)return false;
+// Une seule carte, meme si l equipe a pose trois offres d un coup : on
+// annonce la plus haute, et la page dit le reste.
+var L=_NXABO.offres(),choix=null,rangMax=-1;
+for(a=0;a<L.length;a++){
+if(neuves.indexOf(String(L[a].offre))<0)continue;
+var g=_NXFETE.devine(L[a].offre);
+if(g.rang>rangMax){rangMax=g.rang;choix=L[a];}}
+if(!choix)return false;
+_NXFETE.montre({nom:choix.nom||choix.offre,cle:choix.offre,
+expire:choix.expire_le||null,cadeau:true});
+return true;}catch(_){return false;}};
+
+try{if(window._NXABO&&_NXABO.listeners)_NXABO.listeners.push(function(){
+try{
+// On laisse le client finir de s ouvrir : une fete posee sur un ecran de
+// chargement passe inapercue.
+if(document.getElementById("nx-boot"))return;
+if(document.hidden)return;
+_NXFETE.veille();}catch(_){}});}catch(_){}
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXFETE");if(window._NXERR)_NXERR.push("module _NXFETE :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXFETE desactive:",_nxE);}catch(_){}}
+}
+var _NXDEM=window._NXDEM||(window._NXDEM={});
+if(!_NXDEM.boot){try{_NXDEM.boot=true;
+// Demarrer avec Windows.
+//
+// Le renderer n a pas acces au disque : il ne peut ni ecrire dans la base de
+// registre ni poser un raccourci. Le processus principal, lui, a l API
+// Electron qui fait exactement cela. Il faut donc un canal entre les deux, et
+// il n en existe qu un seul : les reglages Vencord, que le preload sait
+// ecrire et que le lanceur sait relire.
+//
+//   la page  ->  reglages Vencord  ->  le lanceur  ->  cle Run de Windows
+//
+// Le lanceur surveille ce fichier pendant la session : cocher la case agit
+// tout de suite. Et il reecrit a cote ce que Windows a REELLEMENT retenu, si
+// bien que la page affiche un fait verifie plutot qu une intention.
+//
+// Le choix de l utilisateur est garde en double, ici, dans le stockage du
+// client : les reglages Vencord peuvent etre reecrits par Vencord lui-meme a
+// partir de sa copie en memoire, ce qui effacerait notre miroir. On le repose
+// donc a chaque demarrage.
+_NXDEM.CLE="NexiumDemarrage";
+_NXDEM.KEY="nexium_demarrage";
+_NXDEM.listeners=[];
+_NXDEM.notify=function(){for(var a=0;a<_NXDEM.listeners.length;a++){try{_NXDEM.listeners[a]();}catch(_){}}};
+
+_NXDEM.dispo=function(){try{
+return !!(window.VencordNative&&VencordNative.settings
+&&typeof VencordNative.settings.get==="function"
+&&typeof VencordNative.settings.set==="function");}catch(_){return false;}};
+_NXDEM.windows=function(){try{
+if(window.DiscordNative&&DiscordNative.process&&DiscordNative.process.platform)
+return DiscordNative.process.platform==="win32";
+return /win/i.test(String(navigator.platform||""));}catch(_){return false;}};
+
+// Le choix, garde par le client lui-meme.
+_NXDEM.lis=function(){try{
+var r=_NXDB.get(_NXDEM.KEY);
+var d=r?JSON.parse(r):null;
+if(!d||typeof d!=="object")return null;
+if(typeof d.avecWindows!=="boolean")return null;
+return {avecWindows:!!d.avecWindows,reduit:d.reduit!==false};}catch(_){return null;}};
+
+// Ce que le lanceur a rapporte au dernier passage.
+_NXDEM.etat=function(){try{
+if(!_NXDEM.dispo())return null;
+var s=VencordNative.settings.get();
+var c=s&&s.plugins&&s.plugins[_NXDEM.CLE];
+return (c&&c.etat)?c.etat:null;}catch(_){return null;}};
+
+// Le miroir dans les reglages Vencord : la seule chose que le lanceur lira.
+_NXDEM.miroir=function(cfg){try{
+if(!_NXDEM.dispo())return false;
+var s=VencordNative.settings.get();
+if(!s||typeof s!=="object")return false;
+if(!s.plugins)s.plugins={};
+var prec=s.plugins[_NXDEM.CLE]||{};
+// Ne pas ecrire pour rien : chaque ecriture reveille le guetteur du lanceur.
+if(prec.avecWindows===cfg.avecWindows&&prec.reduit===cfg.reduit)return true;
+s.plugins[_NXDEM.CLE]={avecWindows:!!cfg.avecWindows,reduit:cfg.reduit!==false,
+etat:prec.etat||null};
+VencordNative.settings.set(s);
+return true;}catch(_){return false;}};
+
+_NXDEM.set=function(avecWindows,reduit){try{
+var cfg={avecWindows:!!avecWindows,reduit:reduit!==false};
+_NXDB.set(_NXDEM.KEY,JSON.stringify(cfg));
+var ok=_NXDEM.miroir(cfg);
+_NXDEM.notify();
+return ok;}catch(_){return false;}};
+
+// Une reponse honnete a "est-ce que ca marche ?".
+//   inconnu   : rien n a encore ete demande
+//   attente   : demande, mais le lanceur n a pas encore repondu
+//   actif     : Windows a retenu l entree
+//   coupe     : l entree a bien ete retiree
+//   refuse    : demande, mais Windows n en a pas voulu
+_NXDEM.diagnostic=function(){try{
+if(!_NXDEM.windows())return {code:"horsWindows",
+texte:"Ce reglage n existe que sur Windows."};
+if(!_NXDEM.dispo())return {code:"indisponible",
+texte:"Le pont vers le lanceur n est pas la sur ce client."};
+var c=_NXDEM.lis();
+if(!c)return {code:"inconnu",texte:"Rien n a encore ete demande."};
+var e=_NXDEM.etat();
+if(!e||typeof e.applique!=="boolean")return {code:"attente",
+texte:"Demande enregistree. Le lanceur l appliquera dans un instant."};
+if(c.avecWindows&&e.demande===true&&e.applique===true)return {code:"actif",
+texte:"Verifie : Windows lance Nexium a l ouverture de ta session."};
+if(!c.avecWindows&&e.demande===false&&e.applique===false)return {code:"coupe",
+texte:"Verifie : plus aucune entree de demarrage."};
+if(c.avecWindows&&e.applique===false)return {code:"refuse",
+texte:"Windows a refuse l entree de demarrage. Une strategie de groupe ou un antivirus peut l interdire."};
+return {code:"attente",
+texte:"La demande a change depuis le dernier passage du lanceur."};}catch(_){
+return {code:"inconnu",texte:""};}};
+
+// A chaque ouverture : on repose le miroir. Si Vencord l a efface en
+// reecrivant ses reglages, le lanceur le retrouve au demarrage suivant.
+try{setTimeout(function(){try{
+var c=_NXDEM.lis();
+if(c)_NXDEM.miroir(c);}catch(_){}},7000);}catch(_){}
+}catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXDEM");if(window._NXERR)_NXERR.push("module _NXDEM :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXDEM desactive:",_nxE);}catch(_){}}
 }
 var _NXPALD={bg:"#08080a",panel:"#0b0b0c",inset:"#0e0e10",raise:"#141416",line:"#161618",hair:"#212125",edge:"#2a2a30",faint:"#34343a",mute:"#4a4a52",dim:"#5b5b63",soft:"#6c6c74",sub:"#8a8a92",mid:"#a6a6ac",pale:"#c9c9d2",txt:"#f4f4f5",acc:"#e8e8ea",ink:"#0a0a0a",ok:"#8fd19e",okSoft:"#a9cdb4",warn:"#e6c48a",warnSoft:"#d8d2a8",danger:"#e79a9a",dangerSoft:"#d6aeae",red:"#d6484a",info:"#8fb4ea",mauve:"#c7a2ee",cyan:"#7fd3c4",lime:"#c3d98a",rose:"#e9a3c1",light:false};
 var _NXPALL={bg:"#f2f3f5",panel:"#ffffff",inset:"#f6f6f7",raise:"#eceef1",line:"#e3e5e8",hair:"#dcdee1",edge:"#cfcfd2",faint:"#b5bac1",mute:"#9a9aa0",dim:"#6d6f78",soft:"#5a5a60",sub:"#4e5058",mid:"#42424a",pale:"#2a2a30",txt:"#111214",acc:"#1a1a1e",ink:"#ffffff",ok:"#248046",okSoft:"#5a6a5e",warn:"#8a6a2a",warnSoft:"#6a6650",danger:"#9a3a3a",dangerSoft:"#6a5050",red:"#d6484a",info:"#2f5aa8",mauve:"#6a3fa0",cyan:"#1f7a6a",lime:"#5a6f22",rose:"#9a3f6a",light:true};
@@ -3239,9 +4020,128 @@ var _NXMARQUES={
 "Nexium Team":["equipe","acc"],"Nexium Sponsor":["coeur","rose"],
 "Nexium Admins":["couronne","warn"],"Nexium Changelog":["liste","info"],
 "Nexium Mise \u00e0 jour":["maj","cyan"]};
+// ------------------------------------------------------------------- l aide
+//
+// Le client fait beaucoup de choses, et une page de reglages n explique
+// jamais vraiment a quoi elle sert : elle montre des interrupteurs. On ajoute
+// donc a chaque entete un bouton qui deplie trois reponses courtes, toujours
+// les memes trois questions :
+//
+//   - ce que fait cette page,
+//   - ce que ca change reellement sur la machine,
+//   - ce que ca ne fait jamais.
+//
+// La troisieme est la plus utile : elle dit ou s arrete le client. Un outil
+// qui touche aux messages et au reseau se doit d etre clair la-dessus.
+_NXFX.Aide=function(props){try{
+var P=_NXpal;
+var A=(props&&props.aide)||null;
+var c=(props&&props.col)||P.acc;
+var o=F.useState(false);
+if(!A||!A.length)return null;
+var TITRES=[_T("Ce que fait cette page"),_T("Ce que ca change chez toi"),
+_T("Ce que ca ne fait jamais")];
+var ICONES=["question","puce","cadenas"];
+return i("div",{style:{marginTop:"14px"}},
+i("div",_NXFX.fusion({className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+"aria-expanded":o[0]?"true":"false",
+onClick:function(){o[1](!o[0]);},
+style:{display:"inline-flex",alignItems:"center",gap:"7px",padding:"6px 13px",
+borderRadius:"99px",cursor:"pointer",
+border:"1px solid "+(o[0]?_NXteinte(c,.44):P.line),
+background:o[0]?_NXteinte(c,.10):"transparent",
+color:o[0]?P.txt:P.sub,fontSize:"11.5px",fontWeight:"700",
+transition:_NXFX.anime()?"background .2s ease,border-color .2s ease,color .2s ease":"none"}},
+_NXFX.a({"data-nx-appui":"1"})),
+i("span",{style:{display:"flex",color:o[0]?c:P.faint}},_NXFX.svg("question",14)),
+i("span",null,o[0]?_T("Masquer l explication"):_T("A quoi ca sert ?"))),
+o[0]?i("div",_NXFX.fusion({style:{marginTop:"13px",display:"flex",gap:"12px",
+flexWrap:"wrap"}},_NXFX.a({"data-nx-panel":"1"})),
+A.slice(0,3).map(function(t,k){
+return i("div",{key:k,style:{flex:"1 1 210px",minWidth:"196px",
+padding:"14px 15px",borderRadius:"14px",background:P.inset,
+border:"1px solid "+(k===2?_NXteinte(P.ok,.22):P.line)}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"9px"}},
+i("span",{style:{display:"flex",color:k===2?P.ok:c}},_NXFX.svg(ICONES[k],14)),
+i("span",{style:{fontSize:"9.5px",fontWeight:"900",letterSpacing:".13em",
+textTransform:"uppercase",color:k===2?P.ok:P.dim}},TITRES[k])),
+i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.6}},t));})):null);
+}catch(_){return null;}};
+
+// Trois phrases par page. Elles sont ecrites une fois, ici, pour qu on puisse
+// les relire toutes d affilee et voir si le client tient ses promesses.
+var _NXAIDES={
+"Nexium Client":[
+"La vue d ensemble : l etat des huit modules, ce qui tourne, ce qui dort, et les reglages de demarrage et de mouvement.",
+"Rien par elle-meme. Elle lit l etat des autres modules et te laisse couper l animation d ouverture ou celle des pages.",
+"Elle n envoie rien. Tous les chiffres affiches sont calcules sur cette machine, a partir de ce qui y est deja garde."],
+"Nexium IA":[
+"Un assistant dans le client : une page de discussion, et un panneau flottant que tu peux ouvrir par-dessus Discord.",
+"Tes questions partent vers un relais qui interroge le modele, puis la reponse revient. Le fil est garde sur cette machine.",
+"Il ne lit pas tes conversations Discord tout seul. Ce qui part est ce que tu as ecrit, ou ce que tu as explicitement joint."],
+"Nexium Protect":[
+"La garde contre ce qui arrive par messages : liens dangereux, hameconnage, fichiers pieges, codes a coller dans la console.",
+"Les liens sont examines avant ouverture, et ceux qui sont reconnus dangereux sont bloques. Rien n est supprime.",
+"Il n envoie aucun lien a l exterieur pour l analyser. La reconnaissance se fait sur cette machine, sur une base embarquee."],
+"Nexium Privacy":[
+"Ce que Discord et les sites apprennent de toi : telemetrie, accuses de lecture, empreinte du navigateur, liens de suivi.",
+"Des requetes sortantes sont coupees avant d etre envoyees, et certains liens sont nettoyes de leurs marqueurs.",
+"Il ne cache pas ton adresse IP a Discord et ne remplace pas un reseau prive. Ce qu il coupe, il le dit ; le reste passe."],
+"Nexium Réseau":[
+"Ce que le client fait sortir : quelles adresses, a quel rythme, et pour quelle raison.",
+"Rien, sauf si tu actives une regle. C est d abord un journal : il regarde et il note.",
+"Il ne voit pas le trafic des autres applications. Seules les requetes du client et de Discord passent par ici."],
+"Nexium Données":[
+"Tout ce que le client garde sur cette machine : taille, contenu, sauvegardes, et de quoi tout effacer.",
+"Ce que tu y fais est definitif : effacer une cle efface vraiment ce qu elle contenait.",
+"Rien de ce qui est liste ici n est envoye ailleurs. C est le stockage local du navigateur, et il ne quitte pas ton disque."],
+"Nexium Stats":[
+"Ce que tu fais sur Discord, compte a la maison : messages, vocal, serveurs frequentes, rythme des journees.",
+"Un compteur tourne pendant que tu utilises Discord, et ecrit sur cette machine. Tu peux le remettre a zero.",
+"Aucun de ces chiffres ne part. Personne d autre, y compris l equipe Nexium, ne les voit."],
+"Nexium Music":[
+"Le lecteur du client, et ce qu il affiche de ton ecoute.",
+"Il lit les fichiers que tu lui donnes et retient ta liste. L affichage de Spotify peut etre coupe ici.",
+"Il ne televerse aucun fichier et ne partage pas ce que tu ecoutes sans que tu l aies demande."],
+"Nexium Auto":[
+"Des regles simples : quand telle chose arrive, faire telle chose. Un declencheur, une action.",
+"Une regle active agit vraiment -- elle peut ecrire un message, jouer un son, ou noter quelque chose.",
+"Rien ne s execute sans que tu aies cree la regle et l aies allumee. L envoi de messages est coupe par defaut."],
+"Nexium Comptes":[
+"Les comptes Discord enregistres sur ce client, et de quoi passer de l un a l autre.",
+"Les jetons sont gardes chiffres sur cette machine, et servent a rouvrir une session sans retaper de mot de passe.",
+"Aucun jeton ne part vers un serveur Nexium. Ils ne servent qu a parler a Discord, depuis cette machine."],
+"Nexium Team":[
+"Qui fait le client, et comment le joindre.",
+"Rien. C est une page de presentation.",
+"Elle n affiche aucune donnee te concernant."],
+"Nexium Sponsor":[
+"Les emplacements de soutien, et ce que soutenir le client apporte en retour.",
+"Rien tant que tu ne demandes rien. Un emplacement se reserve par ticket.",
+"Il n y a ni publicite, ni suivi, ni redirection. Les emplacements libres sont montres comme tels."],
+"Nexium Admins":[
+"L administration du client : utilisateurs, alertes, bannissements, credits et abonnements.",
+"Ce que tu fais ici touche les autres comptes. Chaque geste est inscrit dans un journal d audit.",
+"Elle ne donne pas acces aux messages des utilisateurs. Elle ne montre que ce que le client remonte deja."],
+"Nexium Changelog":[
+"Ce qui a change d une version a l autre, dans les mots de celui qui l a fait.",
+"Rien. La page lit le fichier publie sur le depot.",
+"Elle ne telecharge aucune mise a jour. C est la page Mise a jour qui s en charge."],
+"Nexium Mise à jour":[
+"L etat de ta version, celle qui est publiee, et de quoi appliquer la nouvelle.",
+"Appliquer une mise a jour reecrit le fichier du client et redemarre Discord. Tes reglages sont conserves.",
+"Rien n est installe sans que tu l aies accepte. Le fichier telecharge est verifie avant d etre pose."],
+"Nexium Abonnement":[
+"Ce que ton compte ouvre aujourd hui, ce que chaque offre ajouterait, et comment souscrire.",
+"Rien depuis cette page : elle lit ton etat sur le serveur et te laisse simuler une offre.",
+"Aucun paiement ne passe par le client. Il n y a ni formulaire bancaire, ni prelevement automatique."],
+"Nexium Ticket":[
+"Un fil prive entre toi et l equipe : une question, un probleme, ou un abonnement a prendre.",
+"Ce que tu ecris est envoye a l equipe et garde quinze jours apres le dernier message, puis efface.",
+"Personne d autre que toi et l equipe ne lit ce fil. La preuve d acces reste sur cette machine."]};
 var _NXhead=function(k,t,d){try{
 var m=_NXMARQUES[t]||null;
-return _NXFX.entete({cle:k,titre:t,texte:d,
+return _NXFX.entete({cle:k,titre:t,texte:d,aide:_NXAIDES[t]||null,
 icone:m?m[0]:"point",col:m?(_NXpal[m[1]]||_NXpal.acc):_NXpal.acc});
 }catch(_){
 // Repli : la forme d origine, sans blason. Une entete manquante vaudrait
@@ -3428,7 +4328,7 @@ try{window.addEventListener("beforeunload",function(){_NXS.save();});}catch(_){}
 _NXS.wire();
 }
 
-var NexiumStatsIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M3.5 18.5l6-6 4 4L22 6.92 20.59 5.5l-7.09 8.09-4-4L2 16.5l1.5 2z"}));};
+var NexiumStatsIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("graphe",z):null;};
 var _NXRT=window._NXRT||(window._NXRT={});
 if(!_NXRT.boot){try{_NXRT.boot=true;
 _NXRT.W=1080;_NXRT.H=1350;
@@ -7190,7 +8090,7 @@ try{_NXNETX.go(_NXCL.URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){
 setTimeout(function(){_NXCL.refresh();},4000);
 _NXCL.iv=setInterval(function(){if(typeof document==="undefined"||!document.hidden)_NXCL.refresh();},1800000);
 }
-var NexiumPrivacyIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M12 7a5 5 0 0 1 5 5c0 .65-.13 1.26-.36 1.83l2.92 2.92A11.8 11.8 0 0 0 23 12c-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.15 2.15C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46A11.8 11.8 0 0 0 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65a3 3 0 0 0 3 3c.22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53a5 5 0 0 1-5-5c0-.79.2-1.53.53-2.2z"}));};
+var NexiumPrivacyIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("oeilBarre",z):null;};
 var PV_TELE=[
 {k:"blockTel",ic:"M4 20h16v-2H4v2zM6 16h3V9H6v7zm5 0h3V4h-3v12zm5 0h3v-4h-3v4z",t:"Telemetrie d usage",d:"Annule les requetes /science et /track. Discord les envoie sans attendre de reponse : rien ne casse."},
 {k:"blockSentry",ic:"M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V8h2v5z",t:"Rapports de plantage",d:"Empeche l envoi des rapports vers Sentry, qui embarquent l etat de ton client au moment de l erreur."},
@@ -7682,7 +8582,7 @@ tab==="apercu"?tApercu():tab==="reglages"?tReglages():tab==="preuve"?i(NexiumPre
 _NXfoot("Nexium Privacy · interception locale, aucune donnée envoyée")));
 }
 
-var NexiumNetworkIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.07 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"}));};
+var NexiumNetworkIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("reseau",z):null;};
 function NexiumNetworkComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 var _t0=F.useState("direct");var tab=_t0[0];var setTab=_t0[1];
@@ -8011,7 +8911,7 @@ erreurs:((window._NXERR||[]).length)};}catch(_){return {total:0,vivants:0,morts:
 try{setTimeout(function(){_NXDATA.autoSiBesoin();},25000);}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXDATA");if(window._NXERR)_NXERR.push("module _NXDATA :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXDATA desactive:",_nxE);}catch(_){}}
 }
-var NexiumDataIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z},i("path",{d:"M12 2C7 2 3 3.6 3 5.5v13C3 20.4 7 22 12 22s9-1.6 9-3.5v-13C21 3.6 17 2 12 2zm0 2c4.4 0 7 1.3 7 1.5S16.4 7 12 7 5 5.7 5 5.5 7.6 4 12 4zM5 8.2C6.7 9.1 9.2 9.5 12 9.5s5.3-.4 7-1.3v3.1c0 .2-2.6 1.5-7 1.5s-7-1.3-7-1.5V8.2zm0 5.5C6.7 14.6 9.2 15 12 15s5.3-.4 7-1.3v3.1c0 .2-2.6 1.5-7 1.5s-7-1.3-7-1.5v-3.1z"}));};
+var NexiumDataIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("base",z):null;};
 function NexiumDataComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 var _t0=F.useState("stockage");var tab=_t0[0];var setTab=_t0[1];
@@ -8144,29 +9044,7 @@ if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Copie dans le presse-papiers."),1);
 _NXbtn(_T("Effacer cette donnee"),function(){
 if(window.confirm(_T("Effacer")+" \u00ab "+r.libelle+" \u00bb ?")){effacer(r.k);setOuvert("");force();}}))):null);})
 :i("div",{style:{fontSize:"12.5px",color:P.dim,lineHeight:1.6}},_T("Aucune donnee ne correspond a ce filtre."))),{mb:12}),
-_NXcard(i("div",null,
-_NXch(_T("Demarrage avec Windows"),
-_T("La seule chose que Nexium ecrit hors de son propre dossier.")),
-i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.7}},
-_T("A l installation, un raccourci est pose dans ton dossier Demarrage. Nexium se lance donc avec Windows, reduit. Rien n est ecrit dans la base de registre, et les autres comptes de l ordinateur ne sont pas touches.")),
-i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.faint,lineHeight:1.6,
-marginTop:"11px",padding:"10px 12px",background:P.inset,border:"1px solid "+P.line,
-borderRadius:"9px",wordBreak:"break-all"}},
-"%AppData%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Nexium Client.lnk"),
-i("div",{style:{fontSize:"12px",color:P.dim,lineHeight:1.65,marginTop:"11px"}},
-_T("Supprime ce raccourci et Nexium ne demarrera plus tout seul. Le client n a pas acces au disque : il ne peut ni le verifier ni le retirer lui-meme.")),
-i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap",marginTop:"13px"}},
-_NXbtn(_T("Copier la commande qui le retire"),function(){try{
-var cmd="Remove-Item \"$env:AppData" +
-"\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Nexium Client.lnk\" -Force";
-var ok=false;
-try{if(typeof DiscordNative!=="undefined"&&DiscordNative.clipboard&&DiscordNative.clipboard.copy){DiscordNative.clipboard.copy(cmd);ok=true;}}catch(_){}
-if(!ok)try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(cmd);ok=true;}}catch(_){}
-if(window._NXPR&&_NXPR.toast)_NXPR.toast(ok
-?_T("Commande copiee. Colle-la dans PowerShell."):_T("Le presse-papiers a refuse l acces."),ok?1:0);
-}catch(_){}}),
-_NXbtn(_T("Ouvrir le dossier Demarrage"),function(){try{
-if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Touche Windows + R, puis tape : shell:startup"),1);}catch(_){}}))),{mb:12}),
+carteDemarrage(),
 _NXcard(i("div",null,_NXch(_T("Tout exporter, tout effacer"),
 _T("L export rassemble reglages et compteurs de tous les modules dans un seul fichier.")),
 i("div",{style:{display:"flex",gap:"9px",flexWrap:"wrap"}},
@@ -8174,6 +9052,62 @@ _NXbtn(_T("Exporter tout"),function(){try{if(window._NXV&&_NXV.exportAll)_NXV.ex
 _NXbtn(_T("Tout effacer"),function(){
 if(window.confirm(_T("Effacer toutes les donnees Nexium de cette machine ? Cette action est definitive.")))
 {try{if(window._NXV&&_NXV.purgeAll)_NXV.purgeAll();}catch(_){}force();}}))),{mb:0}));}
+// ------------------------------------------------- demarrer avec Windows
+// Avant, cette carte decrivait un raccourci que l installateur etait cense
+// poser -- il n existait pas -- et disait que le client ne pouvait ni le
+// verifier ni le retirer. C est maintenant un reglage, applique par le
+// lanceur, et dont l etat affiche est celui que Windows a reellement retenu.
+function carteDemarrage(){
+var D=window._NXDEM;
+if(!D)return null;
+var dg=D.diagnostic();
+var cfg=D.lis()||{avecWindows:false,reduit:true};
+var e=D.etat();
+var COUL={actif:P.ok,coupe:P.dim,attente:P.warn,refuse:P.danger,
+inconnu:P.faint,indisponible:P.faint,horsWindows:P.faint};
+var col=COUL[dg.code]||P.faint;
+var vivant=(dg.code!=="horsWindows"&&dg.code!=="indisponible");
+return _NXcard(i("div",null,
+_NXch(_T("Demarrage avec Windows"),
+_T("Nexium s ouvre avec ta session, reduit dans la barre des taches.")),
+i("div",{style:{display:"flex",alignItems:"center",gap:"13px",padding:"14px 15px",
+borderRadius:"14px",background:_NXteinte(col,.07),
+border:"1px solid "+_NXteinte(col,.26),marginBottom:"14px",flexWrap:"wrap"}},
+_NXFX.pastille(dg.code==="actif"?"check":(dg.code==="refuse"?"alerte":
+(dg.code==="attente"?"horloge":"puce")),{col:col,taille:34,halo:dg.code==="actif"}),
+i("div",{style:{flex:1,minWidth:"210px"}},
+i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt}},
+dg.code==="actif"?_T("Actif"):(dg.code==="coupe"?_T("Coupe"):
+(dg.code==="refuse"?_T("Refuse par Windows"):
+(dg.code==="attente"?_T("En attente du lanceur"):
+(dg.code==="inconnu"?_T("Jamais demande"):_T("Indisponible")))))),
+i("div",{style:{fontSize:"12px",color:P.sub,marginTop:"4px",lineHeight:1.55}},dg.texte)),
+vivant?_NXFX.bouton({t:cfg.avecWindows?_T("Desactiver"):_T("Activer"),
+icone:cfg.avecWindows?"croix":"check",plein:!cfg.avecWindows,creux:cfg.avecWindows,
+col:cfg.avecWindows?P.sub:P.acc,
+onClick:function(){D.set(!cfg.avecWindows,cfg.reduit);force();}}):null),
+vivant&&cfg.avecWindows?i("div",{style:{display:"flex",alignItems:"center",gap:"11px",
+padding:"11px 14px",borderRadius:"12px",background:P.inset,
+border:"1px solid "+P.line,marginBottom:"13px",flexWrap:"wrap"}},
+i("span",{style:{display:"flex",color:P.dim}},_NXFX.svg("moins",15)),
+i("div",{style:{flex:1,minWidth:"190px"}},
+i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:P.txt}},_T("Demarrer reduit")),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"3px",lineHeight:1.5}},
+_T("La fenetre ne s ouvre pas au premier plan : le client attend dans la barre des taches."))),
+_NXFX.bouton({t:cfg.reduit?_T("Oui"):_T("Non"),petit:true,creux:true,
+col:cfg.reduit?P.ok:P.sub,
+onClick:function(){D.set(cfg.avecWindows,!cfg.reduit);force();}})):null,
+i("div",{style:{fontSize:"12px",color:P.sub,lineHeight:1.7}},
+_T("Le reglage est applique par le lanceur, qui ecrit une entree a ton nom d utilisateur seulement. Les autres comptes de l ordinateur ne sont pas touches, et rien n est installe comme service.")),
+e&&e.chemin?i("div",{style:{fontFamily:_NXf.mono,fontSize:"10.5px",color:P.faint,
+lineHeight:1.6,marginTop:"11px",padding:"10px 12px",background:P.inset,
+border:"1px solid "+P.line,borderRadius:"9px",wordBreak:"break-all"}},
+"HKCU\\...\\CurrentVersion\\Run"+String.fromCharCode(10)+
+(e.nom||"Nexium Client")+" = "+e.chemin+(e.reduit?" --start-minimized":"")):null,
+e&&e.quand?i("div",{style:{fontSize:"11px",color:P.faint,marginTop:"9px"}},
+_T("Dernier passage du lanceur")+" : "+
+new Date(e.quand).toLocaleString("fr-FR")):null),{mb:12});}
+
 function tSauvegardes(){
 var L=D.sauvegardes();
 return i("div",null,
@@ -8561,7 +9495,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="190";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="191";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -8653,28 +9587,183 @@ _NXUP.relaunch=function(){try{if(window.DiscordNative&&DiscordNative.processUtil
 _NXUP.relaunchApply=function(){_NXUP.msg="Redémarrage pour appliquer la mise à jour…";_NXUP.notify();if(!_NXUP.relaunch())_NXUP.msg="Ferme complètement Discord puis rouvre-le pour appliquer la mise à jour.";_NXUP.notify();};
 _NXUP.openRepo=function(){try{_NXP.open(_NXUP.REPO);}catch(_){}};
 _NXUP.snoozeUntil=0;try{_NXUP.snoozeUntil=parseInt((_NXUP.st&&_NXUP.st.snooze)||0,10)||0;}catch(_){}_NXUP.modalEl=null;
-_NXUP.hideModal=function(){try{if(_NXUP.modalEl&&_NXUP.modalEl.parentNode)_NXUP.modalEl.parentNode.removeChild(_NXUP.modalEl);}catch(_){}_NXUP.modalEl=null;};
+_NXUP.hideModal=function(){try{
+var d=_NXUP.modalEl;
+_NXUP.modalEl=null;
+try{if(_NXUP._clav)document.removeEventListener("keydown",_NXUP._clav,true);}catch(_){}
+if(!d)return;
+try{d.className=(d.className+" nxu-part").replace(/^ /,"");}catch(_){}
+setTimeout(function(){try{
+if(d&&d.parentNode)d.parentNode.removeChild(d);
+// La feuille ne part que si plus aucune carte ne s en sert.
+if(!_NXUP.modalEl){var st=document.getElementById("nx-maj-style");
+if(st&&st.parentNode)st.parentNode.removeChild(st);}}catch(_){}},300);
+}catch(_){_NXUP.modalEl=null;}};
+// L invitation a mettre a jour.
+//
+// Avant, elle disait "une nouvelle version est prete" et rien d autre : aucune
+// raison de cliquer, et un flou plein ecran qui coutait cher a chaque image.
+// Maintenant elle montre ce que la version apporte -- les vraies lignes du
+// changelog, lues sur le depot -- et ne fait bouger que des transformations.
+_NXUP.modalCss=function(){return ""+
+"#nx-maj{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;"+
+"justify-content:center;padding:22px;background:rgba(4,4,6,.70);opacity:1;"+
+"font-family:'gg sans','Noto Sans',Helvetica,Arial,sans-serif;"+
+"transition:opacity .28s cubic-bezier(.32,0,.24,1);}"+
+"#nx-maj.nxu-part{opacity:0;pointer-events:none;}"+
+"#nx-maj *{box-sizing:border-box;}"+
+"#nx-maj .nxu-cadre{position:relative;width:min(432px,100%);}"+
+"#nx-maj .nxu-liseret{position:absolute;inset:-1px;border-radius:21px;overflow:hidden;"+
+"pointer-events:none;}"+
+"#nx-maj .nxu-liseret i{position:absolute;left:50%;top:50%;width:150%;padding-bottom:150%;"+
+"margin:-75% 0 0 -75%;display:block;will-change:transform;transform:translateZ(0);"+
+"background:conic-gradient(from 0deg,transparent 0deg,rgba(255,255,255,.44) 30deg,"+
+"transparent 66deg,transparent 190deg,rgba(143,180,234,.40) 218deg,transparent 258deg);}"+
+"#nx-maj .nxu-carte{position:relative;background:linear-gradient(180deg,#141418,#0b0b0d);"+
+"border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:26px 24px 20px;"+
+"box-shadow:0 30px 84px rgba(0,0,0,.66);color:#f4f4f5;"+
+"max-height:calc(100vh - 44px);overflow-x:hidden;overflow-y:auto;}"+
+"#nx-maj .nxu-tete{display:flex;align-items:center;gap:13px;margin-bottom:18px;}"+
+"#nx-maj .nxu-logo{position:relative;width:46px;height:46px;flex:0 0 auto;border-radius:14px;"+
+"background:#f4f4f5;display:flex;align-items:center;justify-content:center;}"+
+"#nx-maj .nxu-cle{font-size:9.5px;font-weight:900;letter-spacing:.22em;"+
+"text-transform:uppercase;color:#6c6c74;margin-bottom:5px;}"+
+"#nx-maj .nxu-ver{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;"+
+"font-size:21px;font-weight:800;letter-spacing:-.02em;color:#f4f4f5;line-height:1.1;}"+
+"#nx-maj .nxu-titre{font-size:14.5px;font-weight:800;color:#f4f4f5;line-height:1.4;"+
+"margin-bottom:13px;letter-spacing:-.01em;}"+
+"#nx-maj .nxu-liste{border:1px solid rgba(255,255,255,.08);border-radius:13px;"+
+"background:rgba(255,255,255,.022);padding:10px 14px;margin-bottom:14px;}"+
+"#nx-maj .nxu-li{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;"+
+"color:#c9c9d2;line-height:1.5;padding:5px 0;}"+
+"#nx-maj .nxu-li s{flex:0 0 auto;width:5px;height:5px;margin-top:6px;border-radius:50%;"+
+"background:rgba(255,255,255,.45);text-decoration:none;}"+
+"#nx-maj .nxu-plus{font-size:11.5px;color:#6c6c74;padding:5px 0 1px;}"+
+"#nx-maj .nxu-rassure{display:flex;gap:8px;align-items:center;font-size:11.5px;"+
+"color:#8a8a92;line-height:1.5;margin-bottom:17px;}"+
+"#nx-maj .nxu-actions{display:flex;gap:9px;}"+
+"#nx-maj .nxu-b{position:relative;overflow:hidden;flex:1;text-align:center;padding:12px 10px;"+
+"border-radius:12px;border:1px solid rgba(255,255,255,.14);background:transparent;"+
+"color:#9a9aa0;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;"+
+"transition:background .18s ease,color .18s ease,transform .18s ease;}"+
+"#nx-maj .nxu-b:hover{background:rgba(255,255,255,.07);color:#f4f4f5;transform:translateY(-1px);}"+
+"#nx-maj .nxu-b1{flex:1.7;background:#f4f4f5;color:#0a0a0a;border-color:#f4f4f5;font-weight:800;}"+
+"#nx-maj .nxu-b1:hover{background:#fff;color:#0a0a0a;}"+
+"#nx-maj .nxu-b1::after{content:'';position:absolute;top:0;bottom:0;left:0;width:38%;"+
+"pointer-events:none;transform:translate3d(-190%,0,0);will-change:transform;"+
+"background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);}"+
+"#nx-maj.nxu-vif .nxu-carte{animation:nxu-arrive .62s cubic-bezier(.16,1.1,.3,1) both;}"+
+"#nx-maj.nxu-vif .nxu-liseret i{animation:nxu-tourne 8s linear infinite;}"+
+"#nx-maj.nxu-vif .nxu-logo{animation:nxu-pop .7s cubic-bezier(.16,1.6,.3,1) .08s both;}"+
+"#nx-maj.nxu-vif .nxu-titre{animation:nxu-monte .5s cubic-bezier(.2,.9,.3,1) .18s both;}"+
+"#nx-maj.nxu-vif .nxu-li{animation:nxu-glisse .5s cubic-bezier(.2,.9,.3,1) both;}"+
+"#nx-maj.nxu-vif .nxu-li:nth-child(1){animation-delay:.24s;}"+
+"#nx-maj.nxu-vif .nxu-li:nth-child(2){animation-delay:.31s;}"+
+"#nx-maj.nxu-vif .nxu-li:nth-child(3){animation-delay:.38s;}"+
+"#nx-maj.nxu-vif .nxu-li:nth-child(4){animation-delay:.45s;}"+
+"#nx-maj.nxu-vif .nxu-rassure{animation:nxu-monte .5s cubic-bezier(.2,.9,.3,1) .50s both;}"+
+"#nx-maj.nxu-vif .nxu-actions{animation:nxu-monte .5s cubic-bezier(.2,.9,.3,1) .56s both;}"+
+"#nx-maj.nxu-vif .nxu-b1::after{animation:nxu-sillage 3.4s cubic-bezier(.5,0,.5,1) 1.2s infinite;}"+
+"@keyframes nxu-arrive{from{transform:translateY(24px) scale(.94)}to{transform:none}}"+
+"@keyframes nxu-monte{from{transform:translateY(9px)}to{transform:none}}"+
+"@keyframes nxu-glisse{from{transform:translateX(-8px)}to{transform:none}}"+
+"@keyframes nxu-pop{from{transform:scale(.6)}to{transform:none}}"+
+"@keyframes nxu-tourne{to{transform:rotate(360deg)}}"+
+"@keyframes nxu-sillage{0%{transform:translate3d(-190%,0,0)}"+
+"48%{transform:translate3d(300%,0,0)}100%{transform:translate3d(300%,0,0)}}"+
+"@media (prefers-reduced-motion: reduce){#nx-maj *{animation:none!important;}}";};
+// Les trois ou quatre lignes qui donnent envie. Elles viennent du changelog
+// publie, jamais d un texte ecrit ici : ce qui est annonce est ce qui a ete
+// fait.
+_NXUP.pointsForts=function(){try{
+var N=_NXUP.notes;
+if(!N||!N.length)return null;
+var v=null,a;
+for(a=0;a<N.length;a++)if(v===null||N[a].v>v.v)v=N[a];
+if(!v)return null;
+var chefs=[],autres=[],b;
+for(b=0;b<v.lignes.length;b++){
+if(v.lignes[b].chef)chefs.push(v.lignes[b].t);
+else autres.push(v.lignes[b].t);}
+var L=chefs.length>=2?chefs:autres;
+return {titre:v.titre||"",lignes:L.slice(0,4),reste:Math.max(0,v.lignes.length-4)};}catch(_){return null;}};
 _NXUP.showModal=function(){try{
 if(_NXUP.modalEl)return;if(typeof document==="undefined"||!document.body)return;
-var ov=document.createElement("div");ov.id="nx-update-modal";
-ov.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);";
-var card=document.createElement("div");
-card.style.cssText="width:400px;max-width:calc(100vw - 40px);background:"+_NXpal.panel+";border:1px solid "+_NXpal.line+";border-radius:20px;padding:26px;box-shadow:0 30px 80px rgba(0,0,0,.55);position:relative;overflow:hidden;";
-var note=(_NXUP.latest&&_NXUP.latest.msg)?String(_NXUP.latest.msg):"";
-card.innerHTML='<div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(232,232,234,.10),transparent 70%);pointer-events:none;"></div>'
-+'<div style="position:relative;display:flex;align-items:center;gap:12px;margin-bottom:16px;"><div style="width:42px;height:42px;border-radius:13px;background:#e8e8ea;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg viewBox="0 0 24 24" width="23" height="23" fill=_NXpal.ink><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg></div><div style="min-width:0;"><div style="font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8a8a92;">Nexium</div><div style="font-size:20px;font-weight:800;color:#f4f4f5;letter-spacing:-.02em;">Mise à jour disponible</div></div></div>'
-+'<div style="position:relative;font-size:13px;color:#b8b8be;line-height:1.6;margin-bottom:16px;">Une nouvelle version du client Nexium est prête. Redémarre pour l\'appliquer maintenant.</div>'
-+(note?'<div style="position:relative;font-size:12px;color:#8a8a92;background:"+_NXpal.inset+";border:1px solid "+_NXpal.line+";border-radius:10px;padding:11px 13px;margin-bottom:20px;line-height:1.5;"><span style="display:block;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#5b5b63;margin-bottom:3px;">Nouveauté</span>'+note.replace(/</g,"&lt;")+'</div>':'<div style="height:4px;"></div>');
-var row=document.createElement("div");row.style.cssText="position:relative;display:flex;gap:9px;";
-var later=document.createElement("div");later.style.cssText="flex:1;text-align:center;padding:12px;border-radius:12px;background:transparent;border:1px solid #26262b;color:#9a9aa0;font-size:13px;font-weight:600;cursor:pointer;";later.textContent="Plus tard";
-later.onclick=function(){_NXUP.snoozeUntil=Date.now()+1500000;try{_NXUP.st.snooze=_NXUP.snoozeUntil;_NXUP.save();}catch(_){}_NXUP.hideModal();};
-var apply=document.createElement("div");apply.style.cssText="flex:1.6;text-align:center;padding:12px;border-radius:12px;background:#e8e8ea;color:#0a0a0a;font-size:13px;font-weight:800;cursor:pointer;";apply.textContent="Redémarrer pour appliquer";
-apply.onclick=function(){_NXUP.hideModal();_NXUP.relaunchApply();};
-row.appendChild(later);row.appendChild(apply);card.appendChild(row);
-ov.appendChild(card);
-ov.onclick=function(e){if(e.target===ov){_NXUP.snoozeUntil=Date.now()+1500000;try{_NXUP.st.snooze=_NXUP.snoozeUntil;_NXUP.save();}catch(_){}_NXUP.hideModal();}};
-document.body.appendChild(ov);_NXUP.modalEl=ov;
+// Les notes arrivent peut-etre en retard : on les demande, et la carte se
+// contente de ce qu elle a.
+try{_NXUP.litNotes();}catch(_){}
+if(!document.getElementById("nx-maj-style")){
+var st=document.createElement("style");
+st.id="nx-maj-style";st.textContent=_NXUP.modalCss();
+(document.head||document.documentElement).appendChild(st);}
+var esc=function(s){return String(s===null||s===undefined?"":s)
+.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");};
+var pf=_NXUP.pointsForts();
+var ver=(_NXUP.repoVersion!=null)?("v"+_NXUP.repoVersion):"";
+var li="",z;
+if(pf&&pf.lignes.length){
+for(z=0;z<pf.lignes.length;z++)
+li+='<div class="nxu-li"><s></s><span>'+esc(pf.lignes[z])+'</span></div>';
+if(pf.reste)li+='<div class="nxu-plus">'+String.fromCharCode(0x2026)+" et "+pf.reste+
+' autre'+(pf.reste>1?"s":"")+' changement'+(pf.reste>1?"s":"")+'</div>';}
+var ov=document.createElement("div");
+ov.id="nx-maj";
+ov.setAttribute("role","dialog");
+ov.setAttribute("aria-label","Mise a jour de Nexium Client");
+ov.innerHTML=
+'<div class="nxu-cadre">'+
+'<div class="nxu-liseret"><i></i></div>'+
+'<div class="nxu-carte">'+
+'<div class="nxu-tete"><div class="nxu-logo">'+
+'<svg viewBox="0 0 100 100" width="21" height="21" fill="none" stroke="#0a0a0a" '+
+'stroke-width="10" stroke-linecap="square"><path d="M28 72 V28 L72 72 V28"/></svg></div>'+
+'<div><div class="nxu-cle">Nexium Client</div>'+
+'<div class="nxu-ver">'+esc(ver)+" est pr"+String.fromCharCode(0xEA)+"te</div></div></div>"+
+(pf&&pf.titre?('<div class="nxu-titre">'+esc(pf.titre)+"</div>"):"")+
+(li?('<div class="nxu-liste">'+li+"</div>"):"")+
+'<div class="nxu-rassure">'+
+'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" '+
+'stroke-width="2" stroke-linecap="round" style="flex:0 0 auto">'+
+'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'+
+'<span>Un red'+String.fromCharCode(0xE9)+"marrage, quelques secondes. Tes r"+
+String.fromCharCode(0xE9)+"glages et tes donn"+String.fromCharCode(0xE9)+
+"es restent en place.</span></div>"+
+'<div class="nxu-actions">'+
+'<button type="button" class="nxu-b nxu-b2">Plus tard</button>'+
+'<button type="button" class="nxu-b nxu-b1">Installer maintenant</button>'+
+"</div></div></div>";
+var plusTard=function(){
+_NXUP.snoozeUntil=Date.now()+1500000;
+try{_NXUP.st.snooze=_NXUP.snoozeUntil;_NXUP.save();}catch(_){}
+_NXUP.hideModal();};
+document.body.appendChild(ov);
+_NXUP.modalEl=ov;
+try{
+ov.querySelector(".nxu-b1").onclick=function(){_NXUP.hideModal();_NXUP.relaunchApply();};
+ov.querySelector(".nxu-b2").onclick=plusTard;
+ov.onclick=function(e){try{if(e.target===ov)plusTard();}catch(_){}};
+_NXUP._clav=function(e){try{
+if(e.key==="Escape"){e.preventDefault();e.stopPropagation();plusTard();}}catch(_){}};
+document.addEventListener("keydown",_NXUP._clav,true);}catch(_){}
+// Meme regle que partout : le mouvement n arrive qu a la premiere image
+// peinte, et la carte reste entierement lisible si elle n arrive jamais.
+try{if(typeof requestAnimationFrame==="function")
+requestAnimationFrame(function(){requestAnimationFrame(function(){try{
+if(_NXUP.modalEl)_NXUP.modalEl.className="nxu-vif";}catch(_){}});});
+else ov.className="nxu-vif";}catch(_){}
+// Les notes peuvent arriver apres coup : on redessine une seule fois.
+try{if(!pf)setTimeout(function(){try{
+if(!_NXUP.modalEl||_NXUP._redessine)return;
+if(!_NXUP.pointsForts())return;
+_NXUP._redessine=true;
+_NXUP.hideModal();_NXUP.showModal();}catch(_){}},2600);}catch(_){}
 }catch(_){}};
+// Le titre de l entree dans la colonne des reglages : une pastille quand une
+// version attend.
+_NXUP.titreOnglet=function(){try{
+return _NXUP.available()?("Mise "+String.fromCharCode(0xE0)+" jour "+
+String.fromCharCode(0xB7)+" 1"):("Mise "+String.fromCharCode(0xE0)+" jour");}catch(_){
+return "Mise "+String.fromCharCode(0xE0)+" jour";}};
 _NXUP.maybePrompt=function(){try{if(!_NXUP.available())return;if(_NXUP.modalEl)return;if(Date.now()<_NXUP.snoozeUntil)return;_NXUP.showModal();}catch(_){}};
 _NXUP._vsBody=function(txt){var esc=function(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};if(!txt)return '<div style="font-size:13px;color:#8a8a92;text-align:center;padding:24px 0;">Chargement des notes de version…</div>';var lines=String(txt).split(/\r?\n/).slice(0,120);var body="";for(var a=0;a<lines.length;a++){var s=lines[a].trim();if(!s){body+='<div style="height:8px;"></div>';continue;}if(/^[=\-_]{3,}$/.test(s)){body+='<div style="height:1px;background:#1e1e22;margin:12px 0;"></div>';continue;}if(/^#{1,3}\s/.test(s)||/^\[.+\]$/.test(s)){var h=s.replace(/^#{1,3}\s*/,"").replace(/^\[/,"").replace(/\]$/,"");body+='<div style="display:flex;align-items:center;gap:8px;margin:14px 0 7px;"><div style="width:3px;height:14px;background:#e8e8ea;border-radius:2px;"></div><div style="font-size:14px;font-weight:800;color:#f4f4f5;">'+esc(h)+'</div></div>';continue;}if(/^[-*\u2022]\s/.test(s)){body+='<div style="display:flex;gap:9px;padding:2px 0 2px 6px;"><div style="width:4px;height:4px;border-radius:50%;background:#5b5b63;margin-top:8px;flex-shrink:0;"></div><div style="font-size:12.5px;color:#b8b8be;line-height:1.55;">'+esc(s.replace(/^[-*\u2022]\s*/,""))+'</div></div>';continue;}body+='<div style="font-size:12.5px;color:#b8b8be;line-height:1.6;padding:2px 0;">'+esc(s)+'</div>';}return body;};
 _NXUP.showVersionScreen=function(prevVer){try{
@@ -8723,7 +9812,7 @@ _NXNG.show();}catch(_){}},4200);}catch(_){}
 setTimeout(function(){_NXUP.check();},6000);
 _NXUP.iv=setInterval(function(){if(typeof document==="undefined"||!document.hidden)_NXUP.check();},2700000);
 }
-var NexiumUpdateIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z},i("path",{d:"M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"}));};
+var NexiumUpdateIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("maj",z):null;};
 function NexiumUpdateComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 var _t=F.useState("etat");var tab=_t[0];var setTab=_t[1];
@@ -9002,8 +10091,8 @@ _NXLY.typeLabel=function(t){return t===2?"Écoute":t===1?"Diffuse":t===3?"Regard
 _NXLY.actImgSmall=function(a){try{var as=a&&a.assets;if(as&&as.small_image){var s=as.small_image;if(s.indexOf("mp:external/")===0)return "https://media.discordapp.net/external/"+s.slice(12);if(s.indexOf("http")===0)return s;if(a.application_id)return "https://cdn.discordapp.com/app-assets/"+a.application_id+"/"+s+".png";}}catch(_){}return null;};
 _NXLY.acts=function(){try{var d=_NXLY.data;if(!d)return [];var out=[];if(d.listening_to_spotify&&d.spotify){var sp=d.spotify,ts=(d.activities||[]).filter(function(z){return z.type===2;})[0];var st=ts&&ts.timestamps;out.push({spotify:true,label:"Écoute sur Spotify",name:sp.song,sub:sp.artist,sub2:sp.album,img:sp.album_art_url,imgSmall:null,elapsed:null,start:st&&st.start,end:st&&st.end});}var acts=d.activities||[];for(var a=0;a<acts.length;a++){var x=acts[a];if(x.type===4)continue;if(x.type===2&&x.name==="Spotify"&&d.listening_to_spotify)continue;var tt=x.timestamps||{};out.push({spotify:false,label:_NXLY.typeLabel(x.type)+" "+(x.name||""),name:x.details||x.name||"",sub:x.state||"",sub2:(x.details&&x.name&&x.details!==x.name)?x.name:"",img:_NXLY.actImg(x),imgSmall:_NXLY.actImgSmall(x),elapsed:_NXLY.elapsed(x),start:tt.start,end:tt.end});}return out;}catch(_){return [];}};
 }
-var NexiumAdminIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"}));};
-var NexiumHomeIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z"}));};
+var NexiumAdminIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("cle",z):null;};
+var NexiumHomeIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("accueil",z):null;};
 function NexiumAdminComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 F.useEffect(function(){
@@ -9618,7 +10707,7 @@ onglet[0]==="bans"?ongletBans():
 onglet[0]==="credits"?ongletCredits():ongletSession()),
 _NXfoot("Nexium Admins · les droits sont verifies par Supabase, pas par le client"));
 }
-var NexiumTeamIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.18.68-2.26 1.76-2.73 1.17-.52 2.61-.91 4.24-.91zM4 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c-.37-.06-.74-.1-1.13-.1-.99 0-1.93.21-2.78.58A2.01 2.01 0 0 0 0 16.43V18h4.5v-1.61c0-.83.23-1.61.63-2.29zM20 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm4 3.43c0-.81-.48-1.53-1.22-1.85A6.95 6.95 0 0 0 20 14c-.39 0-.76.04-1.13.1.4.68.63 1.46.63 2.29V18H24v-1.57zM12 6c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z"}));};
+var NexiumTeamIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("equipe",z):null;};
 function _NXthemeWrap(Orig){try{
 if(!Orig)return Orig;
 if(Orig.__nxwrapped)return Orig;
@@ -9846,11 +10935,7 @@ i("div",{style:{padding:"6px 12px",borderRadius:"8px",background:prev.acc,color:
 i("div",{style:{padding:"6px 12px",borderRadius:"8px",border:"1px solid "+prev.line,color:prev.sub,fontSize:"11.5px",fontWeight:"700"}},_T("Secondaire")),
 i("span",{style:{fontSize:"11px",color:prev.dim}},_T("Contraste")+" "+_NXBG.contrast(cur,prev.txt).toFixed(1)+":1"))):null);
 }
-var NexiumIAIcon=function(p){p=p||{};var z=p.width||p.height||20;
-return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},
-i("path",{d:"M12 2.5 13.7 8l5.5 1.7-5.5 1.7L12 17l-1.7-5.6L4.8 9.7 10.3 8 12 2.5z"}),
-i("path",{d:"M18.5 14.5l.8 2.6 2.6.8-2.6.8-.8 2.6-.8-2.6-2.6-.8 2.6-.8.8-2.6z",opacity:".55"}),
-i("path",{d:"M5 15l.6 2 2 .6-2 .6L5 20.2 4.4 18.2l-2-.6 2-.6L5 15z",opacity:".35"}));};
+var NexiumIAIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("etincelle",z):null;};
 
 // ---------------------------------------------------------------- le chat
 // Un seul composant pour les deux emplacements. `compact` resserre la mise
@@ -14072,7 +15157,7 @@ _NXAU.iv=setInterval(function(){try{if(_NXAU.eco)return;_NXAU.snoozeCheck();_NXA
 }catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXAU");if(window._NXERR)_NXERR.push("module _NXAU :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXAU desactive:",_nxE);}catch(_){}}
 }
-var NexiumAutoIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"}));};
+var NexiumAutoIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("baguette",z):null;};
 function NexiumAutoComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 var _t0=F.useState("taches");var tab=_t0[0];var setTab=_t0[1];
@@ -14585,7 +15670,7 @@ _NXfoot("Nexium Auto \u00b7 "+(_NXAU.envoiPret()
 ?_T("envoi autorise, plafonne et journalise")
 :_T("execution locale, aucun envoi de message")))));
 }
-var NexiumProtectIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M12 2 4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm-1.06 13.54L7.4 12l1.41-1.41 2.12 2.12 4.24-4.24 1.41 1.41-5.64 5.66z"}));};
+var NexiumProtectIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("bouclierOk",z):null;};
 var SH_LIENS=[
 {k:"maskLinks",ic:"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zM2 4.27 3.28 3 21 20.73 19.73 22 2 4.27z",t:"Masquage des liens dangereux",d:"Recouvre le lien dans le message : il n est plus lisible, plus copiable, plus cliquable par erreur. C est la seule protection qui agit avant meme que tu decides quoi que ce soit."},
 {k:"maskSuspect",ic:"M12 2 2 7v7c0 5 3.5 8.5 10 10 6.5-1.5 10-5 10-10V7L12 2zm1 15h-2v-2h2v2zm0-4h-2V8h2v5z",t:"Masquer aussi les liens douteux",d:"Etend le masquage aux liens raccourcis et a ceux que l analyse trouve inhabituels sans certitude. Plus sur, plus bavard."},
@@ -15232,7 +16317,7 @@ _NXlogin.CSS=[
 "font-size:44px;font-weight:800;letter-spacing:.055em;line-height:1;padding-left:.055em;",
 "background:linear-gradient(100deg,#ffffff,#b9b9c4 28%,#ffffff 50%,#b9b9c4 72%,#ffffff);",
 "background-size:220% 100%;-webkit-background-clip:text;background-clip:text;",
-"-webkit-text-fill-color:transparent;color:transparent;animation:nxSheen 7s linear infinite}",
+"-webkit-text-fill-color:transparent;color:transparent;animation:nxSheen 7s linear 3}",
 "#nx-welcome .nx-sub{margin-top:12px;font-size:13px;color:rgba(168,168,178,.82);letter-spacing:-.005em}",
 "#nx-welcome .nx-row{margin-top:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}",
 "#nx-welcome .nx-chip{display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:99px;",
@@ -15457,7 +16542,20 @@ _NXECO.notify=function(){for(var a=0;a<_NXECO.listeners.length;a++){try{_NXECO.l
 _NXECO.machine=function(){try{
 var n=window.navigator||{};
 return {coeurs:n.hardwareConcurrency||0,memoire:n.deviceMemory||0};}catch(_){return {coeurs:0,memoire:0};}};
+// Les images par seconde comptees par l ecran d ouverture, au dernier
+// demarrage. Zero quand la mesure n a pas eu lieu -- ecran desactive,
+// fenetre jamais peinte -- et on retombe alors sur les caracteristiques
+// declarees.
+_NXECO.fpsDemarrage=function(){try{
+var t=JSON.parse(_NXDB.get("nexium_boot_trace")||"null");
+return (t&&typeof t.fps==="number"&&t.fps>0)?t.fps:0;}catch(_){return 0;}};
 _NXECO.faible=function(){try{
+// La mesure passe avant la fiche technique, dans les deux sens : elle peut
+// declarer faible une machine bien dotee, et laisser tranquille une petite
+// machine qui s en sort tres bien.
+var f=_NXECO.fpsDemarrage();
+if(f&&f<45)return true;
+if(f&&f>=90)return false;
 var m=_NXECO.machine();
 if(m.coeurs&&m.coeurs<=4)return true;
 if(m.memoire&&m.memoire<=4)return true;
@@ -15512,7 +16610,7 @@ for(var a=0;a<mods.length;a++){var m=window[mods[a]];if(!m)continue;m.eco=cache;
 _NXECO.status=function(){try{
 var m=_NXECO.machine();
 return {mode:_NXECO.cfg.mode,actif:_NXECO.actif(),detecteFaible:_NXECO.faible(),
-coeurs:m.coeurs,memoire:m.memoire,
+coeurs:m.coeurs,memoire:m.memoire,fps:_NXECO.fpsDemarrage(),
 feuille:!!document.getElementById(_NXECO.STYLEID),
 animations:!!(window._NXMO&&_NXMO.on),
 reseauAllege:!!(window._NXNET&&_NXNET.paused)};}catch(_){return {};}};
@@ -18605,7 +19703,7 @@ e.preventDefault();e.stopPropagation();
 try{if(window._NXV&&_NXV.maskBascule)_NXV.maskBascule();}catch(_){}}
 }catch(_){}},true);}catch(_){}
 }
-var NexiumComptesIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M9 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.33 0-6 1.34-6 3v2h9.35A5.98 5.98 0 0 1 11 15.5c0-.52.07-1.02.19-1.5H9zm9 .5-1.15 1.15L18 17H14v2h4l-1.15 1.15L18 21.5l3-3-3-3z"}));};
+var NexiumComptesIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("comptes",z):null;};
 function NexiumComptesComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 var _t=F.useState("comptes");var tab=_t[0];var setTab=_t[1];
@@ -19349,7 +20447,7 @@ col:etatDirect.ouvert?P.ok:P.faint,rang:4}),
 _NXFX.chiffre({k:_T("Version"),v:"v"+ver,rang:5}))),{mb:0}),
 _NXfoot("Nexium Client v"+ver+" · "+_T("tout est calcule et garde sur cette machine"))));
 }
-var NexiumTicketIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M20 4H4a2 2 0 0 0-2 2v3a2 2 0 0 1 0 4v3a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3a2 2 0 0 1 0-4V6a2 2 0 0 0-2-2zm-6 3h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z"}));};
+var NexiumTicketIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("courrier",z):null;};
 function NexiumTicketComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 var P=_NXpal;
@@ -19389,7 +20487,7 @@ if(!el||!colle.current)return;
 el.scrollTop=el.scrollHeight;}catch(_){}},[etat.length,vue[0]]);
 
 if(!T)return i(Kr,null,i("div",{style:{maxWidth:"760px",margin:"0 auto"}},
-_NXFX.entete({cle:_T("Support"),titre:"Nexium Ticket",icone:"courrier",col:P.info,
+_NXFX.entete({cle:_T("Support"),titre:"Nexium Ticket",aide:_NXAIDES["Nexium Ticket"]||null,icone:"courrier",col:P.info,
 texte:_T("Le module de support n a pas demarre sur ce client.")}),
 _NXfoot("Nexium Ticket")));
 
@@ -19423,8 +20521,10 @@ onClick:function(){cat[1](c[0]);},
 style:{display:"flex",alignItems:"center",gap:"8px",padding:"9px 14px",borderRadius:"11px",
 cursor:"pointer",border:"1px solid "+(on?P.acc:P.line),
 background:on?_NXteinte(P.acc,.1):"transparent",
-color:on?P.txt:P.sub,fontSize:"12px",fontWeight:"700"}},_NXFX.a({"data-nx-appui":"1"})),
-_NXFX.ico(c[2],14,{hv:"saute"}),
+color:on?P.txt:P.sub,fontSize:"12px",fontWeight:"700",
+transition:_NXFX.anime()?"background .2s ease,border-color .2s ease,color .2s ease":"none"}},
+_NXFX.a({"data-nx-appui":"1"})),
+i("span",{style:{display:"flex",color:on?P.acc:P.faint}},_NXFX.svg(c[2],15)),
 i("span",null,_T(c[1])));})),
 offre[0]?_NXFX.note({col:P.warn,icone:"etoile",titre:_T("Demande d abonnement"),
 texte:_T("Ce ticket porte sur")+" : "+offre[0]+". "+
@@ -19456,23 +20556,41 @@ _NXcard(i("div",null,
 _NXch(_T("Tes tickets"),L.length?(L.length+" "+_T("fil(s)")):_T("Aucun ticket pour l instant."),
 _NXFX.bouton({t:_T("Rafraichir"),icone:"maj",hv:"tourne",petit:true,creux:true,col:P.sub,
 onClick:function(){T.rafraichis();}})),
-L.length?L.map(function(t,k){
+L.length?i("div",{style:{display:"flex",flexDirection:"column",gap:"9px",
+marginTop:"14px"}},L.map(function(t,k){
 var c=couleurEtat(t.etat);
 var repondu=t.reponses>0;
-return _NXFX.rangee({key:t.id,premier:k===0,rang:Math.min(6,k+1),
-icone:t.categorie==="abonnement"?"etoile":(t.categorie==="probleme"?"alerte":
-(t.categorie==="signalement"?"bouclier":"question")),
-col:c,titre:t.sujet,
-texte:(T.ETATS[t.etat]||t.etat)+" · "+_T("mis a jour il y a")+" "+quand(t.maj_le)+
-(repondu?(" · "+t.reponses+" "+_T("reponse(s)")):" · "+_T("pas encore de reponse")),
+var ic=t.categorie==="abonnement"?"etoile":(t.categorie==="probleme"?"alerte":
+(t.categorie==="signalement"?"bouclier":"question"));
+// Une carte plutot qu une rangee : le rail colore donne l etat avant meme
+// qu on ait lu quoi que ce soit.
+return i("div",_NXFX.fusion({key:t.id,className:"nx-fx",role:"button",tabIndex:0,
+onKeyDown:_NXkey,"data-nx-press":"1",
 onClick:function(){T.lis(t.id,function(e){
 if(e){dire(e);return;}
 T.suit(t.id,function(){T.lis(t.id);});
 colle.current=true;vue[1]("fil");});},
-droite:i("div",{style:{display:"flex",gap:"6px",alignItems:"center"}},
+style:{position:"relative",display:"flex",alignItems:"center",gap:"13px",
+padding:"14px 15px 14px 18px",borderRadius:"15px",cursor:"pointer",
+background:P.inset,border:"1px solid "+P.line,overflow:"hidden"}},
+_NXFX.a({"data-nx-rise":String(Math.min(6,k+1))})),
+i("div",{"aria-hidden":"true",style:{position:"absolute",left:0,top:0,bottom:0,
+width:"3px",background:c}}),
+_NXFX.pastille(ic,{col:c,taille:32,halo:t.etat==="ouvert"}),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt,
+overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},t.sujet),
+i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"5px",
+flexWrap:"wrap",fontSize:"11px",color:P.dim}},
+i("span",{style:{color:c,fontWeight:"700"}},T.ETATS[t.etat]||t.etat),
+i("span",{style:{width:"3px",height:"3px",borderRadius:"50%",background:P.faint}}),
+i("span",null,_T("mis a jour il y a")+" "+quand(t.maj_le)),
+repondu?i("span",{style:{width:"3px",height:"3px",borderRadius:"50%",background:P.faint}}):null,
+repondu?i("span",{style:{color:P.ok,fontWeight:"600"}},
+t.reponses+" "+(t.reponses>1?_T("reponses"):_T("reponse"))):null)),
+i("div",{style:{display:"flex",gap:"7px",alignItems:"center",flexShrink:0}},
 repondu?_NXFX.badge(String(t.reponses),P.ok,{icone:"courrier"}):null,
-_NXFX.badge(T.ETATS[t.etat]||t.etat,c,{point:t.etat==="ouvert"}),
-_NXFX.ico("chevron",13,{col:P.faint,hv:"pousse"}))});})
+_NXFX.ico("chevron",14,{col:P.faint,hv:"pousse"})));}))
 :_NXFX.vide({icone:"courrier",titre:_T("Aucun ticket"),
 texte:_T("Une question, un souci, un abonnement a prendre : ouvre un fil, la reponse arrive ici."),
 action:_NXFX.bouton({t:_T("Ouvrir un ticket"),icone:"plus",plein:true,col:P.acc,
@@ -19481,27 +20599,93 @@ L.length?_NXFX.note({col:P.dim,icone:"horloge",serre:true,
 texte:_T("Un ticket disparait quinze jours apres son dernier message. Tant qu il vit, il reste ici.")}):null));}
 
 // -------------------------------------------------------------------- le fil
-function bulle(m,k){
+// ------------------------------------------------------------------- l aspect
+// Le fil est le coeur de la page : il merite d etre une surface, pas une
+// liste. On lui donne un fond grave, des pastilles d auteur, un groupage des
+// messages consecutifs et un separateur de jour -- soit exactement ce qu on
+// attend d une conversation, sans rien changer a ce qui la fait marcher.
+var JOURS=["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+var MOIS=["janvier","fevrier","mars","avril","mai","juin","juillet","aout",
+"septembre","octobre","novembre","decembre"];
+function jourDe(t){try{var d=new Date(t);return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate();}catch(_){return "";}}
+function jourDit(t){try{
+var d=new Date(t),n=new Date();
+var mj=86400000;
+var ecart=Math.floor((new Date(n.getFullYear(),n.getMonth(),n.getDate())-
+new Date(d.getFullYear(),d.getMonth(),d.getDate()))/mj);
+if(ecart===0)return _T("aujourd hui");
+if(ecart===1)return _T("hier");
+if(ecart<7)return _T(JOURS[d.getDay()]);
+return d.getDate()+" "+_T(MOIS[d.getMonth()]);}catch(_){return "";}}
+function heureDe(t){try{
+var d=new Date(t);
+return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);}catch(_){return "";}}
+// La pastille d auteur. Cote equipe, le monogramme ; cote client, un disque
+// sobre -- on ne va pas chercher l avatar Discord pour un fil de support.
+function figure(moi){
+return i("div",{"aria-hidden":"true",style:{width:"26px",height:"26px",flexShrink:0,
+borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",
+background:moi?P.raise:_NXteinte(P.warn,.14),
+border:"1px solid "+(moi?P.hair:_NXteinte(P.warn,.32)),
+color:moi?P.sub:P.warn}},
+moi?_NXFX.svg("comptes",13)
+:i("svg",{viewBox:"0 0 100 100",width:12,height:12,fill:"none",stroke:"currentColor",
+strokeWidth:11,strokeLinecap:"square","aria-hidden":"true"},
+i("path",{d:"M28 72 V28 L72 72 V28"})));}
+
+function bulle(m,k,prec){
 var moi=m.auteur==="client";
 var sys=m.auteur==="systeme";
-if(sys)return i("div",{key:k,style:{textAlign:"center",padding:"8px 0"}},
-i("span",{style:{fontSize:"10.5px",color:P.faint,fontFamily:_NXf.mono,
-border:"1px solid "+P.line,borderRadius:"99px",padding:"3px 11px"}},m.contenu));
-return i("div",_NXFX.fusion({key:k,style:{display:"flex",justifyContent:moi?"flex-end":"flex-start",
-marginBottom:"11px"}},_NXFX.a({"data-nx-zoom":"1"})),
-i("div",{style:{maxWidth:"78%"}},
-i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginBottom:"5px",
-justifyContent:moi?"flex-end":"flex-start"}},
-moi?null:_NXFX.ico("couronne",11,{col:P.warn}),
+if(sys)return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"10px",
+padding:"10px 4px"}},
+i("div",{style:{flex:1,height:"1px",background:P.line}}),
+i("span",{style:{fontSize:"10px",color:P.faint,fontFamily:_NXf.mono,
+letterSpacing:".08em",whiteSpace:"nowrap"}},m.contenu),
+i("div",{style:{flex:1,height:"1px",background:P.line}}));
+// Deux messages de suite du meme auteur, a moins de cinq minutes : on ne
+// repete ni la figure ni le nom. C est ce qui fait une conversation plutot
+// qu un registre.
+var suite=!!(prec&&prec.auteur===m.auteur&&prec.auteur!=="systeme"&&
+(((new Date(m.a)).getTime()-(new Date(prec.a)).getTime())<300000));
+return i("div",_NXFX.fusion({key:k,style:{display:"flex",gap:"9px",
+flexDirection:moi?"row-reverse":"row",
+marginBottom:suite?"3px":"12px",alignItems:"flex-end"}},
+_NXFX.a({"data-nx-zoom":"1"})),
+i("div",{style:{width:"26px",flexShrink:0}},suite?null:figure(moi)),
+i("div",{style:{maxWidth:"76%",display:"flex",flexDirection:"column",
+alignItems:moi?"flex-end":"flex-start"}},
+suite?null:i("div",{style:{display:"flex",alignItems:"center",gap:"7px",marginBottom:"5px",
+flexDirection:moi?"row-reverse":"row"}},
 i("span",{style:{fontSize:"10px",fontWeight:"800",letterSpacing:".1em",
 textTransform:"uppercase",color:moi?P.dim:P.warn}},
 moi?_T("Toi"):_T("Equipe Nexium")),
-i("span",{style:{fontSize:"10px",color:P.faint,fontFamily:_NXf.mono}},quand(m.a))),
-i("div",{style:{padding:"11px 14px",borderRadius:moi?"14px 14px 4px 14px":"14px 14px 14px 4px",
+i("span",{style:{fontSize:"10px",color:P.faint,fontFamily:_NXf.mono}},heureDe(m.a))),
+i("div",{style:{padding:"11px 14px",
+borderRadius:moi?(suite?"14px 4px 4px 14px":"14px 14px 4px 14px")
+:(suite?"4px 14px 14px 4px":"14px 14px 14px 4px"),
 background:moi?P.raise:_NXteinte(P.warn,.08),
 border:"1px solid "+(moi?P.hair:_NXteinte(P.warn,.22)),
 color:P.txt,fontSize:"13px",lineHeight:1.65,whiteSpace:"pre-wrap",
 overflowWrap:"anywhere",userSelect:"text",WebkitUserSelect:"text"}},m.contenu)));}
+
+// Les messages, entrecoupes d un trait quand le jour change.
+function fildeMessages(L){
+var out=[],prec=null,jour="";
+for(var a=0;a<L.length;a++){
+var m=L[a];
+var j=jourDe(m.a);
+if(j&&j!==jour){
+jour=j;
+out.push(i("div",{key:"j"+a,style:{display:"flex",alignItems:"center",gap:"10px",
+padding:"12px 4px 10px"}},
+i("div",{style:{flex:1,height:"1px",background:P.line}}),
+i("span",{style:{fontSize:"9.5px",color:P.dim,fontFamily:_NXf.mono,
+letterSpacing:".14em",textTransform:"uppercase",whiteSpace:"nowrap"}},jourDit(m.a)),
+i("div",{style:{flex:1,height:"1px",background:P.line}})));
+prec=null;}
+out.push(bulle(m,a,prec));
+prec=m;}
+return out;}
 
 function vueFil(){
 var f=T.fil;
@@ -19529,9 +20713,12 @@ _NXFX.badge(d.ouvert?_T("en direct"):_T("verifie regulierement"),
 d.ouvert?P.ok:P.faint,{point:d.ouvert})),
 i("div",{ref:fil,onScroll:function(e){try{var el=e.target;
 colle.current=(el.scrollHeight-el.scrollTop-el.clientHeight)<48;}catch(_){}},
-style:{maxHeight:"46vh",minHeight:"180px",overflowY:"auto",overflowX:"hidden",
-padding:"4px 2px",background:P.bg,borderRadius:"14px",border:"1px solid "+P.line}},
-i("div",{style:{padding:"12px"}},(f.messages||[]).map(bulle))),
+style:{position:"relative",maxHeight:"48vh",minHeight:"200px",overflowY:"auto",
+overflowX:"hidden",padding:"4px 2px",borderRadius:"16px",
+border:"1px solid "+P.line,
+background:"linear-gradient("+_NXteinte(P.txt,.022)+" 1px,transparent 1px) 0 0/100% 34px,"+
+"radial-gradient(90% 60% at 50% 0%,"+_NXteinte(c,.05)+",transparent 70%),"+P.bg}},
+i("div",{style:{padding:"14px 14px 16px"}},fildeMessages(f.messages||[]))),
 ferme?_NXFX.note({col:P.faint,icone:"cadenas",serre:true,
 texte:_T("Ce ticket est ferme. Ouvres-en un nouveau si tu as encore besoin d aide.")})
 :i("div",{style:{marginTop:"12px"}},
@@ -19553,7 +20740,7 @@ _T("Entree pour envoyer, Maj+Entree pour aller a la ligne"))))),{mb:0})));}
 
 var enAttente=T.enAttente();
 return i(Kr,null,i("div",{style:{maxWidth:"780px",margin:"0 auto"}},
-_NXFX.entete({cle:_T("Support"),titre:"Nexium Ticket",icone:"courrier",col:P.info,
+_NXFX.entete({cle:_T("Support"),titre:"Nexium Ticket",aide:_NXAIDES["Nexium Ticket"]||null,icone:"courrier",col:P.info,
 texte:_T("Un fil prive avec l equipe : une question, un probleme, ou un abonnement a prendre. La reponse arrive ici, pas ailleurs."),
 chiffres:[{k:_T("Ouverts"),v:enAttente,col:enAttente?P.warn:P.faint},
 {k:_T("Au total"),v:(T.liste||[]).length},
@@ -19568,7 +20755,7 @@ plein:vue[0]==="neuf",creux:vue[0]!=="neuf",onClick:function(){vue[1]("neuf");}}
 vue[0]==="neuf"?neuf():(vue[0]==="fil"?vueFil():liste()),
 _NXfoot("Nexium Ticket · "+_T("fil prive, efface quinze jours apres le dernier message"))));
 }
-var NexiumAboIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M12 2 9.2 8.6 2 9.2l5.5 4.7L5.8 21 12 17.3 18.2 21l-1.7-7.1L22 9.2l-7.2-.6L12 2z"}));};
+var NexiumAboIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("etoile",z):null;};
 function NexiumAboComp(){
 var force=F.useReducer(function(x){return x+1;},0)[1];
 F.useEffect(function(){
@@ -19578,13 +20765,15 @@ _NXABO.charge(true);
 _NXABO.catalogue();
 return function(){try{_NXABO.listeners=_NXABO.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
 var P=_NXpal;
-var copie=F.useState(false),setCopie=copie[1];
 var onglet=F.useState("etat");
+// L offre dont on regarde l effet sur la carte d acces. Rien n est achete :
+// c est un calque pose sur l etat reel.
+var apercu=F.useState(null);
 var an=_NXFX.anime();
 var A=window._NXABO;
 
 if(!A)return i(Kr,null,i("div",{style:{maxWidth:"760px",margin:"0 auto"}},
-_NXFX.entete({cle:_T("Abonnement"),titre:"Nexium Abonnement",icone:"etoile",col:P.warn,
+_NXFX.entete({cle:_T("Abonnement"),titre:"Nexium Abonnement",aide:_NXAIDES["Nexium Abonnement"]||null,icone:"etoile",col:P.warn,
 texte:_T("Le module d abonnement n a pas demarre sur ce client.")}),
 _NXfoot("Nexium Abonnement")));
 
@@ -19597,14 +20786,13 @@ sujet:o?(_T("Abonnement")+" : "+o.nom):_T("Demande d abonnement")};
 if(window._NXCP)_NXCP.ouvrir("equicord_ticket","Nexium Ticket");
 return;}
 DiscordNative.clipboard.copy("5dj0");
-setCopie(true);setTimeout(function(){try{setCopie(false);}catch(_){}},2200);
 if(window._NXPR&&_NXPR.toast)_NXPR.toast(_T("Pseudo copie : 5dj0"),1);}catch(_){}}
-function contact(){ticket(null);}
 
 var res=A.resume();
 var niv={ia:A.niveau("ia"),pr:A.niveau("pr"),pv:A.niveau("pv")};
 var mesOffres=A.offres();
 var prochaine=A.prochaine();
+var libre=A.libre();
 
 // Ce que chaque niveau ouvre, domaine par domaine. C est la meme grille que
 // celle appliquee par le client et par le relais : elle est ecrite une fois.
@@ -19625,40 +20813,204 @@ var DOMS=[["pr","Nexium Protect","bouclierOk",P.danger],
 ["pv","Nexium Privacy","oeilBarre",P.ok],
 ["ia","Nexium IA","etincelle",P.mauve]];
 
-// ------------------------------------------------------------------ l etat
-function bandeau(){
-var libre=A.libre();
-var c=res.etat==="admin"?P.warn:(res.etat==="pionnier"?P.lime:(res.etat==="abonne"?P.info:P.sub));
+// Un chiffre honnete : combien de paliers restent fermes, sur les neuf qui
+// existent au-dela du socle. C est ce que l abonnement change, exactement.
+var fermes=0,ouverts=0,_z;
+for(_z=0;_z<DOMS.length;_z++){
+var _n=niv[DOMS[_z][0]];
+ouverts+=Math.min(3,_n);
+fermes+=3-Math.min(3,_n);}
+
+// ------------------------------------------------------------------ la scene
+// La piece maitresse : l etat du compte, les trois arcs, et l action. Tout ce
+// qui compte tient au-dessus de la ligne de flottaison.
+function scene(){
+var c=res.etat==="admin"?P.warn:(res.etat==="pionnier"?P.lime:(res.etat==="abonne"?P.info:P.mauve));
 var t=res.etat==="admin"?_T("Compte d equipe")
 :res.etat==="pionnier"?_T("Membre des debuts")
-:res.etat==="abonne"?_T("Abonne")
+:res.etat==="abonne"?(mesOffres.length===1?mesOffres[0].nom:_T("Abonne"))
 :res.etat==="inconnu"?_T("Etat inconnu"):_T("Offre libre");
-return i("div",_NXFX.fusion({style:{position:"relative",overflow:"hidden",borderRadius:"22px",
-border:"1px solid "+_NXteinte(c,.3),background:"linear-gradient(158deg,"+_NXteinte(c,.1)+","+P.panel+" 66%)",
-padding:"26px 24px",marginBottom:"14px"}},_NXFX.a({"data-nx-carte":"1"})),
-an?i("div",{"data-nx-breathe":"1","aria-hidden":"true",style:{position:"absolute",right:"-60px",top:"-80px",
-width:"280px",height:"280px",borderRadius:"50%",pointerEvents:"none",
-background:"radial-gradient(circle,"+_NXteinte(c,.16)+",transparent 68%)"}}):null,
-i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"18px",flexWrap:"wrap"}},
-_NXFX.blason(res.etat==="pionnier"?"couronne":(res.etat==="admin"?"cle":(res.etat==="abonne"?"etoile":"boussole")),c,78),
-i("div",{style:{flex:1,minWidth:"220px"}},
+return i("div",_NXFX.fusion({style:{position:"relative",overflow:"hidden",borderRadius:"24px",
+border:"1px solid "+_NXteinte(c,.3),
+background:"linear-gradient(152deg,"+_NXteinte(c,.13)+" 0%,"+P.panel+" 58%)",
+padding:"28px 26px 24px",marginBottom:"16px"}},_NXFX.a({"data-nx-carte":"1"})),
+an?i("div",{"data-nx-breathe":"1","aria-hidden":"true",style:{position:"absolute",right:"-70px",top:"-96px",
+width:"320px",height:"320px",borderRadius:"50%",pointerEvents:"none",
+background:"radial-gradient(circle,"+_NXteinte(c,.18)+",transparent 68%)"}}):null,
+i("div",{"aria-hidden":"true",style:{position:"absolute",inset:0,pointerEvents:"none",
+backgroundImage:"linear-gradient("+_NXteinte(P.txt,.03)+" 1px,transparent 1px),"+
+"linear-gradient(90deg,"+_NXteinte(P.txt,.03)+" 1px,transparent 1px)",
+backgroundSize:"38px 38px",
+maskImage:"radial-gradient(70% 90% at 84% 8%,#000,transparent 72%)",
+WebkitMaskImage:"radial-gradient(70% 90% at 84% 8%,#000,transparent 72%)"}}),
+i("div",{style:{position:"relative",display:"flex",alignItems:"center",gap:"20px",flexWrap:"wrap"}},
+_NXFX.blason(res.etat==="pionnier"?"couronne":(res.etat==="admin"?"cle":(res.etat==="abonne"?"etoile":"boussole")),c,84),
+i("div",{style:{flex:1,minWidth:"230px"}},
 i("div",{style:{fontSize:"10px",fontWeight:"900",letterSpacing:".2em",textTransform:"uppercase",
 color:P.faint,marginBottom:"9px"}},_T("Ton offre")),
-i("div",{style:{fontFamily:_NXf.disp,fontSize:"30px",fontWeight:"800",color:P.txt,
-letterSpacing:"-.035em",lineHeight:1.06}},t),
-i("div",{style:{fontSize:"13px",color:P.sub,marginTop:"10px",lineHeight:1.6,maxWidth:"440px"}},
+i("div",{style:{fontFamily:_NXf.disp,fontSize:"32px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.038em",lineHeight:1.05}},t),
+i("div",{style:{fontSize:"13px",color:P.sub,marginTop:"10px",lineHeight:1.6,maxWidth:"430px"}},
 res.texte),
-libre?null:i("div",{style:{marginTop:"14px"}},
-_NXFX.bouton({t:_T("S abonner"),icone:"courrier",plein:true,col:P.acc,
-onClick:function(){ticket(null);}})))),
-prochaine?i("div",{style:{position:"relative",marginTop:"18px",paddingTop:"16px",
+i("div",{style:{marginTop:"16px",display:"flex",gap:"8px",flexWrap:"wrap"}},
+libre?null:_NXFX.bouton({t:mesOffres.length?_T("Prolonger ou changer"):_T("Choisir une offre"),
+icone:"etoile",plein:true,col:P.acc,onClick:function(){onglet[1]("offres");}}),
+libre?null:_NXFX.bouton({t:_T("Ouvrir un ticket"),icone:"courrier",petit:false,creux:true,col:P.sub,
+onClick:function(){ticket(null);}}),
+libre?_NXFX.bouton({t:_T("Voir ce que ca ouvre"),icone:"fleche",creux:true,col:P.sub,
+onClick:function(){onglet[1]("offres");}}):null))),
+// Les trois arcs : l etat reel, lisible en une seconde.
+i("div",{style:{position:"relative",marginTop:"22px",paddingTop:"20px",
+borderTop:"1px solid "+P.line,display:"flex",gap:"14px",flexWrap:"wrap",
+justifyContent:"space-around"}},
+DOMS.map(function(d,k){
+var n=niv[d[0]];
+return i("div",_NXFX.fusion({key:d[0],style:{display:"flex",flexDirection:"column",
+alignItems:"center",gap:"9px",minWidth:"104px"}},_NXFX.a({"data-nx-rise":String(k+1)})),
+_NXFX.jauge(n/3*100,n>=3?P.ok:d[3],104,n+"/3",null),
+i("div",{style:{fontSize:"11px",fontWeight:"700",color:P.sub,letterSpacing:".02em"}},d[1]));})),
+prochaine?i("div",{style:{position:"relative",marginTop:"18px",paddingTop:"15px",
 borderTop:"1px solid "+P.line,display:"flex",alignItems:"center",gap:"11px",flexWrap:"wrap"}},
 _NXFX.ico("horloge",14,{col:(A.jours(new Date(prochaine.t).toISOString())<=5)?P.warn:P.dim}),
 i("span",{style:{fontSize:"12px",color:P.sub}},
 _T("Prochaine echeance")+" : "+prochaine.nom+" "+_T("dans")+" "+
-A.jours(new Date(prochaine.t).toISOString())+" "+_T("jour(s)"))):null);}
+A.jours(new Date(prochaine.t).toISOString())+" "+_T("jour(s)")),
+_NXFX.bouton({t:_T("Prolonger"),petit:true,creux:true,col:P.warn,
+onClick:function(){ticket(null);}})):null);}
 
-// -------------------------------------------------------- ce que tu as, la
+// --------------------------------------------------------- la carte d acces
+//
+// Le probleme que ceci resout : "niveau 2 / 3" ne veut rien dire. Un
+// abonnement, concretement, c est des etages de ton propre client qui
+// s allument. On les dessine donc : trois tours -- Protect, Privacy, IA --
+// quatre etages chacune, du socle au sommet. Ce qui est ouvert est eclaire et
+// relie par un filament ; ce qui ne l est pas est eteint, avec un cadenas.
+//
+// Et surtout : on peut essayer. Choisir une offre au-dessus de la carte
+// allume, en pointille, les etages qu elle ouvrirait. C est la reponse la
+// plus courte a "ca sert a quoi".
+var ETAGES={
+pr:[[0,_T("Le socle"),"bouclier"],[1,_T("Les pieges"),"cible"],
+[2,_T("L avance"),"baguette"],[3,_T("La sortie"),"reseau"]],
+pv:[[0,_T("La telemetrie"),"oeilBarre"],[1,_T("Les signaux"),"equipe"],
+[2,_T("L empreinte"),"puce"],[3,_T("Les donnees"),"base"]],
+ia:[[0,_T("Rapide"),"eclair"],[1,_T("Plus"),"etincelle"],
+[2,_T("Pro"),"couches"],[3,_T("Ultra"),"robot"]]};
+// Ce qu une offre ferait, domaine par domaine. Une offre generale monte les
+// trois ; une offre de module ne monte que le sien.
+function vise(cle){try{
+if(!cle)return null;
+var g=(window._NXFETE&&_NXFETE.devine)?_NXFETE.devine(cle):null;
+if(!g)return null;
+var r={ia:niv.ia,pr:niv.pr,pv:niv.pv};
+if(g.famille==="general"){
+r.ia=Math.max(r.ia,g.rang);r.pr=Math.max(r.pr,g.rang);r.pv=Math.max(r.pv,g.rang);}
+else if(g.famille==="ia")r.ia=Math.max(r.ia,g.rang);
+else if(g.famille==="privacy")r.pv=Math.max(r.pv,g.rang);
+else if(g.famille==="securite")r.pr=Math.max(r.pr,g.rang);
+return r;}catch(_){return null;}}
+
+function tour(d,k){
+var cle=d[0],nom=d[1],col=d[3];
+var n=niv[cle];
+var cible=apercu[0]?vise(apercu[0]):null;
+var nc=cible?cible[cle]:n;
+var L=ETAGES[cle];
+// Les etages se lisent du haut vers le bas, donc on inverse.
+var hauts=L.slice().reverse();
+return i("div",_NXFX.fusion({key:cle,style:{flex:"1 1 190px",minWidth:"176px",
+display:"flex",flexDirection:"column"}},_NXFX.a({"data-nx-rise":String(k+1)})),
+i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"11px"}},
+_NXFX.pastille(d[2],{col:col,taille:26,halo:n>0}),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"12px",fontWeight:"800",color:P.txt,letterSpacing:"-.01em"}},nom),
+i("div",{style:{fontSize:"10px",color:P.dim,fontFamily:_NXf.mono,marginTop:"2px"}},
+n+" / 3"+((nc>n)?(" "+String.fromCharCode(0x2192)+" "+nc+" / 3"):""))) ),
+i("div",{style:{position:"relative",paddingLeft:"15px"}},
+// Le filament : la part eclairee monte depuis le socle.
+i("div",{"aria-hidden":"true",style:{position:"absolute",left:"5px",top:"6px",bottom:"6px",
+width:"1px",background:P.line}}),
+i("div",{"aria-hidden":"true",style:{position:"absolute",left:"5px",bottom:"6px",
+width:"1px",height:(((n+1)/4)*100)+"%",maxHeight:"calc(100% - 12px)",
+background:"linear-gradient(0deg,"+col+","+_NXteinte(col,.25)+")",
+transformOrigin:"bottom",
+transition:_NXFX.anime()?"height .5s cubic-bezier(.22,1,.36,1)":"none"}}),
+hauts.map(function(e,z){
+var ouvert=n>=e[0];
+var promis=!ouvert&&nc>=e[0];
+var c=ouvert?col:(promis?P.warn:P.faint);
+return i("div",{key:z,style:{position:"relative",display:"flex",alignItems:"center",
+gap:"9px",padding:"9px 10px",marginBottom:"5px",borderRadius:"11px",
+background:ouvert?_NXteinte(col,.07):(promis?_NXteinte(P.warn,.07):"transparent"),
+border:"1px "+(promis?"dashed":"solid")+" "+
+(ouvert?_NXteinte(col,.26):(promis?_NXteinte(P.warn,.42):P.line)),
+opacity:ouvert||promis?1:.55,
+transition:_NXFX.anime()?"background .3s ease,border-color .3s ease,opacity .3s ease":"none"}},
+// Le raccord vers le filament.
+i("div",{"aria-hidden":"true",style:{position:"absolute",left:"-10px",top:"50%",
+width:"9px",height:"1px",background:ouvert?_NXteinte(col,.5):P.line}}),
+i("span",{style:{display:"flex",flexShrink:0,color:c}},
+_NXFX.svg(ouvert?e[2]:(promis?e[2]:"cadenas"),14)),
+i("span",{style:{flex:1,minWidth:0,fontSize:"11.5px",fontWeight:ouvert?"700":"600",
+color:ouvert?P.txt:(promis?P.pale:P.dim)}},e[1]),
+promis?i("span",{style:{fontSize:"9.5px",fontWeight:"900",color:P.warn,
+fontFamily:_NXf.mono}},"+1"):
+(ouvert?i("span",{style:{display:"flex",color:_NXteinte(col,.75)}},_NXFX.svg("check",12)):null));})));}
+
+function carteAcces(){
+var cat=A.CAT||[];
+var cible=apercu[0]?vise(apercu[0]):null;
+var gagne=0;
+if(cible)gagne=(cible.ia-niv.ia)+(cible.pr-niv.pr)+(cible.pv-niv.pv);
+var nomOffre="";
+if(apercu[0]){for(var z=0;z<cat.length;z++)if(cat[z].offre===apercu[0])nomOffre=cat[z].nom;}
+// Les puces d essai : cliquer sur l une allume la carte comme si l offre
+// etait deja la. Rien n est achete, rien n est promis : c est un apercu.
+function puce(o){
+var on=apercu[0]===o.offre;
+var col=o.famille==="ia"?P.mauve:(o.famille==="privacy"?P.ok:
+(o.famille==="securite"?P.danger:P.info));
+return i("div",{key:o.offre,className:"nx-fx",role:"button",tabIndex:0,onKeyDown:_NXkey,
+"data-nx-press":"1",
+onClick:function(){apercu[1](on?null:o.offre);},
+style:{display:"inline-flex",alignItems:"center",gap:"6px",padding:"5px 11px",
+borderRadius:"99px",cursor:"pointer",whiteSpace:"nowrap",
+background:on?_NXteinte(col,.16):P.inset,
+border:"1px solid "+(on?_NXteinte(col,.5):P.line),
+color:on?P.txt:P.sub,fontSize:"11px",fontWeight:on?"800":"600",
+transition:_NXFX.anime()?"background .22s ease,border-color .22s ease,color .22s ease":"none"}},
+i("span",{style:{display:"flex",color:on?col:P.faint}},
+_NXFX.svg(o.famille==="ia"?"etincelle":(o.famille==="privacy"?"oeilBarre":
+(o.famille==="securite"?"bouclierOk":"etoile")),12)),
+i("span",null,o.nom.replace("Nexium ","")));}
+return _NXcard(i("div",null,
+_NXch(_T("La carte de tes acces"),
+_T("Ton client, etage par etage. Ce qui est eclaire est ouvert ; ce qui porte un cadenas ne l est pas encore. Choisis une offre pour voir ce qu elle allumerait."),
+apercu[0]?_NXFX.bouton({t:_T("Arreter l apercu"),petit:true,creux:true,col:P.sub,
+icone:"croix",onClick:function(){apercu[1](null);}}):null),
+cat.length?i("div",{style:{display:"flex",gap:"7px",flexWrap:"wrap",
+margin:"2px 0 18px"}},cat.map(puce)):null,
+i("div",{style:{display:"flex",gap:"16px",flexWrap:"wrap",alignItems:"flex-start"}},
+DOMS.map(tour)),
+apercu[0]?i("div",_NXFX.fusion({style:{marginTop:"18px",padding:"13px 15px",
+borderRadius:"13px",border:"1px dashed "+_NXteinte(P.warn,.42),
+background:_NXteinte(P.warn,.06),display:"flex",alignItems:"center",gap:"11px",
+flexWrap:"wrap"}},_NXFX.a({"data-nx-pop":"1"})),
+i("span",{style:{display:"flex",color:P.warn}},_NXFX.svg("cadenasOuvert",16)),
+i("span",{style:{flex:1,minWidth:"200px",fontSize:"12.5px",color:P.pale,lineHeight:1.55}},
+gagne>0?(nomOffre+" "+_T("allumerait")+" "+gagne+" "+(gagne>1?_T("etages de plus dans ton client."):_T("etage de plus dans ton client.")))
+:(nomOffre+" "+_T("n ajouterait rien : ces etages sont deja ouverts chez toi."))),
+gagne>0?_NXFX.bouton({t:_T("Creer un ticket"),petit:true,plein:true,col:P.acc,
+icone:"courrier",onClick:function(){
+var o=null;for(var y=0;y<cat.length;y++)if(cat[y].offre===apercu[0])o=cat[y];
+ticket(o);}}):null):
+i("div",{style:{marginTop:"16px",fontSize:"11.5px",color:P.faint,
+display:"flex",alignItems:"center",gap:"8px"}},
+i("span",{style:{display:"flex"}},_NXFX.svg("info",13)),
+i("span",null,fermes?(fermes+" "+(fermes>1?_T("etages encore eteints sur 9."):_T("etage encore eteint sur 9.")))
+:_T("Les neuf etages sont ouverts. Il n y a plus rien a allumer.")))),{mb:12});}
+
+// ------------------------------------------------- ce que tu as, domaine par
 function domaine(d,k){
 var cle=d[0],nom=d[1],ic=d[2],col=d[3];
 var n=niv[cle];
@@ -19684,60 +21036,149 @@ i("div",{style:{flex:1,minWidth:0}},
 i("div",{style:{fontSize:"12px",fontWeight:"700",color:ouvert?P.txt:P.dim}},p[1]),
 i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"3px",lineHeight:1.5}},p[2])));}));}
 
-// ------------------------------------------------------------- le catalogue
-var FAM=[["general",_T("Tout Nexium"),_T("Les trois modules d un coup, au niveau correspondant."),"etoile",P.warn],
-["ia",_T("Nexium IA"),_T("Des paliers plus capables, et une reserve de credits plus large."),"etincelle",P.mauve],
-["privacy",_T("Nexium Privacy"),_T("Les signaux sociaux, l empreinte, puis l hygiene des donnees."),"oeilBarre",P.ok],
-["securite",_T("Nexium Security"),_T("Les pieges, les gardes avancees, puis le pare-feu sortant."),"bouclierOk",P.danger]];
+// ----------------------------------------------------------- les offres
+var FAM=[["ia",_T("Nexium IA"),_T("Des paliers plus capables, et une reserve de credits plus large."),"etincelle",P.mauve,"ia"],
+["privacy",_T("Nexium Privacy"),_T("Les signaux sociaux, l empreinte, puis l hygiene des donnees."),"oeilBarre",P.ok,"pv"],
+["securite",_T("Nexium Security"),_T("Les pieges, les gardes avancees, puis le pare-feu sortant."),"bouclierOk",P.danger,"pr"]];
 
-function carteOffre(o,col,vedette){
-var a=A.expire(o.offre);
-var jours=A.jours(a);
-var mienne=false,z;
-for(z=0;z<mesOffres.length;z++)if(mesOffres[z].offre===o.offre)mienne=true;
-return i("div",_NXFX.fusion({key:o.offre,style:{position:"relative",flex:"1 1 190px",minWidth:"178px",
-padding:vedette?"20px 16px 16px":"17px 16px 16px",borderRadius:"17px",
-background:mienne?_NXteinte(P.ok,.07):(vedette?_NXteinte(col,.08):P.inset),
-border:"1px solid "+(mienne?_NXteinte(P.ok,.34):(vedette?_NXteinte(col,.34):P.line))}},
+function prixFr(v){try{
+return String(v).replace(".00","").replace(".",",");}catch(_){return String(v);}}
+function parJour(v){try{
+var n=parseFloat(v);
+if(!isFinite(n)||n<=0)return "";
+var c=Math.round((n/30)*100);
+if(c<1)return "";
+return _T("soit")+" "+(c<100?(c+" centimes"):(prixFr((c/100).toFixed(2))+" "+_T("euros")))+" "+_T("par jour");}catch(_){return "";}}
+
+function mienne(cle){try{
+for(var z=0;z<mesOffres.length;z++)if(mesOffres[z].offre===cle)return mesOffres[z];
+return null;}catch(_){return null;}}
+
+// Ce que chaque offre generale apporte, en clair. Trois colonnes qu on lit
+// de gauche a droite, avec la meme liste : c est ce qui rend le choix simple.
+var TOUT=[[_T("Nexium Protect"),1],[_T("Nexium Privacy"),1],[_T("Nexium IA"),1],
+[_T("Credits IA par tranche"),0],[_T("Modeles ouverts"),0],
+[_T("Bac a sable et empreinte"),2],[_T("Pare-feu sortant"),3],
+[_T("Reflexion profonde"),3]];
+var VALEURS={1:["1 / 3","1 / 3","1 / 3","100",_T("trois"),_T("non"),_T("non"),_T("non")],
+2:["2 / 3","2 / 3","2 / 3","200",_T("quatre"),_T("oui"),_T("non"),_T("non")],
+3:["3 / 3","3 / 3","3 / 3","400",_T("tous"),_T("oui"),_T("oui"),_T("oui")]};
+
+// Une colonne d offre generale : haute, lisible, et qui dit son prix avant
+// tout le reste.
+function colonne(o,vedette){
+var m=mienne(o.offre);
+var col=o.rang===3?P.mauve:(o.rang===2?P.info:P.cyan);
+var vals=VALEURS[o.rang]||VALEURS[1];
+return i("div",_NXFX.fusion({key:o.offre,style:{position:"relative",flex:"1 1 216px",
+minWidth:"200px",display:"flex",flexDirection:"column",
+padding:vedette?"26px 19px 19px":"22px 19px 19px",borderRadius:"20px",
+background:m?_NXteinte(P.ok,.07):(vedette?"linear-gradient(178deg,"+_NXteinte(col,.13)+","+P.inset+" 62%)":P.inset),
+border:"1px solid "+(m?_NXteinte(P.ok,.36):(vedette?_NXteinte(col,.40):P.line)),
+boxShadow:vedette?("0 18px 46px "+_NXteinte(col,.10)):"none"}},
 _NXFX.a({"data-nx-tile":"1"})),
-mienne?i("div",{style:{position:"absolute",top:"-9px",left:"50%",transform:"translateX(-50%)",
-padding:"3px 10px",borderRadius:"99px",background:P.ok,color:P.ink,
-fontSize:"9px",fontWeight:"900",letterSpacing:".1em",textTransform:"uppercase",
-whiteSpace:"nowrap"}},_T("Actif")):null,
-i("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}},
-i("span",{style:{fontSize:"9.5px",fontWeight:"900",letterSpacing:".13em",
-textTransform:"uppercase",color:col}},_T("niveau")+" "+o.rang)),
-i("div",{style:{fontSize:"13.5px",fontWeight:"700",color:P.txt,marginBottom:"9px",
-lineHeight:1.3}},o.nom),
-i("div",{style:{display:"flex",alignItems:"baseline",gap:"4px",marginBottom:"13px"}},
-i("span",{style:{fontFamily:_NXf.disp,fontSize:"25px",fontWeight:"800",color:P.txt,
-letterSpacing:"-.04em"}},String(o.prix).replace(".00","").replace(".",",")+" €"),
-i("span",{style:{fontSize:"11px",color:P.dim}},"/ "+(o.periode||"mois"))),
-mienne?i("div",{style:{fontSize:"11px",color:P.ok,fontWeight:"600"}},
-jours===null?_T("sans echeance"):(jours+" "+_T("jour(s) restant(s)")))
-:_NXFX.bouton({t:_T("Creer un ticket"),petit:true,large:true,creux:!vedette,plein:vedette,col:col,
+(m||vedette)?i("div",{style:{position:"absolute",top:"-10px",left:"50%",
+transform:"translateX(-50%)",padding:"3px 11px",borderRadius:"99px",
+background:m?P.ok:col,color:P.ink,fontSize:"9px",fontWeight:"900",
+letterSpacing:".1em",textTransform:"uppercase",whiteSpace:"nowrap"}},
+m?_T("Actif"):_T("Le plus choisi")):null,
+i("div",{style:{display:"flex",alignItems:"center",gap:"9px",marginBottom:"12px"}},
+_NXFX.pastille(o.rang===3?"couronne":(o.rang===2?"etoile":"etincelle"),
+{col:col,taille:28,halo:!!vedette}),
+i("div",{style:{fontSize:"14px",fontWeight:"800",color:P.txt,letterSpacing:"-.01em"}},o.nom)),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"5px"}},
+i("span",{style:{fontFamily:_NXf.disp,fontSize:"36px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.045em",lineHeight:1}},prixFr(o.prix)+" "+String.fromCharCode(0x20AC)),
+i("span",{style:{fontSize:"11.5px",color:P.dim}},"/ "+(o.periode||"mois"))),
+i("div",{style:{fontSize:"10.5px",color:P.faint,marginTop:"6px",fontFamily:_NXf.mono,
+minHeight:"13px"}},parJour(o.prix)),
+i("div",{style:{margin:"16px 0 4px",height:"1px",background:P.line}}),
+i("div",{style:{flex:1}},
+TOUT.map(function(t,k){
+var v=vals[k];
+var oui=(v!==_T("non"));
+return i("div",{key:k,style:{display:"flex",alignItems:"center",gap:"8px",
+padding:"7px 0",borderTop:k?"1px solid "+_NXteinte(P.txt,.04):"none"}},
+i("span",{style:{flexShrink:0,display:"flex",color:oui?col:P.faint}},
+_NXFX.svg(oui?"check":"croix",12)),
+i("span",{style:{flex:1,minWidth:0,fontSize:"11.5px",color:oui?P.mid:P.faint,
+lineHeight:1.4}},t[0]),
+i("span",{style:{fontSize:"11px",fontWeight:"700",fontFamily:_NXf.mono,
+color:oui?P.txt:P.faint,whiteSpace:"nowrap"}},v));})),
+i("div",{style:{marginTop:"16px"}},
+m?i("div",{style:{textAlign:"center",fontSize:"11.5px",color:P.ok,fontWeight:"700",
+padding:"9px 0"}},
+(A.jours(m.expire_le)===null?_T("sans echeance")
+:(A.jours(m.expire_le)+" "+_T("jour(s) restant(s)"))))
+:_NXFX.bouton({t:_T("Creer un ticket"),icone:"courrier",large:true,
+plein:vedette,creux:!vedette,col:vedette?P.acc:col,
+onClick:function(){ticket(o);}})));}
+
+// Une pastille d offre par module : trois prix, cote a cote, tres lisibles.
+function carteMod(o,col){
+var m=mienne(o.offre);
+return i("div",_NXFX.fusion({key:o.offre,style:{position:"relative",flex:"1 1 156px",
+minWidth:"148px",padding:"15px 14px 14px",borderRadius:"15px",
+background:m?_NXteinte(P.ok,.07):P.inset,
+border:"1px solid "+(m?_NXteinte(P.ok,.34):P.line)}},_NXFX.a({"data-nx-tile":"1"})),
+m?i("div",{style:{position:"absolute",top:"-8px",right:"11px",padding:"2px 9px",
+borderRadius:"99px",background:P.ok,color:P.ink,fontSize:"8.5px",fontWeight:"900",
+letterSpacing:".1em",textTransform:"uppercase"}},_T("Actif")):null,
+i("div",{style:{fontSize:"9.5px",fontWeight:"900",letterSpacing:".13em",
+textTransform:"uppercase",color:col,marginBottom:"7px"}},_T("niveau")+" "+o.rang),
+i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:P.txt,marginBottom:"9px",
+lineHeight:1.32,minHeight:"33px"}},o.nom),
+i("div",{style:{display:"flex",alignItems:"baseline",gap:"4px",marginBottom:"12px"}},
+i("span",{style:{fontFamily:_NXf.disp,fontSize:"24px",fontWeight:"800",color:P.txt,
+letterSpacing:"-.04em"}},prixFr(o.prix)+" "+String.fromCharCode(0x20AC)),
+i("span",{style:{fontSize:"10.5px",color:P.dim}},"/ "+(o.periode||"mois"))),
+m?i("div",{style:{fontSize:"11px",color:P.ok,fontWeight:"600"}},
+A.jours(m.expire_le)===null?_T("sans echeance"):(A.jours(m.expire_le)+" "+_T("j restants")))
+:_NXFX.bouton({t:_T("Creer un ticket"),petit:true,large:true,creux:true,col:col,
 onClick:function(){ticket(o);}}));}
 
 function ongletOffres(){
 var cat=A.CAT||[];
+var gen=[],z;
+for(z=0;z<cat.length;z++)if(cat[z].famille==="general")gen.push(cat[z]);
+gen.sort(function(a,b){return (a.rang||0)-(b.rang||0);});
 return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
+// On montre d abord ce que ca change, et seulement ensuite ce que ca coute.
+carteAcces(),
+(libre||!fermes)?null:_NXFX.note({col:P.warn,icone:"cadenas",
+titre:fermes+" "+_T("paliers fermes sur")+" 9",
+texte:_T("C est exactement ce qu un abonnement ouvre : rien de plus, rien de moins. Le socle protecteur, lui, reste actif quoi qu il arrive."),
+droite:_NXFX.bouton({t:_T("Voir le detail"),petit:true,creux:true,col:P.sub,
+onClick:function(){onglet[1]("etat");}})}),
+gen.length?_NXcard(i("div",null,
+_NXch(_T("Les trois offres generales"),
+_T("Elles montent les trois modules d un cran a la fois. La colonne du milieu est celle qui repond a la plupart des besoins.")),
+i("div",{style:{display:"flex",gap:"12px",flexWrap:"wrap",marginTop:"18px",
+alignItems:"stretch"}},
+gen.map(function(o){return colonne(o,o.rang===2);}))),{mb:12}):null,
+_NXcard(i("div",null,
+_NXch(_T("Un seul module"),
+_T("Si un seul domaine t interesse, il se prend seul, a partir d un euro par mois.")),
+FAM.map(function(f,k){
+var L=[],y;
+for(y=0;y<cat.length;y++)if(cat[y].famille===f[0])L.push(cat[y]);
+if(!L.length)return null;
+L.sort(function(a,b){return (a.rang||0)-(b.rang||0);});
+var n=niv[f[5]];
+return i("div",{key:f[0],style:{paddingTop:k?"18px":"14px",
+borderTop:k?"1px solid "+P.line:"none"}},
+i("div",{style:{display:"flex",alignItems:"center",gap:"11px",marginBottom:"12px"}},
+_NXFX.pastille(f[3],{col:f[4],taille:30,hv:"secoue",halo:n>0}),
+i("div",{style:{flex:1,minWidth:0}},
+i("div",{style:{fontSize:"13.5px",fontWeight:"800",color:P.txt}},f[1]),
+i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"3px",lineHeight:1.5}},f[2])),
+_NXFX.badge(n>=3?_T("complet"):(_T("niveau")+" "+n),n>=3?P.ok:(n>0?f[4]:P.faint))),
+i("div",{style:{display:"flex",gap:"10px",flexWrap:"wrap",alignItems:"stretch"}},
+L.map(function(o){return carteMod(o,f[4]);})));})),{mb:12}),
 _NXFX.note({col:P.info,icone:"info",titre:_T("Comment souscrire"),
 texte:_T("Tu ouvres un ticket depuis le client, tu dis quelle offre, et l equipe te repond dans le meme fil. Aucune reconduction automatique : quand la date passe, l offre s arrete."),
 droite:_NXFX.bouton({t:_T("Ouvrir un ticket"),petit:true,
 icone:"courrier",col:P.acc,plein:true,onClick:function(){ticket(null);}})}),
-FAM.map(function(f,k){
-var L=[],z;
-for(z=0;z<cat.length;z++)if(cat[z].famille===f[0])L.push(cat[z]);
-if(!L.length)return null;
-return _NXcard(i("div",{key:f[0]},
-i("div",{style:{display:"flex",alignItems:"center",gap:"11px",marginBottom:"6px"}},
-_NXFX.pastille(f[3],{col:f[4],taille:30,hv:"secoue"}),
-i("div",{style:{flex:1,minWidth:0}},
-i("div",{style:{fontSize:"13.5px",fontWeight:"800",color:P.txt}},f[1]),
-i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"3px",lineHeight:1.5}},f[2]))),
-i("div",{style:{display:"flex",gap:"10px",flexWrap:"wrap",marginTop:"14px",
-alignItems:"stretch"}},
-L.map(function(o){return carteOffre(o,f[4],f[0]==="general"&&o.rang===2);}))),{mb:12});}),
 cat.length?null:_NXFX.vide({icone:"nuage",titre:_T("Catalogue indisponible"),
 texte:_T("Les offres n ont pas pu etre lues. Elles reviendront a la prochaine connexion."),
 action:_NXFX.bouton({t:_T("Reessayer"),icone:"maj",hv:"tourne",petit:true,creux:true,col:P.sub,
@@ -19749,8 +21190,15 @@ return i("div",_NXFX.a({"data-nx-panel":"1"}),i("div",null,
 _NXcard(i("div",null,
 _NXch(_T("Ce que tu as en cours"),
 mesOffres.length?(mesOffres.length+" "+_T("abonnement(s) actif(s)")):_T("Aucun abonnement en cours."),
+i("div",{style:{display:"flex",gap:"7px",flexWrap:"wrap"}},
+mesOffres.length?_NXFX.bouton({t:_T("Revoir l annonce"),icone:"cadeau",petit:true,creux:true,col:P.mauve,
+onClick:function(){try{
+var o=mesOffres[mesOffres.length-1];
+if(window._NXFETE)_NXFETE.montre({nom:o.nom,cle:o.offre,expire:o.expire_le||null,
+titre:_T("Ton abonnement"),
+sous:_T("Voila ce qu il ouvre sur ce client.")});}catch(_){}}}):null,
 _NXFX.bouton({t:_T("Rafraichir"),icone:"maj",hv:"tourne",petit:true,creux:true,col:P.sub,
-onClick:function(){A.charge(true);}})),
+onClick:function(){A.charge(true);}}))),
 mesOffres.length?mesOffres.map(function(o,k){
 var j=A.jours(o.expire_le);
 var urgent=(j!==null&&j<=5);
@@ -19761,16 +21209,19 @@ col:urgent?P.warn:P.ok,
 titre:o.nom,
 texte:o.expire_le
 ?(_T("jusqu au")+" "+new Date(o.expire_le).toLocaleDateString("fr-FR")+
-" · "+j+" "+_T("jour(s) restant(s)"))
+" "+String.fromCharCode(0xB7)+" "+j+" "+_T("jour(s) restant(s)"))
 :_T("sans echeance"),
 droite:_NXFX.badge(o.expire_le?(j+" j"):_T("a vie"),urgent?P.warn:P.ok,{point:!urgent})});})
 :_NXFX.vide({icone:"etoile",titre:_T("Pas encore d abonnement"),
-texte:A.libre()?_T("Et tu n en as pas besoin : ton compte a deja tout.")
+texte:libre?_T("Et tu n en as pas besoin : ton compte a deja tout.")
 :_T("Le socle protecteur reste actif. Un abonnement ouvre les protections avancees."),
-action:A.libre()?null:_NXFX.bouton({t:_T("Voir les offres"),icone:"etoile",petit:true,plein:true,
+action:libre?null:_NXFX.bouton({t:_T("Voir les offres"),icone:"etoile",petit:true,plein:true,
 col:P.acc,onClick:function(){onglet[1]("offres");}})})),{mb:12}),
+carteAcces(),
 _NXcard(i("div",null,
-_NXch(_T("Ce que ton compte ouvre"),_T("Le detail, domaine par domaine, tel que le serveur le calcule.")),
+_NXch(_T("Le detail, palier par palier"),
+ouverts+" "+_T("paliers ouverts sur")+" 9"+
+(fermes?(" "+String.fromCharCode(0xB7)+" "+fermes+" "+_T("encore fermes")):"")),
 _NXFX.grille(DOMS.map(domaine),248)),{mb:12}),
 A.pionnier()?_NXFX.note({col:P.lime,icone:"couronne",titre:_T("Tu etais la avant"),
 texte:_T("Ton compte etait connu du serveur avant la mise en place des abonnements. Tout est ouvert, sans echeance et sans rien payer. Cela ne se retire pas.")}):null,
@@ -19793,18 +21244,18 @@ _T("Le fichier du client est sur ta machine, donc oui, techniquement. Deux chose
 _T("Trois modules au premier palier coutent 3 euros ; Nexium Plus en coute 5 mais monte les trois d un cran. L offre generale devient interessante des que deux modules t interessent vraiment.")]];
 
 var TABS=[["etat",_T("Mon offre"),"etoile",""],
-["offres",_T("Les offres"),"jeton",""],
+["offres",_T("Les offres"),"jeton",(!libre&&fermes>0)?String(fermes):""],
 ["questions",_T("Questions"),"question",""]];
 
-return i(Kr,null,i("div",{style:{maxWidth:"820px",margin:"0 auto"}},
-_NXFX.entete({cle:_T("Abonnement"),titre:"Nexium Abonnement",icone:"etoile",col:P.warn,
+return i(Kr,null,i("div",{style:{maxWidth:"860px",margin:"0 auto"}},
+_NXFX.entete({cle:_T("Abonnement"),titre:"Nexium Abonnement",aide:_NXAIDES["Nexium Abonnement"]||null,icone:"etoile",col:P.warn,
 marque:res.etat==="pionnier"?_T("a vie"):(res.etat==="admin"?_T("equipe"):null),
 texte:_T("Ce que ton compte ouvre aujourd hui, ce que les offres ajoutent, et comment souscrire. Aucune reconduction automatique, aucun prelevement."),
 chiffres:[{k:"Protect",v:niv.pr+"/3",col:niv.pr>=3?P.ok:P.danger},
 {k:"Privacy",v:niv.pv+"/3",col:niv.pv>=3?P.ok:P.info},
 {k:"Nexium IA",v:niv.ia+"/3",col:niv.ia>=3?P.ok:P.mauve},
 {k:_T("Abonnements"),v:mesOffres.length,col:mesOffres.length?P.lime:P.faint}]}),
-bandeau(),
+scene(),
 _NXFX.onglets(TABS,onglet[0],onglet[1],{col:P.warn}),
 onglet[0]==="etat"?ongletMiens():
 onglet[0]==="offres"?ongletOffres():
@@ -19814,10 +21265,10 @@ QUESTIONS.map(function(q,k){
 return i("div",{key:k,style:{padding:"14px 0",borderTop:k?"1px solid "+P.line:"none"}},
 i("div",{style:{fontSize:"13px",fontWeight:"700",color:P.txt,marginBottom:"7px"}},q[0]),
 i("div",{style:{fontSize:"12.5px",color:P.sub,lineHeight:1.65}},q[1]));})),{mb:0})),
-_NXfoot("Nexium Abonnement · "+
+_NXfoot("Nexium Abonnement "+String.fromCharCode(0xB7)+" "+
 (A.err?_T("etat lu depuis la derniere reponse connue"):_T("etat verifie sur le serveur")))));
 }
-var NexiumSponsorIcon=function(p){p=p||{};var z=p.width||p.height||20;return i("svg",{viewBox:"0 0 24 24",fill:"currentColor",width:z,height:z,"aria-hidden":"true"},i("path",{d:"M5 16 3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 3h14v2H5v-2z"}));};
+var NexiumSponsorIcon=function(p){p=p||{};var z=p.width||p.height||20;return (window._NXFX&&_NXFX.svg)?_NXFX.svg("coeur",z):null;};
 function fmtN(n){if(n==null)return "—";if(n>=1000)return (n/1000).toFixed(n>=10000?0:1).replace(".0","")+"k";return ""+n;}
 function InviteCard(){
 var P=_NXpal;var d=_NXSP.data;var bn=_NXSP.banner();var ic=_NXSP.icon();var on=_NXSP.online(),mb=_NXSP.members();
@@ -20324,7 +21775,7 @@ _NXfoot("Nexium Changelog · lu depuis le dépôt, aucune donnée envoyée")));
     height: calc(1rem + 4px);
     max-height: calc(1rem + 4px)
 }
-`,classNames:{},dom:null});Wye="src/plugins/_api/messageDecorations/style.css"});var QT,Qye=h(()=>{"use strict";d();O();R();Kye();QT=A({name:"MessageDecorationsAPI",description:"API to add decorations to messages",authors:[w.TheSun],managedStyle:Wye,patches:[{find:"#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",replacement:{match:/#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,replace:"$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"}}]})});var ZT,Zye=h(()=>{"use strict";d();O();R();ZT=A({name:"MessageEventsAPI",description:"Api required by anything using message events.",authors:[w.Arjix,w.hunt,w.Ven],patches:[{find:"#{intl::EDIT_TEXTAREA_HELP}",replacement:{match:/(?<=,channel:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,replace:(e,t)=>`async ${e}if(await Vencord.Api.MessageEvents._handlePreEdit(${t}))return Promise.resolve({shouldClear:false,shouldRefocus:true});`}},{find:".handleSendMessage,onResize:",replacement:{match:/let (\i)=\i\.\i\.parse\((\i),.+?\.getSendMessageOptions\(\{.+?\}\)?;(?=.+?(\i)\.flags=)(?<=\)\(({.+?})\)\.then.+?)/,replace:(e,t,n,o,r)=>e+`if(await Vencord.Api.MessageEvents._handlePreSend(${n}.id,${t},${r},${o}))return{shouldClear:false,shouldRefocus:true};`}},{find:'("interactionUsernameProfile',replacement:{match:/let\{id:\i}=(\i),{id:\i}=(\i);return \i\.useCallback\((\i)=>\{/,replace:(e,t,n,o)=>`const vcMsg=${t},vcChan=${n};${e}Vencord.Api.MessageEvents._handleClick(vcMsg,vcChan,${o});`}}]})});var YT,Yye=h(()=>{"use strict";d();O();R();YT=A({name:"MessagePopoverAPI",description:"API to add buttons to message popovers.",authors:[w.KingFish,w.Ven,w.Nuckyz],patches:[{find:"#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",replacement:{match:/(?<=\]\}\)),(.{0,40}togglePopout:.+?\}\))\]\}\):null,(?<=\((\i\.\i),\{label:.+?:null,(\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,replace:(e,t,n,o,r)=>`]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${n},${r}),${o}?${t}:null,`}}]})});var JT,Jye=h(()=>{"use strict";d();O();R();JT=A({name:"MessageUpdaterAPI",description:"API for updating and re-rendering messages.",authors:[w.Nuckyz],patches:[{find:"}renderStickersAccessories(",replacement:{match:/(?<=this.props,\i,\[)"message",/,replace:""}}]})});var XT,Xye=h(()=>{"use strict";d();O();R();XT=A({name:"NicknameIconsAPI",description:"API to add icons to the nickname, in profiles",authors:[w.Nuckyz],patches:[{find:"#{intl::USER_PROFILE_PRONOUNS}",replacement:[{match:/(?<=children:\i\}\):\i,)null!=\i/,replace:"($&||!!Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"},{match:/(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)(?=\}\)\])/,replace:"children:[...Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id}),$1]"}]}]})});var VT,Vye=h(()=>{"use strict";d();O();R();VT=A({name:"NoticesAPI",description:"Fixes notices being automatically dismissed",authors:[w.Ven],required:!0,patches:[{find:'"NoticeStore"',replacement:[{match:/(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,replace:"if(Vencord.Api.Notices.currentNotice)return false;$&"},{match:/(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,replace:(e,t)=>`if(${t}?.id=="EquicordNotice")return(${t}=null,Vencord.Api.Notices.nextNotice(),true);${e}`}]}]})});var e9,eve=h(()=>{"use strict";d();O();R();e9=A({name:"ServerListAPI",authors:[w.kemo],description:"Api required for plugins that modify the server list",patches:[{find:"#{intl::DISCODO_DISABLED}",replacement:{match:/(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:"friends-list".+?}\))(?=}function)/,replace:"[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"}},{find:".setGuildsTree(",replacement:[{match:/(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,replace:"Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"},{match:/lastTargetNode.{0,25}\?null:\i,/,replace:"$&...Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below),"}]}]})});var t9,tve=h(()=>{"use strict";d();O();R();t9=A({name:"UserSettingsAPI",description:"Patches Discord's UserSettings to expose their group and name.",authors:[w.Nuckyz],patches:[{find:",updateSetting:",replacement:[{match:/\.updateAsync\(.+?(?=,useSetting:)/,replace:"$&,userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1]"},{match:/updateSetting:.{0,100}SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"},{match:/updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"}]}]})});var n9,nve=h(()=>{"use strict";d();O();R();T();n9=A({name:"ConcatenatedComponentExtractor",description:"Extract components that have been concatenated by the bundler",authors:[w.sadan],required:!0,patches:[{find:"#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}),focusProps:",replacement:{match:/(?=function (\i)\(\i\)\{let\{onChange:\i,onClose:\i,[^}]+?showEyeDropper:)/,replace:"$self.setColorPicker($1);"}},{find:/="ltr",orientation:\i="vertical"[^}]+?customTheme:/,replacement:{match:/(?=function (\i)\(\i,\i,\i\)\{.{0,20}?return \i\.forwardRef\(function\(\i,\i\)\{let\{[^}]+?="ltr",orientation:)/,replace:"$self.setCreateScroller($1);"}}],setCreateScroller:qH,setColorPicker:jH})});var ove,o9,rve=h(()=>{"use strict";d();q();O();Xe();R();ove=M({disableAnalytics:{type:3,description:"Disable Discord's tracking (analytics/'science')",default:!0,restartNeeded:!0}}),o9=A({name:"NoTrack",description:"Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",authors:[w.Cyn,w.Ven,w.Nuckyz,w.Arrow],required:!0,settings:ove,patches:[{find:"AnalyticsActionHandlers.handle",predicate:()=>ove.store.disableAnalytics,replacement:{match:/\(0,\i\.analyticsTrackingStoreMaker\)/,replace:"(()=>{})"}},{find:".METRICS_V2",replacement:[{match:/this\._intervalId=/,replace:"this._intervalId=void 0&&"},{match:/(?:increment|distribution)\(\i(?:,\i)?\){/g,replace:"$&return;"}]},{find:".BetterDiscord||null!=",replacement:{match:/(?=let \i=window;)/,replace:"return false;"}}],flux:{TRACK(e){e?.resolve?.()}},startAt:"Init",start(){Object.defineProperty(Function.prototype,"d",{configurable:!0,set(e){Object.defineProperty(this,"d",{value:e,configurable:!0,enumerable:!0,writable:!0});let{stack:t}=new Error;if(this.c!=null||!t?.includes("http")||!String(this).includes("exports:{}"))return;let n=t.match(/http.+?(?=:\d+?:\d+?$)/m)?.[0];if(!n)return;let o=new XMLHttpRequest;if(o.open("GET",n,!1),o.send(),!!o.responseText.includes(".DiscordSentry="))throw new ce("NoTrack","#8caaee").info("Disabling Sentry by erroring its WebpackInstance"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry"),new Error("Sentry successfully disabled")}}),Object.defineProperty(window,"DiscordSentry",{configurable:!0,set(){new ce("NoTrack","#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry")}})}})});var Jv,KK,li,lf=h(()=>{"use strict";d();q();bt();Da();Gv();O();Zl();R();se();Jv={SECTION:1,SIDEBAR_ITEM:2,PANEL:3,CATEGORY:5,CUSTOM:19};uo(["SECTION","SIDEBAR_ITEM","PANEL","CUSTOM"],e=>Jv=e);KK=M({settingsLocation:{type:4,description:"Where to put the Nexium Client settings section",options:[{label:"At the very top",value:"top"},{label:"Above the Nitro section",value:"aboveNitro",default:!0},{label:"Below the Nitro section",value:"belowNitro"},{label:"Above Activity Settings",value:"aboveActivity"},{label:"Below Activity Settings",value:"belowActivity"},{label:"At the very bottom",value:"bottom"}]},includeVencordInfoWhenCopying:{type:3,description:"Also copy Nexium info (Nexium, Electron, Chromium) when clicking the version info in the bottom left area of the Settings page",default:!0}}),li=A({name:"Settings",description:"Adds Settings UI and debug info",authors:[w.Ven,w.Megu],required:!0,settings:KK,patches:[{find:"#{intl::COPY_VERSION}",replacement:[{match:/\.RELEASE_CHANNEL/,replace:"$&.replace(/^./, c => c.toUpperCase())"},{match:/"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,replace:(e,t,n,o,r)=>(r=r.replace(/children:\[.+\]/,""),`${e},$self.makeInfoElements(${o},${r}).map(e=>${n}e})),`)},{match:/copyValue:\i\.join\(" "\)/g,replace:"$& + $self.getInfoString()"}]},{find:".buildLayout().map",replacement:{match:/(\i)\.buildLayout\(\)(?=\.map)/,replace:"$self.buildLayout($1)"}}],buildEntry(e){let{key:t,title:n,panelTitle:o=n,Component:r,Icon:a}=e,s={key:t+"_panel",type:Jv.PANEL,useTitle:()=>o,buildLayout:()=>[{type:Jv.CATEGORY,key:t+"_category",buildLayout:()=>[{type:Jv.CUSTOM,key:t+"_custom",Component:r,useSearchTerms:()=>[n]}]}]};return{key:t,type:Jv.SIDEBAR_ITEM,useTitle:()=>n,icon:()=>i(a,{width:20,height:20}),buildLayout:()=>[s]}},buildLayout(e){let t=e.buildLayout();if(e.key!=="$Root"||!Array.isArray(t)||t.some(u=>u?.key==="equicord_section"))return t;let{buildEntry:n}=this,mkS=(k,ti,li)=>({key:k,type:Jv.SECTION,useTitle:()=>ti,buildLayout:()=>li.filter(fl)}),r=[mkS("equicord_section","Nexium",[n({key:"equicord_main",title:"Nexium Client",panelTitle:"Nexium Client",Component:_NXsafe(NexiumHomeComp,"Nexium Client"),Icon:NexiumHomeIcon}),n({key:"equicord_ia",title:"Nexium IA",panelTitle:"Nexium IA",Component:_NXsafe(NexiumIAComp,"Nexium IA"),Icon:NexiumIAIcon}),n({key:"equicord_comptes",title:"Nexium Comptes",panelTitle:"Nexium Comptes",Component:_NXsafe(NexiumComptesComp,"Nexium Comptes"),Icon:NexiumComptesIcon}),n({key:"equicord_data",title:"Nexium Données",panelTitle:"Nexium Données",Component:_NXsafe(NexiumDataComp,"Nexium Données"),Icon:NexiumDataIcon}),n({key:"equicord_abo",title:"Abonnement",panelTitle:"Nexium Abonnement",Component:_NXsafe(NexiumAboComp,"Nexium Abonnement"),Icon:NexiumAboIcon}),n({key:"equicord_ticket",title:"Support",panelTitle:"Nexium Ticket",Component:_NXsafe(NexiumTicketComp,"Nexium Ticket"),Icon:NexiumTicketIcon}),n({key:"equicord_updater",title:"Mise à jour",panelTitle:"Nexium — Mise à jour",Component:_NXsafe(NexiumUpdateComp,"Mise à jour"),Icon:NexiumUpdateIcon}),n({key:"equicord_changelog",title:"Changelog",Component:ST,Icon:j5}),...(window._NXADMIN&&_NXADMIN.estEquipe()?[n({key:"equicord_nexium_admin",title:"Nexium Admins",panelTitle:"Nexium Admins",Component:_NXsafe(NexiumAdminComp,"Nexium Admins"),Icon:NexiumAdminIcon})]:[])]),mkS("equicord_section_protection","Protection",[n({key:"equicord_protect",title:"Nexium Protect",panelTitle:"Nexium Protect",Component:_NXsafe(NexiumProtectComp,"Nexium Protect"),Icon:NexiumProtectIcon}),n({key:"equicord_privacy",title:"Nexium Privacy",panelTitle:"Nexium Privacy",Component:_NXsafe(NexiumPrivacyComp,"Nexium Privacy"),Icon:NexiumPrivacyIcon}),n({key:"equicord_network",title:"Nexium Réseau",panelTitle:"Nexium Réseau",Component:_NXsafe(NexiumNetworkComp,"Nexium Réseau"),Icon:NexiumNetworkIcon})]),mkS("equicord_section_espace","Ton espace",[n({key:"equicord_stats",title:"Nexium Stats",panelTitle:"Nexium Stats",Component:_NXsafe(NexiumStatsComp,"Nexium Stats"),Icon:NexiumStatsIcon}),n({key:"equicord_auto",title:"Nexium Auto",panelTitle:"Nexium Auto",Component:_NXsafe(NexiumAutoComp,"Nexium Auto"),Icon:NexiumAutoIcon}),n({key:"equicord_music",title:"Nexium Music",panelTitle:"Nexium Music",Component:_NXsafe(NexiumMusicComp,"Nexium Music"),Icon:NexiumMusicIcon})]),mkS("equicord_section_perso","Personnalisation",[n({key:"equicord_plugins",title:"Plugins",Component:Gx,Icon:rH}),n({key:"equicord_themes",title:"Themes",Component:_NXthemeWrap(Mx),Icon:Mm})]),mkS("equicord_section_aide","Aide et sauvegardes",[n({key:"equicord_backup_restore",title:"Backup & Restore",Component:MT,Icon:iH}),n({key:"equicord_team",title:"Team",panelTitle:"Nexium — Team",Component:_NXsafe(NexiumTeamComp,"Team"),Icon:NexiumTeamIcon}),n({key:"equicord_sponsor",title:"Sponsor",panelTitle:"Nexium — Sponsor",Component:_NXsafe(NexiumSponsorComp,"Sponsor"),Icon:NexiumSponsorIcon}),VA&&n({key:"equicord_patch_helper",title:"Patch Helper",Component:VA,Icon:aH}),...this.customEntries.map(n)])].filter(x=>x.buildLayout().length),{settingsLocation:a}=KK.store,s={top:"user_section",aboveNitro:"billing_section",belowNitro:"billing_section",aboveActivity:"activity_section",belowActivity:"activity_section",bottom:"utility_section"},l=s[a]??s.top,c=t.findIndex(u=>typeof u?.key=="string"&&u.key===l);return c===-1?c=2:a.startsWith("below")&&(c+=1),t.splice(c,0,...r),t},customSections:[],customEntries:[],get electronVersion(){return VencordNative.native.getVersions().electron??window.legcord?.electron??null},get chromiumVersion(){try{return VencordNative.native.getVersions().chrome??navigator.userAgentData?.brands?.find(e=>e.brand==="Chromium"||e.brand==="Google Chrome")?.version??null}catch{return null}},getVersionInfo(e=!0){let t="";return e&&t?` (${t})`:t},getInfoRows(){let{electronVersion:e,chromiumVersion:t,getVersionInfo:n}=this,o=[`Nexium Client ${t0}${n()}`];return e&&o.push(`Electron ${e}`),t&&o.push(`Chromium ${t}`),o},getInfoString(){return KK.store.includeVencordInfoWhenCopying?`
+`,classNames:{},dom:null});Wye="src/plugins/_api/messageDecorations/style.css"});var QT,Qye=h(()=>{"use strict";d();O();R();Kye();QT=A({name:"MessageDecorationsAPI",description:"API to add decorations to messages",authors:[w.TheSun],managedStyle:Wye,patches:[{find:"#{intl::GUILD_COMMUNICATION_DISABLED_ICON_TOOLTIP_BODY}",replacement:{match:/#{intl::GUILD_COMMUNICATION_DISABLED_BOTTOM_SHEET_TITLE}.+?renderPopout:.+?(?=\])/,replace:"$&,Vencord.Api.MessageDecorations.__addDecorationsToMessage(arguments[0])"}}]})});var ZT,Zye=h(()=>{"use strict";d();O();R();ZT=A({name:"MessageEventsAPI",description:"Api required by anything using message events.",authors:[w.Arjix,w.hunt,w.Ven],patches:[{find:"#{intl::EDIT_TEXTAREA_HELP}",replacement:{match:/(?<=,channel:\i\}\)\.then\().+?(?=\i\.content!==this\.props\.message\.content&&\i\((.+?)\)\})/,replace:(e,t)=>`async ${e}if(await Vencord.Api.MessageEvents._handlePreEdit(${t}))return Promise.resolve({shouldClear:false,shouldRefocus:true});`}},{find:".handleSendMessage,onResize:",replacement:{match:/let (\i)=\i\.\i\.parse\((\i),.+?\.getSendMessageOptions\(\{.+?\}\)?;(?=.+?(\i)\.flags=)(?<=\)\(({.+?})\)\.then.+?)/,replace:(e,t,n,o,r)=>e+`if(await Vencord.Api.MessageEvents._handlePreSend(${n}.id,${t},${r},${o}))return{shouldClear:false,shouldRefocus:true};`}},{find:'("interactionUsernameProfile',replacement:{match:/let\{id:\i}=(\i),{id:\i}=(\i);return \i\.useCallback\((\i)=>\{/,replace:(e,t,n,o)=>`const vcMsg=${t},vcChan=${n};${e}Vencord.Api.MessageEvents._handleClick(vcMsg,vcChan,${o});`}}]})});var YT,Yye=h(()=>{"use strict";d();O();R();YT=A({name:"MessagePopoverAPI",description:"API to add buttons to message popovers.",authors:[w.KingFish,w.Ven,w.Nuckyz],patches:[{find:"#{intl::MESSAGE_UTILITIES_A11Y_LABEL}",replacement:{match:/(?<=\]\}\)),(.{0,40}togglePopout:.+?\}\))\]\}\):null,(?<=\((\i\.\i),\{label:.+?:null,(\i)\?\(0,\i\.jsxs?\)\(\i\.Fragment.+?message:(\i).+?)/,replace:(e,t,n,o,r)=>`]}):null,Vencord.Api.MessagePopover._buildPopoverElements(${n},${r}),${o}?${t}:null,`}}]})});var JT,Jye=h(()=>{"use strict";d();O();R();JT=A({name:"MessageUpdaterAPI",description:"API for updating and re-rendering messages.",authors:[w.Nuckyz],patches:[{find:"}renderStickersAccessories(",replacement:{match:/(?<=this.props,\i,\[)"message",/,replace:""}}]})});var XT,Xye=h(()=>{"use strict";d();O();R();XT=A({name:"NicknameIconsAPI",description:"API to add icons to the nickname, in profiles",authors:[w.Nuckyz],patches:[{find:"#{intl::USER_PROFILE_PRONOUNS}",replacement:[{match:/(?<=children:\i\}\):\i,)null!=\i/,replace:"($&||!!Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id})?.length)"},{match:/(?<=shouldUnderlineOnHover:null.{0,300})children:(\i)(?=\}\)\])/,replace:"children:[...Vencord.Api.NicknameIcons._renderIcons({userId:arguments[0].user?.id}),$1]"}]}]})});var VT,Vye=h(()=>{"use strict";d();O();R();VT=A({name:"NoticesAPI",description:"Fixes notices being automatically dismissed",authors:[w.Ven],required:!0,patches:[{find:'"NoticeStore"',replacement:[{match:/(?<=!1;)\i=null;(?=.{0,80}getPremiumSubscription\(\))/g,replace:"if(Vencord.Api.Notices.currentNotice)return false;$&"},{match:/(?<=,NOTICE_DISMISS:function\(\i\){)return null!=(\i)/,replace:(e,t)=>`if(${t}?.id=="EquicordNotice")return(${t}=null,Vencord.Api.Notices.nextNotice(),true);${e}`}]}]})});var e9,eve=h(()=>{"use strict";d();O();R();e9=A({name:"ServerListAPI",authors:[w.kemo],description:"Api required for plugins that modify the server list",patches:[{find:"#{intl::DISCODO_DISABLED}",replacement:{match:/(?<=#{intl::DISCODO_DISABLED}.+?return)(\(.{0,150}?tutorialId:"friends-list".+?}\))(?=}function)/,replace:"[$1].concat(Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Above))"}},{find:".setGuildsTree(",replacement:[{match:/(?<=#{intl::SERVERS}\),gap:"xs",children:)\i\.map\(.{0,50}\.length\)/,replace:"Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.In).concat($&)"},{match:/lastTargetNode.{0,25}\?null:\i,/,replace:"$&...Vencord.Api.ServerList.renderAll(Vencord.Api.ServerList.ServerListRenderPosition.Below),"}]}]})});var t9,tve=h(()=>{"use strict";d();O();R();t9=A({name:"UserSettingsAPI",description:"Patches Discord's UserSettings to expose their group and name.",authors:[w.Nuckyz],patches:[{find:",updateSetting:",replacement:[{match:/\.updateAsync\(.+?(?=,useSetting:)/,replace:"$&,userSettingsAPIGroup:arguments[0],userSettingsAPIName:arguments[1]"},{match:/updateSetting:.{0,100}SELECTIVELY_SYNCED_USER_SETTINGS_UPDATE/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"},{match:/updateSetting:.{0,60}USER_SETTINGS_OVERRIDE_CLEAR/,replace:"userSettingsAPIGroup:arguments[0].userSettingsAPIGroup,userSettingsAPIName:arguments[0].userSettingsAPIName,$&"}]}]})});var n9,nve=h(()=>{"use strict";d();O();R();T();n9=A({name:"ConcatenatedComponentExtractor",description:"Extract components that have been concatenated by the bundler",authors:[w.sadan],required:!0,patches:[{find:"#{intl::USER_SETTINGS_PROFILE_COLOR_SELECT_COLOR}),focusProps:",replacement:{match:/(?=function (\i)\(\i\)\{let\{onChange:\i,onClose:\i,[^}]+?showEyeDropper:)/,replace:"$self.setColorPicker($1);"}},{find:/="ltr",orientation:\i="vertical"[^}]+?customTheme:/,replacement:{match:/(?=function (\i)\(\i,\i,\i\)\{.{0,20}?return \i\.forwardRef\(function\(\i,\i\)\{let\{[^}]+?="ltr",orientation:)/,replace:"$self.setCreateScroller($1);"}}],setCreateScroller:qH,setColorPicker:jH})});var ove,o9,rve=h(()=>{"use strict";d();q();O();Xe();R();ove=M({disableAnalytics:{type:3,description:"Disable Discord's tracking (analytics/'science')",default:!0,restartNeeded:!0}}),o9=A({name:"NoTrack",description:"Disable Discord's tracking (analytics/'science'), metrics and Sentry crash reporting",authors:[w.Cyn,w.Ven,w.Nuckyz,w.Arrow],required:!0,settings:ove,patches:[{find:"AnalyticsActionHandlers.handle",predicate:()=>ove.store.disableAnalytics,replacement:{match:/\(0,\i\.analyticsTrackingStoreMaker\)/,replace:"(()=>{})"}},{find:".METRICS_V2",replacement:[{match:/this\._intervalId=/,replace:"this._intervalId=void 0&&"},{match:/(?:increment|distribution)\(\i(?:,\i)?\){/g,replace:"$&return;"}]},{find:".BetterDiscord||null!=",replacement:{match:/(?=let \i=window;)/,replace:"return false;"}}],flux:{TRACK(e){e?.resolve?.()}},startAt:"Init",start(){Object.defineProperty(Function.prototype,"d",{configurable:!0,set(e){Object.defineProperty(this,"d",{value:e,configurable:!0,enumerable:!0,writable:!0});let{stack:t}=new Error;if(this.c!=null||!t?.includes("http")||!String(this).includes("exports:{}"))return;let n=t.match(/http.+?(?=:\d+?:\d+?$)/m)?.[0];if(!n)return;let o=new XMLHttpRequest;if(o.open("GET",n,!1),o.send(),!!o.responseText.includes(".DiscordSentry="))throw new ce("NoTrack","#8caaee").info("Disabling Sentry by erroring its WebpackInstance"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry"),new Error("Sentry successfully disabled")}}),Object.defineProperty(window,"DiscordSentry",{configurable:!0,set(){new ce("NoTrack","#8caaee").error("Failed to disable Sentry. Falling back to deleting window.DiscordSentry"),Reflect.deleteProperty(Function.prototype,"d"),Reflect.deleteProperty(window,"DiscordSentry")}})}})});var Jv,KK,li,lf=h(()=>{"use strict";d();q();bt();Da();Gv();O();Zl();R();se();Jv={SECTION:1,SIDEBAR_ITEM:2,PANEL:3,CATEGORY:5,CUSTOM:19};uo(["SECTION","SIDEBAR_ITEM","PANEL","CUSTOM"],e=>Jv=e);KK=M({settingsLocation:{type:4,description:"Where to put the Nexium Client settings section",options:[{label:"At the very top",value:"top"},{label:"Above the Nitro section",value:"aboveNitro",default:!0},{label:"Below the Nitro section",value:"belowNitro"},{label:"Above Activity Settings",value:"aboveActivity"},{label:"Below Activity Settings",value:"belowActivity"},{label:"At the very bottom",value:"bottom"}]},includeVencordInfoWhenCopying:{type:3,description:"Also copy Nexium info (Nexium, Electron, Chromium) when clicking the version info in the bottom left area of the Settings page",default:!0}}),li=A({name:"Settings",description:"Adds Settings UI and debug info",authors:[w.Ven,w.Megu],required:!0,settings:KK,patches:[{find:"#{intl::COPY_VERSION}",replacement:[{match:/\.RELEASE_CHANNEL/,replace:"$&.replace(/^./, c => c.toUpperCase())"},{match:/"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,replace:(e,t,n,o,r)=>(r=r.replace(/children:\[.+\]/,""),`${e},$self.makeInfoElements(${o},${r}).map(e=>${n}e})),`)},{match:/copyValue:\i\.join\(" "\)/g,replace:"$& + $self.getInfoString()"}]},{find:".buildLayout().map",replacement:{match:/(\i)\.buildLayout\(\)(?=\.map)/,replace:"$self.buildLayout($1)"}}],buildEntry(e){let{key:t,title:n,panelTitle:o=n,Component:r,Icon:a}=e,s={key:t+"_panel",type:Jv.PANEL,useTitle:()=>o,buildLayout:()=>[{type:Jv.CATEGORY,key:t+"_category",buildLayout:()=>[{type:Jv.CUSTOM,key:t+"_custom",Component:r,useSearchTerms:()=>[n]}]}]};return{key:t,type:Jv.SIDEBAR_ITEM,useTitle:()=>n,icon:()=>i(a,{width:20,height:20}),buildLayout:()=>[s]}},buildLayout(e){let t=e.buildLayout();if(e.key!=="$Root"||!Array.isArray(t)||t.some(u=>u?.key==="equicord_section"))return t;let{buildEntry:n}=this,mkS=(k,ti,li)=>({key:k,type:Jv.SECTION,useTitle:()=>ti,buildLayout:()=>li.filter(fl)}),r=[mkS("equicord_section","Nexium",[n({key:"equicord_main",title:"Nexium Client",panelTitle:"Nexium Client",Component:_NXsafe(NexiumHomeComp,"Nexium Client"),Icon:NexiumHomeIcon}),n({key:"equicord_ia",title:"Nexium IA",panelTitle:"Nexium IA",Component:_NXsafe(NexiumIAComp,"Nexium IA"),Icon:NexiumIAIcon}),n({key:"equicord_data",title:"Nexium Données",panelTitle:"Nexium Données",Component:_NXsafe(NexiumDataComp,"Nexium Données"),Icon:NexiumDataIcon})]),mkS("equicord_section_abo","Abonnement",[n({key:"equicord_abo",title:((window._NXABO&&_NXABO.titreOnglet)?_NXABO.titreOnglet():"Abonnement"),panelTitle:"Nexium Abonnement",Component:_NXsafe(NexiumAboComp,"Nexium Abonnement"),Icon:NexiumAboIcon}),n({key:"equicord_ticket",title:((window._NXTK&&_NXTK.titreOnglet)?_NXTK.titreOnglet():"Support"),panelTitle:"Nexium Ticket",Component:_NXsafe(NexiumTicketComp,"Nexium Ticket"),Icon:NexiumTicketIcon})]),mkS("equicord_section_protection","Protection",[n({key:"equicord_protect",title:"Nexium Protect",panelTitle:"Nexium Protect",Component:_NXsafe(NexiumProtectComp,"Nexium Protect"),Icon:NexiumProtectIcon}),n({key:"equicord_privacy",title:"Nexium Privacy",panelTitle:"Nexium Privacy",Component:_NXsafe(NexiumPrivacyComp,"Nexium Privacy"),Icon:NexiumPrivacyIcon}),n({key:"equicord_network",title:"Nexium Réseau",panelTitle:"Nexium Réseau",Component:_NXsafe(NexiumNetworkComp,"Nexium Réseau"),Icon:NexiumNetworkIcon})]),mkS("equicord_section_espace","Ton espace",[n({key:"equicord_comptes",title:"Nexium Comptes",panelTitle:"Nexium Comptes",Component:_NXsafe(NexiumComptesComp,"Nexium Comptes"),Icon:NexiumComptesIcon}),n({key:"equicord_stats",title:"Nexium Stats",panelTitle:"Nexium Stats",Component:_NXsafe(NexiumStatsComp,"Nexium Stats"),Icon:NexiumStatsIcon}),n({key:"equicord_auto",title:"Nexium Auto",panelTitle:"Nexium Auto",Component:_NXsafe(NexiumAutoComp,"Nexium Auto"),Icon:NexiumAutoIcon}),n({key:"equicord_music",title:"Nexium Music",panelTitle:"Nexium Music",Component:_NXsafe(NexiumMusicComp,"Nexium Music"),Icon:NexiumMusicIcon})]),mkS("equicord_section_client","Le client",[n({key:"equicord_updater",title:((window._NXUP&&_NXUP.titreOnglet)?_NXUP.titreOnglet():"Mise à jour"),panelTitle:"Nexium — Mise à jour",Component:_NXsafe(NexiumUpdateComp,"Mise à jour"),Icon:NexiumUpdateIcon}),n({key:"equicord_changelog",title:"Changelog",Component:ST,Icon:j5}),n({key:"equicord_plugins",title:"Plugins",Component:Gx,Icon:rH}),n({key:"equicord_themes",title:"Themes",Component:_NXthemeWrap(Mx),Icon:Mm}),n({key:"equicord_backup_restore",title:"Backup & Restore",Component:MT,Icon:iH})]),mkS("equicord_section_aide","Nexium et toi",[n({key:"equicord_team",title:"Team",panelTitle:"Nexium — Team",Component:_NXsafe(NexiumTeamComp,"Team"),Icon:NexiumTeamIcon}),n({key:"equicord_sponsor",title:"Sponsor",panelTitle:"Nexium — Sponsor",Component:_NXsafe(NexiumSponsorComp,"Sponsor"),Icon:NexiumSponsorIcon}),...(window._NXADMIN&&_NXADMIN.estEquipe()?[n({key:"equicord_nexium_admin",title:"Nexium Admins",panelTitle:"Nexium Admins",Component:_NXsafe(NexiumAdminComp,"Nexium Admins"),Icon:NexiumAdminIcon})]:[]),VA&&n({key:"equicord_patch_helper",title:"Patch Helper",Component:VA,Icon:aH}),...this.customEntries.map(n)])].filter(x=>x.buildLayout().length),{settingsLocation:a}=KK.store,s={top:"user_section",aboveNitro:"billing_section",belowNitro:"billing_section",aboveActivity:"activity_section",belowActivity:"activity_section",bottom:"utility_section"},l=s[a]??s.top,c=t.findIndex(u=>typeof u?.key=="string"&&u.key===l);return c===-1?c=2:a.startsWith("below")&&(c+=1),t.splice(c,0,...r),t},customSections:[],customEntries:[],get electronVersion(){return VencordNative.native.getVersions().electron??window.legcord?.electron??null},get chromiumVersion(){try{return VencordNative.native.getVersions().chrome??navigator.userAgentData?.brands?.find(e=>e.brand==="Chromium"||e.brand==="Google Chrome")?.version??null}catch{return null}},getVersionInfo(e=!0){let t="";return e&&t?` (${t})`:t},getInfoRows(){let{electronVersion:e,chromiumVersion:t,getVersionInfo:n}=this,o=[`Nexium Client ${t0}${n()}`];return e&&o.push(`Electron ${e}`),t&&o.push(`Chromium ${t}`),o},getInfoString(){return KK.store.includeVencordInfoWhenCopying?`
 `+this.getInfoRows().join(`
 `):""},makeInfoElements(e,t){return this.getInfoRows().map((n,o)=>i(e,{key:o,...t},n))}})});function Hct(e){C.show({message:e,type:C.Type.FAILURE,id:C.genId(),options:{position:C.Position.BOTTOM}})}function jct(){return new Promise(e=>{Ln.show({title:"Restart Required",body:i(f,null,i("p",{style:{textAlign:"center"}},"Some plugins require a restart to fully disable."),i("p",{style:{textAlign:"center"}},"Would you like to restart now?")),confirmText:"Restart Now",cancelText:"Later",onConfirm:()=>e(!0),onCancel:()=>e(!1)})})}async function _i(e){let t=!1;function n(){t=!0}async function o(u,p){return t?await jct()?(u.enabled=!p,location.reload(),!0):!1:!0}let r=Ge[e],a=Me.plugins[r.name],l=a.enabled??!1;if(!l){let{restartNeeded:u,failures:p}=Nv(r);if(p.length)return console.error(`Failed to start dependencies for ${r.name}: ${p.join(", ")}`),Ma("Failed to start dependencies: "+p.join(", "),"Close",()=>null),!1;if(u)return a.enabled=!0,n(),await o(a,l)}if(r.patches?.length)return n(),await o(a,l);if(l&&!r.started)return a.enabled=!l,await o(a,l);if(!(l?Qm(r):Km(r))){a.enabled=!1;let u=`Error while ${l?"stopping":"starting"} plugin ${r.name}`;return console.error(u),Hct(u),!1}return a.enabled=!l,await o(a,l)}function qct(e){let t=parseInt(e.split(".")[2]);return t>=22e3?"Windows 11":t>=10240?"Windows 10":t>=9200?"Windows 8.1":t>=7600?"Windows 7":`Windows (${e})`}function Wct(e){let t=parseInt(e.split(".")[0]);return t===25?"MacOS 26 (Tahoe)":t===24?"MacOS 15 (Sequoia)":t===23?"MacOS 14 (Sonoma)":t===22?"MacOS 13 (Ventura)":t===21?"MacOS 12 (Monterey)":t===20?"MacOS 11 (Big Sur)":t===19?"MacOS 10.15 (Catalina)":`MacOS (${e})`}function QK(){return typeof DiscordNative>"u"?navigator.platform:DiscordNative.process.platform==="win32"?`${qct(DiscordNative.os.release)}`:DiscordNative.process.platform==="darwin"?`${Wct(DiscordNative.os.release)} (${DiscordNative.process.arch==="arm64"?"Apple Silicon":"Intel Silicon"})`:DiscordNative.process.platform==="linux"?`${navigator.platform} (${DiscordNative.os.release})`:DiscordNative.process.platform}var md=h(()=>{"use strict";d();Vg();Qt();q();T()});var ZK,l0,YK=h(()=>{"use strict";d();Vg();q();O();R();T();ZK=M({idleTimeout:{description:"Minutes before Discord goes idle (0 to disable auto-idle)",type:5,markers:cn(0,60,5),default:10,stickToMarkers:!1,restartNeeded:!0},remainInIdle:{description:"When you come back to Discord, remain idle until you confirm you want to go online",type:3,default:!0}}),l0=A({name:"CustomIdle",description:"Allows you to set the time before Discord goes idle (or disable auto-idle)",tags:["Activity","Customisation"],authors:[w.newwares],settings:ZK,patches:[{find:'type:"IDLE",idle:',replacement:[{match:/(?<=Date\.now\(\)-\i>)\i\.\i\|\|/,replace:"$self.getIdleTimeout()||"},{match:/Math\.min\((\i\*\i\.\i\.\i\.SECOND),\i\.\i\)/,replace:"$1"},{match:/\i\.\i\.dispatch\({type:"IDLE",idle:!1}\)/,replace:"$self.handleOnline()"}]}],handleOnline(){if(!ZK.store.remainInIdle){G.dispatch({type:"IDLE",idle:!1});return}let e="Welcome back! Click the button to go online. Click the X to stay idle until reload.";Ox?.[1]===e||qA.some(([,t])=>t===e)||Ma(e,"Exit idle",()=>{ad(),G.dispatch({type:"IDLE",idle:!1})})},getIdleTimeout(){let{idleTimeout:e}=ZK.store;return e===0?1/0:e*6e4}})});async function ive(){let e=await ql();return e&&(await Ym(),ii()),e}function XK(){return{name:"Discord Desktop",version:DiscordNative.app.getVersion()}}async function ave(){let{RELEASE_CHANNEL:e}=window.GLOBAL_ENV,t=XK(),n=`${t.name}`;n+=`${t.version?` v${t.version}`:""}`,n+=`${t.info?` \u2022 ${t.info}`:""}`,n+=`${t.shortHash?` \u2022 [${t.shortHash}](<https://github.com/Omega-devj/nexium-client/commit/${t.hash}>)`:""}`;let o=null,r=o?.spoofed?`${QK()} (spoofed from ${o.originalPlatform})`:QK(),a={"Nexium Client":`v1.14.13.1 \u2022 [${t0}](<https://github.com/Omega-devj/nexium-client/commit/${Pa}>)${li.getVersionInfo()} - ${Intl.DateTimeFormat("en-US",{dateStyle:"medium"}).format(1780518166381)}`,Client:`${e} ~ ${n}`,Platform:r};a["Last Crash Reason"]=(await TA(()=>DiscordNative.processUtils.getLastCrash(),void 0))?.rendererCrashReason??"N/A";let s=(["NoRPC","NoProfileThemes","NoMosaic","NoRoleHeaders","NoSystemBadge","AlwaysAnimate","ClientTheme","SoundTroll","Ingtoninator","NeverPausePreviews","IdleAutoRestart"].filter(Be)??[]).sort();Be(l0.name)&&l0.settings.store.idleTimeout===0&&s.push(l0.name);let c={"Activity Sharing Disabled":TA(()=>!Yct.getSetting(),!1),"Link Embeds Disabled":TA(()=>!Jct.getSetting(),!1),"Nexium Client DevBuild":!0,"Nexium Desktop DevBuild":!1,"Platform Spoofed":o?.spoofed??!1,"Has UserPlugins":Object.values(la).some(p=>p.userPlugin),">2 Weeks Outdated":1780518166381<Date.now()-12096e5,[`Potentially Problematic Plugins: ${s.join(", ")}
 -# Note: These plugins might not be the cause of your problem. They are simply plugins that cause common issues.`]:s.length},u=`>>> ${Object.entries(a).map(([p,m])=>`**${p}**: ${m}`).join(`
