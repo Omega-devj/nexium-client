@@ -1,5 +1,42 @@
 # Nexium Client — Notes de version
 
+## v198 - Le captcha de Discord s affiche enfin
+
+### Une protection qui empechait d entrer chez soi
+
+hcaptcha.com n etait dans aucune liste du garde de sortie. Or celui-ci retire
+les cadres et les scripts qui viennent d un hote inconnu, et il est allume par
+defaut. La fenetre de verification ne pouvait donc jamais s afficher.
+
+Consequence : impossible de se connecter, de changer de mot de passe, ou de
+rejoindre certains serveurs. Et rien ne le disait -- la fenetre restait vide.
+C est le blocage le plus couteux qu une protection puisse faire : il
+n empeche aucune attaque, il empeche l utilisateur d entrer chez lui.
+
+Les fournisseurs que Discord emploie reellement sont desormais connus du garde :
+hCaptcha, plus Arkose Labs et FunCaptcha pour certains parcours d inscription.
+google.com n est PAS ajoute pour autant -- ouvrir un domaine aussi large pour un
+fournisseur que Discord n utilise pas serait un mauvais echange.
+
+Un faux hote qui ressemble a un captcha, lui, reste bloque : hcaptcha.com.evil
+n est pas hcaptcha.com. Huit tests le verifient.
+
+### L onglet Vocal disait quelque chose d incomprehensible
+
+Il affichait "aucun peripherique de bouclage sur cette machine (toutes les voix
+de l appel)" et s arretait la. C etait le message d erreur brut d une fonction
+interne : il ne disait ni ce qu est un peripherique de bouclage, ni pourquoi il
+en faut un, ni quoi faire. Et il arrivait apres coup, alors que la reponse est
+connue avant meme d essayer.
+
+C est inverse. La page cherche le peripherique des qu on ouvre l onglet :
+
+- trouve, elle le nomme et dit ce qu il donne ;
+- pas trouve, elle dit "pour l instant, le clip ne contiendra que ta voix",
+  explique en trois gestes quoi activer dans Windows, rappelle que les moments
+  a plusieurs restent reperes de toute facon, et propose de rechercher a
+  nouveau.
+
 ## v197 - Le best-of enregistre toutes les voix de l appel
 
 ### Un autre chemin, qui ne passe pas par la ou ca plantait

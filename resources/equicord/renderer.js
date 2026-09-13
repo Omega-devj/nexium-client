@@ -9926,7 +9926,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="197";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="198";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -15132,7 +15132,14 @@ var c=v.charAt(0);
 if(c!=="h"&&c!=="w"&&c!=="f")return "";
 var h=new URL(v,"https://discord.com").hostname.toLowerCase();
 return h.replace(/^www\./,"");}catch(_){return "";}};
+// Les fournisseurs de captcha. Sans eux, la fenetre de verification ne
+// s affiche pas : le garde du DOM retire son cadre et son script avant
+// qu ils ne chargent, et on ne peut plus ni se connecter ni changer de mot
+// de passe. Une protection qui empeche d entrer chez soi est un defaut,
+// pas une protection.
+_NXGD.CAPTCHA=["hcaptcha.com","arkoselabs.com","arkoselabs.cn","funcaptcha.com","recaptcha.net"];
 _NXGD.BASE=["discord.com","discordapp.com","discordapp.net","discord.gg","discord.media","discord.dev","discordstatus.com","discord.app","discordcdn.com","dis.gd",
+"hcaptcha.com","arkoselabs.com","arkoselabs.cn","funcaptcha.com","recaptcha.net",
 "githubusercontent.com","github.com","github.io","githubassets.com",
 "jsdelivr.net","unpkg.com","cdnjs.cloudflare.com",
 "emcoqnvxriyrchmfpunq.supabase.co",
@@ -16291,6 +16298,16 @@ _NXAU.listeners.push(force);
 try{if(window._NXFO)_NXFO.listeners.push(force);}catch(_){}
 return function(){try{_NXAU.listeners=_NXAU.listeners.filter(function(f){return f!==force;});}catch(_){}
 try{if(window._NXFO)_NXFO.listeners=_NXFO.listeners.filter(function(f){return f!==force;});}catch(_){}};},[]);
+// Cherche le peripherique de bouclage des l ouverture de l onglet, pour que
+// la page dise ce qu elle a trouve au lieu de rendre une erreur apres coup.
+var _b0=F.useState(undefined);var boucl=_b0[0];var setBoucl=_b0[1];
+F.useEffect(function(){
+if(tab!=="vocal")return;
+if(boucl!==undefined)return;
+try{
+if(window._NXBEST&&_NXBEST.bouclage)
+_NXBEST.bouclage().then(function(b){setBoucl(b||null);},function(){setBoucl(null);});
+else setBoucl(null);}catch(_){setBoucl(null);}},[tab]);
 var monte=_NXmounted(F);
 var P=_NXpal;
 var A=window._NXAU||null;
@@ -16669,14 +16686,34 @@ i("div",{style:{marginTop:"14px"}},
 label(_T("Ce qu il ecoute")),
 i("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap"}},
 B.VOIES.map(function(V){
-return chip(V.n+(V.auto?"":" \u2022 "+_T("ouvre une fenetre")),
-(B.cfg.voie||"")===V.k,function(){
+return chip(V.n,(B.cfg.voie||"")===V.k,function(){
 if(B.suspecte===V.k){B.pardonne();force();return;}
 B.set("voie",V.k);force();},B.suspecte===V.k);})),
 i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"8px",lineHeight:1.6}},
-voie?voie.d:_T("Sans choix, il essaie le son de la machine puis ton micro, sans jamais ouvrir de fenetre."))),
+voie?voie.d:_T("Sans choix, il prend toutes les voix si c est possible, et ton micro sinon."))),
+// Ce que la page a trouve, dit avant d essayer.
+boucl===undefined?etatLigne(_T("Recherche d un peripherique de bouclage...")):
+boucl?i("div",{style:{marginTop:"12px",padding:"12px 13px",borderRadius:"12px",
+background:P.inset,border:"1px solid "+_NXteinte(_NXpal.ok,30)}},
+i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:_NXpal.ok}},
+_T("Toutes les voix de l appel seront enregistrees")),
+i("div",{style:{fontSize:"11.5px",color:P.sub,marginTop:"4px",lineHeight:1.6}},
+_T("Par")+" "+boucl.nom+" : "+boucl.note+"."),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"4px",lineHeight:1.6}},
+_T("Ton micro est melange par-dessus, pour que ta voix y soit aussi."))):
+i("div",{style:{marginTop:"12px",padding:"12px 13px",borderRadius:"12px",
+background:P.inset,border:"1px solid "+P.line}},
+i("div",{style:{fontSize:"12.5px",fontWeight:"700",color:P.txt}},
+_T("Pour l instant, le clip ne contiendra que ta voix")),
+i("div",{style:{fontSize:"11.5px",color:P.sub,marginTop:"5px",lineHeight:1.65}},
+B.COMMENT),
+i("div",{style:{fontSize:"11px",color:P.dim,marginTop:"6px",lineHeight:1.6}},
+_T("Les moments a plusieurs sont quand meme reperes : Discord dit qui parle, ca ne vient pas du son.")),
+i("div",{style:{display:"flex",gap:"8px",marginTop:"10px"}},
+btn(_T("Rechercher a nouveau"),function(){setBoucl(undefined);force();}))),
 B.suspecte?etatLigne(_T("La derniere fois, cette source a fait tomber le client. Elle est mise de cote : clique dessus pour la remettre en jeu."),_NXpal.danger):null,
-B.erreur?etatLigne(B.erreur,_NXpal.warn):null,
+// L erreur brute ne sert a rien quand le bloc ci-dessus dit deja tout.
+(B.erreur&&!/bouclage/.test(B.erreur))?etatLigne(B.erreur,_NXpal.warn):null,
 etatLigne(e.actif?(_T("En ecoute, source :")+" "+(B.VOIETXT[e.voie]||e.voie)
 +((e.voie==="appel"&&B.bouclageNom)?(" ("+B.bouclageNom+")"):"")+". "+e.moments+" "+_T("moment(s) garde(s).")):
 (e.moments?(e.moments+" "+_T("moment(s) de la derniere session.")):_T("En veille. Rien n est enregistre."))),
@@ -22615,7 +22652,7 @@ _NXBEST.VOIES=[
 {k:"appel",n:"toutes les voix de l appel",auto:true,
  d:"Passe par un peripherique de bouclage : le mixage stereo de Windows, ou un cable audio virtuel. Ton micro est melange par-dessus, pour que ta voix y soit aussi.",
  f:function(){return _NXBEST.bouclage().then(function(b){
- if(!b)throw new Error("aucun peripherique de bouclage sur cette machine");
+ if(!b)throw new Error("aucune entree de bouclage n est activee sur cette machine");
  _NXBEST.bouclageNom=b.nom;_NXBEST.bouclageNote=b.note;
  return navigator.mediaDevices.getUserMedia(
  {audio:{deviceId:{exact:b.id},echoCancellation:false,noiseSuppression:false,
@@ -22628,7 +22665,9 @@ _NXBEST.VOIES=[
  d:"Le repli quand aucun bouclage n existe. Le clip ne contiendra que ta voix -- mais les moments a plusieurs sont quand meme reperes : Discord dit qui parle, ca ne vient pas du son.",
  f:function(){return navigator.mediaDevices.getUserMedia({audio:true,video:false});}}];
 // Ce qu il faut pour avoir toutes les voix, dit une fois, au bon endroit.
-_NXBEST.POURQUOI="Pour enregistrer les autres, il faut un peripherique de bouclage. Le plus simple : parametres de son de Windows, onglet Enregistrement, clic droit, Afficher les peripheriques desactives, puis activer le Mixage stereo. Plus propre : installer VB-CABLE, gratuit, et mettre la sortie de Discord dessus. La capture d ecran, elle, n est pas utilisee : c est ce chemin qui faisait tomber le client en v195.";
+_NXBEST.COMMENT="Un peripherique de bouclage est une entree audio qui renvoie ce que ta machine joue. Le plus simple : ouvre les parametres de son de Windows, onglet Enregistrement, clic droit dans la liste, Afficher les peripheriques desactives, puis active le Mixage stereo. Plus propre : installe VB-CABLE, qui est gratuit, et mets la sortie de Discord dessus.";
+_NXBEST.POURQUOI="Pour enregistrer les autres, il en faut un. "+_NXBEST.COMMENT+
+" La capture d ecran, elle, n est pas utilisee : c est ce chemin qui faisait tomber le client en v195.";
 // Le temoin de tentative. Pose avant d ouvrir, efface des que la source a
 // repondu. S il est encore la au demarrage suivant, c est que le client
 // n a pas survecu a l ouverture.
