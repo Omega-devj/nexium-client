@@ -1,5 +1,44 @@
 # Nexium Client — Notes de version
 
+## v196 - Le best-of n ecoute plus que le micro
+
+### Ce qui faisait tomber le client
+
+Demarrer le best-of pouvait tuer le client entier. Pas la page : le processus
+principal.
+
+    A JavaScript error occurred in the main process
+    ReferenceError: _processUtils is not defined
+
+L erreur est dans un module de Discord, pas dans Nexium. Elle se declenche
+quand la page demande une capture d ecran : Electron passe alors la main au
+processus principal, qui appelle une fonction absente de ce paquet. Rien, du
+cote de la page, ne permet de le savoir a l avance -- on ne peut ni la lire,
+ni la sonder, ni la corriger.
+
+Deux des trois sources du best-of passaient par la : "le son des autres", qui
+demande explicitement un partage d ecran, et "le son de la machine", qui prend
+le meme chemin de capture. Les deux sont retirees, et le client ne demande plus
+aucune capture d ecran nulle part.
+
+### Ce qui reste
+
+Le micro, et il faut le dire franchement : le clip ne contiendra que ta voix.
+La carte l ecrit, et elle explique pourquoi les autres sources ont disparu --
+une absence expliquee n est pas la meme chose qu un manque.
+
+Ce que ca ne casse pas, et c est l essentiel : le detecteur des GENS ne lit pas
+le son. Il lit qui parle dans Discord. Trois personnes qui se coupent la parole
+restent reperees exactement comme avant, et tes propres rires restent un bon
+signal -- on rit quand le moment est drole.
+
+### Le temoin a fait son travail
+
+Pose en v195 avant chaque ouverture de source et efface des qu elle repond, il
+survit au plantage : au demarrage suivant, la source en cause est mise de cote
+et il faut insister pour la reessayer. Il nettoie desormais aussi les temoins
+qui designent une source retiree depuis.
+
 ## v195 - Le best-of du vocal, le sismographe, les gros fichiers, et tes sons partout
 
 ### Le best-of du vocal

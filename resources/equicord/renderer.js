@@ -9926,7 +9926,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="195";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="196";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -22035,9 +22035,9 @@ _NXPOP.ANNONCES=[
 {k:"bestof195",
  film:function(){return _NXPOP.FILM;},
  titre:"Nexium decoupe les moments forts de tes appels",
- texte:"Pendant un vocal, il garde les trois dernieres minutes en memoire vive. "+
- "Quand tout le monde rit en meme temps, il le repere et te sort un clip de vingt secondes, "+
- "pret a poster. Rien ne quitte la machine, et rien n est garde si tu ne demandes rien.",
+ texte:"Pendant un vocal, il garde les trois dernieres minutes de ton micro en memoire vive. "+
+ "Quand tout le monde parle ou rit en meme temps, il le repere et te sort un clip de vingt "+
+ "secondes, pret a poster. Rien ne quitte la machine, et rien n est garde si tu ne demandes rien.",
  bouton:"Voir comment ca marche",
  fait:function(){try{if(window._NXBEST&&_NXBEST.boot)_NXBEST.carte();}catch(_){}}}];
 
@@ -22447,7 +22447,9 @@ if(!d||typeof d!=="object")d={};
 if(typeof d.on!=="boolean")d.on=false;
 if(d.sensible!=="basse"&&d.sensible!=="normale"&&d.sensible!=="haute")d.sensible="normale";
 if(typeof d.garde!=="boolean")d.garde=true;
-if(d.voie!=="systeme"&&d.voie!=="micro"&&d.voie!=="ecran")d.voie="";
+// Les anciennes valeurs designent des sources retirees en v196 : on les
+// jette plutot que de les laisser pointer dans le vide.
+if(d.voie!=="micro")d.voie="";
 _NXBEST.cfg=d;return d;}catch(_){return _NXBEST.cfg;}};
 _NXBEST.save=function(){try{_NXDB.set(_NXBEST.KEY,JSON.stringify(_NXBEST.cfg));}catch(_){}};
 _NXBEST.set=function(k,v){try{_NXBEST.cfg[k]=v;_NXBEST.save();_NXBEST.notify();}catch(_){}};
@@ -22601,25 +22603,23 @@ return m+":"+("0"+(s2%60)).slice(-2);}catch(_){return "0:00";}};
 // que tu entends -- et, a defaut, le micro. La carte dit toujours laquelle
 // des trois voies a servi : un clip qui ne contient que ta propre voix ne
 // doit pas etre presente comme un clip de l appel.
-// `auto` dit si la voie peut etre essayee toute seule. Celle du partage
-// d ecran ne le peut pas : elle ouvre une fenetre de choix, et personne ne
-// s attend a ca en cliquant sur Demarrer.
+// Une seule source, et c est une decision, pas un oubli.
+//
+// Toute capture du son de la MACHINE -- partage d ecran comme
+// chromeMediaSource:"desktop" -- passe par le processus principal de
+// Discord. Sur ce paquet, ce chemin leve "_processUtils is not defined" et
+// emporte l application entiere. C est du code de Discord : on ne peut ni
+// le corriger ni le sonder depuis la page.
+//
+// Donc le micro, et rien d autre. Le detecteur des gens, lui, ne lit pas le
+// son : il lit qui parle dans Discord, et il marche a l identique.
 _NXBEST.VOIES=[
-{k:"systeme",n:"le son de la machine",auto:true,
- d:"Tout ce que tu entends, l appel compris. Silencieux, mais indisponible sur beaucoup de machines.",
- f:function(){return navigator.mediaDevices.getUserMedia(
- {audio:{mandatory:{chromeMediaSource:"desktop"}},video:false});}},
 {k:"micro",n:"ton micro",auto:true,
- d:"Ta voix seulement. Les moments a plusieurs sont quand meme reperes : Discord dit qui parle, ca ne vient pas du son.",
- f:function(){return navigator.mediaDevices.getUserMedia({audio:true,video:false});}},
-{k:"ecran",n:"le son des autres",auto:false,
- d:"Discord va te demander de choisir une fenetre ou un ecran : c est le seul moyen d avoir le son des autres. Seul le son est garde, l image est jetee tout de suite.",
- f:function(){return navigator.mediaDevices.getDisplayMedia({audio:true,video:true})
- .then(function(st){try{
- var vt=st.getVideoTracks?st.getVideoTracks():[];
- for(var a=0;a<vt.length;a++){try{vt[a].stop();st.removeTrack(vt[a]);}catch(_){}}}catch(_){}
- if(!st.getAudioTracks||!st.getAudioTracks().length)throw new Error("cette source n a pas de son");
- return st;});}}];
+ d:"Le clip ne contiendra que ta voix. Les moments a plusieurs sont quand meme reperes : Discord dit qui parle, ca ne vient pas du son.",
+ f:function(){return navigator.mediaDevices.getUserMedia({audio:true,video:false});}}];
+// Pourquoi il n y en a qu une. Affiche sous la liste, pour que l absence ne
+// passe pas pour un manque.
+_NXBEST.POURQUOI="Capturer le son des autres demanderait une capture d ecran. Sur ce client, ce chemin fait tomber le processus principal de Discord (_processUtils is not defined) : c est une erreur de Discord, pas de Nexium, et elle n est pas reparable depuis le client. La source a donc ete retiree.";
 // Le temoin de tentative. Pose avant d ouvrir, efface des que la source a
 // repondu. S il est encore la au demarrage suivant, c est que le client
 // n a pas survecu a l ouverture.
@@ -23009,6 +23009,7 @@ h+='<div class="nx-fx nx-best-src" data-k="'+esc(V.k)+'" role="button" tabindex=
 +(V.auto?"":' <span style="color:'+P.warn+';font-weight:600;">demande une fenetre</span>')
 +(_NXBEST.suspecte===V.k?' <span style="color:'+P.danger+';font-weight:600;">a fait tomber le client</span>':'')+'</div>'
 +'<div style="font-size:11px;color:'+P.dim+';margin-top:3px;line-height:1.5;">'+esc(V.d)+'</div></div>';}
+h+='<div style="font-size:11px;color:'+P.faint+';line-height:1.6;margin-top:2px;">'+esc(_NXBEST.POURQUOI)+'</div>';
 var el=document.createElement("div");
 el.innerHTML=h;
 corps.appendChild(el);
@@ -23120,7 +23121,8 @@ sensible:_NXBEST.cfg.sensible,tampon:_NXBEST.TAMPON};}catch(_){return {actif:fal
 try{_NXBEST.load();_NXBEST.litTemoin();
 if(_NXBEST.suspecte)_NXBEST.erreur="La derniere fois, "+
 ((_NXBEST.voieDe(_NXBEST.suspecte)||{}).n||_NXBEST.suspecte)+
- " a fait tomber le client. Cette source est mise de cote.";}catch(_){}
+ " a fait tomber le client. Cette source est mise de cote.";
+else _NXBEST.oteTemoin();}catch(_){}
 }catch(_nxE){try{window._NXFAIL=window._NXFAIL||[];_NXFAIL.push("_NXBEST");if(window._NXERR)_NXERR.push("module _NXBEST :: "+((_nxE&&_nxE.message)||"erreur"));console.warn("[Nexium] _NXBEST desactive:",_nxE);}catch(_){}}
 }
 var _NXFIC=window._NXFIC||(window._NXFIC={});
