@@ -9926,7 +9926,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="196";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="197";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -16677,7 +16677,8 @@ i("div",{style:{fontSize:"11.5px",color:P.dim,marginTop:"8px",lineHeight:1.6}},
 voie?voie.d:_T("Sans choix, il essaie le son de la machine puis ton micro, sans jamais ouvrir de fenetre."))),
 B.suspecte?etatLigne(_T("La derniere fois, cette source a fait tomber le client. Elle est mise de cote : clique dessus pour la remettre en jeu."),_NXpal.danger):null,
 B.erreur?etatLigne(B.erreur,_NXpal.warn):null,
-etatLigne(e.actif?(_T("En ecoute, source :")+" "+(B.VOIETXT[e.voie]||e.voie)+". "+e.moments+" "+_T("moment(s) garde(s).")):
+etatLigne(e.actif?(_T("En ecoute, source :")+" "+(B.VOIETXT[e.voie]||e.voie)
++((e.voie==="appel"&&B.bouclageNom)?(" ("+B.bouclageNom+")"):"")+". "+e.moments+" "+_T("moment(s) garde(s).")):
 (e.moments?(e.moments+" "+_T("moment(s) de la derniere session.")):_T("En veille. Rien n est enregistre."))),
 i("div",{style:{display:"flex",gap:"8px",marginTop:"14px",flexWrap:"wrap"}},
 btn(_T("Ouvrir le best-of"),function(){B.carte();},true),
@@ -22447,9 +22448,9 @@ if(!d||typeof d!=="object")d={};
 if(typeof d.on!=="boolean")d.on=false;
 if(d.sensible!=="basse"&&d.sensible!=="normale"&&d.sensible!=="haute")d.sensible="normale";
 if(typeof d.garde!=="boolean")d.garde=true;
-// Les anciennes valeurs designent des sources retirees en v196 : on les
-// jette plutot que de les laisser pointer dans le vide.
-if(d.voie!=="micro")d.voie="";
+// Une valeur gardee qui ne designe plus rien est jetee plutot que de
+// pointer dans le vide.
+if(d.voie!=="micro"&&d.voie!=="appel")d.voie="";
 _NXBEST.cfg=d;return d;}catch(_){return _NXBEST.cfg;}};
 _NXBEST.save=function(){try{_NXDB.set(_NXBEST.KEY,JSON.stringify(_NXBEST.cfg));}catch(_){}};
 _NXBEST.set=function(k,v){try{_NXBEST.cfg[k]=v;_NXBEST.save();_NXBEST.notify();}catch(_){}};
@@ -22603,23 +22604,31 @@ return m+":"+("0"+(s2%60)).slice(-2);}catch(_){return "0:00";}};
 // que tu entends -- et, a defaut, le micro. La carte dit toujours laquelle
 // des trois voies a servi : un clip qui ne contient que ta propre voix ne
 // doit pas etre presente comme un clip de l appel.
-// Une seule source, et c est une decision, pas un oubli.
+// Deux sources, et aucune ne touche a la capture d ecran -- c est ce chemin
+// qui faisait tomber le processus principal de Discord en v195.
 //
-// Toute capture du son de la MACHINE -- partage d ecran comme
-// chromeMediaSource:"desktop" -- passe par le processus principal de
-// Discord. Sur ce paquet, ce chemin leve "_processUtils is not defined" et
-// emporte l application entiere. C est du code de Discord : on ne peut ni
-// le corriger ni le sonder depuis la page.
-//
-// Donc le micro, et rien d autre. Le detecteur des gens, lui, ne lit pas le
-// son : il lit qui parle dans Discord, et il marche a l identique.
+// Celle qui prend toutes les voix ouvre un peripherique de BOUCLAGE, qui se
+// presente au navigateur comme un micro ordinaire. Meme appel, meme code,
+// et il ne plante pas. Le micro est melange par-dessus, sans quoi le clip
+// aurait toutes les voix sauf la tienne.
 _NXBEST.VOIES=[
+{k:"appel",n:"toutes les voix de l appel",auto:true,
+ d:"Passe par un peripherique de bouclage : le mixage stereo de Windows, ou un cable audio virtuel. Ton micro est melange par-dessus, pour que ta voix y soit aussi.",
+ f:function(){return _NXBEST.bouclage().then(function(b){
+ if(!b)throw new Error("aucun peripherique de bouclage sur cette machine");
+ _NXBEST.bouclageNom=b.nom;_NXBEST.bouclageNote=b.note;
+ return navigator.mediaDevices.getUserMedia(
+ {audio:{deviceId:{exact:b.id},echoCancellation:false,noiseSuppression:false,
+ autoGainControl:false},video:false})
+ .then(function(st){
+ return navigator.mediaDevices.getUserMedia({audio:true,video:false})
+ .then(function(mic){return {flux:st,plus:mic};},
+ function(){return {flux:st,plus:null};});});});}},
 {k:"micro",n:"ton micro",auto:true,
- d:"Le clip ne contiendra que ta voix. Les moments a plusieurs sont quand meme reperes : Discord dit qui parle, ca ne vient pas du son.",
+ d:"Le repli quand aucun bouclage n existe. Le clip ne contiendra que ta voix -- mais les moments a plusieurs sont quand meme reperes : Discord dit qui parle, ca ne vient pas du son.",
  f:function(){return navigator.mediaDevices.getUserMedia({audio:true,video:false});}}];
-// Pourquoi il n y en a qu une. Affiche sous la liste, pour que l absence ne
-// passe pas pour un manque.
-_NXBEST.POURQUOI="Capturer le son des autres demanderait une capture d ecran. Sur ce client, ce chemin fait tomber le processus principal de Discord (_processUtils is not defined) : c est une erreur de Discord, pas de Nexium, et elle n est pas reparable depuis le client. La source a donc ete retiree.";
+// Ce qu il faut pour avoir toutes les voix, dit une fois, au bon endroit.
+_NXBEST.POURQUOI="Pour enregistrer les autres, il faut un peripherique de bouclage. Le plus simple : parametres de son de Windows, onglet Enregistrement, clic droit, Afficher les peripheriques desactives, puis activer le Mixage stereo. Plus propre : installer VB-CABLE, gratuit, et mettre la sortie de Discord dessus. La capture d ecran, elle, n est pas utilisee : c est ce chemin qui faisait tomber le client en v195.";
 // Le temoin de tentative. Pose avant d ouvrir, efface des que la source a
 // repondu. S il est encore la au demarrage suivant, c est que le client
 // n a pas survecu a l ouverture.
@@ -22633,6 +22642,38 @@ _NXBEST.suspecte=(v&&_NXBEST.voieDe(String(v)))?String(v):"";
 return _NXBEST.suspecte;}catch(_){return "";}};
 _NXBEST.pardonne=function(){try{
 _NXBEST.suspecte="";_NXBEST.oteTemoin();_NXBEST.notify();return true;}catch(_){return false;}};
+// Le peripherique qui renvoie ce que la machine joue. Il se presente comme
+// une entree audio ordinaire : aucun rapport avec la capture d ecran.
+_NXBEST.RXCABLE=/(cable|voicemeeter|vb-audio|vb audio|virtual audio|virtual cable|blackhole|soundflower)/i;
+_NXBEST.RXMIX=/(mixage st[e\u00e9]r[e\u00e9]o|stereo ?mix|what ?u ?hear|wave ?out|loopback|bouclage)/i;
+_NXBEST.sortieDiscord=function(){try{
+var ME=_NXcommon().store("MediaEngineStore");
+if(ME&&typeof ME.getOutputDeviceId==="function")return String(ME.getOutputDeviceId()||"");
+return "";}catch(_){return "";}};
+_NXBEST.bouclage=function(){try{
+if(!navigator.mediaDevices||!navigator.mediaDevices.enumerateDevices)
+return Promise.resolve(null);
+return navigator.mediaDevices.enumerateDevices().then(function(L){
+var e=[],s2=[],a;
+for(a=0;a<L.length;a++){
+var d=L[a];
+if(!d||!d.deviceId)continue;
+if(d.kind==="audioinput")e.push({id:d.deviceId,nom:String(d.label||"")});
+else if(d.kind==="audiooutput")s2.push({id:d.deviceId,nom:String(d.label||"")});}
+// Le cable ne sert que si Discord joue DEDANS. Sinon sa sortie est muette,
+// et un clip silencieux est pire que pas de clip.
+var out=_NXBEST.sortieDiscord(),routee=false,b;
+for(b=0;b<s2.length;b++)
+if(s2[b].id===out&&_NXBEST.RXCABLE.test(s2[b].nom))routee=true;
+if(routee)for(a=0;a<e.length;a++)
+if(_NXBEST.RXCABLE.test(e[a].nom))
+return {id:e[a].id,nom:e[a].nom,genre:"cable",
+note:"la sortie de Discord passe par ce cable : le clip ne contiendra que l appel"};
+for(a=0;a<e.length;a++)
+if(_NXBEST.RXMIX.test(e[a].nom))
+return {id:e[a].id,nom:e[a].nom,genre:"mixage",
+note:"il renvoie tout ce que joue ta machine : l appel, mais aussi ta musique et tes notifications"};
+return null;},function(){return null;});}catch(_){return Promise.resolve(null);}};
 _NXBEST.voieDe=function(k){try{
 for(var a=0;a<_NXBEST.VOIES.length;a++)if(_NXBEST.VOIES[a].k===k)return _NXBEST.VOIES[a];
 return null;}catch(_){return null;}};
@@ -22663,9 +22704,12 @@ var suivant=function(){
 if(k>=L.length)
 return Promise.reject(new Error(dernier||"aucune source audio n a accepte"));
 var V=L[k++];
-return essaie(V).then(function(st){
+return essaie(V).then(function(r){
+// Une voie peut rendre un flux, ou deux a melanger.
+var st=(r&&r.flux)?r.flux:r;
+var plus=(r&&r.plus)?r.plus:null;
 if(!st||!st.getAudioTracks||!st.getAudioTracks().length)throw new Error("pas de son");
-return {flux:st,voie:V.k,nom:V.n};},function(e){
+return {flux:st,plus:plus,voie:V.k,nom:V.n};},function(e){
 dernier=String((e&&e.message)||"refuse")+" ("+V.n+")";
 return suivant();});};
 return suivant();}catch(e){return Promise.reject(e);}};
@@ -22703,20 +22747,25 @@ return _NXBEST.source(force).then(function(src){
 var AC=window.AudioContext||window.webkitAudioContext;
 if(!AC)throw new Error("ce client n a pas d AudioContext");
 var ctx=new AC({sampleRate:_NXBEST.HZ});
-var ent=ctx.createMediaStreamSource(src.flux);
+// Un bus unique : les deux flux -- le bouclage et le micro -- y arrivent,
+// et tout ce qui suit ne voit qu une seule source.
+var bus=ctx.createGain();
+bus.gain.value=1;
+ctx.createMediaStreamSource(src.flux).connect(bus);
+try{if(src.plus)ctx.createMediaStreamSource(src.plus).connect(bus);}catch(_){}
 var an=ctx.createAnalyser();
 an.fftSize=1024;
 an.smoothingTimeConstant=0;
-ent.connect(an);
+bus.connect(an);
 var proc=ctx.createScriptProcessor?ctx.createScriptProcessor(4096,1,1):null;
 if(!proc)throw new Error("ce client ne sait pas lire le flux");
-ent.connect(proc);
+bus.connect(proc);
 var muet=ctx.createGain();
 muet.gain.value=0;
 proc.connect(muet);
 muet.connect(ctx.destination);
 var A=_NXBEST.anneau(_NXBEST.TAMPON);
-var S={debut:Date.now(),ctx:ctx,flux:src.flux,proc:proc,anneau:A,
+var S={debut:Date.now(),ctx:ctx,flux:src.flux,plus:src.plus,proc:proc,anneau:A,
 voie:src.voie,voieNom:src.nom,cid:_NXBEST.salon(),
 env:[],fond:0.02,dernier:-999,gens:0,quiGens:[]};
 proc.onaudioprocess=function(e){try{
@@ -22781,6 +22830,7 @@ try{clearInterval(_NXBEST._t);}catch(_){}
 try{clearInterval(_NXBEST._g);}catch(_){}
 try{S.proc.onaudioprocess=null;S.proc.disconnect();}catch(_){}
 try{if(S.flux&&S.flux.getTracks)S.flux.getTracks().forEach(function(x){try{x.stop();}catch(_){}});}catch(_){}
+try{if(S.plus&&S.plus.getTracks)S.plus.getTracks().forEach(function(x){try{x.stop();}catch(_){}});}catch(_){}
 try{S.ctx.close();}catch(_){}
 _NXBEST.dernierAnneau=S.anneau;
 _NXBEST.dernierDebut=S.debut;
@@ -22882,8 +22932,8 @@ _NXBEST.ferme=function(){try{
 var o=document.getElementById(_NXBEST.MODID);
 if(o&&o.parentNode)o.parentNode.removeChild(o);}catch(_){}};
 
-_NXBEST.VOIETXT={systeme:"le son de la machine -- tout ce que tu entends, l appel compris",
-ecran:"le son des autres, pris par le partage -- l image a ete jetee",
+_NXBEST.VOIETXT={
+appel:"toutes les voix de l appel, par le bouclage, avec ton micro melange",
 micro:"ton micro -- le son ne contient que toi, mais les moments a plusieurs sont quand meme reperes"};
 
 _NXBEST.carte=function(){try{

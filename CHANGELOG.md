@@ -1,5 +1,41 @@
 # Nexium Client — Notes de version
 
+## v197 - Le best-of enregistre toutes les voix de l appel
+
+### Un autre chemin, qui ne passe pas par la ou ca plantait
+
+La v196 avait retire la capture du son de la machine, parce qu elle passait par
+la capture d ecran -- et que ce chemin fait tomber le processus principal de
+Discord sur ce paquet.
+
+Il en existe un autre, et il n a rien a voir : un peripherique de BOUCLAGE se
+presente au navigateur comme un micro ordinaire. On l ouvre avec le meme appel
+que pour un vrai micro, donc avec le meme code, qui lui ne plante pas. Aucune
+capture d ecran nulle part, et le client n en demande plus une seule.
+
+### Deux formes, et l ordre compte
+
+- LE CABLE, si la sortie de Discord y est deja routee. Sa sortie ne transporte
+  alors que l appel : ni ta musique, ni tes notifications. C est le cas propre.
+  Un cable dont Discord ne se sert pas est ignore -- sa sortie serait muette, et
+  un clip silencieux est pire que pas de clip.
+- LE MIXAGE STEREO de Windows, qui renvoie tout ce que la machine joue. L appel
+  est dedans, le reste aussi. Ca marche sans rien installer.
+
+Dans les deux cas, le micro est ouvert EN PLUS et melange : un bouclage ne
+contient pas ta propre voix, puisque tu ne t entends pas. Sans ce melange, le
+clip aurait toutes les voix sauf la tienne.
+
+S il n y a aucun bouclage, on retombe sur le micro seul, sans rien casser, et
+la carte explique en trois lignes quoi activer : le Mixage stereo dans les
+parametres de son de Windows, ou VB-CABLE, qui est gratuit et plus propre.
+
+### Ce que le banc verifie
+
+Que le mixage est reconnu meme ecrit avec des accents, qu un cable inutilise
+est ecarte, qu un cable qui porte vraiment la sortie de Discord passe avant le
+mixage, et qu aucune des deux sources ne touche a la capture d ecran.
+
 ## v196 - Le best-of n ecoute plus que le micro
 
 ### Ce qui faisait tomber le client
