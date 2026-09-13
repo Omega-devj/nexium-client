@@ -1,5 +1,340 @@
 # Nexium Client — Notes de version
 
+## v195 - Le best-of du vocal, le sismographe, les gros fichiers, et tes sons partout
+
+### Le best-of du vocal
+
+Pendant un appel, le client garde les trois dernieres minutes en memoire vive,
+et rien d autre. Quand un moment fort arrive, il decoupe autour. Si rien
+n arrive, le tampon s efface tout seul en tournant.
+
+Deux detecteurs, et c est ce qui separe le gadget de l outil :
+
+- LE SON. Un rire ne se reconnait pas au volume, il se reconnait a sa cadence :
+  son enveloppe oscille entre quatre et huit fois par seconde, c est la
+  signature des syllabes. On mesure cette oscillation. Une porte qui claque est
+  forte et plate, un ventilateur est module et faible : ni l un ni l autre ne
+  passe.
+- LES GENS. Discord dit qui parle, gratuitement. Trois personnes qui se coupent
+  la parole, c est un moment, meme sans rire.
+
+Chaque voie peut declencher seule si elle est franche. Trois sensibilites.
+
+Le clip fait vingt-trois secondes, dont quatorze AVANT le pic : le rire arrive
+apres ce qui l a provoque, et c est ca qu on veut garder. Un bouton en fait une
+video avec l onde qui defile, prete a poster.
+
+La voix passe par le moteur natif de Discord, pas par le navigateur : on ne
+peut donc pas se brancher sur l appel. Trois sources au choix, decrites dans la
+carte, et AUCUNE n ouvre de fenetre toute seule -- celle qui passe par le
+partage d ecran est marquee comme telle et se choisit a la main. Par defaut,
+le micro : le detecteur social lit qui parle dans Discord, pas dans le son,
+donc les moments a plusieurs sont reperes quand meme. Et si une source fait
+tomber le client, un temoin survit au plantage : elle est mise de cote au
+demarrage suivant, et il faut insister pour la reessayer.
+
+### Le sismographe
+
+Clic droit sur un serveur, "Sante du serveur".
+
+Un serveur ne meurt pas d un coup, et ne se fait pas envahir d un coup non plus :
+ca se voit sur une courbe, et personne n a cette courbe. Discord garde ses
+statistiques pour les proprietaires de gros serveurs.
+
+Le client, lui, voit passer chaque message. Trois chiffres par jour disent tout : combien de messages, combien de personnes differentes, et quelle
+part vient de comptes crees il y a moins d une semaine. Plus un releve du nombre
+de membres, une fois par heure.
+
+Cinq verdicts, et aucun avant huit jours d observation : cette communaute
+s eteint (deux fois moins de messages ET moins de monde), afflux inhabituel de
+comptes neufs (la forme d un raid), le serveur se vide, ca pousse, ou rien
+d anormal.
+
+Quarante-cinq jours, quarante serveurs, et on jette le reste : une clef de
+stockage qui grossit sans fin finit par couter le demarrage a tout le monde.
+Rien n est demande a Discord pour construire cette page.
+
+### Les gros fichiers passent
+
+Tu glisses une video de 200 Mo. Le client la reduit pendant que tu continues a
+taper, et l envoi part. Les images passent par le canvas, les videos et les sons
+sont rejoues et reencodes -- ca prend le temps du fichier, la carte le dit et
+laisse annuler.
+
+Deux regles qui comptent autant que le code. Si tu as deja Nitro, ce module ne
+fait RIEN : tu paies pour envoyer gros, ce n est pas a nous de degrader ce que
+tu envoies. Et on ne touche jamais a un fichier qui passe deja -- un echec de
+compression n avale pas l envoi, le fichier part tel quel avec la raison.
+
+La limite suit le niveau d amelioration du serveur. Trois qualites au choix.
+
+### Le soundboard, partout, sans Nitro
+
+Les sons personnalises de Discord demandent Nitro, et jouer un son d un serveur
+dans un autre aussi. C est verifie cote serveur : impossible a contourner
+proprement. Donc on ne s en sert pas -- on passe par le micro.
+
+Discord ouvre le peripherique d entree lui-meme : on ne peut pas melanger un son
+dans le flux, mais on peut lui dire QUEL peripherique ecouter. C est la porte.
+
+- avec un cable audio virtuel installe, le son part dans le cable, le micro
+  bascule dessus le temps du son, et revient exactement ou il etait. Les autres
+  n entendent QUE le son. C est propre ;
+- avec le mixage stereo de Windows, meme mecanique, mais il renvoie tout ce qui
+  sort de la machine. On le dit ;
+- sans rien, le son ne joue que pour toi, et la carte explique en trois lignes
+  quoi activer. On ne fait pas semblant que ca marche.
+
+Vingt-quatre sons, gardes sur ta machine, et les neuf premiers sur Ctrl+Maj+1
+a 9 -- jamais quand le curseur est dans un champ de saisie.
+
+### Un onglet Vocal, dans Nexium Auto
+
+Le best-of et le soundboard ont leur page : l interrupteur, la sensibilite, la
+source, l etat reel de chacun, et de quoi ouvrir les deux cartes. Nexium Auto
+est le bon endroit -- c est la page de ce que le client fait tout seul.
+
+### L annonce
+
+Une fonction que personne ne trouve n existe pas, mais une fenetre au demarrage
+est la mauvaise reponse -- on en a retire six pour cette raison. L annonce du
+best-of arrive quand tu RACCROCHES, une fois, jamais deux, et un bouton la
+rejoue dans l onglet Vocal. L animation est rendue par Remotion et voyage dans
+le paquet : elle marche hors ligne et au premier lancement.
+
+Au passage : le bouton "A quoi ca sert ?", present sur toutes les pages, n avait
+aucun nom accessible. Un lecteur d ecran annoncait "bouton", et rien d autre.
+
+### Les bancs
+
+Quatre bancs neufs -- le best-of (77 tests, dont la separation rire/parole sur
+des signaux fabriques), le sismographe (29), les gros fichiers (38), le
+soundboard (35) -- et une page qui monte les cinq modules dans un vrai
+navigateur, ouvre chaque carte, verifie que le film de l annonce se decode et
+tourne, et echoue a la moindre erreur.
+
+Au passage : la courbe des comptes neufs etait normalisee sur son propre
+maximum, donc 3 % du total se lisait comme une invasion. Elle est desormais a
+la meme echelle que les messages.
+
+## v194 - Il lit quand tu le lui donnes, il montre avant d agir, et il sait revenir en arriere
+
+### Resumer un salon, enfin
+
+En v193 on a retire "Resumer ce salon" de la palette : aucun outil ne savait le
+faire. Lire un salon n a pourtant jamais ete le probleme -- techniquement c est
+une ligne. Ce qui manquait, c est le consentement.
+
+Clic droit sur un message, "Lire ce salon avec Nexium IA". Une fenetre s ouvre
+et ne resume pas ce qui va partir : elle le MONTRE. Les cinquante derniers
+messages, en clair, deja caviardes par les motifs de Protect, avec leur nombre
+de caracteres et le prix. Tu lis, tu decides.
+
+Trois verrous, chacun pour une raison differente :
+
+- une permission, qui n allume rien toute seule et ouvre seulement la
+  possibilite
+- la fenetre, pour cette lecture-la
+- un jeton a usage unique, une minute, un salon. L outil n a aucun parametre :
+  il ne choisit pas le salon, il ne peut que prendre celui qu on lui tend. Sans
+  jeton il repond qu il n a rien, et explique comment lui en donner un
+
+Par defaut les pseudos des autres deviennent des lettres : ils n ont rien
+demande, et le sens se garde tres bien avec A, B et moi. La case se decoche, et
+l apercu se met a jour sous tes yeux.
+
+### Voir un lien sans l ouvrir
+
+Le bac a sable existait : le relais va chercher la page, le client l inspecte
+sans rien executer, et en tire la chaine de redirections, les formulaires et
+leur destination, les scripts tiers, la demande de mot de passe. On ne pouvait
+l atteindre qu en collant une adresse dans un onglet de reglages -- a l autre
+bout du client par rapport au moment du danger.
+
+Il est maintenant la ou la question se pose : au clic droit sur un message qui
+contient un lien, et sur le bandeau de lien bloque, a cote de "Ouvrir quand
+meme". La fenetre montre le verdict, le chemin reel etape par etape, ce que la
+page contient, ses cinq cents premiers caracteres, et en gros la seule chose
+qui compte : est-ce qu elle demande un mot de passe.
+
+Le relais rend aussi l age du domaine, lu dans l annuaire public des registres.
+"Enregistre il y a onze jours" en face d une page de connexion Discord se passe
+de commentaire. Il se lit cote relais, pour la meme raison que la page :
+demander cet age depuis ta machine apprendrait a un tiers quel lien tu examines.
+
+### Le plan avant d agir, et la marche arriere
+
+La confirmation par action existait en mode manuel. Son defaut ne se voit qu a
+l usage : elle montre l etape 3 apres que 1 et 2 sont faites. On approuve en
+aveugle, sans jamais voir la forme de ce qu on autorise.
+
+L assistant ecrit maintenant la suite complete AVANT que rien ne change. Une
+carte, une ligne par etape, avec l outil de chacune. Tu decoches, tu valides
+une fois. Le plan REMPLACE les confirmations au lieu de s y ajouter : les
+etapes validees s enchainent sans plus rien demander.
+
+Ce qui ne change rien n a jamais besoin de plan, et le mode Auto l emporte :
+quelqu un qui a choisi "agis sans me demander" a deja repondu a la question.
+
+Avant chaque modification, le client note le geste exact qui la defait -- pas
+un instantane du client entier, le geste. C est plus sur, et ca se raconte :
+"le reglage noCanvas remis sur eteint". Dis "annule", ou ouvre "Annuler ce que
+l assistant a fait" dans la palette. Tout se defait du plus recent au plus
+ancien, seule facon de retomber sur l etat de depart quand deux etapes se
+recouvrent. Ce qui ne peut pas se defaire le dit : un message envoye ne se
+reprend pas.
+
+### Enqueter sur un auteur
+
+Clic droit sur un message. Trois par deux jours, et le menu affiche le compte
+restant plutot que de te le faire decouvrir en tombant dessus.
+
+Les pieces existaient, eparpillees dans six modules : l age d un compte se lit
+dans son identifiant, les serveurs en commun sont dans les magasins, le
+detecteur garde ce qu il a vu, Protect sait classer un lien, le reseau
+communautaire compte les signalements d un hote. Aucune n avait jamais ete
+rassemblee en reponse a la seule question qu on se pose : est-ce que je peux
+faire confiance a ca ?
+
+Un verdict, une balance chiffree, et DEUX colonnes : ce qui inquiete, et ce qui
+rassure. Un rapport qui n aligne que les raisons de se mefier fabrique de la
+peur, pas du jugement. Tout est local sauf le nombre de signalements. Et si tu
+demandes son avis a l assistant, ce qui part ne contient ni pseudo, ni nom de
+serveur, ni identifiant : seulement les faits.
+
+### Repondre, et agir, sans relais
+
+Quatre questions avaient deja une reponse locale. C etait une curiosite, ca
+devient une voie. Se repondent maintenant sans un octet de reseau ni un credit :
+combien de messages cette semaine, a quoi sert un reglage precis (avec le texte
+exact du client, et s il est allume), pourquoi ce bandeau est apparu, combien
+d outils il a, combien d enquetes il te reste, ce qu il a change.
+
+Et il AGIT sans relais : "mets le mode economie", "annule". Ca passe par le
+meme plan et le meme journal inverse que si le modele l avait demande. La bulle
+porte la mention "local" : une reponse gratuite qui se ferait passer pour une
+reponse du modele serait un mensonge par omission.
+
+Au passage, la reponse locale sur les credits ignorait les credits offerts,
+comme la jauge avant la v193 : elle annoncait zero a quelqu un qui en avait
+cinq mille.
+
+### Les bancs
+
+Quatre bancs neufs -- l enquete (38), la lecture consentie (35), le plan (57),
+le mode sans relais (45) -- et un passage dans un vrai navigateur qui ouvre
+chaque carte, la photographie, et echoue a la moindre erreur de console. Le bac
+a sable montre enfin sa fenetre dans son banc, et quatre tests de son chemin
+reseau qui echouaient depuis longtemps sur un laconique "analyse impossible"
+sont repares : il manquait la cle du relais dans le banc.
+
+## v193 - Il parle anglais, et il ne promet plus ce qu il ne fait pas
+
+### Le detecteur de manipulation ne parlait que francais
+
+Les onze procedes reconnus etaient ecrits en francais : "vite", "je suis du
+staff", "viens en mp", "nitro gratuit". Deux miettes d anglais trainaient dans
+tout le jeu. Or la plupart des arnaques Discord sont en anglais.
+
+Une protection qui ne se declenche pas sur la langue majoritaire de la
+plateforme n est pas une protection. Les onze procedes ont donc appris
+l anglais, avec le meme travail que pour le francais : des expressions, pas une
+traduction mot a mot.
+
+Un corpus de vingt-huit fils etiquetes accompagne desormais le detecteur --
+quatorze tentatives reelles, quatorze conversations ordinaires, dans les deux
+langues. Il a trouve six defauts qu on ne voyait pas :
+
+- "ouvrir la console" et "coller dans la console" etaient le meme procede, pese
+  46. Demander de l aide pour deboguer declenchait donc une alerte a lui seul.
+  Ce sont deux procedes distincts : coller garde 46, ouvrir tombe a 20
+- le motif de menace contenait "si tu ne", qui attrape une enorme part du
+  francais ordinaire
+- "tes parents" et "ton entourage" y figuraient aussi : ce sont des objets, pas
+  des menaces. "Tu appelles tes parents ce soir ?" scorait 30
+- "on se voit" et "tu fais quoi la" comptaient comme de l intimite trop rapide.
+  C est ce que deux amis s ecrivent
+- "depeche" ne reconnaissait pas "depecher" ni "depechez"
+- un fil de chantage pur ne franchissait jamais le seuil : la menace ne compte
+  qu une fois, et elle pese 30. La menace CONDITIONNELLE -- "si tu ne reponds
+  pas, je publie" -- est devenue un procede a part
+
+Resultat mesure sur le corpus : quatorze tentatives sur quatorze reperees,
+quatorze conversations ordinaires sur quatorze restees silencieuses, en
+francais comme en anglais. Avant, aucune des huit tentatives anglaises n etait
+vue.
+
+### Quatre choses que le client annoncait sans les faire
+
+- Le mode economie ne s allumait jamais. L assistant appelait la fonction de
+  reglage avec un seul argument au lieu de deux : rien ne changeait, et il
+  annoncait quand meme l avoir fait. Le test qui couvrait ce cas copiait la
+  signature fausse -- il verifie maintenant que le mode a bascule
+- Les jetons mfa. partaient en clair. Le caviardage ne reconnaissait que
+  le jeton Discord en trois parties ; celui des comptes a double
+  authentification -- la majorite -- passait intact. Ajoutes avec les cles d API
+  courantes, les en-tetes colles dans un message et les IBAN
+- La palette proposait "Resumer ce salon", qu aucun outil ne sait faire.
+  L utilisateur payait des credits pour un refus, sur une entree que le client
+  lui avait proposee. Remplacee par ce qu il sait reellement faire : analyser
+  une conversation privee que tu choisis
+- La jauge de credits ignorait les credits offerts. Elle montrait le quota
+  des sept heures, donc zero en rouge des qu il etait consomme, meme avec des
+  milliers de credits en reserve et un assistant qui repondait normalement. Un
+  geste commercial qui affiche zero en rouge dit le contraire de ce qu il
+  voulait dire
+
+### Nexium IA 2.0 se laisse enfin comprendre
+
+La page disait ce que chaque fonction COUTE, jamais comment on s en sert.
+Cocher "le compte rendu vocal" fait apparaitre une carte avec un bouton plus
+bas dans la page : rien ne le disait, donc personne ne la trouvait.
+
+- chaque fonction porte maintenant une ligne de plus, qui dit le geste : ce
+  qu il reste a faire apres avoir coche, et ou
+- celles qui ne demandent rien le disent aussi. "Rien a faire ensuite" est une
+  reponse, et c est celle de trois fonctions sur cinq
+- sous l interrupteur, une ligne rappelle que les fonctions marquees "a la
+  demande" ne partent jamais seules et font apparaitre leur propre carte
+
+Et une description mentait : le compte rendu vocal annoncait qu il "transcrit
+un salon vocal", alors que le module s en defend explicitement et n embarque
+aucun moteur de transcription. Elle dit maintenant ce qu il fait vraiment --
+qui est arrive, qui a parle et combien de temps, et ce qui a ete ecrit.
+
+### Trois outils de plus, sur des donnees que le client comptait deja
+
+- expliquer un reglage : le client garde un texte exact pour chacun de ses
+  reglages, mais il etait enferme dans la portee des pages. L assistant pouvait
+  donc allumer une protection sans savoir dire ce qu elle fait. Il le lit
+  maintenant, au lieu de le deviner a partir du nom
+- l alerte de manipulation : le detecteur sait quels procedes il a reconnus
+  et ce que chacun cherchait a obtenir. A "pourquoi ce bandeau ?", l assistant
+  ne pouvait repondre qu en general. Il rend le score, le seuil et les procedes
+  -- jamais un message, jamais un pseudo, jamais un identifiant de salon
+- ma semaine : les totaux depuis toujours existaient deja. Personne ne
+  demande "combien de messages en tout", on demande "et cette semaine ?"
+
+### L assistant se reprend, et connait ses limites
+
+- un appel d outil malforme par le modele est rejoue une fois avant de rendre
+  l erreur. C est transitoire, et c est l utilisateur qui payait le tour rate
+- "reglage inconnu : cleanLinks" ne disait pas quoi faire. L erreur rend
+  maintenant les cles qui existent
+- sa consigne nomme ce qu il ne peut pas faire : lire un salon, lire un
+  serveur, envoyer sans l acces d envoi, lire un fichier, naviguer sur le web.
+  Il le disait de lui-meme la plupart du temps ; rien ne le garantissait
+
+### Les bancs
+
+- le detecteur de manipulation a le sien, avec son corpus de vingt-huit fils
+- l ecran d ouverture a le sien : quatorze tests, qui verifient les trois
+  regles annoncees en v191 -- aucune animation ne part d une opacite nulle,
+  rien de ce qui bouge n est en SVG, tout le mouvement est derriere la classe
+  posee au premier battement reellement peint
+- la page de Nexium IA monte desormais les modules 2.0, donc l onglet 2.0 est
+  verifie a chaque passage
+
 ## v192 - Il repere les arnaques qui n ont pas de lien
 
 ### Le detecteur de manipulation
@@ -42,16 +377,16 @@ referme d elle-meme si l abonnement s arrete.
 
 Cinq fonctions, cinq cases, et chaque case dit ce qu elle coute :
 
-- **le contexte** : l assistant sait quels serveurs tu frequentes, a quelle
+- le contexte : l assistant sait quels serveurs tu frequentes, a quelle
   heure tu vis et de quoi tu parles, au lieu de repartir de zero a chaque
   question. Il n observe rien de neuf -- il assemble ce que Nexium Stats
   compte deja. Gratuit
-- **le detecteur de manipulation**, ci-dessus. Gratuit
-- **l IA qui veille** : elle regarde d elle-meme et ne parle que quand ca
+- le detecteur de manipulation, ci-dessus. Gratuit
+- l IA qui veille : elle regarde d elle-meme et ne parle que quand ca
   compte. Regarder ne coute rien ; un seul appel par jour au maximum
-- **le repondant** : il apprend ta facon d ecrire et propose des brouillons
+- le repondant : il apprend ta facon d ecrire et propose des brouillons
   dans ton registre. A la demande
-- **le compte rendu vocal** : ce qui s est passe dans une vocale que tu as
+- le compte rendu vocal : ce qui s est passe dans une vocale que tu as
   ratee. A la demande
 
 Le budget est la piece maitresse. Une fonction que tu declenches se paye sur
@@ -161,11 +496,11 @@ qu il y a quelque chose a envoyer.
 
 ### Les couleurs du client etaient invisibles
 
-`_NXteinte(couleur, alpha)` divise l alpha par cent : l argument est un
+_NXteinte(couleur, alpha) divise l alpha par cent : l argument est un
 pourcentage. Quatre-vingt-six appels l ecrivaient en fraction.
-`_NXteinte(P.mauve, .3)` rendait donc trois millemes d opacite au lieu de
+_NXteinte(P.mauve, .3) rendait donc trois millemes d opacite au lieu de
 trente pour cent. Mesure dans le navigateur, pas suppose : la bordure de la
-marque de l assistant sortait a `rgba(199,162,238,0.004)`.
+marque de l assistant sortait a rgba(199,162,238,0.004).
 
 Ce n etait pas un choix. Multipliees par cent, les quatre-vingt-six valeurs
 tombent exactement sur le meme jeu que les vingt-huit appels deja corrects :
@@ -193,10 +528,10 @@ rejouees.
 Une fonction que personne ne trouve n existe pas. Deux leviers, et aucun des
 deux n est une annonce au demarrage :
 
-- **le point neuf** : une entree des reglages qui a change recemment et ou
+- le point neuf : une entree des reglages qui a change recemment et ou
   tu n es pas repasse porte un point. Il part a la premiere visite, pour
   toujours
-- **l invitation meritee** : une fonction ne se propose qu au moment ou elle
+- l invitation meritee : une fonction ne se propose qu au moment ou elle
   AURAIT AGI, en disant ce qu elle aurait fait. Quand le detecteur signale
   une conversation et que la branche 2.0 est fermee, il propose de l ouvrir
 

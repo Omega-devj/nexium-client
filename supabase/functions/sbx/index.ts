@@ -12,6 +12,7 @@
 // redirections devient visible.
 
 const MAX_OCTETS = 400_000;
+const DELAI_RDAP = 3_500;
 const MAX_SAUTS = 6;
 const DELAI = 12_000;
 
@@ -65,6 +66,66 @@ function trop(ip: string): boolean {
   vus.set(ip, L);
   if (vus.size > 500) vus.clear();
   return L.length > 12;
+}
+
+// L annuaire public des registres. Pas de cle, pas de compte, et une reponse
+// normalisee : la date d enregistrement et le bureau d enregistrement.
+//
+// On essaie du plus court au plus long -- "boutique.fr" avant
+// "connexion.boutique.fr" -- parce que seul le domaine enregistrable existe
+// dans un registre, et qu on ne peut pas deviner ou il commence sans embarquer
+// la liste des suffixes publics.
+function apex(h: string): string[] {
+  const p = h.replace(/^\[|\]$/g, "").split(".").filter(Boolean);
+  const out: string[] = [];
+  for (let n = 2; n <= 3 && n <= p.length; n++) out.push(p.slice(p.length - n).join("."));
+  return out;
+}
+
+function ageFr(ms: number): string {
+  const j = Math.floor((Date.now() - ms) / 86_400_000);
+  if (j < 1) return "enregistre aujourd hui";
+  if (j < 31) return "enregistre il y a " + j + " jour" + (j > 1 ? "s" : "");
+  if (j < 365) return "enregistre il y a " + Math.floor(j / 30) + " mois";
+  const a = Math.floor(j / 365);
+  return "enregistre il y a " + a + " an" + (a > 1 ? "s" : "");
+}
+
+async function domaine(hote: string) {
+  for (const nom of apex(hote)) {
+    try {
+      const ctrl = new AbortController();
+      const mt = setTimeout(() => ctrl.abort(), DELAI_RDAP);
+      let r: Response;
+      try {
+        r = await fetch("https://rdap.org/domain/" + encodeURIComponent(nom), {
+          headers: { "Accept": "application/rdap+json" },
+          redirect: "follow",
+          signal: ctrl.signal,
+        });
+      } finally { clearTimeout(mt); }
+      if (!r.ok) continue;
+      const j = await r.json();
+      let cree: number | null = null;
+      for (const e of (j?.events ?? [])) {
+        if (String(e?.eventAction ?? "").toLowerCase() === "registration") {
+          const t = Date.parse(String(e?.eventDate ?? ""));
+          if (isFinite(t)) cree = t;
+        }
+      }
+      let registrar: string | null = null;
+      for (const ent of (j?.entities ?? [])) {
+        if (!(ent?.roles ?? []).includes("registrar")) continue;
+        for (const champ of (ent?.vcardArray?.[1] ?? [])) {
+          if (champ?.[0] === "fn" && typeof champ?.[3] === "string") registrar = champ[3].slice(0, 60);
+        }
+      }
+      if (cree === null && registrar === null) continue;
+      return { nom, cree: cree ? new Date(cree).toISOString().slice(0, 10) : null,
+        age: cree ? ageFr(cree) : null, registrar };
+    } catch { /* domaine suivant */ }
+  }
+  return null;
 }
 
 Deno.serve(async (req: Request) => {
@@ -145,6 +206,10 @@ Deno.serve(async (req: Request) => {
       }
       const html = new TextDecoder("utf-8", { fatal: false }).decode(recu.slice(0, MAX_OCTETS));
 
+      // L age se demande sur la destination REELLE, pas sur le raccourcisseur
+      // par lequel on est passe.
+      const info = await domaine(courant.hostname);
+
       return json({
         ok: true,
         finalUrl: courant.toString(),
@@ -154,6 +219,7 @@ Deno.serve(async (req: Request) => {
         tronquee: recu.length >= MAX_OCTETS,
         ms: Date.now() - t0,
         chaine,
+        domaine: info,
         entetes: {
           serveur: r.headers.get("server") ?? null,
           csp: r.headers.get("content-security-policy") ? true : false,
