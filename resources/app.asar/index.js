@@ -14,7 +14,7 @@ const RAW_APP = "https://raw.githubusercontent.com/Omega-devj/nexium-client/refs
 // Version de CE fichier. A incrementer des qu'on le modifie : c'est ce qui declenche
 // son remplacement chez les utilisateurs. Jusqu'a la v146 il ne se mettait jamais a jour,
 // et une erreur ici obligeait a reinstaller tout le parc a la main.
-const NEXIUM_INDEX_V = 4;
+const NEXIUM_INDEX_V = 5;
 const IDX = __filename;
 const IDXBAK = IDX + ".bak";
 const IDXPEND = IDX + ".pending";
@@ -409,24 +409,61 @@ function nxEcritEtat(fichier, etat) {
     } catch (e) { log("demarrage: etat non ecrit (" + (e && e.message) + ")"); }
 }
 
+// Windows garde les lancements automatiques dans une cle de registre. Electron
+// passe par la, mais son appel peut echouer en silence : on relit donc, et au
+// besoin on ecrit soi-meme. Aucun droit supplementaire n est demande -- c est
+// la ruche de l utilisateur courant.
+const NX_RUN = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+function nxRegistreLu() {
+    try {
+        if (process.platform !== "win32") return null;
+        const { execFileSync } = require("child_process");
+        const out = execFileSync("reg", ["query", NX_RUN, "/v", NX_DEM_NOM],
+            { encoding: "utf8", windowsHide: true, timeout: 5000 });
+        return /REG_SZ\s+(.+)/.test(out) ? String(out).trim() : null;
+    } catch (_) { return null; }
+}
+function nxRegistreEcrit(valeur) {
+    try {
+        if (process.platform !== "win32") return false;
+        const { execFileSync } = require("child_process");
+        execFileSync("reg", ["add", NX_RUN, "/v", NX_DEM_NOM, "/t", "REG_SZ", "/d", valeur, "/f"],
+            { encoding: "utf8", windowsHide: true, timeout: 5000 });
+        return true;
+    } catch (e) { log("demarrage Windows, registre: " + (e && e.message)); return false; }
+}
+function nxRegistreEfface() {
+    try {
+        if (process.platform !== "win32") return false;
+        const { execFileSync } = require("child_process");
+        execFileSync("reg", ["delete", NX_RUN, "/v", NX_DEM_NOM, "/f"],
+            { encoding: "utf8", windowsHide: true, timeout: 5000 });
+        return true;
+    } catch (_) { return false; }
+}
+
 let nxDemDernier = null;
 function nxAppliqueDemarrage(source) {
     try {
         const { app } = require("electron");
         if (!app || typeof app.setLoginItemSettings !== "function") return;
         const r = nxLitReglages();
-        const cfg = r && r.d && r.d.plugins && r.d.plugins[NX_DEM_CLE];
-        // Rien n a jamais ete demande : on ne touche a rien, mais on le dit.
+        let cfg = r && r.d && r.d.plugins && r.d.plugins[NX_DEM_CLE];
+        // Rien n a jamais ete demande : on met en route. Un client qu il faut
+        // penser a lancer est un client qu on oublie. Le choix est ecrit dans
+        // les reglages, donc visible et reversible en un clic.
+        let parDefaut = false;
         if (!cfg || typeof cfg.avecWindows !== "boolean") {
+            parDefaut = true;
+            cfg = { avecWindows: true, reduit: false };
             if (source === "ouverture") {
                 log("demarrage Windows : aucun reglage trouve ("
-                    + nxFichiersReglages().length + " fichier(s) examine(s))");
+                    + nxFichiersReglages().length + " fichier(s) examine(s)), on active par defaut");
             }
-            return;
         }
         const veut = !!cfg.avecWindows;
         const args = cfg.reduit === false ? [] : ["--start-minimized"];
-        if (nxDemDernier === veut) return;
+        if (nxDemDernier === veut && !parDefaut) return;
         app.setLoginItemSettings({
             openAtLogin: veut,
             path: process.execPath,
@@ -441,13 +478,47 @@ function nxAppliqueDemarrage(source) {
             const lu = app.getLoginItemSettings({ path: process.execPath, args: args, name: NX_DEM_NOM });
             if (lu && typeof lu.openAtLogin === "boolean") obtenu = lu.openAtLogin;
         } catch (_) {}
+        // Et on relit le registre, qui est la verite. Si Electron n a rien
+        // ecrit, on ecrit nous-memes plutot que d annoncer un succes qui n a
+        // pas eu lieu.
+        let voie = "electron";
+        try {
+            const present = !!nxRegistreLu();
+            if (veut && !present) {
+                const valeur = "\"" + process.execPath + "\""
+                    + (args.length ? " " + args.join(" ") : "");
+                nxRegistreEcrit(valeur);
+                voie = "registre";
+            } else if (!veut && present) {
+                nxRegistreEfface();
+                voie = "registre";
+            }
+            // La verite, apres coup : ce que le registre contient vraiment.
+            // Pas ce qu on a demande, pas ce qu Electron a repondu.
+            obtenu = !!nxRegistreLu();
+        } catch (_) {}
         nxDemDernier = veut;
         log("demarrage Windows " + (veut ? "active" : "desactive")
-            + " (" + source + ") -> verifie : " + obtenu);
+            + " (" + source + (parDefaut ? ", par defaut" : "") + ")"
+            + " -> verifie : " + obtenu + " via " + voie);
         if (r && r.f) nxEcritEtat(r.f, {
             demande: veut, applique: obtenu, reduit: args.length > 0,
+            voie: voie, parDefaut: parDefaut,
             quand: Date.now(), chemin: process.execPath, nom: NX_DEM_NOM,
         });
+        // Le reglage par defaut devient explicite : sans ca, la page du client
+        // continuerait d afficher "rien n a encore ete demande".
+        if (parDefaut && r && r.f) {
+            try {
+                const d2 = JSON.parse(fs.readFileSync(r.f, "utf8"));
+                if (!d2.plugins) d2.plugins = {};
+                const prec = d2.plugins[NX_DEM_CLE] || {};
+                d2.plugins[NX_DEM_CLE] = { avecWindows: true, reduit: false, etat: prec.etat || null };
+                const tmp2 = r.f + ".nxtmp";
+                fs.writeFileSync(tmp2, JSON.stringify(d2, null, 4));
+                fs.renameSync(tmp2, r.f);
+            } catch (e2) { log("demarrage: defaut non ecrit (" + (e2 && e2.message) + ")"); }
+        }
     } catch (e) { log("demarrage Windows: " + (e && e.message)); }
 }
 

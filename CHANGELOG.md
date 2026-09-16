@@ -1,5 +1,81 @@
 # Nexium Client — Notes de version
 
+## v199 - Le profil ne fait plus tomber le client
+
+### Ce qui tombait, et pourquoi
+
+Ouvrir un profil ou un message prive tuait la fenetre. La trace, relue dans le
+journal du client :
+
+    Cannot read properties of undefined (reading 'toUpperCase')
+        at o (/assets/web.9669a9bae9e1b3c8.js:62:604682)
+
+A cette colonne exacte, l asset de Discord contient son resolveur de badges :
+
+    function o(e){ let t=l[e]; if(null!=t)return t;
+                   let n=i.$[e.toUpperCase()]; ... }
+
+Il est arrive avec le dispositif "2026-08-badge-management" de Discord, et il
+resout DESORMAIS chaque badge par son identifiant -- y compris ceux qu ajoute
+un client tiers. Le notre n en avait pas : avant, personne ne le lui demandait.
+
+Comme la fonction leve pendant le rendu du profil, l arbre React entier
+tombait. Et comme le badge ne s installe que pour les deux developpeurs,
+personne d autre ne pouvait le signaler.
+
+Le badge porte maintenant un identifiant, et en mode securise -- apres trois
+demarrages rapproches -- il ne s installe plus du tout. Mieux vaut un client
+sans badge qu un client qui ne s ouvre plus. Un banc rejoue le resolveur de
+Discord sur notre badge : c est la seule facon de savoir qu on ne le refera pas.
+
+### Il demarre avec Windows, et on le verifie
+
+Le reglage disait oui. Le registre de Windows, lui, ne contenait rien -- et le
+champ que le lanceur ecrit apres coup etait reste vide. L appel d Electron peut
+echouer sans rien dire, et c est ce qu il faisait.
+
+Trois changements. En l absence de choix, le client s installe au demarrage :
+un client qu il faut penser a lancer est un client qu on oublie. Ensuite, le
+lanceur relit le registre, et si l entree n y est pas, il l ecrit lui-meme --
+meme geste, meme endroit, memes droits, sans intermediaire. Enfin il rapporte
+par quelle voie ca a marche, pour que la page cesse d afficher "en attente".
+
+### Le best-of entend enfin les autres
+
+Une troisieme voie, et celle-la ne demande rien : Discord JOUE la voix des
+autres dans la page. Chaque element qui joue expose son flux. Aucune
+permission, aucun peripherique, et surtout aucun aller-retour vers le processus
+principal -- c est ce chemin-la qui faisait tomber le client en v195.
+
+Elle passe en premier ; a defaut on retombe sur le bouclage, puis sur le micro.
+Et un bouton repond enfin a la question : "qu est-ce qu il peut entendre ici ?"
+Trois lignes, une par voie, avec ce que chacune donnerait maintenant.
+
+### Qui est parti, qui a change de nom
+
+Deux choses que Discord sait et ne dit jamais. Une carte garde l empreinte de
+ta liste d amis et la compare : elle ne devine pas qui a retire qui -- elle ne
+peut pas -- mais elle donne la date, et c est ce qui manquait. Elle note aussi
+chaque pseudo qu elle voit changer, avec sa date : trois changements en une
+semaine, c est un signal.
+
+La premiere visite ne fait qu enregistrer l etat actuel, et le dit : sans ca,
+le client annoncerait au premier lancement que toute la liste vient d arriver.
+
+### L annonce, et les bancs
+
+Chaque version a desormais sa propre animation, faite sous Remotion et
+embarquee dans le paquet. Celle-ci DESSINE les quatre nouveautes en quatre
+temps -- le profil qui se casse puis tient, Nexium qui vient se poser dans la
+barre des taches, les voix separees qui se rassemblent en une seule onde, les
+noms qu on raye et ceux qui changent. Un gabarit commun rendrait toutes les
+annonces interchangeables, donc invisibles.
+
+Trois bancs neufs : le badge (18 tests, dont le resolveur de Discord recopie a
+l identique), le demarrage Windows (18), les amis (28). Le banc du demarrage
+laissait par ailleurs passer child_process vers le vrai systeme : il ne s en
+servait pas, mais la securite etait accidentelle. Elle est explicite.
+
 ## v198 - Le captcha de Discord s affiche enfin
 
 ### Une protection qui empechait d entrer chez soi
