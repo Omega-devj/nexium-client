@@ -1,5 +1,88 @@
 # Nexium Client — Notes de version
 
+## v200 - Ton groupe existe au-dessus de Discord
+
+### Le repaire
+
+Une bande d amis installe Nexium, et elle a un espace commun qui la suit
+partout : un fil, des notes, des liens. Dans n importe quel serveur, dans
+n importe quel message prive, sans rien creer et sans rien demander a Discord.
+
+Le point qui compte est ailleurs. Le relais qui transporte tout ca ne peut pas
+le lire, et ce n est pas une formule. Le code d invitation fabrique TROIS
+choses derivees separement :
+
+- l identifiant du canal, envoye : une empreinte du code ;
+- le verificateur, envoye aussi : une AUTRE empreinte, qui prouve qu on
+  connait le code sans donner de quoi dechiffrer ;
+- la cle AES-GCM, qui ne quitte jamais la machine.
+
+Le serveur ne stocke que du chiffre, avec des dates. Quelqu un qui apprendrait
+l identifiant du canal ET le verificateur ne lirait toujours rien. C est ce qui
+permet de dire que personne ne peut fermer ce groupe : il n y a rien a fermer,
+et rien a lire.
+
+Le repaire reste consultable sans reseau -- une copie locale garde le fil, les
+notes et les liens. Quitter n efface que ta machine : les autres gardent tout,
+et revenir avec le meme code te rend le fil.
+
+### La ligne de secours
+
+Discord tombe plusieurs fois par an et tout le monde devient muet. Les clients
+Nexium, eux, continuent de se joindre : le repaire ne passe pas par Discord.
+
+Le coeur de cette fonction n est pas le bandeau, c est le diagnostic. Annoncer
+"Discord est tombe" quand c est la connexion de la personne qui a laché serait
+un mensonge, et on ne croirait plus rien ensuite. Nexium interroge donc DEUX
+reseaux qui n ont rien en commun : Discord, et son propre relais.
+
+- le relais repond et Discord se tait : la panne est chez Discord ;
+- les deux se taisent : c est ta connexion, et le client le dit au lieu
+  d accuser Discord ;
+- Discord repond : rien ne s affiche.
+
+Une panne se confirme sur deux passages avant de s annoncer : un appel qui rate
+une fois n est pas une panne, et un bandeau qui clignote ne serait pas cru. Au
+calme le client regarde toutes les trois minutes ; des qu un doute apparait,
+toutes les trente secondes.
+
+### Nexium Vocal
+
+Discord connait le serveur qui relaie ta voix, ta latence reelle, le codec, le
+debit, les paquets perdus. Il n en montre presque rien. La page les affiche, et
+propose de resoudre l adresse du serveur -- sur demande seulement, parce que
+cette resolution apprend a un tiers dans quelle region tu parles.
+
+Une regle tient toute la page : un champ introuvable est marque introuvable.
+Un debit plausible mais invente rendrait tout le reste suspect. Les noms de
+methodes de Discord changent a chaque refonte, donc chaque valeur est cherchee
+sous plusieurs noms connus, et vaut null si aucun ne repond.
+
+L onglet Clips reprend le moteur du best-of :
+
+- demarrer et arreter l enregistrement du vocal ;
+- voir ce que chaque source pourrait entendre en ce moment ;
+- decouper un moment et le garder.
+
+### Ce que ca change dans le paquet
+
+Le film d annonce de la v200 est un plan-sequence : une camera traverse cinq
+stations posees cote a cote et chaque nouveaute se dessine en arrivant au
+centre, au lieu d etre racontee. Les films des versions precedentes sont
+retires -- une annonce deja vue ne revient jamais, et deux films morts pesaient
+183 000 caracteres dans un paquet telecharge a chaque mise a jour.
+
+Quatre bancs neufs :
+
+- le canal chiffre (47 tests, dont la verification que ni le code, ni le
+  texte, ni le pseudo ne partent sur le reseau) ;
+- la ligne de secours (35) ;
+- le vocal en direct (54, surtout consacres a l absence de donnee) ;
+- l annonce (26).
+ Le banc de l ecran NEW Gen verifiait par ailleurs un filet de
+securite supprime volontairement en v198 : il decrivait une protection qui
+n existe plus. Il monte desormais le declencheur et regarde quel ecran s ouvre.
+
 ## v199 - Le profil ne fait plus tomber le client
 
 ### Ce qui tombait, et pourquoi
