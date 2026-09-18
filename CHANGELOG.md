@@ -1,5 +1,90 @@
 # Nexium Client — Notes de version
 
+## v201 - Un laboratoire, une boite a outils, un ecran d ouverture refait
+
+### Le bac a sable
+
+Un fichier, lu octet par octet. Rien n est jamais execute : on reconnait des
+formes, on compte, on compare.
+
+- le type REEL, derriere l extension. Un fichier nomme facture.pdf dont le
+  contenu commence par MZ est un executable Windows deguise, et c est le
+  constat le plus lourd que cette page puisse produire ;
+- l entropie, globale et par blocs. Au-dela de 7,4 le contenu n est pas
+  lisible tel quel : normal pour une archive, inhabituel pour un executable ;
+- les chaines lisibles, en ASCII et en UTF-16 ;
+- les indicateurs : adresses, IP, e-mails, webhooks Discord, chemins Windows,
+  clefs de registre, blocs encodes ;
+- douze regles de detection, chacune avec sa raison et son poids ;
+- la structure : repertoire central des archives (donc detection d une
+  archive-bombe AVANT de decompresser, et des chemins qui remontent hors du
+  dossier), en-tete PE des executables, sections, date de compilation,
+  empaqueteurs.
+
+L analyse tourne dans un fil isole. Quand le navigateur le refuse, elle tourne
+sur le fil principal ET LA PAGE LE DIT : annoncer un isolement qu on n a pas
+obtenu serait exactement le mensonge que ce client refuse partout ailleurs.
+
+Le score n est jamais un nombre de plus : c est la somme des constats
+affiches, chacun avec son poids. Sept niveaux de lecture, du resume au rapport
+exportable, et un identifiant unique par analyse.
+
+### La boite a outils
+
+Une vingtaine d outils techniques, sans brides, derriere une porte a cinq
+verrous. Cocher quatre engagements sur cinq ne l ouvre pas : on ne peut pas
+dire qu on a compris cinq choses d un seul clic.
+
+Ce qui reste sur la machine : base64, hexadecimal, URL, JSON, JWT, empreintes
+SHA-1 a SHA-512, UUID, horodatage, comparaison de textes, caracteres
+invisibles, generateur de mots de passe et de clefs, mesure de robustesse, age
+d un compte Discord.
+
+Ce qui en sort, et qui le dit avant : resolution DNS, journaux de
+transparence des certificats, en-tetes HTTP. Chaque usage est consigne sur la
+machine, et le journal distingue ce qui est reste de ce qui est parti.
+
+Deux precisions qui comptent :
+
+- le decodeur JWT ne verifie jamais la signature. Verifier demanderait la
+  clef, et l envoyer quelque part reviendrait a livrer le jeton ;
+- l inspecteur d en-tetes dit ce qu un navigateur n a pas le droit de lire,
+  au lieu d afficher un tableau vide.
+
+### L ecran d ouverture
+
+Refait entierement : un horizon en perspective qui defile, trois nappes de
+lumiere qui derivent, un champ d etoiles a trois profondeurs, un gyroscope de
+cinq anneaux dont deux couches, deux points en orbite, un halo qui respire.
+Tout est compose par le processeur graphique.
+
+Deux defauts constates a l usage, et corriges :
+
+- les animations s arretaient vers la fin. La mesure de performance comptait
+  les appels de requestAnimationFrame, donc le FIL PRINCIPAL -- celui que
+  Discord sature pendant tout son demarrage. Or chaque animation de cet ecran
+  est composee par le processeur graphique et n en souffre pas. On lisait huit
+  images par seconde pendant que l ecran en affichait soixante, et on coupait
+  le decor au pire moment. Le jugement se fait desormais une fois, sur ce que
+  la machine annonce ;
+- le logo de Discord reapparaissait juste apres. La derniere etape acceptait
+  un element qui existe DEJA pendant le chargement de Discord. Elle exige
+  maintenant un signal qui n apparait qu avec l interface reelle, cherche
+  l ecran de chargement dans tout le document, et demande deux confirmations
+  d affilee.
+
+### Le reste
+
+Les boutons Copier des pages Repaire et Vocal etaient inertes. Electron refuse
+la permission presse-papier du web sans gestionnaire explicite, et l appel
+restait en attente sans jamais lever -- donc sans message d erreur.
+
+Trois bancs neufs : le laboratoire (81 tests), la boite a outils (102), et le
+rendu des quatre nouvelles pages. Ils ont sorti quatre defauts reels : trois
+expressions regulieres qui cherchaient deux antislashs la ou il n y en a
+qu un, et des dates de certificats lues en heure locale, donc decalees d un
+jour selon la machine.
+
 ## v200 - Ton groupe existe au-dessus de Discord
 
 ### Le repaire
