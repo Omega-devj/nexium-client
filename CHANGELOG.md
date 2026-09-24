@@ -1,5 +1,14 @@
 # Nexium Client — Notes de version
 
+## v202 - Un responsable communication dans l equipe
+
+### L equipe
+
+10348295 rejoint Nexium comme responsable communication. Il apparait dans la
+page Team, a cote des autres contributeurs.
+
+- annonces et reseaux : c est lui qui les porte desormais.
+
 ## v201 - Un laboratoire, une boite a outils, un ecran d ouverture refait
 
 ### Le bac a sable

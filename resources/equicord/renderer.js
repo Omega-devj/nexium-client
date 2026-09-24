@@ -10100,7 +10100,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="201";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="202";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -13081,7 +13081,8 @@ var live=!!d&&!_NXLY.err;
 var an=_NXFX.anime();
 var CONTRIB=[
 {n:"kikou",r:_T("Developpeur"),s:_T("C++ · Lua · Luau"),ic:"code",c:P.info},
-{n:"elias.qsd7",r:_T("Contributeur"),s:_T("Idees et retours"),ic:"baguette",c:P.mauve}];
+{n:"elias.qsd7",r:_T("Contributeur"),s:_T("Idees et retours"),ic:"baguette",c:P.mauve},
+{n:"10348295",r:_T("Responsable communication"),s:_T("Annonces et reseaux"),ic:"courrier",c:P.warn}];
 function ms(x){var t=Math.max(0,Math.floor(x/1000));var m=Math.floor(t/60);var r=t%60;return m+":"+(r<10?"0":"")+r;}
 
 function anneau(){
