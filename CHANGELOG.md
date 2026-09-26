@@ -1,5 +1,77 @@
 # Nexium Client — Notes de version
 
+## v203 - Protect et Privacy refaits, le vrai serveur vocal, un son qui ne baisse plus
+
+### Nexium Protect, refait de zero
+
+Certaines protections etaient listees deux fois, et d autres ne faisaient
+plus rien sans le dire. La page repart d une seule liste.
+
+- 42 protections, chacune listee une seule fois : le QR code, les caracteres
+  invisibles, les noms de fichiers pieges, les campagnes, les fuites de
+  webhook, les messages prives d inconnus et les serveurs pieges etaient en
+  double, ils sont fusionnes ;
+- les protections de liens (loggers d IP, hameconnage, liens masques,
+  apercus, telechargements) ne marchaient qu avec l analyse des liens
+  allumee. Elles la rallument desormais, et la page dit quand l une d elles
+  est en pause ;
+- chaque carte montre combien de fois elle a agi, et si elle a passe son
+  test, pour de vrai ;
+- un tableau de bord anime, une recherche, des filtres par famille, un
+  bouton pour tout tester.
+
+### Douze secondes avant les actions graves
+
+Autoriser une application, supprimer ou ceder un serveur, couper la double
+authentification, changer d e-mail ou de mot de passe, supprimer ou
+desactiver le compte : la requete attend douze secondes, avec un bouton pour
+l annuler. Avant, ce reglage ne retenait que l effacement des donnees Nexium.
+
+### Nexium Privacy, avec le meme soin
+
+- 28 reglages regroupes par idee : les trois qui nettoyaient les liens, les
+  deux qui coupaient les rapports d erreurs et ceux qui fermaient l adresse
+  pendant les appels ne font plus qu une carte chacun ;
+- tes dernieres 24 heures et ta semaine en courbes ;
+- chaque reglage dit combien de requetes il a arretees.
+
+### Nexium Vocal : la vraie adresse du serveur
+
+L adresse affichee changeait parce qu elle etait devinee par un resolveur
+DNS. Elle est maintenant lue dans ce que le serveur vocal annonce lui-meme au
+client, avec son port.
+
+- le port UDP, le port de signalisation, le transport, le chiffrement du
+  transport et de bout en bout (DAVE), les codecs, le site du serveur ;
+- le debit mesure, les pertes et la gigue, personne par personne ;
+- ce que Discord voit de toi, masque par defaut.
+
+### Le son
+
+- l enregistrement de clips ouvrait le micro en laissant Chromium regler son
+  niveau dans Windows, le meme que celui de Discord : la voix baissait toute
+  seule pendant les appels. Il ecoute maintenant sans rien toucher ;
+- Krisp reste sur Standard : son module ne demarre que dans l application
+  signee par Discord, c est une condition de sa licence que Nexium ne
+  contourne pas. Nexium Vocal l explique, et montre la reduction de bruit,
+  l echo et le gain reellement actifs ;
+- couper le sondage des regions vocales peut envoyer tes appels vers un
+  serveur plus lointain : Nexium Vocal le signale et le retablit d un clic.
+
+### Et aussi
+
+- Nexium IA : une interface de chat repensee, des blocs de code avec copie,
+  plus de barre blanche dans le panneau ;
+- abonnements : un essai gratuit de trois jours, des credits offerts chaque
+  mois, des jours offerts a l engagement, et des codes promo a saisir dans
+  la page ;
+- la page de support a ete refaite ;
+- le client est traduit en anglais de bout en bout ;
+- les icones de plugins ne recouvrent plus le pseudo ;
+- les animations ne disparaissent plus au redemarrage, et le mode securise
+  rend ce qu il avait coupe ;
+- au premier demarrage, une fenetre raconte ces nouveautes, une fois.
+
 ## v202 - Un responsable communication dans l equipe
 
 ### L equipe
