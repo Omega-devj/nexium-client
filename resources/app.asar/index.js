@@ -14,7 +14,7 @@ const RAW_APP = "https://raw.githubusercontent.com/Omega-devj/nexium-client/refs
 // Version de CE fichier. A incrementer des qu'on le modifie : c'est ce qui declenche
 // son remplacement chez les utilisateurs. Jusqu'a la v146 il ne se mettait jamais a jour,
 // et une erreur ici obligeait a reinstaller tout le parc a la main.
-const NEXIUM_INDEX_V = 5;
+const NEXIUM_INDEX_V = 6;
 const IDX = __filename;
 const IDXBAK = IDX + ".bak";
 const IDXPEND = IDX + ".pending";
@@ -71,6 +71,182 @@ function validIndex(t) {
 }
 
 let state = loadState();
+
+// v6 : l'acceleration materielle.
+// Le demarreur d'origine (_app.asar/bootstrap.js) appelle app.disableHardwareAcceleration()
+// sans condition. Tout Discord etait donc dessine par le processeur, sans la carte
+// graphique : images qui tombent, animations au ralenti, defilement qui accroche --
+// et le reglage d'acceleration de Discord n'y pouvait rien. On la rend au client par
+// defaut ; elle ne se coupe plus que si l'utilisateur le demande dans Nexium Donnees
+// (plugins.NexiumGpu.desactive dans les reglages). Si un pilote graphique plante,
+// Chromium repasse de lui-meme au rendu logiciel : on ne perd aucun filet.
+const NX_GPU_CLE = "NexiumGpu";
+function nxChoixGpu() {
+    try {
+        for (const f of nxFichiersReglages()) {
+            try {
+                const d = JSON.parse(fs.readFileSync(f, "utf8"));
+                const c = d && d.plugins && d.plugins[NX_GPU_CLE];
+                if (c && typeof c.desactive === "boolean") return c.desactive ? "coupee" : "active";
+            } catch (_) {}
+        }
+    } catch (_) {}
+    return "active";
+}
+(function accelerationMaterielle() {
+    try {
+        const { app } = require("electron");
+        if (!app || typeof app.disableHardwareAcceleration !== "function") return;
+        const couper = app.disableHardwareAcceleration.bind(app);
+        const choix = nxChoixGpu();
+        let coupee = false;
+        const appliquer = function () { if (!coupee) { coupee = true; couper(); } };
+        app.disableHardwareAcceleration = function () { if (choix === "coupee") appliquer(); };
+        if (choix === "coupee") appliquer();
+        log("acceleration materielle : " + (choix === "coupee" ? "coupee a la demande" : "active"));
+    } catch (e) { log("acceleration materielle : " + (e && e.message)); }
+})();
+
+// v6 : Nexium Ultra Fast, cote lanceur. Ce qui ne peut se regler qu avant que
+// Chromium demarre : la carte graphique dediee sur les portables a double
+// carte, la rasterisation par la carte graphique sans copie intermediaire, le
+// nombre de fils de rendu, puis la priorite des processus une fois lances.
+// Chaque levier se coupe a part dans Nexium Ultra Fast (plugins.NexiumUltra).
+// Rien ne s applique si l utilisateur a coupe l acceleration materielle.
+const NX_ULTRA_CLE = "NexiumUltra";
+const NX_ULTRA_ETAT = path.join(equicordDir, ".nexium-ultra.json");
+function nxUltraFichier() {
+    let avecCle = null, recent = null;
+    for (const f of nxFichiersReglages()) {
+        try {
+            const st = fs.statSync(f);
+            const d = JSON.parse(fs.readFileSync(f, "utf8"));
+            const cand = { f, d, t: st.mtimeMs };
+            if (d && d.plugins && (d.plugins[NX_ULTRA_CLE] || d.plugins.NexiumGpu || d.plugins.NexiumDemarrage)) {
+                if (!avecCle || cand.t > avecCle.t) avecCle = cand;
+            }
+            if (!recent || cand.t > recent.t) recent = cand;
+        } catch (_) {}
+    }
+    return avecCle || recent;
+}
+function nxUltra() {
+    const u = { actif: true, gpuDedie: true, raster: true, priorite: true };
+    try {
+        const r = nxUltraFichier();
+        const c = r && r.d && r.d.plugins && r.d.plugins[NX_ULTRA_CLE];
+        if (c) for (const k of Object.keys(u)) if (typeof c[k] === "boolean") u[k] = c[k];
+    } catch (_) {}
+    return u;
+}
+const nxUltraEtat = { quand: Date.now(), leviers: [], coupe: null };
+(function ultraFastAvant() {
+    try {
+        const { app } = require("electron");
+        const u = nxUltra();
+        nxUltraEtat.reglage = u;
+        if (!u.actif) { nxUltraEtat.coupe = "Ultra Fast coupe par l utilisateur"; log("ultra fast : coupe"); return; }
+        if (nxChoixGpu() === "coupee") { nxUltraEtat.coupe = "acceleration materielle coupee"; log("ultra fast : acceleration coupee, rien a appliquer"); return; }
+        const cl = app.commandLine;
+        if (u.gpuDedie) { cl.appendSwitch("force_high_performance_gpu"); nxUltraEtat.leviers.push("carte graphique dediee"); }
+        if (u.raster) {
+            cl.appendSwitch("enable-gpu-rasterization");
+            cl.appendSwitch("enable-zero-copy");
+            let coeurs = 4; try { coeurs = require("os").cpus().length || 4; } catch (_) {}
+            const fils = Math.max(2, Math.min(4, Math.floor(coeurs / 2)));
+            cl.appendSwitch("num-raster-threads", String(fils));
+            nxUltraEtat.leviers.push("rasterisation par la carte graphique, " + fils + " fils");
+        }
+        log("ultra fast : " + (nxUltraEtat.leviers.join(", ") || "aucun levier"));
+    } catch (e) { log("ultra fast : " + (e && e.message)); }
+})();
+// Le constat du demarrage precedent passe dans les reglages AVANT que le
+// patcher ne les charge : c est le seul moyen qu Equicord les garde et que la
+// page Ultra Fast les lise. Le constat de ce demarrage-ci, lui, sera ecrit
+// plus bas, une fois l application prete.
+(function ultraFastRapport() {
+    try {
+        let avant = null;
+        try { avant = JSON.parse(fs.readFileSync(NX_ULTRA_ETAT, "utf8")); } catch (_) {}
+        const r = nxUltraFichier();
+        if (!r) return;
+        const d = JSON.parse(fs.readFileSync(r.f, "utf8"));
+        if (!d.plugins) d.plugins = {};
+        const c = d.plugins[NX_ULTRA_CLE] || {};
+        c.etat = { demarrage: nxUltraEtat, precedent: avant };
+        d.plugins[NX_ULTRA_CLE] = c;
+        const tmp = r.f + ".nxtmp";
+        fs.writeFileSync(tmp, JSON.stringify(d, null, 4));
+        fs.renameSync(tmp, r.f);
+    } catch (e) { log("ultra fast : rapport non ecrit (" + (e && e.message) + ")"); }
+})();
+// Une fois l application prete : la priorite des processus, la preference de
+// carte graphique de Windows, et le constat de ce que Chromium a obtenu.
+function nxUltraPriorites() {
+    try {
+        const { app } = require("electron");
+        const os = require("os");
+        const P = os.constants && os.constants.priority ? os.constants.priority.PRIORITY_ABOVE_NORMAL : -7;
+        let n = 0;
+        for (const m of app.getAppMetrics()) {
+            if (m.type !== "Browser" && m.type !== "GPU" && m.type !== "Tab") continue;
+            try { if (os.getPriority(m.pid) > P) { os.setPriority(m.pid, P); } n++; } catch (_) {}
+        }
+        return n;
+    } catch (_) { return 0; }
+}
+function nxUltraPreferenceWindows(veut) {
+    try {
+        if (process.platform !== "win32") return;
+        const { execFile } = require("child_process");
+        const cle = "HKCU\\Software\\Microsoft\\DirectX\\UserGpuPreferences";
+        const exe = process.execPath;
+        execFile("reg", ["query", cle, "/v", exe], { windowsHide: true }, (err, sortie) => {
+            const existe = !err && /GpuPreference/i.test(String(sortie || ""));
+            // Un choix pose par l utilisateur lui-meme dans Windows est respecte :
+            // on ne touche qu a la valeur que Nexium a ecrite.
+            if (veut && !existe) {
+                execFile("reg", ["add", cle, "/v", exe, "/t", "REG_SZ", "/d", "GpuPreference=2;", "/f"], { windowsHide: true }, (e2) => {
+                    if (!e2) { state.gpuPrefNexium = true; saveState(state); }
+                    log("ultra fast : preference Windows haute performance " + (e2 ? "refusee" : "posee"));
+                });
+            } else if (!veut && existe && state.gpuPrefNexium) {
+                execFile("reg", ["delete", cle, "/v", exe, "/f"], { windowsHide: true }, (e3) => {
+                    if (!e3) { state.gpuPrefNexium = false; saveState(state); }
+                    log("ultra fast : preference Windows retiree");
+                });
+            }
+        });
+    } catch (e) { log("ultra fast : preference Windows (" + (e && e.message) + ")"); }
+}
+(function ultraFastApres() {
+    try {
+        const { app } = require("electron");
+        if (!app || typeof app.whenReady !== "function") return;
+        app.whenReady().then(() => {
+            const u = nxUltraEtat.reglage || nxUltra();
+            const actif = u.actif && !nxUltraEtat.coupe;
+            nxUltraPreferenceWindows(actif && u.gpuDedie);
+            setTimeout(() => {
+                const constat = { quand: Date.now(), leviers: nxUltraEtat.leviers, coupe: nxUltraEtat.coupe, priorite: 0, gpu: null, statut: null };
+                if (actif && u.priorite) constat.priorite = nxUltraPriorites();
+                try { constat.statut = app.getGPUFeatureStatus(); } catch (_) {}
+                const fin = () => { try { fs.writeFileSync(NX_ULTRA_ETAT, JSON.stringify(constat)); } catch (_) {} };
+                try {
+                    app.getGPUInfo("basic").then((info) => {
+                        try {
+                            constat.gpu = ((info && info.gpuDevice) || []).map((g) => ({
+                                actif: !!g.active, vendeur: g.vendorId, materiel: g.deviceId,
+                                nom: g.deviceString || null, pilote: g.driverVersion || null }));
+                        } catch (_) {}
+                        fin();
+                    }).catch(fin);
+                } catch (_) { fin(); }
+                if (actif && u.priorite) setInterval(nxUltraPriorites, 120000);
+            }, 5000);
+        });
+    } catch (e) { log("ultra fast : " + (e && e.message)); }
+})();
 
 // Premier demarrage sur un nouveau lanceur : on pose un drapeau que le chien de garde
 // relira si le chargement du patcher n'aboutit pas. On ne l'efface qu'une fois le patcher

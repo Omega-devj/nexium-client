@@ -1,5 +1,62 @@
 # Nexium Client — Notes de version
 
+## v204 - Nexium Ultra Fast, la carte graphique rendue a Discord
+
+### La carte graphique dessine de nouveau Discord
+
+Le demarreur de Nexium coupait l acceleration materielle a chaque lancement :
+tout Discord etait dessine par le processeur. C etait la cause des images qui
+tombent, des animations au ralenti et des lettres qui mettent du temps a
+apparaitre. L acceleration est rendue a tout le monde, avec un interrupteur
+pour ceux dont le pilote graphique pose probleme.
+
+### Nexium Ultra Fast
+
+- la carte graphique dediee sur les portables a deux cartes, et la
+  rasterisation par la carte graphique ;
+- les colonnes fixes de Discord ne recalculent plus leur mise en page quand
+  la discussion bouge ;
+- un pilote qui lit les images que Chromium declare bloquees, et retire les
+  flous d arriere-plan seulement si ca rame vraiment. Il ne touche jamais aux
+  animations ;
+- la frappe mesuree touche par touche : l attente, le traitement,
+  l affichage, et la cause dominante dite en une phrase ;
+- les images par seconde mesurees sur la machine, avant et apres.
+
+### Les animations trop rapides sont corrigees
+
+Le pilote pouvait raccourcir toutes les animations a presque rien : les
+animations en boucle (la carte de l abonnement, le bouclier de Protect,
+l oeil de Privacy) tournaient alors des milliers de fois par seconde. Ce
+palier est supprime. Les animations du bouclier et de l oeil sont aussi
+ralenties.
+
+### La connexion par QR code et par cle d acces
+
+Nexium ne cache plus jamais le QR code ni les cles d acces sur l ecran de
+connexion : certains comptes ne peuvent entrer que par la. Un message qui
+demande de scanner un QR code reste signale.
+
+### Quatre pages refaites
+
+Music, Stats, Reseau et Outils ont chacune leur mise en page et leurs
+animations : le vinyle et son bras de lecture, une courbe qui se trace et une
+horloge de 24 heures, des cadrans et un radar des hotes, un tableau
+periodique des outils.
+
+### Nexium IA
+
+Douze nouveaux outils de lecture : performances, appel en cours, son,
+plugins, erreurs, demarrage, abonnement, menaces, serveur ouvert, et un bilan
+complet en une seule question.
+
+### Le reste
+
+- un ecran d ouverture sobre, avec le vrai logo ;
+- une seule annonce de mise a jour, les anciennes sont retirees du paquet ;
+- la carte Fluidite de Nexium Donnees mesure le cout de chaque partie de
+  Nexium.
+
 ## v203 - Protect et Privacy refaits, le vrai serveur vocal, un son qui ne baisse plus
 
 ### Nexium Protect, refait de zero
