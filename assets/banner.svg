@@ -98,7 +98,7 @@
       <g opacity="0">
         <animate attributeName="opacity" from="0" to="1" dur="0.6s" begin="2.2s" fill="freeze"/>
         <rect x="698" y="298" width="150" height="32" rx="16" fill="#1c1c22" stroke="#2f2f38"/>
-        <text x="773" y="319" fill="#6a8fd6">100% francais</text>
+        <text x="773" y="319" fill="#6a8fd6">Francais &#183; English</text>
       </g>
     </g>
 
