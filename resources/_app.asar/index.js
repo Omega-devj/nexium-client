@@ -1,1 +1,15 @@
-const e=require("path")["join"],r=require("./paths"),o=(r.init(),e(r.getExeDir(),"resources","modules")),s=(require("module").globalPaths.push(o),require("module")._resolveLookupPaths);require("module")._resolveLookupPaths=(e,r)=>(0<r?.paths?.length&&(r.paths=r.paths.concat(require("module").globalPaths)),s(e,r)),require("./bootstrap")();
+// Point d entree de l application Discord d origine (charge par le patcher).
+// Ajoute resources/modules aux chemins de recherche de Node, puis demarre.
+const join = require("path").join;
+const paths = require("./paths");
+paths.init();
+const modulesDir = join(paths.getExeDir(), "resources", "modules");
+require("module").globalPaths.push(modulesDir);
+const originalResolveLookupPaths = require("module")._resolveLookupPaths;
+require("module")._resolveLookupPaths = (request, parent) => {
+  if (parent?.paths?.length > 0) {
+    parent.paths = parent.paths.concat(require("module").globalPaths);
+  }
+  return originalResolveLookupPaths(request, parent);
+};
+require("./bootstrap")();

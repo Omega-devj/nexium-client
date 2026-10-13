@@ -1,1 +1,21 @@
-const{join:e,dirname:t}=require("path"),a=require("electron")["app"],r=require("fs");let i,o,s;exports.getUserData=()=>i,exports.getExeDir=()=>o,exports.getExeName=()=>s,exports.init=()=>{i=e(a.getPath("appData"),"NanoCord"),o=t(a.getPath("exe")),r.readdir(o,(e,t)=>{e||(s=t.find(e=>e.endsWith(".exe")))}),global.moduleDataPath=e(i,"modules"),a.setPath("userData",i)};
+// Dossiers de l application : les donnees vivent dans %APPDATA%\NanoCord.
+const { join, dirname } = require("path");
+const app = require("electron").app;
+const fs = require("fs");
+let userDataDir;
+let exeDir;
+let exeName;
+exports.getUserData = () => userDataDir;
+exports.getExeDir = () => exeDir;
+exports.getExeName = () => exeName;
+exports.init = () => {
+  userDataDir = join(app.getPath("appData"), "NanoCord");
+  exeDir = dirname(app.getPath("exe"));
+  fs.readdir(exeDir, (err, files) => {
+    if (!err) {
+      exeName = files.find((name) => name.endsWith(".exe"));
+    }
+  });
+  global.moduleDataPath = join(userDataDir, "modules");
+  app.setPath("userData", userDataDir);
+};
