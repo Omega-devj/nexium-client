@@ -1,0 +1,983 @@
+@import 'tailwindcss';
+
+/* Les couleurs viennent de src/config/palette.ts, posées en variables sur <html>. */
+@theme {
+  --color-chalk: var(--chalk);
+  --color-chalk-deep: var(--chalk-deep);
+  --color-ink: var(--ink);
+  --color-night: var(--night);
+  --color-vermilion: var(--vermilion);
+  --color-slate: var(--slate);
+  --color-ash: var(--ash);
+  --color-fg: var(--fg);
+  --color-fg-soft: var(--fg-soft);
+  --font-display: var(--font-archivo), 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: var(--font-martian), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --ease-matter: cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+
+:root {
+  --u: 100svh;
+  --night-amount: 0;
+  --fg: var(--ink);
+  --fg-soft: color-mix(in oklab, var(--ink) 62%, transparent);
+  --gutter: clamp(1rem, 4.2vw, 4.5rem);
+  --paper: color-mix(in oklab, var(--chalk), var(--night) calc(var(--night-amount) * 100%));
+  color-scheme: light;
+}
+
+html[data-night='1'] {
+  --fg: var(--chalk);
+  --fg-soft: color-mix(in oklab, var(--chalk) 62%, transparent);
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--paper);
+  font-family: var(--font-display);
+  font-variation-settings: 'wdth' 100;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--vermilion);
+  color: var(--chalk);
+}
+
+:focus-visible {
+  outline: 2px solid var(--vermilion);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ---- Typographie --------------------------------------------------------- */
+
+.t-mono {
+  font-family: var(--font-mono);
+  font-variation-settings: 'wdth' 88;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.t-mono-plain {
+  font-family: var(--font-mono);
+  font-variation-settings: 'wdth' 88;
+  font-size: 0.72rem;
+  letter-spacing: 0.01em;
+  line-height: 1.55;
+}
+
+/* Titres monumentaux : très condensés, très gras. */
+.t-monument {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variation-settings: 'wdth' 62;
+  letter-spacing: -0.02em;
+  line-height: 0.84;
+  text-transform: uppercase;
+}
+
+/* Grandes phrases : larges et légères, pour le contraste avec les monuments. */
+.t-statement {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-variation-settings: 'wdth' 112;
+  letter-spacing: -0.015em;
+  line-height: 1.08;
+}
+
+.t-body {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-variation-settings: 'wdth' 100;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+/* ---- Masques de révélation ---------------------------------------------- */
+
+.mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  /* Marge haute : les accents des capitales (É, È) dépassent la hauteur de ligne. */
+  padding: 0.16em 0.04em 0.1em;
+  margin: -0.16em -0.04em -0.1em;
+}
+
+.mask > span {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* ---- Scène ----------------------------------------------------------------- */
+
+.stage-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease-matter);
+}
+
+html[data-scene='ready'] .stage-layer {
+  opacity: 1;
+}
+
+.stage-canvas {
+  position: absolute !important;
+  inset: 0;
+}
+
+.chapter {
+  position: relative;
+  z-index: 1;
+}
+
+.pin {
+  position: sticky;
+  top: 0;
+  height: var(--u);
+  overflow: hidden;
+}
+
+/* Logotype plat de l'ouverture : visible tant que la 3D n'a pas pris le relais. */
+.hero-mark {
+  transition:
+    opacity 1.2s var(--ease-matter),
+    transform 1.6s var(--ease-matter);
+}
+
+html[data-scene='ready'] .hero-mark {
+  opacity: 0;
+  transform: scale(1.04);
+}
+
+/* ---- Étiquettes ancrées dans la 3D ------------------------------------------ */
+
+.anchor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate3d(-200vw, 0, 0);
+  will-change: transform;
+}
+
+.anchor[data-behind='1'] {
+  visibility: hidden;
+}
+
+/* Sans 3D (ou avant elle), les étiquettes se rangent dans le flux du document. */
+html:not([data-anchors='live']) .anchor {
+  position: relative;
+  transform: none !important;
+}
+
+html:not([data-anchors='live']) .anchor-set {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+/* ---- Liens ------------------------------------------------------------------ */
+
+.link-line {
+  position: relative;
+  text-decoration: none;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 100% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition:
+    background-size 0.5s var(--ease-matter),
+    font-variation-settings 0.5s var(--ease-matter),
+    color 0.3s;
+}
+
+.link-line:hover,
+.link-line:focus-visible {
+  color: var(--vermilion);
+  background-size: 0% 1px;
+  background-position: 100% 100%;
+  font-variation-settings: 'wdth' 118;
+}
+
+/* ---- Curseur --------------------------------------------------------------- */
+
+html[data-cursor='on'],
+html[data-cursor='on'] a,
+html[data-cursor='on'] button {
+  cursor: none;
+}
+
+html[data-cursor='on'] input,
+html[data-cursor='on'] textarea {
+  cursor: text;
+}
+
+/* ---- Mouvement réduit ------------------------------------------------------ */
+
+html[data-motion='reduced'] *,
+html[data-motion='reduced'] *::before,
+html[data-motion='reduced'] *::after {
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-mark {
+    transition: opacity 0.4s linear;
+  }
+}
+
+/* ---- Accessibilité ---------------------------------------------------------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  transform: translateY(-200%);
+  background: var(--ink);
+  color: var(--chalk);
+  padding: 0.6rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+/* ===========================================================================
+   Composants
+   =========================================================================== */
+
+/* ---- En-tête ---------------------------------------------------------------- */
+
+.site-header {
+  padding: calc(var(--gutter) * 0.55) var(--gutter);
+}
+
+.header-mark {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition:
+    opacity 0.6s var(--ease-matter),
+    transform 0.6s var(--ease-matter),
+    visibility 0s linear 0.6s;
+}
+
+html[data-past='1'] .header-mark {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
+}
+
+/* ---- Ouverture -------------------------------------------------------------- */
+
+/* Calé sur la projection des lettres 3D à l'ouverture : le fondu ne fait qu'ajouter la profondeur. */
+.hero-mark-svg {
+  width: min(calc(var(--u) * 1.07), 88vw);
+  height: auto;
+  transform: translateY(14%);
+}
+
+@media (max-width: 767px) {
+  .hero-mark-svg {
+    width: 86vw;
+    transform: translateY(-19%);
+  }
+}
+
+.fallback-note,
+.fallback-only {
+  display: none;
+}
+
+html[data-scene='fallback'] .fallback-only {
+  display: block;
+}
+
+/* Sans 3D, les langages forment une liste sous le titre. */
+html:not([data-anchors='live']) .systems-labels {
+  position: absolute;
+  inset: 34% var(--gutter) auto var(--gutter);
+  max-width: 40rem;
+}
+
+html[data-scene='fallback'] .fallback-note {
+  display: block;
+}
+
+.scroll-cue {
+  position: relative;
+  display: inline-block;
+  width: 1px;
+  height: 44px;
+  background: color-mix(in oklab, currentColor 30%, transparent);
+  overflow: hidden;
+}
+
+.scroll-cue::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -40%;
+  width: 1px;
+  height: 40%;
+  background: var(--vermilion);
+  animation: cue 2.4s var(--ease-matter) infinite;
+}
+
+@keyframes cue {
+  to {
+    top: 100%;
+  }
+}
+
+html[data-motion='reduced'] .scroll-cue::after {
+  animation: none;
+  top: 30%;
+}
+
+/* ---- Règle du parcours ------------------------------------------------------ */
+
+.ruler {
+  right: calc(var(--gutter) * 0.55);
+  top: 50%;
+  transform: translateY(-50%);
+  height: min(58vh, 34rem);
+  width: 6rem;
+}
+
+.ruler-track {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: color-mix(in oklab, currentColor 35%, transparent);
+}
+
+.ruler-marker {
+  position: absolute;
+  right: -4px;
+  top: calc(var(--p, 0) * 100%);
+  width: 9px;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--vermilion);
+}
+
+.ruler-list li {
+  position: absolute;
+  right: 0;
+  top: calc(var(--i) / 7 * 100%);
+}
+
+.ruler-tick {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  transform: translateY(-50%);
+  padding: 0.4rem 0 0.4rem 0.6rem;
+  color: inherit;
+}
+
+.ruler-dash {
+  display: inline-block;
+  width: 9px;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.4s var(--ease-matter);
+}
+
+.ruler-index {
+  opacity: 0.55;
+  transition: opacity 0.3s;
+}
+
+.ruler-title {
+  opacity: 0;
+  transform: translateX(6px);
+  transition:
+    opacity 0.35s,
+    transform 0.35s var(--ease-matter);
+}
+
+.ruler-list li[data-state='past'] .ruler-index {
+  opacity: 0.85;
+}
+
+.ruler-list li[data-state='current'] .ruler-index {
+  opacity: 1;
+  color: var(--vermilion);
+}
+
+.ruler-list li[data-state='current'] .ruler-dash,
+.ruler-tick:hover .ruler-dash {
+  width: 18px;
+}
+
+.ruler-list li[data-state='current'] .ruler-title,
+.ruler-tick:hover .ruler-title,
+.ruler-tick:focus-visible .ruler-title {
+  opacity: 1;
+  transform: none;
+}
+
+.ruler-readout {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 1.4rem);
+  white-space: nowrap;
+  opacity: 0.55;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.62rem;
+}
+
+@media (max-width: 767px) {
+  .ruler {
+    top: auto;
+    bottom: calc(var(--gutter) * 0.7);
+    left: var(--gutter);
+    right: var(--gutter);
+    height: 1.9rem;
+    width: auto;
+    transform: none;
+  }
+  .ruler-track {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: auto;
+    height: 1px;
+  }
+  .ruler-marker {
+    right: auto;
+    top: auto;
+    bottom: -4px;
+    left: calc(var(--p, 0) * 100%);
+    width: 2px;
+    height: 9px;
+    margin: 0 0 0 -1px;
+  }
+  .ruler-list li {
+    right: auto;
+    top: auto;
+    bottom: 0;
+    left: calc(var(--i) / 7 * 100%);
+  }
+  .ruler-tick {
+    transform: none;
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 0.25rem;
+    padding: 0 0.6rem 0 0;
+  }
+  .ruler-dash {
+    width: 1px !important;
+    height: 6px;
+  }
+  .ruler-title {
+    display: none;
+  }
+  .ruler-readout {
+    display: none;
+  }
+}
+
+/* ---- Curseur ---------------------------------------------------------------- */
+
+.cursor-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: var(--vermilion);
+}
+
+.cursor-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 46px;
+  height: 46px;
+  margin: -23px 0 0 -23px;
+  border: 1px solid var(--fg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.6s;
+}
+
+.cursor-label {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  white-space: nowrap;
+  color: var(--fg);
+  font-size: 0.58rem;
+}
+
+/* ---- Systèmes ---------------------------------------------------------------- */
+
+.tech-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transform: translate(-0.4rem, -50%);
+  padding: 0.25rem 0.55rem 0.25rem 0.3rem;
+  color: var(--ink);
+  font-weight: 650;
+  font-variation-settings: 'wdth' 80;
+  font-size: clamp(0.95rem, 1.15vw, 1.25rem);
+  white-space: nowrap;
+  background: color-mix(in oklab, var(--chalk) 72%, transparent);
+  transition:
+    color 0.25s,
+    font-variation-settings 0.45s var(--ease-matter);
+}
+
+.tech-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  transition: background 0.25s;
+}
+
+.tech-label:hover,
+.tech-label:focus-visible,
+.tech-label.is-active {
+  color: var(--vermilion);
+  font-variation-settings: 'wdth' 104;
+}
+
+.tech-label.is-active .tech-dot {
+  background: var(--vermilion);
+  border-color: var(--vermilion);
+}
+
+.family-label {
+  pointer-events: none;
+}
+
+.family-label > div {
+  transform: translate(-50%, -100%);
+  text-align: center;
+  white-space: nowrap;
+}
+
+html:not([data-anchors='live']) .family-label {
+  display: none;
+}
+
+.systems-panel {
+  padding: 1.1rem 1.2rem;
+  background: color-mix(in oklab, var(--chalk) 82%, transparent);
+  border-top: 1px solid var(--ink);
+  min-height: 9.5rem;
+}
+
+@media (max-width: 767px) {
+  .systems-panel {
+    min-height: 0;
+  }
+  .systems-panel ul.space-y-2 li span:last-child {
+    display: none;
+  }
+}
+
+/* ---- Signal ------------------------------------------------------------------ */
+
+.graph-label {
+  display: inline-block;
+  transform: translate(0.75rem, -50%);
+  padding: 0.15rem 0.4rem;
+  color: var(--chalk);
+  border-left: 1px solid color-mix(in oklab, var(--chalk) 50%, transparent);
+  white-space: nowrap;
+  transition: color 0.25s;
+}
+
+.graph-label:hover,
+.graph-label:focus-visible {
+  color: var(--vermilion);
+}
+
+.graph-label.is-core {
+  color: var(--vermilion);
+  border-color: var(--vermilion);
+}
+
+html:not([data-anchors='live']) .graph-labels {
+  display: none;
+}
+
+/* Sur petit écran, la figure se lit sans étiquettes : la phrase reste prioritaire. */
+@media (max-width: 767px) {
+  .graph-labels {
+    display: none;
+  }
+}
+
+/* ---- Ouvrages ---------------------------------------------------------------- */
+
+.work {
+  position: absolute;
+  inset: 0;
+  padding: calc(var(--gutter) + 3rem) var(--gutter) var(--gutter);
+  /* Invisible jusqu'à son tour, mais toujours lu par les lecteurs d'écran. */
+  opacity: 0;
+}
+
+.work-title {
+  font-size: clamp(3rem, 13vw, 5rem);
+}
+
+.work-summary {
+  font-size: clamp(1.1rem, 1.45vw, 1.6rem);
+  max-width: 30ch;
+}
+
+.work-details {
+  max-width: 44ch;
+  margin-top: 1.1rem;
+  font-size: 0.95rem;
+}
+
+.work-meta {
+  margin-top: 1.3rem;
+}
+
+.work-links {
+  margin-top: 1.1rem;
+}
+
+.work-ghost {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .work-monument .work-index {
+    position: absolute;
+    left: var(--gutter);
+    top: calc(var(--gutter) + 3rem);
+  }
+  .work-monument .work-title {
+    position: absolute;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: calc(var(--gutter) * 0.55);
+    font-size: clamp(5rem, 15vw, 17rem);
+    line-height: 0.8;
+  }
+  .work-monument .work-body {
+    position: absolute;
+    right: calc(var(--gutter) + 6rem);
+    top: calc(var(--gutter) + 3rem);
+    width: min(25rem, 29vw);
+  }
+
+  .work-column .work-title {
+    position: absolute;
+    left: calc(var(--gutter) - 0.1em);
+    top: calc(var(--gutter) + 3rem);
+    bottom: var(--gutter);
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: clamp(5rem, 15vh, 11rem);
+    line-height: 0.82;
+  }
+  .work-column .work-index,
+  .work-column .work-body {
+    position: absolute;
+    left: calc(var(--gutter) + clamp(5rem, 15vh, 11rem) + 2rem);
+  }
+  .work-column .work-index {
+    top: calc(var(--gutter) + 3rem);
+  }
+  .work-column .work-body {
+    bottom: var(--gutter);
+    width: min(26rem, 31vw);
+  }
+
+  .work-split {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 54vw;
+    padding-right: calc(var(--gutter) + 6rem);
+  }
+  .work-split .work-title {
+    margin-top: 0.8rem;
+    margin-bottom: 1.2rem;
+    font-size: clamp(4rem, 6.6vw, 8rem);
+  }
+
+  .work-margin {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: min(36rem, 42vw);
+  }
+  .work-margin .work-ghost {
+    display: block;
+    position: absolute;
+    left: calc(var(--gutter) - 0.04em);
+    top: calc(var(--gutter) + 2.6rem);
+    font-size: clamp(10rem, 36vh, 26rem);
+    color: transparent;
+    -webkit-text-stroke: 1px color-mix(in oklab, var(--ink) 45%, transparent);
+  }
+  .work-margin .work-title {
+    margin-top: 0.8rem;
+    margin-bottom: 1rem;
+    font-size: clamp(3.4rem, 5.6vw, 6.4rem);
+  }
+}
+
+@media (max-width: 767px) {
+  .work {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: calc(var(--gutter) + 3.4rem);
+  }
+  .work::before {
+    content: '';
+    position: absolute;
+    inset: 38% 0 0 0;
+    background: linear-gradient(to bottom, transparent, color-mix(in oklab, var(--chalk) 92%, transparent) 30%);
+    z-index: -1;
+  }
+  .work-title {
+    margin: 0.5rem 0 0.8rem;
+  }
+  .work-details li:nth-child(n + 2) {
+    display: none;
+  }
+}
+
+/* ---- Laboratoire ------------------------------------------------------------- */
+
+.lab-panel {
+  padding: clamp(1.1rem, 2.4vw, 1.75rem);
+  background: color-mix(in oklab, var(--chalk) 84%, transparent);
+  border-top: 1px solid var(--ink);
+}
+
+.formula-field {
+  border-bottom: 1px solid var(--ink);
+  transition: border-color 0.25s;
+}
+
+.formula-field input {
+  caret-color: var(--vermilion);
+}
+
+.formula-field.has-error {
+  border-color: var(--vermilion);
+}
+
+.chip {
+  border: 1px solid currentColor;
+  padding: 0.45rem 0.75rem;
+  transition:
+    background 0.25s,
+    color 0.25s;
+}
+
+.chip:hover {
+  color: var(--vermilion);
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--chalk);
+}
+
+.lab-sheet {
+  position: relative;
+  padding: clamp(1.25rem, 4vw, 3.5rem);
+  background-color: var(--chalk);
+  background-image: linear-gradient(to right, color-mix(in oklab, var(--ink) 7%, transparent) 1px, transparent 1px);
+  background-size: calc(100% / 12) 100%;
+  border-top: 2px solid var(--ink);
+  box-shadow: 0 40px 80px -60px rgb(0 0 0 / 0.4);
+}
+
+.source-chip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid color-mix(in oklab, var(--ink) 28%, transparent);
+  background: var(--chalk);
+  transition:
+    opacity 0.25s,
+    border-color 0.25s;
+}
+
+.source-chip:hover {
+  border-color: var(--ink);
+}
+
+.source-chip.is-off {
+  opacity: 0.42;
+}
+
+.source-chip.is-off .t-body {
+  text-decoration: line-through;
+}
+
+.claim-row {
+  padding: 0.8rem 0;
+  border-top: 1px solid color-mix(in oklab, var(--ink) 18%, transparent);
+}
+
+.src-tag {
+  padding: 0.05rem 0.35rem;
+  border: 1px solid currentColor;
+  font-size: 0.6rem;
+}
+
+.src-tag.is-off {
+  opacity: 0.28;
+}
+
+.src-tag.is-shared {
+  border-style: dashed;
+  color: var(--vermilion);
+}
+
+/* ---- Retour ------------------------------------------------------------------- */
+
+.ring-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.closing-links .is-left .ring-link {
+  transform: translate(calc(-100% - 1.1rem), -50%);
+  align-items: flex-end;
+  text-align: right;
+}
+
+.closing-links .is-right .ring-link {
+  transform: translate(1.1rem, -50%);
+}
+
+.ring-link-label {
+  font-size: clamp(1.05rem, 1.5vw, 1.65rem);
+  font-weight: 500;
+  font-variation-settings: 'wdth' 88;
+  transition:
+    color 0.3s,
+    font-variation-settings 0.6s var(--ease-matter);
+}
+
+.ring-link-note {
+  opacity: 0.6;
+}
+
+.ring-link:hover .ring-link-label,
+.ring-link:focus-visible .ring-link-label {
+  color: var(--vermilion);
+  font-variation-settings: 'wdth' 122;
+}
+
+html:not([data-anchors='live']) .closing-links,
+html:not([data-anchors='live']) .closing-links .ring-link {
+  transform: none;
+}
+
+@media (max-width: 767px) {
+  .closing-links {
+    position: absolute;
+    inset: auto var(--gutter) calc(var(--gutter) + 15rem) var(--gutter) !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+  .closing-links .anchor {
+    position: relative;
+    transform: none !important;
+  }
+  .closing-links .is-left .ring-link,
+  .closing-links .is-right .ring-link {
+    transform: none;
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+html:not([data-anchors='live']) .closing-links {
+  position: absolute;
+  inset: auto var(--gutter) calc(var(--gutter) + 12rem) var(--gutter);
+  flex-direction: column;
+}
+
+html:not([data-anchors='live']) .closing-links .ring-link {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.restart-dot {
+  position: relative;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+
+.restart-dot::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--vermilion);
+}
+
+.restart:hover {
+  color: var(--vermilion);
+}
