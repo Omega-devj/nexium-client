@@ -291,7 +291,7 @@ avant que tu payes quoi que ce soit.
 | **Enregistrement** | Au démarrage | Ton identifiant Discord et la version du client |
 | **Badge Nexium** | Quand des profils s'affichent | Les identifiants Discord de ces profils, pour savoir lesquels utilisent Nexium |
 | **Signalement** | **Seulement si tu cliques sur « Signaler »** | Le domaine signalé, son type, ton identifiant et ton pseudo |
-| **Nexium IA** | **Seulement quand tu poses une question** | Ta question et le contexte que tu as autorisé, montré tel quel avant l'envoi |
+| **Nexium IA** | **Seulement quand tu poses une question** | Ta question et le contexte que tu as autorisé, montré tel quel avant l'envoi. Le relais la transmet à Groq, qui fait tourner le modèle |
 | **Bac à sable de liens** | **Seulement quand tu inspectes un lien** | L'adresse inspectée. Le relais va chercher la page à ta place : le site ne voit pas ton IP |
 | **Repaire** | Quand tu l'utilises | Des messages **chiffrés sur ta machine** : le relais ne peut pas les lire |
 | **Support** | Quand tu ouvres un ticket | Ce que tu écris dans le ticket |
