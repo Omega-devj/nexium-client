@@ -547,6 +547,6 @@ irm https://raw.githubusercontent.com/Omega-devj/nexium-client/main/install-nexi
 
 **Nexium Collective** &nbsp;·&nbsp; [nexium-client.netlify.app](https://nexium-client.netlify.app/) &nbsp;·&nbsp; [État des services](https://omega-devj.github.io/status-nexium/)
 
-Basé sur [Equicord](https://github.com/Equicord/Equicord).
+Basé sur [Equicord](https://github.com/Equicord/Equicord) · Licence [GPL-3.0](LICENSE)
 
 </div>

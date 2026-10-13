@@ -6,3 +6,21 @@ discord_utils.log
 resources/equicord/renderer.js.bak-*
 resources/equicord/.nexium-update.log
 resources/modules/discord_dispatch/dispatch.log
+
+# Etat et fichiers de travail du lanceur, propres a chaque machine
+resources/equicord/.nexium-update.json
+resources/equicord/.nexium-ultra.json
+resources/equicord/.nexium-index-trying
+resources/equicord/.nexium-restore
+resources/equicord/.nexium-repair
+resources/equicord/renderer.js.bak
+resources/equicord/renderer.js.pending
+resources/equicord/*.sync.tmp
+resources/equicord/*.newtmp
+resources/equicord/*.pending.tmp
+resources/equicord/renderer.js.construction
+resources/app.asar/index.js.bak
+resources/app.asar/index.js.pending
+resources/app.asar/*.tmp
+resources/app.asar/*.newtmp
+node_modules/
