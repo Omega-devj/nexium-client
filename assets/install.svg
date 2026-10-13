@@ -32,7 +32,7 @@
     <g opacity="0">
       <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.50;0.54;0.93;0.96;1" dur="10s" repeatCount="indefinite"/>
       <path d="M26 152 l6 7 l12 -15" fill="none" stroke="#5fb37a" stroke-width="2.4"/>
-      <text x="56" y="157" fill="#a5a6ab">Client telecharge, somme de controle verifiee</text>
+      <text x="56" y="157" fill="#a5a6ab">Client telecharge dans ton dossier utilisateur</text>
     </g>
     <g opacity="0">
       <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.60;0.64;0.93;0.96;1" dur="10s" repeatCount="indefinite"/>
@@ -42,7 +42,7 @@
     <g opacity="0">
       <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.70;0.74;0.93;0.96;1" dur="10s" repeatCount="indefinite"/>
       <text x="26" y="217" fill="url(#oret)" font-weight="700">Nexium est pret.</text>
-      <text x="176" y="217" fill="#7a7a84">Aucun droit administrateur. Rien dans le registre.</text>
+      <text x="176" y="217" fill="#7a7a84">Aucun droit administrateur. Reglages conserves.</text>
     </g>
   </g>
 </svg>
