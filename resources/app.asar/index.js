@@ -14,7 +14,7 @@ const RAW_APP = "https://raw.githubusercontent.com/Omega-devj/nexium-client/refs
 // Version de CE fichier. A incrementer des qu'on le modifie : c'est ce qui declenche
 // son remplacement chez les utilisateurs. Jusqu'a la v146 il ne se mettait jamais a jour,
 // et une erreur ici obligeait a reinstaller tout le parc a la main.
-const NEXIUM_INDEX_V = 8;
+const NEXIUM_INDEX_V = 9;
 const IDX = __filename;
 const IDXBAK = IDX + ".bak";
 const IDXPEND = IDX + ".pending";
@@ -723,6 +723,10 @@ function nxRetireRaccourci() {
     } catch (e) { log("demarrage Windows, raccourci: " + (e && e.message)); return false; }
 }
 
+function nxEntreeEstLaNotre(lu) {
+    return !!lu && String(lu).toLowerCase().indexOf(String(process.execPath).toLowerCase()) >= 0;
+}
+
 let nxDemDernier = null;
 function nxAppliqueDemarrage(source) {
     try {
@@ -764,8 +768,12 @@ function nxAppliqueDemarrage(source) {
         // pas eu lieu.
         let voie = "electron";
         try {
-            const present = !!nxRegistreLu();
-            if (veut && !present) {
+            const lu = nxRegistreLu();
+            const present = !!lu;
+            // v9 : une entree qui lance un AUTRE exe -- une ancienne copie de
+            // Nexium, deplacee ou laissee ailleurs -- ne compte pas. Sans ca,
+            // Windows relancait l ancienne copie a chaque ouverture de session.
+            if (veut && !nxEntreeEstLaNotre(lu)) {
                 const valeur = "\"" + process.execPath + "\""
                     + (args.length ? " " + args.join(" ") : "");
                 nxRegistreEcrit(valeur);
@@ -776,7 +784,7 @@ function nxAppliqueDemarrage(source) {
             }
             // La verite, apres coup : ce que le registre contient vraiment.
             // Pas ce qu on a demande, pas ce qu Electron a repondu.
-            obtenu = !!nxRegistreLu();
+            obtenu = nxEntreeEstLaNotre(nxRegistreLu());
         } catch (_) {}
         let raccourciRetire = false;
         if (!veut || obtenu) {
