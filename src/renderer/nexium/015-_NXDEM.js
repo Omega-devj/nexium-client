@@ -84,10 +84,15 @@ if(!c)return {code:"inconnu",texte:"Rien n a encore ete demande."};
 var e=_NXDEM.etat();
 if(!e||typeof e.applique!=="boolean")return {code:"attente",
 texte:"Demande enregistree. Le lanceur l appliquera dans un instant."};
+// Lanceur v7 : il retire le raccourci que posaient les anciens installateurs,
+// et ne le garde que si Windows refuse l entree de registre (voie "raccourci").
 if(c.avecWindows&&e.demande===true&&e.applique===true)return {code:"actif",
-texte:"Verifie : Windows lance Nexium a l ouverture de ta session."};
+texte:e.voie==="raccourci"?"Verifie : Nexium demarre par le raccourci du dossier Demarrage, car Windows a refuse l entree de registre."
+:e.raccourciRetire?"Verifie : Windows lance Nexium a l ouverture de ta session. L ancien raccourci du dossier Demarrage a ete retire."
+:"Verifie : Windows lance Nexium a l ouverture de ta session."};
 if(!c.avecWindows&&e.demande===false&&e.applique===false)return {code:"coupe",
-texte:"Verifie : plus aucune entree de demarrage."};
+texte:e.raccourciRetire?"Verifie : plus aucune entree de demarrage, ancien raccourci compris."
+:"Verifie : plus aucune entree de demarrage."};
 if(c.avecWindows&&e.applique===false)return {code:"refuse",
 texte:"Windows a refuse l entree de demarrage. Une strategie de groupe ou un antivirus peut l interdire."};
 return {code:"attente",

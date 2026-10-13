@@ -1,5 +1,32 @@
 # Nexium Client — Notes de version
 
+## v205 - Couper le demarrage avec Windows le coupe vraiment
+
+### Le demarrage avec Windows
+
+L installateur posait un raccourci dans le dossier Demarrage, en plus de
+l entree que gere le lanceur. L interrupteur du client n effacait que
+l entree : Nexium revenait a chaque ouverture de session alors qu on
+l avait coupe, et la page affichait "plus aucune entree de demarrage".
+
+- le lanceur retire l ancien raccourci quand tu coupes l option, ou des
+  que l entree est en place ;
+- il ne le garde que si Windows refuse l entree, et la page le dit ;
+- l installateur ne le pose plus ;
+- les messages de la page sont traduits en anglais.
+
+### Le bac a sable
+
+Le relais qui inspecte les liens a ta place refuse maintenant toute
+adresse qui mene au reseau interne, y compris par une redirection ou par
+un nom de domaine qui y pointe.
+
+### Pour ceux qui modifient le client
+
+- le code du lanceur et du processus principal est lisible ;
+- renderer.js se construit a partir de sources rangees par module ;
+- le depot porte la licence GPL-3.0, celle d Equicord.
+
 ## v204 - Nexium Ultra Fast, la carte graphique rendue a Discord
 
 ### La carte graphique dessine de nouveau Discord
