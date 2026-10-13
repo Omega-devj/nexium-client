@@ -20,6 +20,13 @@ if (!fs.existsSync(JS)) {
 
 let src = fs.readFileSync(JS, "utf8");
 
+// Depuis que renderer.js est construit a partir de src/renderer/, monter la
+// version ici desynchroniserait les sources : le build l ecraserait.
+if (BUMP && fs.existsSync(path.join(__dirname, "src", "renderer"))) {
+  console.error("refus : utilise node outils/construire-renderer.js --bump (les sources sont dans src/renderer/)");
+  process.exit(2);
+}
+
 if (BUMP) {
   const m = src.match(/_NXUP\.VERSION="(\d+)"/);
   if (!m) { console.error("refus : _NXUP.VERSION introuvable"); process.exit(2); }
@@ -43,8 +50,9 @@ if (BUMP) {
 let bad = null;
 if (src.length < 500000) bad = "taille insuffisante (" + src.length + ")";
 else if (!/_NXUP\.VERSION="\d+"/.test(src)) bad = "numero de version absent";
-else if ((src.match(/registrar:"Nexium Client"/g) || []).length < 10) bad = "marqueurs internes manquants";
+else if ((src.match(/var _NX[A-Za-z]+=window\._NX[A-Za-z]+\|\|/g) || []).length < 20) bad = "modules Nexium incomplets";
 else if (src.indexOf("_NXUP.checkRaw") < 0 || src.indexOf("_NXPR.scanUrl") < 0) bad = "modules Nexium absents";
+else if (src.indexOf("_NXV.checkOut") < 0 || src.indexOf("_NXGD.bloque") < 0) bad = "gardes de sortie absents";
 if (bad) {
   console.error("refus : le fichier ne passerait pas validRenderer() — " + bad);
   process.exit(2);

@@ -11,3 +11,6 @@ resources/equicord/renderer.css       -text
 resources/equicord/patcher.js         -text
 resources/equicord/preload.js         -text
 resources/app.asar/index.js           -text
+# Les sources de renderer.js sont concatenees octet pour octet par
+# outils/construire-renderer.js : la meme regle s applique a chaque morceau.
+src/renderer/**                       -text
