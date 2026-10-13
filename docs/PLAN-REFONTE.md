@@ -1,194 +1,263 @@
-# Plan de refonte de Nexium Client
+# Plan de refonte de Nexium
 
-> **But :** passer d'un client qui casse à chaque mise à jour de Discord et qui se
-> modifie à la main dans un fichier de 6 Mo, à un projet qu'on construit depuis ses
-> sources, qu'on teste automatiquement, qu'on publie signé, et qu'on remet à niveau
-> en moins de 48 heures quand Discord change.
+Objectif : un client qui **ne casse plus** quand Discord se met à jour, qui a **sa
+propre identité** au lieu de ressembler à Vencord ou Equicord, et qu'on peut faire
+évoluer sans peur.
 
 ---
 
-## 1. Où on en est
+## 1. En bref
 
-| Élément | État actuel | Problème |
+| Aujourd'hui | Demain |
+|---|---|
+| Ça casse à chaque mise à jour de Discord | Réparé en moins de 48 h, souvent avant que les utilisateurs le voient |
+| On modifie à la main un fichier de 6 Mo | On modifie de petits fichiers, un outil assemble le reste |
+| Ça ressemble à Equicord avec des pages Nexium en plus | Une seule identité, de l'icône jusqu'au dernier menu |
+| 27 entrées dans les réglages, en français et en anglais mélangés | Une dizaine d'entrées claires, dans une seule langue à la fois |
+| Une erreur sur `main` part chez tout le monde | Rien ne part sans être testé et signé |
+| Windows seulement | Windows, puis macOS et Linux |
+
+---
+
+## 2. Pourquoi ça casse aujourd'hui
+
+Nexium repose sur **Equicord**, qui modifie Discord pendant qu'il tourne : il cherche
+des morceaux précis du code de Discord et les remplace. Quand Discord change ces
+morceaux, la recherche échoue et la fonction casse.
+
+L'équipe d'Equicord corrige ces casses en continu. Mais Nexium embarque une copie
+**figée** d'Equicord (version 1.14.13.1), alors que l'actuelle est la 1.15.11.0. Nexium
+ne reçoit donc aucune de leurs corrections.
+
+Et on ne peut pas simplement remplacer la copie : des modifications Nexium ont été
+faites **directement dedans**, à la main. Les reprendre une à une à chaque mise à jour
+est impossible.
+
+**La solution :** séparer proprement Equicord et Nexium, pour récupérer chaque version
+d'Equicord en une commande.
+
+---
+
+## 3. Les étapes
+
+### Étape 1 : ne plus prendre de risques *(1 semaine)*
+
+Aujourd'hui, tout ce qui est poussé sur `main` arrive chez tous les utilisateurs au
+lancement suivant. Une faute de frappe suffit à casser tout le monde.
+
+- [ ] **Un canal « stable » à part.** Les clients lisent les mises à jour sur une branche
+  `stable`. On travaille sur `main`, et on publie quand c'est prêt.
+- [ ] **Des mises à jour signées.** Une signature numérique prouve que la mise à jour
+  vient bien de toi. Même si quelqu'un volait l'accès au GitHub, il ne pourrait pas
+  envoyer de code aux utilisateurs.
+- [ ] **Des tests automatiques sur GitHub.** À chaque envoi, GitHub vérifie tout seul
+  que rien n'est cassé. Les tests existent déjà en partie (`outils/tests/`).
+- [ ] **Protéger le compte** : double authentification obligatoire.
+- [ ] **Récupérer tout le serveur dans le dépôt.** Quatre fonctions Supabase sur six
+  n'existent que sur le serveur, et la base de données n'est pas sauvegardée dans le
+  code. Si le projet Supabase disparaît, elles disparaissent avec.
+
+### Étape 2 : se rebrancher sur Equicord à jour *(2 à 3 semaines)* : règle les bugs
+
+- [ ] **Faire la liste des modifications faites à la main.** On reconstruit la version
+  1.14.13.1 d'Equicord telle quelle et on la compare à celle de Nexium : chaque
+  différence est une modification Nexium. On obtient une liste complète, sans rien
+  deviner.
+- [ ] **Repartir de la dernière version d'Equicord**, et y ajouter Nexium à part, dans
+  son propre dossier.
+- [ ] **Transformer chaque module Nexium en vrai plugin**, en commençant par la base
+  (stockage, traductions, erreurs), puis Protect et Privacy, puis les pages.
+- [ ] **Un test chaque nuit contre le vrai Discord.** Equicord fournit un outil qui
+  vérifie toutes les modifications contre la version actuelle de Discord. S'il trouve
+  une casse, on est prévenu avant les utilisateurs.
+- [ ] **Une mise à jour d'Equicord chaque semaine**, proposée automatiquement.
+
+### Étape 3 : un code qu'on peut faire évoluer *(environ 6 semaines, en continu)*
+
+- [ ] Passer le code en **TypeScript** : l'éditeur signale les erreurs avant même de
+  lancer le client.
+- [ ] **Découper les fichiers géants.** L'IA fait 240 Ko, Protect 143 Ko. Objectif :
+  aucun fichier au-delà de 800 lignes.
+- [ ] **Tester la logique importante** : détection des liens piégés, détecteur
+  d'arnaques, masquage des jetons, bac à sable.
+- [ ] **Mesurer la vitesse avant chaque publication** : temps de démarrage, mémoire.
+
+### Étape 4 : une installation de vrai logiciel *(2 à 3 semaines)*
+
+- [ ] **Un installateur classique** (« Suivant, Suivant, Terminer ») au lieu d'une
+  commande PowerShell.
+- [ ] **Un exécutable signé** : plus d'alerte rouge de Windows. C'est gratuit pour les
+  projets open source (SignPath).
+- [ ] **macOS et Linux.**
+- [ ] **Ne plus distribuer le code de Discord.** Aujourd'hui, le dépôt contient des
+  fichiers de Discord (`resources/modules/`). Discord ne l'autorise pas, et c'est inutile
+  avec la nouvelle base (voir le choix B plus bas).
+- [ ] **Sortir les gros fichiers du dépôt** (DLL, `.exe`) : ils vont dans les
+  « Releases » de GitHub. Le dépôt devient léger.
+
+### Étape 5 : un serveur propre *(2 semaines, en parallèle)*
+
+- [ ] Un serveur de test séparé : on n'essaie plus rien sur le vrai.
+- [ ] Les **abonnements gérés par le serveur uniquement**. Le code étant public, un
+  verrou dans le client se retire facilement ; un verrou sur le serveur, non.
+- [ ] Une **politique de confidentialité** claire : ce qui est gardé, combien de temps,
+  et qui le reçoit (par exemple Groq pour l'IA). Plus un bouton « supprimer mes
+  données ».
+
+---
+
+## 4. Fonctionnalités
+
+### Ce qu'on garde et qu'on met en avant
+
+Ce qui rend Nexium unique, et qu'aucun autre client n'a :
+
+- **Protect** (liens piégés, détecteur d'arnaques, 12 secondes pour annuler) ;
+- **Privacy**, avec son journal qui montre chaque blocage ;
+- le **Repaire chiffré** et la **ligne de secours** quand Discord tombe ;
+- le **best-of vocal** ;
+- l'**IA qui montre avant d'agir**.
+
+### Ce qu'on simplifie
+
+- **27 entrées dans les réglages → une dizaine**, regroupées par besoin :
+
+  | Nouvelle entrée | Ce qu'elle regroupe |
+  |---|---|
+  | Accueil | l'accueil actuel |
+  | Protection | Protect, Privacy, Réseau, Bac à sable, Outils |
+  | Vocal | Nexium Vocal, best-of, soundboard |
+  | Mon groupe | Repaire, ligne de secours |
+  | Assistant | Nexium IA |
+  | Mon activité | Stats, Comptes, Amis, Sismographe |
+  | Automatisations | Auto, Music |
+  | Apparence | thèmes, extensions, animations |
+  | Mon compte | Abonnement, Support |
+  | Réglages | Mise à jour, Données, Démarrage, À propos |
+
+- **388 plugins Equicord → une sélection d'environ 40**, triés et décrits en français.
+  Les autres restent disponibles dans un coin « avancé », masqué par défaut.
+- **Retirer les outils de développeur** de l'interface (Patch Helper, éditeur de
+  correctifs).
+- **Un premier lancement guidé** : trois questions (protection forte ou légère ? IA
+  oui ou non ? démarrer avec Windows ?), et le client est réglé.
+
+### Ce qu'on ajoute
+
+- **Une page « Santé du client »** : quand Discord casse une fonction, la page le dit,
+  désactive seule la fonction en cause, et la réactive quand le correctif arrive. Plus
+  de client qui plante sans explication.
+- **Un mode panique** : un raccourci qui masque tout d'un coup (messages, serveurs,
+  pseudos). L'idée existe déjà en partie (`Ctrl + Maj + M`) : on la complète.
+- **La synchronisation des réglages** entre deux PC, chiffrée comme le Repaire.
+- **Un canal bêta** pour les volontaires, qui reçoivent les nouveautés une semaine avant
+  les autres.
+
+---
+
+## 5. Esthétique : ne plus ressembler à Vencord ou Equicord
+
+### Ce qui trahit Equicord aujourd'hui
+
+- **Le menu de la fenêtre** s'appelle « NanoCord », avec « À propos de NanoCord » et
+  « Réparer NanoCord ».
+- **Des fenêtres d'Equicord** : « NanoCord QuickCSS Editor », « NanoCord Host
+  Permissions ».
+- **Des pages entières reprises telles quelles** : Plugins, Themes, Backup & Restore,
+  avec le style d'Equicord (396 styles `vc-`) et des titres en anglais.
+- **Le dossier des réglages** sur le PC s'appelle `NanoCord`.
+- **Des noms en anglais au milieu du français** : Changelog, Team, Sponsor, Backup &
+  Restore.
+
+### Ce qu'on fait
+
+1. **Une identité écrite noir sur blanc**, dans un fichier `docs/IDENTITE.md` :
+   - le logo et ses variantes ;
+   - les couleurs : l'or sur fond anthracite de la bannière actuelle, plus 3 couleurs
+     d'accent maximum ;
+   - une seule police ;
+   - les icônes au trait fin (déjà redessinées en v191) ;
+   - les règles de mouvement : animations courtes, coupées en mode économie.
+2. **Refaire les pages reprises d'Equicord** avec les briques Nexium (cartes, tuiles,
+   en-têtes) :
+   - Plugins devient « Extensions », en cartes, par catégories en français ;
+   - Themes devient « Apparence » ;
+   - Backup & Restore passe dans « Réglages » ;
+   - Team et Sponsor deviennent « À propos ».
+3. **Effacer chaque trace de NanoCord** : le menu de la fenêtre, les fenêtres, les
+   messages d'erreur, le dossier des réglages (avec une migration automatique, pour ne
+   perdre aucun réglage).
+4. **Un thème Nexium pour Discord lui-même**, activé par défaut : touches dorées,
+   coins arrondis, barre latérale Nexium. On reconnaît Nexium au premier coup d'œil,
+   même hors des pages Nexium. Il ne passe que par les variables de couleur de Discord,
+   pour ne pas casser à chaque mise à jour.
+5. **Une langue par écran** : tout en français, ou tout en anglais, jamais mélangé.
+6. **Des écrans d'erreur et d'attente à l'image de Nexium**, au lieu des messages
+   techniques bruts.
+
+---
+
+## 6. Les choix à faire (avec ma recommandation)
+
+**A. Comment construire le client**
+- **Recommandé :** une copie d'Equicord qu'on met à jour chaque semaine, avec Nexium à
+  part dans son propre dossier.
+- Garder le système actuel : c'est lui qui casse.
+
+**B. Ce que l'utilisateur lance**
+- **Recommandé à terme : notre propre application**, basée sur *Equibop* (la version
+  d'Equicord qui ouvre Discord comme un site, dans sa propre fenêtre).
+  - Pour : aucun fichier de Discord à distribuer, Windows, macOS et Linux, installateur
+    et mises à jour standards.
+  - Contre : la réduction de bruit Krisp et la détection des jeux de Discord
+    disparaissent.
+- Garder le client actuel le temps de la transition.
+- Une 3ᵉ voie, en option : se greffer sur le Discord officiel déjà installé (comme
+  l'installateur d'Equicord). Krisp continue de marcher, mais une mise à jour de Discord
+  peut retirer la greffe.
+
+**C. Les abonnements**
+- **Recommandé :** ne faire payer que ce qui coûte vraiment côté serveur (l'IA, les
+  relais, le stockage du Repaire). Tout ce qui tourne sur le PC reste gratuit : avec un
+  code public, ce serait de toute façon facile à débloquer.
+
+---
+
+## 7. Calendrier
+
+| Semaines | Ce qui est fait | Ce que voient les utilisateurs |
 |---|---|---|
-| **Base Equicord** | 1.14.13.1, figée dans `renderer.js` et `patcher.js` | L'amont en est à **1.15.11.0**. Les correctifs (« patches ») ciblent un Discord ancien : chaque mise à jour de Discord en casse de nouveaux. **C'est la cause principale des bugs.** |
-| **Code Nexium** | ~2,8 Mo, 112 modules `window._NXxx`, ES5, sans import ni type | Depuis la PR #7, découpé dans `src/renderer/`. Mais toujours collé dans un bundle compilé, avec des retouches faites à la main *dans* le code compilé d'Equicord. |
-| **Construction** | `outils/construire-renderer.js` concatène des morceaux | Impossible de mettre à jour Equicord sans tout refaire à la main. |
-| **Tests** | Les « bancs » cités dans le CHANGELOG ne sont pas dans le dépôt | Personne d'autre ne peut les lancer, et aucune CI ne les fait tourner. |
-| **Mises à jour** | Chaque client exécute ce qui est sur `main` au démarrage | Fusionner = déployer chez tout le monde. Somme djb2 publiée au même endroit que le fichier : protège de la corruption, pas d'un compte compromis. |
-| **Distribution** | `Nexium.exe` de 177 Mo non signé, Electron « NanoCord » portable, binaires et modules de Discord commités dans git | Alertes SmartScreen ; dépôt lourd ; **le code propriétaire de Discord (`resources/modules/discord_*`) est redistribué publiquement**. |
-| **Backend** | Supabase : 2 fonctions sur 6 dans le dépôt, SQL non versionné | `users`, `community`, `report`, `repaire` et toutes les fonctions SQL (abonnements, tickets, bannissements) n'existent que sur le serveur. |
-| **Licence** | GPL-3.0 ajoutée (PR #7), code désobfusqué | Les verrous d'abonnement côté client sont contournables par nature (le CHANGELOG v190 le reconnaît). |
-| **Plateformes** | Windows uniquement | Le portable embarque des DLL Windows. |
+| 1 | Étape 1 | Rien, mais plus de mise à jour cassée |
+| 2 à 4 | Étape 2 | **Beaucoup moins de bugs** après les mises à jour de Discord |
+| 3 à 6 | Esthétique (points 1 à 3) | Un client qui ne ressemble plus à Equicord |
+| 5 à 10 | Étape 3, fonctionnalités | Réglages simplifiés, page Santé, premier lancement guidé |
+| 6 à 8 | Étape 4 | Installateur classique, plus d'alerte Windows, puis macOS et Linux |
+| 5 et 6 | Étape 5 | Politique de confidentialité, « supprimer mes données » |
+
+À temps plein. À mi-temps, compter le double.
 
 ---
 
-## 2. À quoi ressemble « un projet sérieux »
+## 8. Ce que je fais ensuite, dans l'ordre
 
-Chaque critère est vérifiable :
-
-1. **Reproductible** : `git clone` puis `pnpm build` produisent exactement ce que reçoivent les utilisateurs.
-2. **À jour** : base Equicord à moins de deux semaines de l'amont, et aucun patch cassé sur le Discord stable du jour (vérifié par la CI).
-3. **Testé** : chaque PR passe lint, types, tests unitaires, tests des patches et tests du lanceur. Rien ne part en production sans CI verte.
-4. **Publié proprement** : un canal `stable` distinct de `main`, des mises à jour **signées** (ed25519), un exécutable **signé**, des notes de version générées.
-5. **Backend versionné** : toutes les fonctions et toutes les migrations SQL dans le dépôt, avec un projet de préproduction.
-6. **Clair juridiquement** : GPL respectée, aucun code de Discord redistribué, politique de confidentialité qui nomme les sous-traitants de l'IA (Groq, et Google pour les administrateurs).
-7. **Documenté** : guide de contribution, architecture, procédure de publication, politique de sécurité.
-
----
-
-## 3. Les décisions à prendre d'abord
-
-### Décision A : comment Nexium vit à côté d'Equicord
-
-| Option | Pour | Contre |
-|---|---|---|
-| **A1. Fork d'Equicord, Nexium dans `src/nexiumplugins/`** *(recommandé)* | On garde la chaîne de build, les types et les outils de test des patches d'Equicord. Une mise à jour amont = un `git merge` de leur tag. | Il faut porter les 112 modules en plugins Equicord, un par un. |
-| A2. Nexium en « userplugins » sur un Equicord non modifié | Aucune divergence avec l'amont | Les retouches de l'interface Equicord (sections des réglages, page des notes de version) deviennent difficiles. |
-| A3. Garder le bundle et y recoller Nexium | Rien à porter | C'est la situation actuelle : elle casse à chaque mise à jour. |
-
-### Décision B : la coquille (ce que l'utilisateur lance)
-
-| Option | Pour | Contre |
-|---|---|---|
-| B1. Garder le portable « NanoCord » actuel | Rien à changer à court terme | Redistribue le code de Discord ; 177 Mo ; Windows seul ; Krisp bloqué (sa licence exige l'appli signée par Discord). |
-| B2. Injection dans le Discord officiel (comme l'installateur d'Equicord) | Discord se met à jour seul ; Krisp marche ; aucun binaire de Discord redistribué | Une mise à jour de Discord peut retirer l'injection (il faut un « réparer ») ; ça touche l'installation officielle, ce que le README promet de ne pas faire. |
-| **B3. Coquille Electron propre, sur la base d'Equibop** *(recommandé à terme)* | Aucun code de Discord ; **Windows, macOS, Linux** ; installateur et mises à jour standards (electron-builder, electron-updater) ; signature de code ; la voix passe par WebRTC dans la page, donc le best-of peut lire les voix sans passer par le moteur natif de Discord. | Pas de modules natifs Discord : détection des jeux limitée, Krisp absent. Certaines fonctions de Nexium Vocal sont à réécrire. |
-
-**Recommandation :** A1 tout de suite, car c'est ce qui règle les bugs. B1 pendant la transition, puis B3. On garde B2 comme option « avancée » si des utilisateurs tiennent à Krisp.
-
-### Décision C : le modèle d'abonnement
-
-Avec un code GPL lisible, un verrou côté client ne protège rien. Les fonctions payantes doivent coûter **côté serveur** (IA, relais, stockage du Repaire), et les fonctions purement locales doivent rester gratuites. Le relais de l'IA applique déjà ce principe ; il faut l'étendre et retirer les verrous locaux.
+1. Les **tests automatiques sur GitHub**.
+2. Le **canal stable et les mises à jour signées** : c'est le préalable à tout le
+   reste.
+3. La **liste des modifications faites à la main** dans Equicord.
+4. La **copie d'Equicord à jour**, avec la base de Nexium portée dessus, puis Protect et
+   Privacy.
+5. L'**identité visuelle** (`docs/IDENTITE.md`), puis les pages Extensions et
+   Apparence.
 
 ---
 
-## 4. Les phases
+## 9. Petit lexique
 
-### Phase 0 : sécuriser l'existant *(1 semaine)*
-
-But : arrêter de prendre des risques en production, avant de toucher au reste.
-
-- [ ] Relire et fusionner la PR #7 ; déployer `sbx` (`supabase functions deploy sbx`).
-- [ ] **Protéger `main`** : 2FA obligatoire sur le compte, branche protégée, fusion uniquement par PR.
-- [ ] **Séparer « fusionner » et « déployer »** : lanceur v8 qui lit les mises à jour sur une branche `stable` (ou les Releases GitHub) au lieu de `main`. On publie en avançant `stable`, jamais par accident.
-- [ ] **Signer les mises à jour** : paire de clés ed25519, clé publique dans le lanceur v8, clé privée uniquement dans les secrets de la CI. Le lanceur refuse un `renderer.js` ou un `index.js` non signé. Transition : la v8 arrive encore par l'ancien canal ; toutes les publications suivantes sont signées.
-- [ ] **CI GitHub Actions** sur chaque PR :
-  - `construire-renderer.js --verifier` ;
-  - `node --check` sur tous les JS ;
-  - analyse PowerShell de l'installateur ;
-  - `tsc` sur les fonctions Supabase ;
-  - les tests de `outils/tests/`.
-- [ ] Rapatrier les **bancs** cités dans le CHANGELOG (badge, canal chiffré, ligne de secours, vocal, laboratoire…) dans `outils/tests/`, et les brancher sur la CI.
-- [ ] Rapatrier le **backend** : `supabase functions download` pour `users`, `community`, `report`, `repaire`, et `supabase db pull` pour obtenir les migrations SQL (tables, fonctions RPC, règles RLS).
-- [ ] Audit des règles RLS et des fonctions RPC : toute fonction qui prend un identifiant Discord doit vérifier un jeton, pas croire l'identifiant (déjà fait pour les tickets, à généraliser).
-- [ ] `SECURITY.md` : comment signaler une faille.
-
-**Fini quand :** une PR ne peut plus casser la production sans avoir été testée et signée.
-
-### Phase 1 : se rebrancher sur Equicord à jour *(2 à 3 semaines)* : règle les bugs
-
-But : plus aucun patch cassé, et une mise à jour amont qui prend une heure au lieu d'une semaine.
-
-1. [ ] **Inventorier les retouches faites à la main.** Construire Equicord `v1.14.13.1` depuis l'amont (le tag existe) et comparer avec `src/renderer/000-equicord-tete.js` et `999-equicord-queue.js`. Chaque différence est une retouche Nexium (renommage NanoCord, sections des réglages, page des notes de version remplacée, badges…). On obtient une liste exhaustive, au lieu de la deviner.
-2. [ ] **Créer le fork** : Equicord `v1.15.11.0` comme base, Nexium dans `src/nexiumplugins/`. Les retouches de l'étape 1 deviennent des plugins ou des patches propres, jamais des modifications du code compilé.
-3. [ ] **Porter les modules**, du socle vers les pages :
-   - le socle : `_NXDB` (stockage), `_NXI` (traduction), `_NXERR`, `_NXPERF`, `_NXNETX` ;
-   - puis Protect (`_NXPR`), Privacy (`_NXP`), les gardes de sortie (`_NXV`, `_NXGD`) ;
-   - puis les pages, une par une.
-
-   Chaque module devient un fichier TypeScript avec des `import` à la place de `window._NXxx`. React passe par `@webpack/common` au lieu de `F.useState`.
-4. [ ] **Traductions** : passer de clés « phrase française » (449 Ko dans `_NXI`) à des clés stables, avec un fichier par langue. Ça permet d'ajouter d'autres langues sans toucher au code.
-5. [ ] **Compatibilité avec les clients installés** : tant qu'un lanceur v6 ou v7 tourne quelque part, le `renderer.js` produit doit garder `_NXUP.VERSION="N"` et vingt lignes `var _NXxx=window._NXxx||`. Le lanceur v8 (phase 0) remplace ce contrôle par la signature, ce qui libère le format.
-6. [ ] **Test des patches en CI** : `pnpm buildReporter` d'Equicord, lancé chaque nuit contre le Discord stable. Un patch cassé ouvre une issue automatiquement.
-7. [ ] **Synchronisation amont** : une action hebdomadaire ouvre une PR « Equicord vX → vY ». La CI dit ce qui casse.
-
-**Fini quand :** `pnpm build` produit le client complet, et le rapport des patches est vide sur le Discord du jour.
-
-### Phase 2 : qualité du code Nexium *(continu, environ 6 semaines)*
-
-- [ ] TypeScript strict, ESLint et Prettier : enfin possibles, puisque le format du fichier n'est plus imposé par le lanceur.
-- [ ] Découper les modules géants :
-  - `_NXIA` (158 Ko) et `NexiumIA` (83 Ko) ;
-  - `_NXPR` (143 Ko) ;
-  - `_NXI` (451 Ko, surtout le dictionnaire) ;
-  - `NexiumAdmin` (80 Ko).
-
-  Cible : aucun fichier au-delà de 800 lignes.
-- [ ] Un seul système de composants : les briques communes existent déjà (tuiles, jauges, entêtes). On les sort dans `src/nexiumplugins/_ui/`, typées et documentées.
-- [ ] Tests unitaires sur la logique pure :
-  - classement des liens et base de menaces ;
-  - détecteur de manipulation, avec son corpus FR/EN de 28 fils ;
-  - caviardage des jetons, bac à sable de fichiers, sismographe.
-- [ ] Budget de performance mesuré en CI : temps de démarrage, mémoire, coût par module. La carte « Fluidité » le mesure déjà côté client ; on le fait aussi avant de publier.
-- [ ] Accessibilité : noms accessibles, navigation clavier, « réduire les animations ». Le CHANGELOG montre que c'était fait au cas par cas ; on l'automatise (axe-core dans les tests de rendu).
-
-### Phase 3 : une distribution professionnelle *(2 à 3 semaines)*
-
-- [ ] **Coquille B3** : fork d'Equibop renommé Nexium, avec electron-builder pour un installateur NSIS (Windows), DMG (macOS), AppImage/deb (Linux).
-- [ ] **Signature de code** Windows : SignPath Foundation (gratuit pour l'open source) ou Azure Trusted Signing. Fin des alertes SmartScreen à terme.
-- [ ] **Mises à jour de l'application** par electron-updater depuis les Releases GitHub ; mises à jour du code Nexium par le canal signé de la phase 0.
-- [ ] **Sortir les binaires de git** : DLL, `.pak`, modules Discord, `Nexium.exe`. Ils ne vivent plus que dans les Releases. Nettoyer l'historique (`git filter-repo`) pour alléger le dépôt.
-- [ ] **Ne plus redistribuer le code de Discord** : la coquille B3 n'en a pas besoin.
-- [ ] Installateur PowerShell gardé pour la transition, mais qui **vérifie le SHA-256** de ce qu'il télécharge (GitHub le publie pour chaque fichier de Release).
-- [ ] Paquets `winget` et `scoop`.
-- [ ] Deux canaux : `stable` et `beta`, avec un interrupteur dans le client.
-
-### Phase 4 : un backend propre *(2 semaines, en parallèle des phases 2 et 3)*
-
-- [ ] Projet Supabase de préproduction (branches Supabase) ; on ne teste plus en production.
-- [ ] Migrations SQL versionnées et relues comme du code ; tests des RPC avec `pgTAP`.
-- [ ] Tests `deno test` pour chaque fonction ; `sbx` a déjà son test de filtrage réseau.
-- [ ] Limites de débit côté base, pas en mémoire d'instance (celles de `sbx` sont remises à zéro à chaque instance).
-- [ ] Rotation des clés (Groq, Gemini) et alerte de consommation.
-- [ ] Abonnements : paiement par un prestataire (Stripe ou Lemon Squeezy) avec webhooks ; les droits ne sont décidés **que** côté serveur.
-- [ ] **RGPD** :
-  - politique de confidentialité publique, qui nomme les destinataires des questions posées à l'IA : Groq, et Google pour l'essai réservé aux administrateurs ;
-  - durées de conservation écrites (tickets : 15 jours, déjà en place) ;
-  - une fonction « supprimer toutes mes données ».
-
-### Phase 5 : produit et communauté *(continu)*
-
-- [ ] `CONTRIBUTING.md`, modèles d'issue et de PR, `CODEOWNERS`, code de conduite.
-- [ ] `docs/ARCHITECTURE.md` : le schéma de démarrage, les modules, les flux réseau. L'analyse faite pour la PR #7 sert de base.
-- [ ] Feuille de route publique (GitHub Projects).
-- [ ] Notes de version générées à partir des commits ; l'animation par version reste un plus.
-- [ ] Un serveur de test et des testeurs bêta inscrits sur le canal `beta`.
-
----
-
-## 5. Calendrier indicatif
-
-| Semaines | Phase | Livrable visible |
-|---|---|---|
-| 1 | 0 | `main` protégé, CI verte, mises à jour signées, `sbx` déployé |
-| 2–4 | 1 | Client construit depuis le fork Equicord 1.15.11.0, zéro patch cassé |
-| 5–10 | 2 | Code Nexium en TypeScript, découpé, testé |
-| 6–8 | 3 | Installateur signé Windows, puis macOS et Linux |
-| 5–6 | 4 | Backend versionné, préproduction, politique de confidentialité |
-| ensuite | 5 | Documentation, contributions, canal bêta |
-
-Les durées supposent une personne à temps plein ; à mi-temps, compter le double.
-
----
-
-## 6. Ce que je fais ensuite, dans l'ordre
-
-1. **CI GitHub Actions** avec les vérifications qui existent déjà (build, tests, syntaxe).
-2. **Lanceur v8** : canal `stable` et signature ed25519. C'est le préalable à tout le reste, puisque c'est lui qui décide de ce qui s'exécute chez les utilisateurs.
-3. **Inventaire des retouches** dans le bundle (comparaison avec Equicord 1.14.13.1 reconstruit depuis l'amont).
-4. **Fork Equicord 1.15.11.0** avec le socle Nexium porté (`_NXDB`, `_NXI`, `_NXERR`), puis Protect et Privacy.
-5. **Rapatriement du backend** (fonctions et migrations), dès que tu me donnes accès au projet Supabase.
-
----
-
-## 7. Risques
-
-| Risque | Probabilité | Parade |
-|---|---|---|
-| Bannissement de comptes par Discord (conditions d'utilisation) | Faible mais réelle | Le dire clairement (c'est fait dans le README) ; pas d'automatisation agressive (envois de messages plafonnés, déjà en place). |
-| Compromission du compte GitHub, donc code malveillant chez tous les clients | Faible, impact maximal | Phase 0 : 2FA, branche protégée, signature des mises à jour avec une clé hors du dépôt. |
-| Le portage casse des fonctions existantes | Moyenne | Porter module par module, tests avant/après, canal bêta. |
-| Equicord change d'API entre deux versions | Moyenne | Synchronisation hebdomadaire plutôt que des sauts de six mois. |
-| Plaintes liées à la redistribution du code de Discord | Faible | Phase 3 : ne plus le distribuer. |
-| Abonnements contournés (code GPL) | Certaine pour les verrous locaux | Décision C : ne faire payer que ce qui coûte côté serveur. |
+| Mot | Ce que ça veut dire |
+|---|---|
+| **Equicord** | Le projet open source sur lequel Nexium est construit. Il modifie Discord pendant qu'il tourne. |
+| **Patch** | Une modification précise du code de Discord (« remplace ceci par cela »). C'est ce qui casse quand Discord change. |
+| **Bundle** | Un gros fichier qui regroupe tout le code, prêt à être exécuté. `renderer.js` en est un. |
+| **Signature** | Une preuve mathématique qu'un fichier vient bien de toi et n'a pas été modifié. |
+| **Canal stable** | La version que reçoivent les utilisateurs, séparée de celle sur laquelle on travaille. |
+| **Tests automatiques** | Des vérifications que GitHub lance tout seul à chaque envoi de code. |
