@@ -1,5 +1,25 @@
 # Nexium Client — Notes de version
 
+## v206 - La mise a jour ne revient plus en boucle
+
+### Ce qui se passait
+
+Juste apres la publication de la v205, le client proposait la mise a jour,
+on redemarrait, et il la reproposait aussitot. Le cache de GitHub garde
+chaque fichier cinq minutes, chacun de son cote : le lanceur recevait le
+nouveau client avec l ancienne somme de controle, refusait la mise a jour
+par prudence, et le client ne le savait pas.
+
+### Ce qui change
+
+- le lanceur lit les fichiers a une version precise du depot : le client et
+  sa somme concordent toujours ;
+- il dit au client ce qu il a fait au demarrage. Une version qu il vient de
+  refuser n est plus reproposee : il reessaie seul au lancement suivant, et
+  la page Mise a jour dit pourquoi ;
+- le client n annonce une version que si elle est entierement publiee ;
+- en mode developpeur, plus aucune proposition de mise a jour.
+
 ## v205 - Couper le demarrage avec Windows le coupe vraiment
 
 ### Le demarrage avec Windows

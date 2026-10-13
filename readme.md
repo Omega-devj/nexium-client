@@ -13,7 +13,7 @@ et ton groupe d'amis a un espace chiffré qui tient même quand Discord tombe.
 
 <br>
 
-![Version](https://img.shields.io/badge/version-v205-e6c48a?style=for-the-badge&labelColor=17171a)
+![Version](https://img.shields.io/badge/version-v206-e6c48a?style=for-the-badge&labelColor=17171a)
 ![Windows](https://img.shields.io/badge/Windows-10%20%2F%2011-6a8fd6?style=for-the-badge&labelColor=17171a)
 ![Langues](https://img.shields.io/badge/langues-FR%20%C2%B7%20EN-c7a2ee?style=for-the-badge&labelColor=17171a)
 ![Socle gratuit](https://img.shields.io/badge/protection-gratuite-5fb37a?style=for-the-badge&labelColor=17171a)

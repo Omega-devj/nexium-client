@@ -10857,7 +10857,7 @@ var _NXUP=window._NXUP||(window._NXUP={});
 if(!_NXUP.boot){_NXUP.boot=true;
 _NXUP.COMPAT='registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord" registrar:"NanoCord"';
 _NXUP.compatOk=function(){try{return (String(_NXUP.COMPAT).match(/registrar:"NanoCord"/g)||[]).length>=10;}catch(_){return false;}};
-_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="205";_NXUP.repoVersion=null;
+_NXUP.APPLIED="__NEXIUM_APPLIED_SHA__";_NXUP.VERSION="206";_NXUP.repoVersion=null;
 _NXUP.KEY="nexium_update_v1";
 _NXUP.SLUG="Omega-devj/nexium-client";
 
@@ -10869,7 +10869,31 @@ _NXUP.latest=null;_NXUP.listeners=[];_NXUP.busy=false;_NXUP.err=false;_NXUP.nati
 _NXUP.notify=function(){for(var a=0;a<_NXUP.listeners.length;a++){try{_NXUP.listeners[a]();}catch(_){}}};
 _NXUP.short=function(s){return (s||"").slice(0,7);};
 
-_NXUP.checkRaw=function(){try{_NXNETX.go(_NXUP.RAW_URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.text();}).then(function(t){t=String(t||"");if(t.length<50000)throw new Error("short");var mv=t.match(/_NXUP\.VERSION="(\d+)"/);var rv=mv?parseInt(mv[1],10):null;_NXUP.repoVersion=rv;_NXUP.latest={version:rv,raw:true,msg:"Nouvelle version disponible",date:""};_NXUP.busy=false;_NXUP.err=false;_NXUP.marqueVu();_NXUP.jlog(_NXUP.available()?("Mise à jour disponible : v"+_NXUP.VERSION+" -> v"+rv):("Vérifié : à jour (v"+_NXUP.VERSION+")"));if(_NXUP.available()&&_NXUP.st.notified!==rv){_NXUP.st.notified=rv;_NXUP.save();_NXUP.toast("Nexium — nouvelle version disponible.");}_NXUP.maybePrompt();_NXUP.notify();}).catch(function(){_NXUP.busy=false;_NXUP.err=true;_NXUP.jlog("Dépôt injoignable (réseau)");_NXUP.notify();});}catch(_){_NXUP.busy=false;_NXUP.err=true;_NXUP.notify();}};
+// v206 : une version n est annoncee que si le fichier lu et sa somme publiee
+// concordent. Juste apres une publication, le cache de GitHub peut servir le
+// nouveau renderer.js avec l ancienne somme pendant cinq minutes : le lanceur
+// refusait alors la mise a jour, et le client la reproposait a chaque
+// redemarrage. On attend que les deux concordent, et on revient voir.
+_NXUP.nxSum=function(s){var h=5381,a=0,n=s.length;for(;a<n;a++)h=(((h<<5)+h)^s.charCodeAt(a))|0;return "nx"+(h>>>0).toString(16)+"-"+n;};
+_NXUP.checkRaw=function(){try{_NXNETX.go(_NXUP.RAW_URL+"?nx="+Date.now(),{cache:"no-store"}).then(function(r){if(!r||!r.ok)throw new Error("http");return r.text();}).then(function(t){t=String(t||"");if(t.length<50000)throw new Error("short");var mv=t.match(/_NXUP\.VERSION="(\d+)"/);var rv=mv?parseInt(mv[1],10):null;var lv=parseInt(_NXUP.VERSION,10)||0;
+if(rv==null||rv<=lv){_NXUP.recoit(rv);return;}
+return _NXNETX.go(_NXUP.RAW_URL+".nxsum?nx="+Date.now(),{cache:"no-store"}).then(function(r2){if(!r2||!r2.ok)throw new Error("http");return r2.text();}).then(function(s){
+s=String(s||"").trim();
+if(/^nx[0-9a-f]+-\d+$/.test(s)&&_NXUP.nxSum(t)!==s){_NXUP.propagation(rv);return;}
+_NXUP.recoit(rv);}).catch(function(){_NXUP.recoit(rv);});
+}).catch(function(){_NXUP.busy=false;_NXUP.err=true;_NXUP.jlog("Dépôt injoignable (réseau)");_NXUP.notify();});}catch(_){_NXUP.busy=false;_NXUP.err=true;_NXUP.notify();}};
+_NXUP.recoit=function(rv){_NXUP.repoVersion=rv;_NXUP.latest={version:rv,raw:true,msg:"Nouvelle version disponible",date:""};_NXUP.busy=false;_NXUP.err=false;_NXUP.marqueVu();_NXUP.jlog(_NXUP.available()?("Mise à jour disponible : v"+_NXUP.VERSION+" -> v"+rv):("Vérifié : à jour (v"+_NXUP.VERSION+")"));
+var rt=_NXUP.available()?_NXUP.retenue():null;
+if(rt==="dev")_NXUP.jlog("Mode développeur (.nexium-dev) : le lanceur n applique aucune mise à jour");
+else if(rt==="refus")_NXUP.jlog("v"+rv+" refusée par le lanceur au dernier démarrage : "+((_NXUP.lanceur()||{}).raison||"raison inconnue")+". Il réessaiera au prochain lancement.");
+if(_NXUP.available()&&!rt&&_NXUP.st.notified!==rv){_NXUP.st.notified=rv;_NXUP.save();_NXUP.toast("Nexium — nouvelle version disponible.");}_NXUP.maybePrompt();_NXUP.notify();};
+_NXUP.propagation=function(rv){_NXUP.busy=false;_NXUP.err=false;_NXUP.jlog("v"+rv+" en cours de publication : nouvelle vérification dans deux minutes");_NXUP.notify();if(!_NXUP._repasse){_NXUP._repasse=setTimeout(function(){_NXUP._repasse=null;_NXUP.check();},120000);}};
+// v206 : ce que le lanceur a fait au dernier demarrage (lanceur v8 et plus).
+// En mode developpeur il n applique jamais rien : proposer de redemarrer
+// serait une boucle sans fin. S il vient de refuser cette version, on ne la
+// repropose pas : il reessaiera seul au prochain lancement.
+_NXUP.lanceur=function(){try{var s=window.VencordNative&&VencordNative.settings&&VencordNative.settings.get();var c=s&&s.plugins&&s.plugins.NexiumMaj;return (c&&c.etat)||null;}catch(_){return null;}};
+_NXUP.retenue=function(){try{var L=_NXUP.lanceur();if(!L)return null;if(L.modeDev)return "dev";if(L.resultat==="refuse"&&L.versionDepot===_NXUP.repoVersion&&(Date.now()-(L.quand||0))<86400000)return "refus";return null;}catch(_){return null;}};
 // L heure de la derniere verification aboutie. Sans elle, "client a jour" ne
 // vaut rien : on ignore si le renseignement date de dix secondes ou de la
 // veille.
@@ -11214,7 +11238,7 @@ _NXUP.titreOnglet=function(){try{
 var t=_NXtr("Mise "+String.fromCharCode(0xE0)+" jour");
 return _NXUP.available()?(t+" "+String.fromCharCode(0xB7)+" 1"):t;}catch(_){
 return "Mise "+String.fromCharCode(0xE0)+" jour";}};
-_NXUP.maybePrompt=function(){try{if(_NXUP.obsolete()){_NXUP.maybeObligatoire();return;}if(!_NXUP.available())return;if(_NXUP.modalEl)return;if(Date.now()<_NXUP.snoozeUntil)return;_NXUP.showModal();}catch(_){}};
+_NXUP.maybePrompt=function(){try{if(_NXUP.obsolete()){_NXUP.maybeObligatoire();return;}if(!_NXUP.available())return;if(_NXUP.retenue())return;if(_NXUP.modalEl)return;if(Date.now()<_NXUP.snoozeUntil)return;_NXUP.showModal();}catch(_){}};
 _NXUP._vsBody=function(txt){var esc=function(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};if(!txt)return '<div style="font-size:13px;color:#8a8a92;text-align:center;padding:24px 0;">Chargement des notes de version…</div>';var lines=String(txt).split(/\r?\n/).slice(0,120);var body="";for(var a=0;a<lines.length;a++){var s=lines[a].trim();if(!s){body+='<div style="height:8px;"></div>';continue;}if(/^[=\-_]{3,}$/.test(s)){body+='<div style="height:1px;background:#1e1e22;margin:12px 0;"></div>';continue;}if(/^#{1,3}\s/.test(s)||/^\[.+\]$/.test(s)){var h=s.replace(/^#{1,3}\s*/,"").replace(/^\[/,"").replace(/\]$/,"");body+='<div style="display:flex;align-items:center;gap:8px;margin:14px 0 7px;"><div style="width:3px;height:14px;background:#e8e8ea;border-radius:2px;"></div><div style="font-size:14px;font-weight:800;color:#f4f4f5;">'+esc(h)+'</div></div>';continue;}if(/^[-*\u2022]\s/.test(s)){body+='<div style="display:flex;gap:9px;padding:2px 0 2px 6px;"><div style="width:4px;height:4px;border-radius:50%;background:#5b5b63;margin-top:8px;flex-shrink:0;"></div><div style="font-size:12.5px;color:#b8b8be;line-height:1.55;">'+esc(s.replace(/^[-*\u2022]\s*/,""))+'</div></div>';continue;}body+='<div style="font-size:12.5px;color:#b8b8be;line-height:1.6;padding:2px 0;">'+esc(s)+'</div>';}return body;};
 _NXUP.showVersionScreen=function(prevVer){try{
 if(_NXUP.vsEl)return;if(typeof document==="undefined"||!document.body)return;

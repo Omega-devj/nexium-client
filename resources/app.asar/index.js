@@ -14,7 +14,7 @@ const RAW_APP = "https://raw.githubusercontent.com/Omega-devj/nexium-client/refs
 // Version de CE fichier. A incrementer des qu'on le modifie : c'est ce qui declenche
 // son remplacement chez les utilisateurs. Jusqu'a la v146 il ne se mettait jamais a jour,
 // et une erreur ici obligeait a reinstaller tout le parc a la main.
-const NEXIUM_INDEX_V = 7;
+const NEXIUM_INDEX_V = 8;
 const IDX = __filename;
 const IDXBAK = IDX + ".bak";
 const IDXPEND = IDX + ".pending";
@@ -335,15 +335,79 @@ function loadPatcher() {
     } catch (_) {}
 })();
 
+// v8 : le compte rendu du demarrage, pour la page Mise a jour du client.
+// Sans lui, le client ne savait pas que le lanceur venait de refuser une
+// version (ou qu il est en mode developpeur, ou il n applique jamais rien) :
+// il la reproposait a chaque redemarrage, sans fin. Ecrit dans les reglages,
+// avant que le patcher ne les charge, comme le constat d Ultra Fast.
+const NX_MAJ_CLE = "NexiumMaj";
+function nxRapportMaj(etat) {
+    try {
+        let choisi = null, recent = null;
+        for (const f of nxFichiersReglages()) {
+            try {
+                const st = fs.statSync(f);
+                const d = JSON.parse(fs.readFileSync(f, "utf8"));
+                const cand = { f, t: st.mtimeMs };
+                if (d && d.plugins && d.plugins[NX_MAJ_CLE] && (!choisi || cand.t > choisi.t)) choisi = cand;
+                if (!recent || cand.t > recent.t) recent = cand;
+            } catch (_) {}
+        }
+        const r = choisi || recent;
+        if (!r) return;
+        const d = JSON.parse(fs.readFileSync(r.f, "utf8"));
+        if (!d.plugins) d.plugins = {};
+        const c = d.plugins[NX_MAJ_CLE] || {};
+        etat.quand = Date.now();
+        c.etat = etat;
+        d.plugins[NX_MAJ_CLE] = c;
+        const tmp = r.f + ".nxtmp";
+        fs.writeFileSync(tmp, JSON.stringify(d, null, 4));
+        fs.renameSync(tmp, r.f);
+    } catch (e) { log("rapport de mise a jour non ecrit (" + (e && e.message) + ")"); }
+}
+
 // DEV MODE: create resources/equicord/.nexium-dev to freeze the local renderer for testing.
 if (fs.existsSync(DEV)) {
     log("MODE DEV actif (.nexium-dev présent) — auto-update désactivé, modifications locales conservées.");
+    nxRapportMaj({ modeDev: true, resultat: "dev", version: versionOfFile(path.join(equicordDir, "renderer.js")) });
     bootPatcher();
     return;
 }
 
+// v8 : les fichiers sont lus a UN commit precis. Le cache de
+// raw.githubusercontent.com ignore le "?nx=" et garde chaque fichier cinq
+// minutes, separement : juste apres une publication, on recevait le nouveau
+// renderer.js avec l ancienne somme, la mise a jour etait refusee, et le
+// client la reproposait en boucle. Une adresse au commit ne change jamais :
+// le fichier et sa somme concordent toujours. Si l API de GitHub ne repond
+// pas, on retombe sur la branche, comme avant.
+const NX_API_COMMIT = "https://api.github.com/repos/Omega-devj/nexium-client/commits/main";
+const NX_RAW_COMMIT = "https://raw.githubusercontent.com/Omega-devj/nexium-client/";
+function nxCommitMain() {
+    try {
+        const cp = require("child_process");
+        let out = null;
+        try {
+            out = cp.execFileSync("curl", ["-fsSL", "--max-time", "8", "-H", "Accept: application/vnd.github.sha", NX_API_COMMIT],
+                { timeout: 10000, encoding: "utf8", windowsHide: true, stdio: ["ignore", "pipe", "ignore"] });
+        } catch (_) { out = null; }
+        if (!out) {
+            try {
+                out = cp.execFileSync("powershell", ["-NoProfile", "-NonInteractive", "-Command",
+                    "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; (Invoke-WebRequest -UseBasicParsing -Headers @{'Accept'='application/vnd.github.sha'} -Uri '" + NX_API_COMMIT + "').Content"],
+                    { timeout: 12000, encoding: "utf8", windowsHide: true, stdio: ["ignore", "pipe", "ignore"] });
+            } catch (_) { out = null; }
+        }
+        const sha = String(out || "").trim();
+        return /^[0-9a-f]{40}$/.test(sha) ? sha : null;
+    } catch (_) { return null; }
+}
+var NX_COMMIT = null;
+var NX_BASE = RAW, NX_BASE_APP = RAW_APP;
+
 // Synchronous download (curl → PowerShell). Returns text or null.
-function syncDownload(name) { return syncDownloadFrom(RAW, name); }
+function syncDownload(name) { return syncDownloadFrom(NX_BASE, name); }
 function syncDownloadFrom(base, name) {
     try {
         var cp = require("child_process");
@@ -371,7 +435,7 @@ function syncDownloadFrom(base, name) {
 // Async fallback (pure Node https) → writes a .pending applied next launch.
 function asyncFallback() {
     try {
-        const bust = RAW + "renderer.js?nx=" + Date.now();
+        const bust = NX_BASE + "renderer.js?nx=" + Date.now();
         const req = https.get(bust, { headers: { "User-Agent": "Nexium-Updater", "Cache-Control": "no-cache" } }, (res) => {
             if (res.statusCode !== 200) { res.resume(); log("fallback HTTP " + res.statusCode); return; }
             let d = ""; res.setEncoding("utf8"); res.on("data", c => d += c);
@@ -443,18 +507,27 @@ var NX_REPAIR = false;
         } catch (_) {}
 
         var liveV = versionOfFile(live);
+        NX_COMMIT = nxCommitMain();
+        if (NX_COMMIT) {
+            NX_BASE = NX_RAW_COMMIT + NX_COMMIT + "/resources/equicord/";
+            NX_BASE_APP = NX_RAW_COMMIT + NX_COMMIT + "/resources/app.asar/";
+        } else { log("commit de main introuvable (API GitHub) : lecture sur la branche"); }
+        var rapport = { modeDev: false, commit: NX_COMMIT, version: liveV, versionDepot: null, resultat: null, raison: null };
         var txt = syncDownload("renderer.js");
         if (txt == null) {
             log("sync indisponible (curl/PowerShell KO) — repli asynchrone");
+            rapport.resultat = "injoignable"; rapport.raison = "telechargement impossible au demarrage";
             asyncFallback();
         } else {
             var why = validRenderer(txt);
             if (why) {
                 log("TÉLÉCHARGEMENT REFUSÉ : " + why + " — fichier actuel conservé");
+                rapport.resultat = "refuse"; rapport.raison = why; rapport.versionDepot = versionOfText(txt);
             } else {
                 var repoV = versionOfText(txt);
                 if (!NX_REPAIR && liveV != null && repoV <= liveV) {
                     log("à jour (v" + liveV + ")");
+                    rapport.resultat = "a-jour"; rapport.versionDepot = repoV;
                     repoV = null; // rien à appliquer
                 }
                 var sumOk = true, sumInfo = "";
@@ -473,22 +546,25 @@ var NX_REPAIR = false;
                     // déjà à jour, rien à faire
                 } else if (!sumOk) {
                     log("TÉLÉCHARGEMENT REFUSÉ : somme de contrôle incorrecte — fichier actuel conservé");
+                    rapport.resultat = "refuse"; rapport.raison = "somme de controle incorrecte"; rapport.versionDepot = repoV;
                 } else if (!NX_REPAIR && state.blockedVersion != null && repoV === state.blockedVersion) {
                     log("v" + repoV + " ignorée (bloquée après restauration) — publie une version supérieure pour débloquer");
+                    rapport.resultat = "refuse"; rapport.raison = "version bloquee apres une restauration"; rapport.versionDepot = repoV;
                 } else {
                     try { if (liveV != null) fs.copyFileSync(live, bak); } catch (_) {}
                     var w = live + ".newtmp";
                     fs.writeFileSync(w, txt); fs.renameSync(w, live);
                     state.version = repoV; if (state.blockedVersion != null && repoV > state.blockedVersion) delete state.blockedVersion;
                     saveState(state);
-                    log((NX_REPAIR ? "RÉPARÉ" : "MIS À JOUR") + " renderer.js v" + (liveV == null ? "?" : liveV) + " → v" + repoV + sumInfo + " (sauvegarde conservée)");
+                    log((NX_REPAIR ? "RÉPARÉ" : "MIS À JOUR") + " renderer.js v" + (liveV == null ? "?" : liveV) + " → v" + repoV + sumInfo + " (sauvegarde conservée)" + (NX_COMMIT ? " [commit " + NX_COMMIT.slice(0, 7) + "]" : ""));
+                    rapport.resultat = "mis-a-jour"; rapport.version = repoV; rapport.versionDepot = repoV;
                 }
             }
         }
         // Lanceur : on ne remplace que vers une version strictement superieure, jamais vers
         // une version deja rejetee par le chien de garde.
         try {
-            var itxt = syncDownloadFrom(RAW_APP, "index.js");
+            var itxt = syncDownloadFrom(NX_BASE_APP, "index.js");
             if (itxt != null) {
                 var iw = validIndex(itxt);
                 var iv = indexVersionOf(itxt);
@@ -515,6 +591,7 @@ var NX_REPAIR = false;
                 }
             }
         } catch (_) {}
+        nxRapportMaj(rapport);
     } catch (e) { log("syncUpdate exception: " + (e && e.message)); }
 })();
 
