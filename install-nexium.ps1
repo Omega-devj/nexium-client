@@ -141,22 +141,19 @@ if ($exeLocal) {
         Bon "Raccourci cree sur le Bureau"
     } catch { Souci "Raccourci non cree (sans consequence)" }
 
-    # Demarrage avec Windows : un raccourci dans le dossier Demarrage de
-    # l utilisateur. Rien dans le registre, rien pour les autres comptes,
-    # aucun droit administrateur.
+    # Demarrage avec Windows : c est le lanceur qui le gere, par l entree Run
+    # de l utilisateur courant, et l interrupteur "Lancer Nexium avec Windows"
+    # du client le coupe. Les anciennes versions de ce script posaient en plus
+    # un raccourci dans le dossier Demarrage, que l interrupteur ne retirait
+    # pas : Nexium redemarrait alors qu on l avait coupe. On le retire.
     try {
-        $demarrage = [Environment]::GetFolderPath("Startup")
-        $lienD = Join-Path $demarrage "Nexium Client.lnk"
-        $sd = $sh.CreateShortcut($lienD)
-        $sd.TargetPath       = $exeLocal.FullName
-        $sd.WorkingDirectory = $Dossier
-        $sd.Description      = "Nexium Client - demarre avec Windows"
-        $sd.WindowStyle      = 7
-        $sd.Save()
-        Bon "Nexium demarrera avec Windows"
-        Info "Pour l en retirer, supprime le raccourci dans :"
-        Info "  $demarrage"
-    } catch { Souci "Demarrage automatique non configure (sans consequence)" }
+        $lienD = Join-Path ([Environment]::GetFolderPath("Startup")) "Nexium Client.lnk"
+        if (Test-Path $lienD) {
+            Remove-Item $lienD -Force
+            Info "Ancien raccourci du dossier Demarrage retire"
+        }
+    } catch {}
+    Info "Nexium demarrera avec Windows des son premier lancement (interrupteur dans le client)"
 }
 
 Write-Host ""

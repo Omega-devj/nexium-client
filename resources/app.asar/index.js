@@ -14,7 +14,7 @@ const RAW_APP = "https://raw.githubusercontent.com/Omega-devj/nexium-client/refs
 // Version de CE fichier. A incrementer des qu'on le modifie : c'est ce qui declenche
 // son remplacement chez les utilisateurs. Jusqu'a la v146 il ne se mettait jamais a jour,
 // et une erreur ici obligeait a reinstaller tout le parc a la main.
-const NEXIUM_INDEX_V = 6;
+const NEXIUM_INDEX_V = 7;
 const IDX = __filename;
 const IDXBAK = IDX + ".bak";
 const IDXPEND = IDX + ".pending";
@@ -618,6 +618,34 @@ function nxRegistreEfface() {
     } catch (_) { return false; }
 }
 
+// v7 : jusqu a la v204, l installateur posait AUSSI un raccourci dans le dossier
+// Demarrage. Couper l option ne retirait que l entree Run : le raccourci
+// relancait Nexium quand meme. Il est retire des que l utilisateur coupe
+// l option, ou des que l entree Run est verifiee en place -- deux lancements
+// pour un seul choix n ont aucun sens. Il n est garde que s il est le seul
+// moyen qui marche (entree Run refusee par Windows).
+function nxRaccourciDemarrage() {
+    try {
+        const roaming = process.env.APPDATA
+            || path.join(require("os").homedir(), "AppData", "Roaming");
+        return path.join(roaming, "Microsoft", "Windows", "Start Menu", "Programs", "Startup", NX_DEM_NOM + ".lnk");
+    } catch (_) { return null; }
+}
+function nxRaccourciPresent() {
+    try {
+        if (process.platform !== "win32") return false;
+        const f = nxRaccourciDemarrage();
+        return !!(f && fs.existsSync(f));
+    } catch (_) { return false; }
+}
+function nxRetireRaccourci() {
+    try {
+        if (!nxRaccourciPresent()) return false;
+        fs.unlinkSync(nxRaccourciDemarrage());
+        return true;
+    } catch (e) { log("demarrage Windows, raccourci: " + (e && e.message)); return false; }
+}
+
 let nxDemDernier = null;
 function nxAppliqueDemarrage(source) {
     try {
@@ -673,13 +701,21 @@ function nxAppliqueDemarrage(source) {
             // Pas ce qu on a demande, pas ce qu Electron a repondu.
             obtenu = !!nxRegistreLu();
         } catch (_) {}
+        let raccourciRetire = false;
+        if (!veut || obtenu) {
+            raccourciRetire = nxRetireRaccourci();
+            if (raccourciRetire) log("demarrage Windows : raccourci herite du dossier Demarrage retire");
+        } else if (nxRaccourciPresent()) {
+            obtenu = true;
+            voie = "raccourci";
+        }
         nxDemDernier = veut;
         log("demarrage Windows " + (veut ? "active" : "desactive")
             + " (" + source + (parDefaut ? ", par defaut" : "") + ")"
             + " -> verifie : " + obtenu + " via " + voie);
         if (r && r.f) nxEcritEtat(r.f, {
             demande: veut, applique: obtenu, reduit: args.length > 0,
-            voie: voie, parDefaut: parDefaut,
+            voie: voie, parDefaut: parDefaut, raccourciRetire: raccourciRetire,
             quand: Date.now(), chemin: process.execPath, nom: NX_DEM_NOM,
         });
         // Le reglage par defaut devient explicite : sans ca, la page du client

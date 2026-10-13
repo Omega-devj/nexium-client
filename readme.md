@@ -58,9 +58,8 @@ Le script ferme Discord, télécharge le client dans `%LOCALAPPDATA%\Nexium`, r�
 lanceur, pose un raccourci sur le Bureau, et te propose de lancer Nexium tout de suite.
 Si Nexium est déjà installé, il le met à jour **en gardant tes réglages**.
 
-Nexium **démarre avec Windows**. Pour l'en empêcher : coupe *Lancer Nexium avec Windows*
-dans le client, et supprime le raccourci Nexium du dossier Démarrage (`Windows + R` →
-`shell:startup`).
+Nexium **démarre avec Windows**. L'interrupteur *Lancer Nexium avec Windows* du client le
+coupe en un clic, et la page affiche ce que Windows a réellement retenu, pas une intention.
 
 <details>
 <summary><b>Installation manuelle, si tu préfères tout poser toi-même</b></summary>
@@ -427,8 +426,7 @@ précédente y figurent aussi, même après un plantage.
 1. Dans le client, coupe **Lancer Nexium avec Windows**. Pour effacer aussi tes
    réglages : Nexium Données → *Tout effacer*.
 2. Ferme Discord.
-3. Supprime le dossier `%LOCALAPPDATA%\Nexium`, le raccourci du Bureau, et celui du
-   dossier Démarrage (`Windows + R` → `shell:startup`).
+3. Supprime le dossier `%LOCALAPPDATA%\Nexium` et le raccourci du Bureau.
 
 Si tu as supprimé le dossier sans couper le démarrage automatique, retire l'entrée
 restante depuis PowerShell :
