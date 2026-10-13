@@ -11,6 +11,8 @@
 // IP de l utilisateur n est jamais exposee au site inspecte, et la chaine de
 // redirections devient visible.
 
+import { destinationRefusee } from "./reseau.ts";
+
 const MAX_OCTETS = 400_000;
 const DELAI_RDAP = 3_500;
 const MAX_SAUTS = 6;
@@ -31,28 +33,13 @@ function json(corps: unknown, statut = 200) {
 
 // Une adresse qui pointe vers le reseau local n a rien a faire ici : ce
 // service tourne sur une infrastructure partagee, et servir de relais vers
-// ses voisins serait une porte ouverte.
-const PRIVE = [
-  /^localhost$/i, /^127\./, /^0\./, /^10\./, /^192\.168\./,
-  /^172\.(1[6-9]|2\d|3[01])\./, /^169\.254\./, /^::1$/, /^\[?::1\]?$/,
-  /^fc00:/i, /^fd[0-9a-f]{2}:/i, /^fe80:/i,
-  /\.local$/i, /\.internal$/i, /^metadata\./i,
-];
-
-function hoteRefuse(h: string): string | null {
-  const n = h.replace(/^\[|\]$/g, "").toLowerCase();
-  if (!n) return "hote absent";
-  for (const rx of PRIVE) if (rx.test(n)) return "adresse du reseau local";
-  return null;
-}
-
-function verifie(brut: string): { u: URL } | { err: string } {
+// ses voisins serait une porte ouverte. Le nom ET les adresses vers lesquelles
+// il pointe sont verifies, a chaque saut : voir reseau.ts.
+async function verifie(brut: string): Promise<{ u: URL } | { err: string }> {
   let u: URL;
   try { u = new URL(brut); } catch { return { err: "adresse illisible" }; }
-  if (u.protocol !== "http:" && u.protocol !== "https:") return { err: "seuls http et https sont acceptes" };
-  if (u.username || u.password) return { err: "les adresses avec identifiants sont refusees" };
-  const mauvais = hoteRefuse(u.hostname);
-  if (mauvais) return { err: mauvais };
+  const refus = await destinationRefusee(u);
+  if (refus) return { err: refus };
   return { u };
 }
 
@@ -138,7 +125,7 @@ Deno.serve(async (req: Request) => {
   let corps: any;
   try { corps = await req.json(); } catch { return json({ erreur: "requete illisible" }, 400); }
 
-  const v = verifie(String(corps?.url ?? ""));
+  const v = await verifie(String(corps?.url ?? ""));
   if ("err" in v) return json({ erreur: v.err }, 400);
 
   const chaine: { url: string; statut: number }[] = [];
@@ -172,10 +159,12 @@ Deno.serve(async (req: Request) => {
         if (!suivant) return json({ erreur: "redirection sans destination", chaine }, 200);
         let cible: URL;
         try { cible = new URL(suivant, courant); } catch { return json({ erreur: "redirection illisible", chaine }, 200); }
-        const mauvais = hoteRefuse(cible.hostname);
-        if (mauvais) return json({ erreur: "redirection vers une " + mauvais, chaine }, 200);
         if (cible.protocol !== "http:" && cible.protocol !== "https:")
           return json({ erreur: "redirection hors http", chaine }, 200);
+        // Chaque saut est verifie comme l adresse de depart : un raccourcisseur
+        // public peut renvoyer vers 169.254.169.254.
+        const mauvais = await destinationRefusee(cible);
+        if (mauvais) return json({ erreur: "redirection vers une " + mauvais, chaine }, 200);
         courant = cible;
         continue;
       }
